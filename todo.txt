@@ -1,0 +1,53 @@
+
+	* do function based (not callback) traversal of the hashtable, a pointer to "next" should be stored
+	  as well as the current table index. traverse_reset, traverse_next are all that's needed
+	* the release_user() function now will not free the users in the user list when it's destroyed because
+	  the destroy function casuses problems when you release users individually
+
+	* what arguments should a command take
+	* how will a command know where to lookup (and how) the object name to find the actual object on which
+	  to perform an action on?
+	* make an "actions" list stored either in each object or each object type to be used by commands.c
+
+	* make a character creation game object thingie that telnet can call to generate your character
+
+	* add a mobile implementation
+	* make user load data from a file
+	* make objects for container, room, exit, item, etc
+
+	* implement proper handling of telnet commands
+
+	* make the login track invalid attempts and terminate the connection after a while
+	* add a way to automatically timeout login attempts
+	* accept a "-d" command line arg and fork to a daemon process
+	* make the login object use multiple methods of authentication (primarily for other interfaces)
+
+	* make it easy (through data) to have multiple "data modules"
+
+Structural Issues:
+
+	* should game objects be prototype based or class based?  Should each object have it's own actions
+	  hash or should that be stored in the object type?  Should each object have a pointer to a parent
+	  object or should the object type have a pointer to it's parent object type (used to resolve
+	  action object inheritence)?
+	* should object types have some kind of "parent type" pointer so that code can look up to make sure
+	  an object is castable to a parent type? or can you always assume that a given object is castable to
+	  one of it's superclasses?
+
+	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
+	  once *for each condition* so the same function is called with the same interface for each
+	  condition that it's registered for.  How does the callback tell the difference?  should there
+	  really be 3 callbacks?  Or should you only be able to handle one condition? or should the callback
+	  only be called once and it's up to the handling routine to check each descriptor to see which one
+	  is ready?  Isn't there a function called poll that can be used instead of select in those situations?
+
+Features:
+
+	* an irc server interface (such that you enter a channel #world or something and the server
+	  sends output for the room you are currently in and people that enter the room will be be displayed
+	  as join/leaves).  You could also enter multiple channels in a way where only the #world channel is
+	  the game and the other channels are special "game" areas for chat only (normally accessable by
+	  a special teleport command or something)
+	* an irc client interface that is an irc bot that you pm through your irc client with to play the game.
+	* an ssh interface
+
