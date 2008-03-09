@@ -1,9 +1,4 @@
 
-	* do function based (not callback) traversal of the hashtable, a pointer to "next" should be stored
-	  as well as the current table index. traverse_reset, traverse_next are all that's needed
-	* the release_user() function now will not free the users in the user list when it's destroyed because
-	  the destroy function casuses problems when you release users individually
-
 	* what arguments should a command take
 	* how will a command know where to lookup (and how) the object name to find the actual object on which
 	  to perform an action on?

@@ -37,16 +37,56 @@ void sdm_login_release(struct sdm_login *login)
 
 int sdm_login_read_data(struct sdm_login *login)
 {
+	const char *str;
+	char buffer[STRING_SIZE];
+	struct sdm_data_file *data;
+
 	if (!login->name)
 		return(-1);
-	// TODO read the data from the file and find the information for the login name stored in this
-	//	login object
+	if (!(data = sdm_data_open("etc/passwd.xml", SDM_DATA_READ, "passwd")))
+		return(-1);
+	do {
+		if ((str = sdm_data_read_name(data)) && !strcmp(str, "user")) {
+			sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+			if (!strcmp(buffer, login->name)) {
+				sdm_data_read_children(data);
+				do {
+					if ((str = sdm_data_read_name(data)) && !strcmp(str, "password")) {
+						sdm_data_read_string(data, buffer, STRING_SIZE);
+						login->password = create_string("%s", buffer);
+					}
+				} while (sdm_data_read_next(data));
+				sdm_data_read_parent(data);
+			}
+		}
+	} while (sdm_data_read_next(data));
+	sdm_data_close(data);
 	return(0);
 }
 
 int sdm_login_write_data(struct sdm_login *login)
 {
-	// TODO write the recorded information for login to the password database
+	const char *str;
+	char buffer[STRING_SIZE];
+	struct sdm_data_file *data;
+
+	if (!(data = sdm_data_open("etc/passwd.xml", SDM_DATA_READ_WRITE, "passwd")))
+		return(-1);
+	/** Write the new entry at the top (since newer entries are more likely to be accessed) */
+	sdm_data_write_begin_entry(data, "user");
+	sdm_data_write_attrib(data, "name", login->name);
+	sdm_data_write_string_entry(data, "password", login->password);
+	sdm_data_write_end_entry(data);
+	do {
+		if ((str = sdm_data_read_name(data)) && !strcmp(str, "user")) {
+			sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+			if (strcmp(buffer, login->name)) {
+				/** Write all entries as they appear except the one we are replacing */
+				sdm_data_write_current(data);
+			}
+		}
+	} while (sdm_data_read_next(data));
+	sdm_data_close(data);
 	return(0);
 }
 
@@ -71,8 +111,6 @@ int sdm_login_set_password(struct sdm_login *login, const char *password)
 
 int sdm_login_authenticate(struct sdm_login *login, const char *password)
 {
-// TODO hack, remove after testing
-return(1);
 	if (!login->password) {
 		/** Read in the authentication data for this login session */
 		sdm_login_read_data(login);

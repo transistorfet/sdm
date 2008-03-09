@@ -23,15 +23,6 @@ static int telnet_register_verify_password(struct sdm_login *, struct sdm_tcp *)
 int sdm_telnet_register(struct sdm_tcp *inter, struct sdm_login *login)
 {
 	sdm_telnet_write(inter, "\n");
-
-	// ask for name
-	// create user object
-	// ask for password
-	// ask for password confirmation
-	// pass off to scripted registration (implement later)
-	// write user object to file
-
-
 	sdm_telnet_write(inter, SDM_TXT_CHARGEN_NAME_PROMPT);
 	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_register_read_name, login);
 	return(0);
@@ -53,6 +44,10 @@ static int telnet_register_read_name(struct sdm_login *login, struct sdm_tcp *in
 
 	if (sdm_user_exists(buffer)) {
 		sdm_telnet_write(inter, SDM_TXT_ALREADY_EXISTS);
+		sdm_telnet_write(inter, SDM_TXT_CHARGEN_NAME_PROMPT);
+	}
+	else if (!sdm_user_valid_username(buffer)) {
+		sdm_telnet_write(inter, SDM_TXT_INVALID_USERNAME);
 		sdm_telnet_write(inter, SDM_TXT_CHARGEN_NAME_PROMPT);
 	}
 	else if (sdm_login_set_name(login, buffer)) {
@@ -117,6 +112,7 @@ static int telnet_register_verify_password(struct sdm_login *login, struct sdm_t
 		}
 		else {
 			sdm_login_write_data(login);
+			sdm_user_write_data(user);
 			destroy_sdm_object(SDM_OBJECT(login));
 			sdm_telnet_write(inter, "\n");
 			// TODO invoke the game character generation object scripty stuff or else put that

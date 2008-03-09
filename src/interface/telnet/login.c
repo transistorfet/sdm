@@ -53,6 +53,10 @@ static int telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *inter
 	if (!strcmp(buffer, "register")) {
 		sdm_telnet_register(inter, login);
 	}
+	else if (!sdm_user_valid_username(buffer)) {
+		sdm_telnet_write(inter, SDM_TXT_INVALID_USERNAME);
+		sdm_telnet_write(inter, SDM_TXT_LOGIN_PROMPT);
+	}
 	else if (sdm_login_set_name(login, buffer)) {
 		sdm_telnet_write(inter, SDM_TXT_OUT_OF_MEMORY);
 		destroy_sdm_interface(SDM_INTERFACE(inter));

@@ -62,11 +62,9 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 int sdm_user_init(struct sdm_user *user, va_list va)
 {
 	const char *name;
-	char buffer[STRING_SIZE];
-	struct sdm_data_file *data;
 
 	name = va_arg(va, const char *);
-	if (!(user->name = create_string("%s", name)))
+	if (!name || (*name == '\0') || !(user->name = create_string("%s", name)))
 		return(-1);
 	user->inter = va_arg(va, struct sdm_interface *);
 
@@ -75,12 +73,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		return(-1);
 
 	CALL_SDM_OBJECT_INIT((sdm_object_init_t) sdm_mobile_init, SDM_OBJECT(user));
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", name);
-	if (!(sdm_data_file_exists(buffer)) || !(data = sdm_data_open(buffer, "user")))
-		return(-1);
-	// TODO initialize user
-
+	sdm_user_read_data(user);
 	return(0);
 }
 
@@ -89,6 +82,34 @@ void sdm_user_release(struct sdm_user *user)
 	// TODO do all the other releasing
 	sdm_hash_remove(user_list, user->name);
 	destroy_string(user->name);
+}
+
+
+int sdm_user_read_data(struct sdm_user *user)
+{
+	char buffer[STRING_SIZE];
+	struct sdm_data_file *data;
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
+	if (!(sdm_data_file_exists(buffer)) || !(data = sdm_data_open(buffer, SDM_DATA_READ, "user")))
+		return(-1);
+	// TODO read in data
+	sdm_data_close(data);
+	return(0);
+}
+
+int sdm_user_write_data(struct sdm_user *user)
+{
+	char buffer[STRING_SIZE];
+	struct sdm_data_file *data;
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
+	if (!(data = sdm_data_open(buffer, SDM_DATA_WRITE, "user")))
+		return(-1);
+	sdm_data_write_string_entry(data, "name", user->name);
+	// TODO write everything else
+	sdm_data_close(data);
+	return(0);
 }
 
 
@@ -105,6 +126,20 @@ int sdm_user_logged_in(const char *name)
 	if (sdm_hash_find(user_list, name))
 		return(1);
 	return(0);
+}
+
+int sdm_user_valid_username(const char *name)
+{
+	int i;
+
+	for (i = 0; name[i] != '\0'; i++) {
+		if (!(((name[i] >= 0x30) && (name[i] <= 0x39))
+		    || ((name[i] >= 0x41) && (name[i] <= 0x5a))
+		    || ((name[i] >= 0x61) && (name[i] <= 0x7a))
+		    || (name[i] == '-') || (name[i] == '.') || (name[i] == '_')))
+			return(0);
+	}
+	return(1);
 }
 
 

@@ -100,7 +100,25 @@ int sdm_telnet_read(struct sdm_tcp *inter, char *buffer, int max)
 
 int sdm_telnet_write(struct sdm_tcp *inter, const char *str)
 {
-	return(sdm_tcp_write(inter, str, strlen(str)));
+	int res;
+	char *line;
+	int len = 0;
+
+	// TODO rewrite this later to convert colour formatting tags
+	while ((*str != '\0') && (line = strchr(str, '\n'))) {
+		if ((res = sdm_tcp_write(inter, str, line - str)) < 0)
+			return(-1);
+		len += res + 1;
+		if (sdm_tcp_write(inter, "\r\n", 2) < 0)
+			return(-1);
+		str = line + 1;
+	}
+	if (*str != '\0') {
+		if ((res = sdm_tcp_write(inter, str, strlen(str))) < 0)
+			return(-1);
+		len += res;
+	}
+	return(len);
 }
 
 

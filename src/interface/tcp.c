@@ -161,7 +161,7 @@ int sdm_tcp_read_to_buffer(struct sdm_tcp *inter)
 	else if (res == 0)
 		return(inter->read_length - inter->read_pos);
 
-	if ((res = recv(SDM_INTERFACE(inter)->read, &inter->read_buffer[inter->read_length], TCP_READ_BUFFER - inter->read_length - 1, 0)) < 0)
+	if ((res = recv(SDM_INTERFACE(inter)->read, &inter->read_buffer[inter->read_length], TCP_READ_BUFFER - inter->read_length - 1, 0)) <= 0)
 		return(-1);
 	res += inter->read_length;
 	inter->read_length = res;

@@ -8,8 +8,11 @@
 
 #include <sdm/globals.h>
 
+#define SDM_DATA_READ		0x01
+#define SDM_DATA_WRITE		0x02
+#define SDM_DATA_READ_WRITE	0x03
+
 struct sdm_data_file;
-struct sdm_data_entry;
 
 int init_data(void);
 int release_data(void);
@@ -17,20 +20,28 @@ int release_data(void);
 int sdm_set_data_path(const char *);
 int sdm_data_file_exists(const char *);
 
-struct sdm_data_file *sdm_data_new(const char *, const char *);
-struct sdm_data_file *sdm_data_open(const char *, const char *);
-int sdm_data_write(struct sdm_data_file *);
+struct sdm_data_file *sdm_data_open(const char *, int, const char *);
 void sdm_data_close(struct sdm_data_file *);
 
-struct sdm_data_entry *sdm_data_first(struct sdm_data_file *);
-struct sdm_data_entry *sdm_data_next(struct sdm_data_file *, struct sdm_data_entry *);
-struct sdm_data_entry *sdm_data_children(struct sdm_data_file *, struct sdm_data_entry *);
+int sdm_data_read_rewind(struct sdm_data_file *);
+int sdm_data_read_next(struct sdm_data_file *);
+int sdm_data_read_children(struct sdm_data_file *);
+int sdm_data_read_parent(struct sdm_data_file *);
 
-const char *sdm_data_entry_name(struct sdm_data_file *, struct sdm_data_entry *);
-double sdm_data_entry_number(struct sdm_data_file *, struct sdm_data_entry *);
-int sdm_data_entry_string(struct sdm_data_file *, struct sdm_data_entry *, char *, int);
+const char *sdm_data_read_name(struct sdm_data_file *);
+int sdm_data_read_attrib(struct sdm_data_file *, const char *, char *, int);
+double sdm_data_read_number(struct sdm_data_file *);
+int sdm_data_read_string(struct sdm_data_file *, char *, int);
 
-int sdm_data_find_entry(struct sdm_data_file *, const char *, char *, int);
+int sdm_data_write_begin_entry(struct sdm_data_file *, const char *);
+int sdm_data_write_attrib(struct sdm_data_file *, const char *, const char *);
+int sdm_data_write_number(struct sdm_data_file *, double);
+int sdm_data_write_string(struct sdm_data_file *, const char *);
+int sdm_data_write_end_entry(struct sdm_data_file *);
+int sdm_data_write_current(struct sdm_data_file *);
+
+int sdm_data_write_number_entry(struct sdm_data_file *, const char *, const char *);
+int sdm_data_write_string_entry(struct sdm_data_file *, const char *, const char *);
 
 #endif
 

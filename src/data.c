@@ -6,17 +6,19 @@
 #include <string.h>
 #include <libxml/tree.h>
 #include <libxml/parser.h>
+#include <libxml/xmlwriter.h>
 
 #include <sdm/data.h>
 #include <sdm/string.h>
 #include <sdm/memory.h>
 
-#define XMLNODE(ptr)		( (xmlNode *) (ptr) )
-
 struct sdm_data_file {
 	string_t filename;
 	xmlDoc *doc;
-	xmlNode *main;
+	xmlNode *root;
+	xmlNode *current;
+	xmlTextWriterPtr writer;
+	xmlBufferPtr buffer;
 };
 
 static string_t data_path = NULL;
@@ -57,15 +59,8 @@ int sdm_data_file_exists(const char *file)
 }
 
 
-struct sdm_data_file *sdm_data_new(const char *file, const char *rootname)
+struct sdm_data_file *sdm_data_open(const char *file, int mode, const char *rootname)
 {
-	// TODO create a new file
-	return(NULL);
-}
-
-struct sdm_data_file *sdm_data_open(const char *file, const char *rootname)
-{
-	xmlNode *root;
 	struct sdm_data_file *data;
 
 	if (!data_path)
@@ -73,23 +68,49 @@ struct sdm_data_file *sdm_data_open(const char *file, const char *rootname)
 	if (!(data = (struct sdm_data_file *) memory_alloc(sizeof(struct sdm_data_file))))
 		return(NULL);
 	memset(data, '\0', sizeof(struct sdm_data_file));
-	if (!(data->filename = create_string("%s%s", data_path, file))
-	    || !(data->doc = xmlReadFile(data->filename, NULL, 0))
-	    || !(root = xmlDocGetRootElement(data->doc)) || xmlStrcmp(root->name, rootname)) {
+	if (!(data->filename = create_string("%s%s", data_path, file))) {
 		sdm_data_close(data);
 		return(NULL);
 	}
-	data->main = root->children;
-	return(data);
-}
 
-int sdm_data_write(struct sdm_data_file *data)
-{
-	return(xmlSaveFormatFile(data->filename, data->doc, 1));
+	if (mode & SDM_DATA_READ) {
+		if (!(data->doc = xmlReadFile(data->filename, NULL, 0))
+		    || !(data->root = xmlDocGetRootElement(data->doc)) || xmlStrcmp(data->root->name, rootname)) {
+			sdm_data_close(data);
+			return(NULL);
+		}
+		data->current = data->root->children;
+	}
+
+	if (mode & SDM_DATA_WRITE) {
+		if (!(data->buffer = xmlBufferCreate())
+		    || !(data->writer = xmlNewTextWriterMemory(data->buffer, 0))
+		    || (xmlTextWriterSetIndent(data->writer, 1) < 0)
+		    || (xmlTextWriterStartDocument(data->writer, NULL, "UTF-8", NULL) < 0)
+		    || (xmlTextWriterStartElement(data->writer, rootname) < 0)) {
+			sdm_data_close(data);
+			return(NULL);
+		}
+	}
+	return(data);
 }
 
 void sdm_data_close(struct sdm_data_file *data)
 {
+	FILE *fptr;
+
+	if (data->writer) {
+		xmlTextWriterEndElement(data->writer);
+		xmlTextWriterEndDocument(data->writer);
+		xmlFreeTextWriter(data->writer);
+	}
+	if (data->buffer) {
+		if ((fptr = fopen(data->filename, "w"))) {
+			fputs(data->buffer->content, fptr);
+			fclose(fptr);
+		}
+		xmlBufferFree(data->buffer);
+	}
 	if (data->filename)
 		destroy_string(data->filename);
 	if (data->doc)
@@ -97,75 +118,149 @@ void sdm_data_close(struct sdm_data_file *data)
 	memory_free(data);
 }
 
-struct sdm_data_entry *sdm_data_first(struct sdm_data_file *data)
+int sdm_data_read_rewind(struct sdm_data_file *data)
 {
-	return((struct sdm_data_entry *) data->main);
-
-}
-
-struct sdm_data_entry *sdm_data_next(struct sdm_data_file *data, struct sdm_data_entry *entry)
-{
-	if (XMLNODE(entry))
-		return((struct sdm_data_entry *) XMLNODE(entry)->next);
-	return(NULL);
-}
-
-struct sdm_data_entry *sdm_data_children(struct sdm_data_file *data, struct sdm_data_entry *entry)
-{
-	if (XMLNODE(entry))
-		return((struct sdm_data_entry *) XMLNODE(entry)->children);
-	return(NULL);
-}
-
-
-const char *sdm_data_entry_name(struct sdm_data_file *data, struct sdm_data_entry *entry)
-{
-	if (XMLNODE(entry))
-		return(XMLNODE(entry)->name);
-	return(NULL);
-}
-
-double sdm_data_entry_number(struct sdm_data_file *data, struct sdm_data_entry *entry)
-{
-	char *str;
-	double ret = 0;
-
-	if (!XMLNODE(entry))
-		return(0);
-	if (!(str = xmlNodeListGetString(data->doc, XMLNODE(entry)->children, 1)))
-		return(0);
-	ret = atof(str);
-	xmlFree(str);
-	return(ret);
-}
-
-int sdm_data_entry_string(struct sdm_data_file *data, struct sdm_data_entry *entry, char *buffer, int max)
-{
-	char *str;
-
-	if (!(str = xmlNodeListGetString(data->doc, XMLNODE(entry)->children, 1)))
-		return(-1);
-	strncpy(buffer, (char *) str, max - 1);
-	buffer[max - 1] = '\0';
-	xmlFree(str);
+	data->current = data->root->children;
 	return(0);
 }
 
-int sdm_data_find_entry(struct sdm_data_file *data, const char *name, char *buffer, int max)
+int sdm_data_read_next(struct sdm_data_file *data)
+{
+	if (data->current && data->current->next) {
+		data->current = data->current->next;
+		return(1);
+	}
+	return(0);
+}
+
+int sdm_data_read_children(struct sdm_data_file *data)
+{
+	if (data->current && data->current->children) {
+		data->current = data->current->children;
+		return(1);
+	}
+	return(0);
+}
+
+int sdm_data_read_parent(struct sdm_data_file *data)
+{
+	if (data->current && data->current->parent && (data->current->parent != data->root)) {
+		data->current = data->current->parent;
+		return(1);
+	}
+	return(0);
+}
+
+
+const char *sdm_data_read_name(struct sdm_data_file *data)
+{
+	if (data->current)
+		return(data->current->name);
+	return(NULL);
+}
+
+int sdm_data_read_attrib(struct sdm_data_file *data, const char *name, char *buffer, int max)
+{
+	xmlChar *value;
+
+	if (data->current && (value = xmlGetProp(data->current, name))) {
+		strncpy(buffer, value, max);
+		buffer[max - 1] = '\0';
+		xmlFree(value);
+		return(strlen(buffer));
+	}
+	buffer[0] = '\0';
+	return(0);
+}
+
+double sdm_data_read_number(struct sdm_data_file *data)
 {
 	char *str;
-	xmlNode *cur;
+	double num;
 
-	for (cur = data->main; cur; cur = cur->next) {
-		if (!xmlStrcmp(cur->name, (const xmlChar *) name)) {
-			if (!(str = xmlNodeListGetString(data->doc, XMLNODE(cur)->children, 1)))
-				return(0);
-			strncpy(buffer, (char *) str, max - 1);
-			buffer[max - 1] = '\0';
-			xmlFree(str);
-			return(1);
-		}
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		num = atof(str);
+		xmlFree(str);
+		return(num);
 	}
+	return(0);
+}
+
+int sdm_data_read_string(struct sdm_data_file *data, char *buffer, int max)
+{
+	char *str;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		strncpy(buffer, (char *) str, max - 1);
+		buffer[max - 1] = '\0';
+		xmlFree(str);
+		return(strlen(buffer));
+	}
+	return(0);
+}
+
+
+
+int sdm_data_write_begin_entry(struct sdm_data_file *data, const char *name)
+{
+	if (xmlTextWriterStartElement(data->writer, name) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_attrib(struct sdm_data_file *data, const char *name, const char *value)
+{
+	if (xmlTextWriterWriteAttribute(data->writer, name, value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_number(struct sdm_data_file *data, double value)
+{
+	if (xmlTextWriterWriteFormatString(data->writer, "%f", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_string(struct sdm_data_file *data, const char *value)
+{
+	if (xmlTextWriterWriteFormatString(data->writer, "%s", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_end_entry(struct sdm_data_file *data)
+{
+	if (xmlTextWriterEndElement(data->writer) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_current(struct sdm_data_file *data)
+{
+	int res;
+	char *str;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		res = xmlTextWriterWriteString(data->writer, str);
+		xmlFree(str);
+		return(res);
+	}
+	return(-1);
+}
+
+
+int sdm_data_write_number_entry(struct sdm_data_file *data, const char *name, const char *value)
+{
+	if (xmlTextWriterWriteFormatElement(data->writer, name, "%f", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_string_entry(struct sdm_data_file *data, const char *name, const char *value)
+{
+	if (xmlTextWriterWriteFormatElement(data->writer, name, "%s", value) < 0)
+		return(-1);
 	return(0);
 }
 
