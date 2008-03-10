@@ -6,7 +6,6 @@
 #include <crypt.h>
 
 #include <sdm/memory.h>
-#include <sdm/commands.h>
 
 #include <sdm/interface/interface.h>
 #include <sdm/interface/tcp.h>
@@ -146,6 +145,7 @@ void sdm_telnet_encrypt_password(const char *salt, char *buffer, int max)
 
 int sdm_telnet_run(struct sdm_tcp *inter, struct sdm_user *user)
 {
+	sdm_user_startup(user);
 	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_handle_read, user);
 	return(0);
 }
@@ -172,7 +172,12 @@ static int telnet_handle_read(struct sdm_user *user, struct sdm_tcp *inter)
 	}
 	if (i == 0)
 		return(0);
-	return(sdm_evaluate_command(user, buffer));
+
+	if (sdm_user_process_input(user, buffer) < 0) {
+		destroy_sdm_interface(SDM_INTERFACE(inter));
+		return(-1);
+	}
+	return(0);
 }
 
 static int telnet_interpret_command(struct sdm_tcp *inter, const char *cmd, int len)

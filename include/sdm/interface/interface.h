@@ -18,6 +18,8 @@
 #define IO_WAIT_WRITE			0x0020
 #define IO_WAIT_ERROR			0x0040
 
+#define SDM_IBF_RELEASING		0x1000
+
 #define SDM_INTERFACE(ptr)		( (struct sdm_interface *) (ptr) )
 
 struct sdm_interface;
@@ -27,6 +29,11 @@ typedef int (*sdm_int_init_t)(struct sdm_interface *, va_list);
 typedef void (*sdm_int_release_t)(struct sdm_interface *);
 typedef int (*sdm_int_read_t)(struct sdm_interface *, char *, int);
 typedef int (*sdm_int_write_t)(struct sdm_interface *, const char *);
+
+#define SDM_INTERFACE_READ(inter, buffer, max)	\
+	SDM_INTERFACE(inter)->type->read(SDM_INTERFACE(inter), (buffer), (max))
+#define SDM_INTERFACE_WRITE(inter, str)	\
+	SDM_INTERFACE(inter)->type->write(SDM_INTERFACE(inter), (str))
 
 struct sdm_interface {
 	struct sdm_interface_type *type;

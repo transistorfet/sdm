@@ -10,6 +10,7 @@
 
 #include <sdm/string.h>
 #include <sdm/interface/interface.h>
+#include <sdm/objs/processor.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/mobile.h>
@@ -19,6 +20,7 @@
 struct sdm_user {
 	struct sdm_mobile mobile;
 	struct sdm_interface *inter;
+	struct sdm_processor *proc;
 	string_t name;
 	string_t fullname;
 	string_t password;
@@ -41,6 +43,11 @@ int sdm_user_write_data(struct sdm_user *);
 int sdm_user_exists(const char *);
 int sdm_user_logged_in(const char *);
 int sdm_user_valid_username(const char *);
+
+int sdm_user_startup(struct sdm_user *);
+int sdm_user_process_input(struct sdm_user *, char *);
+int sdm_user_tell(struct sdm_user *, const char *, ...);
+int sdm_user_announce(struct sdm_user *, const char *, ...);
 
 #endif
 

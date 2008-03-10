@@ -8,6 +8,8 @@
 
 #include <stdarg.h>
 
+#define SDM_OBF_RELEASING	0x1000
+
 #define SDM_OBJECT(ptr)		( (struct sdm_object *) (ptr) )
 #define SDM_OBJECT_TYPE(ptr)	( (struct sdm_object_type *) (ptr) )
 
@@ -19,6 +21,7 @@ typedef void (*sdm_object_release_t)(struct sdm_object *);
 
 struct sdm_object {
 	struct sdm_object_type *type;
+	int bitflags;
 
 };
 

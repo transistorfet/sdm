@@ -238,15 +238,18 @@ int sdm_data_write_end_entry(struct sdm_data_file *data)
 
 int sdm_data_write_current(struct sdm_data_file *data)
 {
-	int res;
-	char *str;
+	int res = -1;
+	xmlBufferPtr buffer;
 
-	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
-		res = xmlTextWriterWriteString(data->writer, str);
-		xmlFree(str);
-		return(res);
+	if (!data->current || !(buffer = xmlBufferCreate()))
+		return(-1);
+	if (xmlNodeDump(buffer, data->doc, data->current, 2, 1) >= 0) {
+		// TODO this doesn't really format the data correctly but it at least works
+		xmlBufferAdd(buffer, "\n", -1);
+		res = xmlTextWriterWriteRaw(data->writer, buffer->content);
 	}
-	return(-1);
+	xmlBufferFree(buffer);
+	return(res);
 }
 
 

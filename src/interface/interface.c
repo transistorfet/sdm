@@ -108,7 +108,11 @@ void destroy_sdm_interface(struct sdm_interface *inter)
 {
 	int i;
 
-	if (inter && inter->type->release)
+	/** We don't want to attempt to free this object twice */
+	if (!inter || (inter->bitflags & SDM_IBF_RELEASING))
+		return;
+	inter->bitflags |= SDM_IBF_RELEASING;
+	if (inter->type->release)
 		inter->type->release(inter);
 	memory_free(inter);
 

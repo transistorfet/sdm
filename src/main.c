@@ -8,10 +8,14 @@
 #include <signal.h>
 
 #include <sdm/data.h>
-#include <sdm/commands.h>
+#include <sdm/timer.h>
 #include <sdm/interface/interface.h>
 #include <sdm/interface/tcp.h>
 #include <sdm/interface/telnet.h>
+
+#include <sdm/objs/user.h>
+#include <sdm/objs/world.h>
+#include <sdm/objs/interpreter.h>
 
 static int exit_flag = 1;
 
@@ -23,16 +27,20 @@ int init_mud(void)
 {
 	if (init_data() < 0)
 		return(-1);
-	sdm_set_data_path("../data");
+	sdm_set_data_path("data");
 
+	if (init_timer() < 0)
+		return(-1);
 	if (init_interface() < 0)
 		return(-1);
 	if (init_telnet() < 0)
 		return(-1);
 
-	if (init_user() < 0)
+	if (init_interpreter() < 0)
 		return(-1);
-	if (init_commands() < 0)
+	if (init_world() < 0)
+		return(-1);
+	if (init_user() < 0)
 		return(-1);
 
 	signal(SIGINT, handle_sigint);
@@ -42,8 +50,13 @@ int init_mud(void)
 int release_mud(void)
 {
 	release_user();
+	release_world();
+	release_interpreter();
+
 	release_telnet();
 	release_interface();
+	release_timer();
+
 	release_data();
 	return(0);
 }
@@ -69,7 +82,7 @@ int serverloop(void)
 {
 	while (exit_flag) {
 		sdm_interface_select(1);
-		//fe_timer_check();
+		sdm_timer_check();
 	}
 	return(0);
 }

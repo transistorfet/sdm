@@ -31,7 +31,11 @@ struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
 
 void destroy_sdm_object(struct sdm_object *obj)
 {
-	if (obj && obj->type->release)
+	/** We don't want to attempt to free this object twice */
+	if (!obj || (obj->bitflags & SDM_OBF_RELEASING))
+		return;
+	obj->bitflags |= SDM_OBF_RELEASING;
+	if (obj->type->release)
 		obj->type->release(obj);
 	memory_free(obj);
 }

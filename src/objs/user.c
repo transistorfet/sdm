@@ -12,9 +12,13 @@
 #include <sdm/string.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/processor.h>
+#include <sdm/objs/interpreter.h>
 #include <sdm/interface/interface.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/actionable.h>
+#include <sdm/objs/container.h>
 #include <sdm/objs/mobile.h>
 #include <sdm/objs/user.h>
 
@@ -72,16 +76,33 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
 
-	CALL_SDM_OBJECT_INIT((sdm_object_init_t) sdm_mobile_init, SDM_OBJECT(user));
+	if (CALL_SDM_OBJECT_INIT((sdm_object_init_t) sdm_mobile_init, SDM_OBJECT(user)) < 0)
+		return(-1);
 	sdm_user_read_data(user);
+
+	// TODO this should probably be created in read_data or as a result of reading data
+	if (!(user->proc = (struct sdm_processor *) create_sdm_object(&sdm_interpreter_obj_type)))
+		return(-1);
+
+	// TODO this is temporary until you get a way to determine a user's location based on the datafile
+	sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_ACTIONABLE(user));
 	return(0);
 }
 
 void sdm_user_release(struct sdm_user *user)
 {
-	// TODO do all the other releasing
+	/** Save the user information to the user's file */
+	sdm_user_write_data(user);
+	/** Shutdown the input processor */
+	sdm_processor_shutdown(user->proc, user);
+	destroy_sdm_object(SDM_OBJECT(user->proc));
+	/** Release the user's other resources */
 	sdm_hash_remove(user_list, user->name);
 	destroy_string(user->name);
+	destroy_sdm_interface(user->inter);
+	// TODO do all the other releasing
+	/** Release the superclass */
+	sdm_mobile_release(SDM_MOBILE(user));
 }
 
 
@@ -142,4 +163,48 @@ int sdm_user_valid_username(const char *name)
 	return(1);
 }
 
+
+int sdm_user_startup(struct sdm_user *user)
+{
+	// TODO should telnet or whatever interface call this directly?
+	sdm_processor_startup(user->proc, user);
+	return(0);
+}
+
+int sdm_user_process_input(struct sdm_user *user, char *input)
+{
+	// TODO should telnet or whatever interface call this directly?
+	return(sdm_processor_process(user->proc, user, input));
+}
+
+
+// TODO should these go here?
+int sdm_user_tell(struct sdm_user *user, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[STRING_SIZE];
+
+	va_start(va, fmt);
+	vsnprintf(buffer, STRING_SIZE, fmt, va);
+	va_end(va);
+	return(SDM_INTERFACE_WRITE(user->inter, buffer));
+}
+
+int sdm_user_announce(struct sdm_user *user, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[STRING_SIZE];
+	struct sdm_actionable *cur;
+
+	va_start(va, fmt);
+	vsnprintf(buffer, STRING_SIZE, fmt, va);
+	va_end(va);
+	if (!SDM_ACTIONABLE(user)->onwer)
+		return(0);
+	for (cur = SDM_ACTIONABLE(user)->owner->objects; cur; cur = cur->next) {
+		if ((SDM_OBJECT(cur)->type == &sdm_user_obj_type) && (SDM_USER(cur) != user))
+			SDM_INTERFACE_WRITE(SDM_USER(cur)->inter, buffer);
+	}
+	return(0);
+}
 

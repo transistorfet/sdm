@@ -1,15 +1,20 @@
 
-	* what arguments should a command take
-	* how will a command know where to lookup (and how) the object name to find the actual object on which
-	  to perform an action on?
-	* make an "actions" list stored either in each object or each object type to be used by commands.c
+	* should all actionable names have a name field that can be directly accessed, particularily for
+	  being able to find an object by name when used in a command?
+	* what will be stored in the properties list?  all strings?  all objects?  a special struct maintained
+	  by actionable itself?
+	* for performing a "look" command, do you have to be able to determine that an object is a "mobile"
+	  C class in order to list it as a person in the room?  Can this info be found out through the
+	  actionable (game object) type information?
+	* should you implement an object id system to make it easier to refer to objects in the data files?
+
+	* finish implementing the container_find() function
+	* figure out how all data will be loaded and from where
+	* we need a way to create game objects that are different in their actions but the same in their C
+	  class
+	* make user load data from a file
 
 	* make a character creation game object thingie that telnet can call to generate your character
-
-	* add a mobile implementation
-	* make user load data from a file
-	* make objects for container, room, exit, item, etc
-
 	* implement proper handling of telnet commands
 
 	* make the login track invalid attempts and terminate the connection after a while
@@ -17,14 +22,11 @@
 	* accept a "-d" command line arg and fork to a daemon process
 	* make the login object use multiple methods of authentication (primarily for other interfaces)
 
-	* make it easy (through data) to have multiple "data modules"
+	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
+	* make it possible for the command prompt to display info (call a function to generate it)
 
 Structural Issues:
 
-	* should game objects be prototype based or class based?  Should each object have it's own actions
-	  hash or should that be stored in the object type?  Should each object have a pointer to a parent
-	  object or should the object type have a pointer to it's parent object type (used to resolve
-	  action object inheritence)?
 	* should object types have some kind of "parent type" pointer so that code can look up to make sure
 	  an object is castable to a parent type? or can you always assume that a given object is castable to
 	  one of it's superclasses?
