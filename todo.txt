@@ -1,4 +1,7 @@
 
+	* make the data_open function take vargs and build the filename to open from that
+	* make the write_data/read_data functions of various objects take an open data filehandle
+
 	* should all actionable names have a name field that can be directly accessed, particularily for
 	  being able to find an object by name when used in a command?
 	* for performing a "look" command, do you have to be able to determine that an object is a "mobile"

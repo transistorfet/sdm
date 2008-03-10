@@ -20,12 +20,21 @@
 string_t create_string(char *fmt, ...)
 {
 	va_list va;
+	va_start(va, fmt);
+	return(create_vstring(fmt, va));
+}
+
+/**
+ * Allocate a string big enough to hold the given string after
+ * character expansion (using the given arguments) and return
+ * it or NULL on error.
+ */
+string_t create_vstring(char *fmt, va_list va)
+{
 	string_t str;
 	char buffer[STRING_MAX_SIZE];
 
-	va_start(va, fmt);
 	vsnprintf(buffer, STRING_MAX_SIZE, fmt, va);
-	va_end(va);
 	if (!(str = memory_alloc(strlen(buffer) + 1)))
 		return(NULL);
 	strcpy(str, buffer);

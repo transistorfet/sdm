@@ -9,6 +9,7 @@
 #include <stdarg.h>
 
 #include <sdm/hash.h>
+#include <sdm/data.h>
 #include <sdm/objs/object.h>
 
 #define SDM_ACTIONABLE(ptr)	( (struct sdm_actionable *) (ptr) )
@@ -33,6 +34,8 @@ extern struct sdm_object_type sdm_actionable_obj_type;
 
 int sdm_actionable_init(struct sdm_actionable *, va_list);
 void sdm_actionable_release(struct sdm_actionable *);
+int sdm_actionable_read_data(struct sdm_actionable *, struct sdm_data_file *);
+int sdm_actionable_write_data(struct sdm_actionable *, struct sdm_data_file *);
 
 int sdm_actionable_set_proprety(struct sdm_actionable *, const char *, struct sdm_object *);
 struct sdm_object *sdm_actionable_get_property(struct sdm_actionable *, const char *, struct sdm_object_type *);

@@ -5,6 +5,8 @@
 
 #include <stdarg.h>
 
+#include <sdm/hash.h>
+#include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/container.h>
@@ -48,6 +50,17 @@ void sdm_actionable_release(struct sdm_actionable *actionable)
 		destroy_sdm_hash(actionable->properties);
 	if (actionable->actions)
 		destroy_sdm_hash(actionable->actions);
+}
+
+
+int sdm_actionable_read_data(struct sdm_actionable *actionable, struct sdm_data_file *data)
+{
+
+}
+
+int sdm_actionable_write_data(struct sdm_actionable *actionable, struct sdm_data_file *data)
+{
+
 }
 
 
