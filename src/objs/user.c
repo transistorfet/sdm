@@ -199,7 +199,7 @@ int sdm_user_announce(struct sdm_user *user, const char *fmt, ...)
 	va_start(va, fmt);
 	vsnprintf(buffer, STRING_SIZE, fmt, va);
 	va_end(va);
-	if (!SDM_ACTIONABLE(user)->onwer)
+	if (!SDM_ACTIONABLE(user)->owner)
 		return(0);
 	for (cur = SDM_ACTIONABLE(user)->owner->objects; cur; cur = cur->next) {
 		if ((SDM_OBJECT(cur)->type == &sdm_user_obj_type) && (SDM_USER(cur) != user))

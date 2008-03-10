@@ -15,6 +15,7 @@
 
 struct sdm_user;
 struct sdm_container;
+struct sdm_actionable;
 
 typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_actionable *, const char *);
 
