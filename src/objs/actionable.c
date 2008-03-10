@@ -30,8 +30,7 @@ static void sdm_actionable_destroy_action(struct sdm_action *);
 int sdm_actionable_init(struct sdm_actionable *actionable, va_list va)
 {
 	// TODO should we take "parent" as an argument?
-	// TODO add destroy functions for these if you need
-	if (!(actionable->properties = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, NULL)))
+	if (!(actionable->properties = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, (destroy_t) destroy_sdm_object)))
 		return(-1);
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
@@ -49,6 +48,25 @@ void sdm_actionable_release(struct sdm_actionable *actionable)
 		destroy_sdm_hash(actionable->properties);
 	if (actionable->actions)
 		destroy_sdm_hash(actionable->actions);
+}
+
+
+int sdm_actionable_set_proprety(struct sdm_actionable *actionable, const char *name, struct sdm_object *obj)
+{
+	if (sdm_hash_find(actionable->properties, name))
+		return(sdm_hash_replace(actionable->properties, name, obj));
+	return(sdm_hash_add(actionable->properties, name, obj));
+}
+
+struct sdm_object *sdm_actionable_get_property(struct sdm_actionable *actionable, const char *name, struct sdm_object_type *type)
+{
+	struct sdm_object *obj;
+
+	if (!(obj = sdm_hash_find(actionable->properties, name)))
+		return(NULL);
+	if (!type || (obj->type == type))
+		return(obj);
+	return(NULL);
 }
 
 

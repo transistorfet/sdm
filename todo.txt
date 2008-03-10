@@ -1,8 +1,6 @@
 
 	* should all actionable names have a name field that can be directly accessed, particularily for
 	  being able to find an object by name when used in a command?
-	* what will be stored in the properties list?  all strings?  all objects?  a special struct maintained
-	  by actionable itself?
 	* for performing a "look" command, do you have to be able to determine that an object is a "mobile"
 	  C class in order to list it as a person in the room?  Can this info be found out through the
 	  actionable (game object) type information?

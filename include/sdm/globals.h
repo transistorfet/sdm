@@ -9,6 +9,7 @@
 #include <string.h>
 
 #define STRING_SIZE		512
+#define LARGE_STRING_SIZE	2048
 
 typedef void (*destroy_t)(void *);
 typedef int (*compare_t)(void *, void *);

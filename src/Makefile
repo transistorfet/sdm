@@ -26,6 +26,7 @@ OBJS =	data.o	\
 	objs/mobile.o	\
 	objs/object.o	\
 	objs/processor.o	\
+	objs/string.o	\
 	objs/user.o	\
 	objs/world.o
 
@@ -69,7 +70,8 @@ main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/user.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
   ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
-  ../include/sdm/objs/container.h ../include/sdm/objs/world.h
+  ../include/sdm/objs/container.h ../include/sdm/objs/world.h \
+  ../include/sdm/objs/interpreter.h
 
 misc.o: misc.c ../include/sdm/misc.h
 
@@ -121,10 +123,13 @@ objs/container.o: objs/container.c ../include/sdm/memory.h \
   ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h
 
-objs/interpreter.o: objs/interpreter.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/interpreter.h \
-  ../include/sdm/hash.h
+objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
+  ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/objs/user.h ../include/sdm/string.h \
+  ../include/sdm/interface/interface.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/mobile.h \
+  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+  ../include/sdm/objs/container.h ../include/sdm/objs/interpreter.h
 
 objs/login.o: objs/login.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/hash.h ../include/sdm/string.h ../include/sdm/memory.h \
@@ -143,12 +148,16 @@ objs/processor.o: objs/processor.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/processor.h
 
+objs/string.o: objs/string.c ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/string.h
+
 objs/user.o: objs/user.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/hash.h ../include/sdm/string.h ../include/sdm/memory.h \
-  ../include/sdm/interface/interface.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/interpreter.h ../include/sdm/interface/interface.h \
   ../include/sdm/objs/actionable.h ../include/sdm/objs/container.h \
-  ../include/sdm/objs/mobile.h ../include/sdm/objs/user.h \
-  ../include/sdm/objs/processor.h
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/user.h
 
 objs/world.o: objs/world.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \

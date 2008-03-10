@@ -34,6 +34,9 @@ extern struct sdm_object_type sdm_actionable_obj_type;
 int sdm_actionable_init(struct sdm_actionable *, va_list);
 void sdm_actionable_release(struct sdm_actionable *);
 
+int sdm_actionable_set_proprety(struct sdm_actionable *, const char *, struct sdm_object *);
+struct sdm_object *sdm_actionable_get_property(struct sdm_actionable *, const char *, struct sdm_object_type *);
+
 int sdm_actionable_set_action(struct sdm_actionable *, const char *, sdm_action_t, void *, destroy_t);
 int sdm_actionable_do_action(struct sdm_actionable *, struct sdm_user *, const char *, const char *);
 
