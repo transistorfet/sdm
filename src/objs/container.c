@@ -18,8 +18,8 @@ struct sdm_object_type sdm_container_obj_type = {
 	NULL,
 	(sdm_object_init_t) sdm_container_init,
 	(sdm_object_release_t) sdm_container_release,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL
+	(sdm_object_read_entry_t) sdm_container_read_entry,
+	(sdm_object_write_data_t) sdm_container_write_data
 };
 
 int sdm_container_init(struct sdm_container *container, va_list va)
@@ -40,7 +40,7 @@ void sdm_container_release(struct sdm_container *container)
 	sdm_thing_release(SDM_THING(container));
 }
 
-int sdm_container_read_data(struct sdm_container *container, const char *type, struct sdm_data_file *data)
+int sdm_container_read_entry(struct sdm_container *container, const char *type, struct sdm_data_file *data)
 {
 	struct sdm_thing *obj;
 
@@ -69,6 +69,7 @@ int sdm_container_read_data(struct sdm_container *container, const char *type, s
 int sdm_container_write_data(struct sdm_container *container, struct sdm_data_file *data)
 {
 	// TODO write data
+	return(0);
 }
 
 

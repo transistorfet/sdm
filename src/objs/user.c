@@ -88,7 +88,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		return(-1);
 
 	// TODO this is temporary until you get a way to determine a user's location based on the datafile
-	sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_THING(user));
+	//sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_THING(user));
 	return(0);
 }
 
@@ -111,8 +111,13 @@ void sdm_user_release(struct sdm_user *user)
 
 int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data_file *data)
 {
-	// TODO read in data
-	return(0);
+	if (!strcmp(type, "location")) {
+
+	}
+	else {
+		return(0);
+	}
+	return(1);
 }
 
 int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)

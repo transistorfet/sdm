@@ -23,8 +23,6 @@ struct sdm_user {
 	struct sdm_interface *inter;
 	struct sdm_processor *proc;
 	string_t name;
-	string_t fullname;
-	string_t password;
 
 };
 

@@ -30,17 +30,20 @@ int sdm_data_read_parent(struct sdm_data_file *);
 
 const char *sdm_data_read_name(struct sdm_data_file *);
 int sdm_data_read_attrib(struct sdm_data_file *, const char *, char *, int);
-double sdm_data_read_number(struct sdm_data_file *);
+long int sdm_data_read_integer(struct sdm_data_file *);
+double sdm_data_read_float(struct sdm_data_file *);
 int sdm_data_read_string(struct sdm_data_file *, char *, int);
 
 int sdm_data_write_begin_entry(struct sdm_data_file *, const char *);
 int sdm_data_write_attrib(struct sdm_data_file *, const char *, const char *);
-int sdm_data_write_number(struct sdm_data_file *, double);
+int sdm_data_write_integer(struct sdm_data_file *, long int);
+int sdm_data_write_float(struct sdm_data_file *, double);
 int sdm_data_write_string(struct sdm_data_file *, const char *);
 int sdm_data_write_end_entry(struct sdm_data_file *);
 int sdm_data_write_current(struct sdm_data_file *);
 
-int sdm_data_write_number_entry(struct sdm_data_file *, const char *, const char *);
+int sdm_data_write_integer_entry(struct sdm_data_file *, const char *, long int);
+int sdm_data_write_float_entry(struct sdm_data_file *, const char *, double);
 int sdm_data_write_string_entry(struct sdm_data_file *, const char *, const char *);
 
 #endif

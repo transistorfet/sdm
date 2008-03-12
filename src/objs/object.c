@@ -11,6 +11,10 @@
 
 #include <sdm/objs/object.h>
 
+/** We need this to make a list of object types in sdm_object_write_data() in order to write the data
+    to the file with the root object first working down through the children */
+#define SDM_OBJECT_MAX_INHERITENCE		100
+
 struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
 {
 	va_list va;
@@ -89,8 +93,15 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 
 int sdm_object_write_data(struct sdm_object *obj, struct sdm_data_file *data)
 {
-	// TODO write object
-	return(-1);
+	int i;
+	struct sdm_object_type *cur;
+	struct sdm_object_type *list[SDM_OBJECT_MAX_INHERITENCE];
+
+	for (i = 0, cur = obj->type; cur && (i < SDM_OBJECT_MAX_INHERITENCE); cur = cur->parent)
+		list[i] = cur;
+	for (; i >= 0; i--)
+		list[i]->write_data(obj, data);
+	return(0);
 }
 
 

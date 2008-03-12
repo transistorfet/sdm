@@ -93,6 +93,7 @@ void sdm_thing_release(struct sdm_thing *thing)
 
 int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
 {
+	int num;
 	struct sdm_object *obj;
 	char buffer[STRING_SIZE];
 
@@ -115,15 +116,36 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		sdm_thing_set_property(thing, buffer, obj);
 */
 	}
+	else if (!strcmp(type, "id")) {
+		if ((num = sdm_data_read_integer(data)) > 0)
+			sdm_thing_assign_id(thing, num);
+	}
+	else if (!strcmp(type, "owner")) {
+		// TODO this will not load add the object to the owner if the owner hasn't been loaded yet =/
+		if (((num = sdm_data_read_integer(data)) > 0) && (obj = SDM_OBJECT(sdm_thing_lookup_id(num))))
+			sdm_container_add(SDM_CONTAINER(obj), thing);
+	}
 	else if (!strcmp(type, "parent")) {
-		// TODO find the parent
+		// TODO this will set parent to NULL if the parent hasn't been loaded yet =/
+		if ((num = sdm_data_read_integer(data)) > 0)
+			thing->parent = sdm_thing_lookup_id(num);
+	}
+	else {
+		return(1);
 	}
 	return(0);
 }
 
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 {
-	// TODO write data
+	sdm_data_write_integer_entry(data, "id", thing->id);
+	if (thing->parent)
+		sdm_data_write_integer_entry(data, "parent", thing->parent->id);
+	if (thing->owner)
+		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
+	// TODO write properties
+	// TODO write actions
+	return(0);
 }
 
 

@@ -30,7 +30,7 @@ int init_world(void)
 {
 	if (root_world)
 		return(1);
-	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type)))
+	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type, SDM_WORLD_ARGS(0, NULL))))
 		return(-1);
 	// TODO should the read and write data calls be in the object init/release with the filename as an arg
 	sdm_object_read_file(SDM_OBJECT(root_world), "maps/world.xml", "world");

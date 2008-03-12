@@ -173,7 +173,20 @@ int sdm_data_read_attrib(struct sdm_data_file *data, const char *name, char *buf
 	return(0);
 }
 
-double sdm_data_read_number(struct sdm_data_file *data)
+long int sdm_data_read_integer(struct sdm_data_file *data)
+{
+	char *str;
+	long int num;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		num = atol(str);
+		xmlFree(str);
+		return(num);
+	}
+	return(0);
+}
+
+double sdm_data_read_float(struct sdm_data_file *data)
 {
 	char *str;
 	double num;
@@ -215,7 +228,14 @@ int sdm_data_write_attrib(struct sdm_data_file *data, const char *name, const ch
 	return(0);
 }
 
-int sdm_data_write_number(struct sdm_data_file *data, double value)
+int sdm_data_write_integer(struct sdm_data_file *data, long int value)
+{
+	if (xmlTextWriterWriteFormatString(data->writer, "%ld", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_float(struct sdm_data_file *data, double value)
 {
 	if (xmlTextWriterWriteFormatString(data->writer, "%f", value) < 0)
 		return(-1);
@@ -253,7 +273,14 @@ int sdm_data_write_current(struct sdm_data_file *data)
 }
 
 
-int sdm_data_write_number_entry(struct sdm_data_file *data, const char *name, const char *value)
+int sdm_data_write_integer_entry(struct sdm_data_file *data, const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatElement(data->writer, name, "%ld", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_float_entry(struct sdm_data_file *data, const char *name, double value)
 {
 	if (xmlTextWriterWriteFormatElement(data->writer, name, "%f", value) < 0)
 		return(-1);
