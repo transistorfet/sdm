@@ -17,7 +17,7 @@
 #include <sdm/interface/interface.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/actionable.h>
+#include <sdm/objs/thing.h>
 #include <sdm/objs/container.h>
 #include <sdm/objs/mobile.h>
 #include <sdm/objs/user.h>
@@ -86,7 +86,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		return(-1);
 
 	// TODO this is temporary until you get a way to determine a user's location based on the datafile
-	sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_ACTIONABLE(user));
+	sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_THING(user));
 	return(0);
 }
 
@@ -194,15 +194,15 @@ int sdm_user_tell(struct sdm_user *user, const char *fmt, ...)
 int sdm_user_announce(struct sdm_user *user, const char *fmt, ...)
 {
 	va_list va;
+	struct sdm_thing *cur;
 	char buffer[STRING_SIZE];
-	struct sdm_actionable *cur;
 
 	va_start(va, fmt);
 	vsnprintf(buffer, STRING_SIZE, fmt, va);
 	va_end(va);
-	if (!SDM_ACTIONABLE(user)->owner)
+	if (!SDM_THING(user)->owner)
 		return(0);
-	for (cur = SDM_ACTIONABLE(user)->owner->objects; cur; cur = cur->next) {
+	for (cur = SDM_THING(user)->owner->objects; cur; cur = cur->next) {
 		if ((SDM_OBJECT(cur)->type == &sdm_user_obj_type) && (SDM_USER(cur) != user))
 			SDM_INTERFACE_WRITE(SDM_USER(cur)->inter, buffer);
 	}

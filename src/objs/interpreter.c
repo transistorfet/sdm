@@ -85,8 +85,8 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 {
 	int i;
 	char *name;
+	struct sdm_thing *obj;
 	struct sdm_command *cmd;
-	struct sdm_actionable *obj;
 
 	/*
 		get command portion (up to first space)
@@ -132,8 +132,8 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 		if (*name == '\0') {
 			SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_NOT_FOUND);
 		}
-		else if ((obj = sdm_container_find(SDM_ACTIONABLE(user)->owner, name))) {
-			if (sdm_actionable_do_action(obj, user, input, &input[i]) < 0)
+		else if ((obj = sdm_container_find(SDM_THING(user)->owner, name))) {
+			if (sdm_thing_do_action(obj, user, input, &input[i]) < 0)
 				sdm_user_tell(user, SDM_TXT_ACTION_NOT_FOUND);
 		}
 		else {

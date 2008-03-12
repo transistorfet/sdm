@@ -25,7 +25,7 @@
 #define SDM_TXT_COMMAND_PROMPT			"\n> "
 #define SDM_TXT_COMMAND_NOT_FOUND		"You can't do that.\n"
 #define SDM_TXT_ACTION_NOT_FOUND		"You can't do that.\n"
-#define SDM_TXT_OBJECT_NOT_FOUND		"There is no object name \"%s\".\n"
+#define SDM_TXT_OBJECT_NOT_FOUND		"There is no object named \"%s\".\n"
 
 #endif
 

@@ -10,7 +10,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/actionable.h>
+#include <sdm/objs/thing.h>
 #include <sdm/objs/container.h>
 #include <sdm/objs/world.h>
 

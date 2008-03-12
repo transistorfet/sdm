@@ -1,10 +1,10 @@
 /*
- * Object Name:	actionable.h
- * Description:	Base Actionable Object
+ * Object Name:	thing.h
+ * Description:	Base Game Object
  */
 
-#ifndef _SDM_OBJS_ACTIONABLE_H
-#define _SDM_OBJS_ACTIONABLE_H
+#ifndef _SDM_OBJS_THING_H
+#define _SDM_OBJS_THING_H
 
 #include <stdarg.h>
 
@@ -12,36 +12,36 @@
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
 
-#define SDM_ACTIONABLE(ptr)	( (struct sdm_actionable *) (ptr) )
+#define SDM_THING(ptr)	( (struct sdm_thing *) (ptr) )
 
 struct sdm_user;
 struct sdm_container;
-struct sdm_actionable;
+struct sdm_thing;
 
-typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_actionable *, const char *);
+typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_thing *, const char *);
 
-struct sdm_actionable {
+struct sdm_thing {
 	struct sdm_object object;
 	int id;
-	struct sdm_actionable *parent;
+	struct sdm_thing *parent;
 	struct sdm_container *owner;
-	struct sdm_actionable *next;
+	struct sdm_thing *next;
 	struct sdm_hash *properties;
 	struct sdm_hash *actions;
 
 };
 
-extern struct sdm_object_type sdm_actionable_obj_type;
+extern struct sdm_object_type sdm_thing_obj_type;
 
-int sdm_actionable_init(struct sdm_actionable *, va_list);
-void sdm_actionable_release(struct sdm_actionable *);
-int sdm_actionable_read_data(struct sdm_actionable *, const char *, struct sdm_data_file *);
+int sdm_thing_init(struct sdm_thing *, va_list);
+void sdm_thing_release(struct sdm_thing *);
+int sdm_thing_read_data(struct sdm_thing *, const char *, struct sdm_data_file *);
 
-int sdm_actionable_set_property(struct sdm_actionable *, const char *, struct sdm_object *);
-struct sdm_object *sdm_actionable_get_property(struct sdm_actionable *, const char *, struct sdm_object_type *);
+int sdm_thing_set_property(struct sdm_thing *, const char *, struct sdm_object *);
+struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, struct sdm_object_type *);
 
-int sdm_actionable_set_action(struct sdm_actionable *, const char *, sdm_action_t, void *, destroy_t);
-int sdm_actionable_do_action(struct sdm_actionable *, struct sdm_user *, const char *, const char *);
+int sdm_thing_set_action(struct sdm_thing *, const char *, sdm_action_t, void *, destroy_t);
+int sdm_thing_do_action(struct sdm_thing *, struct sdm_user *, const char *, const char *);
 
 #endif
 

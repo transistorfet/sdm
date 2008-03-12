@@ -19,7 +19,6 @@ OBJS =	data.o	\
 	interface/telnet/login.o	\
 	interface/telnet/register.o	\
 	interface/telnet/telnet.o	\
-	objs/actionable.o	\
 	objs/container.o	\
 	objs/interpreter.o	\
 	objs/login.o	\
@@ -27,6 +26,7 @@ OBJS =	data.o	\
 	objs/object.o	\
 	objs/processor.o	\
 	objs/string.o	\
+	objs/thing.o	\
 	objs/user.o	\
 	objs/world.o
 
@@ -69,7 +69,7 @@ main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/login.h ../include/sdm/string.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/user.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/world.h \
   ../include/sdm/objs/interpreter.h
 
@@ -92,8 +92,9 @@ interface/telnet/login.o: interface/telnet/login.c ../include/sdm/text.h \
   ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/string.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/user.h ../include/sdm/objs/processor.h \
-  ../include/sdm/objs/mobile.h ../include/sdm/objs/actionable.h \
-  ../include/sdm/hash.h ../include/sdm/objs/container.h
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/hash.h ../include/sdm/data.h \
+  ../include/sdm/objs/container.h
 
 interface/telnet/register.o: interface/telnet/register.c \
   ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
@@ -101,8 +102,9 @@ interface/telnet/register.o: interface/telnet/register.c \
   ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/string.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/user.h ../include/sdm/objs/processor.h \
-  ../include/sdm/objs/mobile.h ../include/sdm/objs/actionable.h \
-  ../include/sdm/hash.h ../include/sdm/objs/container.h
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/hash.h ../include/sdm/data.h \
+  ../include/sdm/objs/container.h
 
 interface/telnet/telnet.o: interface/telnet/telnet.c \
   ../include/sdm/memory.h ../include/sdm/interface/interface.h \
@@ -110,17 +112,13 @@ interface/telnet/telnet.o: interface/telnet/telnet.c \
   ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/string.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/user.h ../include/sdm/objs/processor.h \
-  ../include/sdm/objs/mobile.h ../include/sdm/objs/actionable.h \
-  ../include/sdm/hash.h ../include/sdm/objs/container.h
-
-objs/actionable.o: objs/actionable.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/container.h \
-  ../include/sdm/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/actionable.h
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/hash.h ../include/sdm/data.h \
+  ../include/sdm/objs/container.h
 
 objs/container.o: objs/container.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/objs/container.h
 
 objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
@@ -128,7 +126,7 @@ objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
   ../include/sdm/objs/user.h ../include/sdm/string.h \
   ../include/sdm/interface/interface.h ../include/sdm/objs/processor.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/mobile.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/interpreter.h
 
 objs/login.o: objs/login.c ../include/sdm/data.h ../include/sdm/globals.h \
@@ -138,7 +136,7 @@ objs/login.o: objs/login.c ../include/sdm/data.h ../include/sdm/globals.h \
 
 objs/mobile.o: objs/mobile.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/mobile.h
 
 objs/object.o: objs/object.c ../include/sdm/memory.h \
@@ -152,15 +150,20 @@ objs/string.o: objs/string.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/string.h
 
+objs/thing.o: objs/thing.c ../include/sdm/hash.h ../include/sdm/globals.h \
+  ../include/sdm/data.h ../include/sdm/memory.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/container.h ../include/sdm/objs/thing.h
+
 objs/user.o: objs/user.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/hash.h ../include/sdm/string.h ../include/sdm/memory.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/interpreter.h ../include/sdm/interface/interface.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/objs/container.h \
+  ../include/sdm/objs/thing.h ../include/sdm/objs/container.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/user.h
 
-objs/world.o: objs/world.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/actionable.h ../include/sdm/hash.h \
+objs/world.o: objs/world.c ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/world.h
 

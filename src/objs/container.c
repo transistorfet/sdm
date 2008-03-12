@@ -9,11 +9,11 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/actionable.h>
+#include <sdm/objs/thing.h>
 #include <sdm/objs/container.h>
 
 struct sdm_object_type sdm_container_obj_type = {
-	&sdm_actionable_obj_type,
+	&sdm_thing_obj_type,
 	sizeof(struct sdm_container),
 	NULL,
 	(sdm_object_init_t) sdm_container_init,
@@ -22,40 +22,40 @@ struct sdm_object_type sdm_container_obj_type = {
 
 int sdm_container_init(struct sdm_container *container, va_list va)
 {
-	if (sdm_actionable_init(SDM_ACTIONABLE(container), va))
+	if (sdm_thing_init(SDM_THING(container), va))
 		return(-1);
 	return(0);
 }
 
 void sdm_container_release(struct sdm_container *container)
 {
-	struct sdm_actionable *cur, *tmp;
+	struct sdm_thing *cur, *tmp;
 
 	for (cur = container->objects; cur; cur = tmp) {
 		tmp = cur->next;
 		destroy_sdm_object(SDM_OBJECT(cur));
 	}
-	sdm_actionable_release(SDM_ACTIONABLE(container));
+	sdm_thing_release(SDM_THING(container));
 }
 
 int sdm_container_read_data(struct sdm_container *container, const char *type, struct sdm_data_file *data)
 {
-	struct sdm_actionable *obj;
+	struct sdm_thing *obj;
 
 	if (!strcmp(type, "thing")) {
-		if (!(obj = (struct sdm_actionable *) create_sdm_object(&sdm_actionable_obj_type)))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_thing_obj_type)))
 			return(-1);
 		sdm_data_read_children(data);
 		do {
 			if (!(type = sdm_data_read_name(data)))
 				return(-1);
-			sdm_actionable_read_data(obj, type, data);
+			sdm_thing_read_data(obj, type, data);
 		} while (sdm_data_read_next(data));
 		sdm_data_read_parent(data);
 		sdm_container_add(container, obj);
 	}
 	else if (!strcmp(type, "container")) {
-		if (!(obj = (struct sdm_actionable *) create_sdm_object(&sdm_container_obj_type)))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_container_obj_type)))
 			return(-1);
 		sdm_data_read_children(data);
 		do {
@@ -67,13 +67,13 @@ int sdm_container_read_data(struct sdm_container *container, const char *type, s
 		sdm_container_add(container, obj);
 	}
 	else {
-		sdm_actionable_read_data(SDM_ACTIONABLE(container), type, data);
+		sdm_thing_read_data(SDM_THING(container), type, data);
 	}
 	return(0);
 }
 
 
-int sdm_container_add(struct sdm_container *container, struct sdm_actionable *obj)
+int sdm_container_add(struct sdm_container *container, struct sdm_thing *obj)
 {
 	// TODO should you notify the objcet somehow that it's being added? (or are these funcs lower level)
 	if (obj->owner == container)
@@ -86,9 +86,9 @@ int sdm_container_add(struct sdm_container *container, struct sdm_actionable *ob
 	return(0);
 }
 
-int sdm_container_remove(struct sdm_container *container, struct sdm_actionable *obj)
+int sdm_container_remove(struct sdm_container *container, struct sdm_thing *obj)
 {
-	struct sdm_actionable *cur, *prev;
+	struct sdm_thing *cur, *prev;
 
 	// TODO should you notify the object somehow that it is being remove?
 	for (prev = NULL, cur = container->objects; cur; prev = cur, cur = cur->next) {
@@ -105,12 +105,12 @@ int sdm_container_remove(struct sdm_container *container, struct sdm_actionable 
 }
 
 
-struct sdm_actionable *sdm_container_find(struct sdm_container *container, const char *name)
+struct sdm_thing *sdm_container_find(struct sdm_container *container, const char *name)
 {
-	struct sdm_actionable *cur;
+	struct sdm_thing *cur;
 
 	for (cur = container->objects; cur; cur = cur->next) {
-// TODO where is the name stored? should all actionable objects have a name? or should it be from properties?
+// TODO where is the name stored? should all thing objects have a name? or should it be from properties?
 //		if (!strncasecmp(cur->name, name, strlen(name)))
 	}
 	return(NULL);
