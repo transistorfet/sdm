@@ -21,7 +21,9 @@ struct sdm_object_type sdm_login_obj_type = {
 	sizeof(struct sdm_login),
 	NULL,
 	(sdm_object_init_t) sdm_login_init,
-	(sdm_object_release_t) sdm_login_release
+	(sdm_object_release_t) sdm_login_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL
 };
 
 int sdm_login_init(struct sdm_login *login, va_list va)

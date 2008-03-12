@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
@@ -21,6 +22,7 @@
 #include <sdm/interface/interface.h>
 #include <sdm/interface/tcp.h>
 
+#include <sdm/misc.h>
 #include <sdm/globals.h>
 
 #ifndef TCP_CONNECT_ATTEMPTS
@@ -270,6 +272,7 @@ static int tcp_accept(struct sdm_tcp *inter, struct sdm_tcp *listener)
 
 	size = sizeof(struct sockaddr_in);
 	if ((SDM_INTERFACE(inter)->read = accept(SDM_INTERFACE(listener)->read, (struct sockaddr *) &saddr, &size))) {
+		sdm_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
 		// TODO do anything you might want with the saddr
 		return(0);
 	}

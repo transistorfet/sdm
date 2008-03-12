@@ -18,7 +18,9 @@ struct sdm_object_type sdm_mobile_obj_type = {
 	sizeof(struct sdm_mobile),
 	NULL,
 	(sdm_object_init_t) sdm_mobile_init,
-	(sdm_object_release_t) sdm_mobile_release
+	(sdm_object_release_t) sdm_mobile_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL
 };
 
 int sdm_mobile_init(struct sdm_mobile *mobile, va_list va)

@@ -28,7 +28,9 @@ struct sdm_processor_type sdm_interpreter_obj_type = {
 	sizeof(struct sdm_interpreter),
 	NULL,
 	(sdm_object_init_t) sdm_interpreter_init,
-	(sdm_object_release_t) sdm_interpreter_release
+	(sdm_object_release_t) sdm_interpreter_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL
     },
 	(sdm_processor_startup_t) sdm_interpreter_startup,
 	(sdm_processor_process_t) sdm_interpreter_process,

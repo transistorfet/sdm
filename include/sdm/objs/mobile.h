@@ -19,6 +19,8 @@ struct sdm_mobile {
 
 };
 
+#define SDM_MOBILE_ARGS(id, parent)		SDM_CONTAINER_ARGS((id), (parent))
+
 extern struct sdm_object_type sdm_mobile_obj_type;
 
 int sdm_mobile_init(struct sdm_mobile *, va_list);

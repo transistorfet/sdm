@@ -15,6 +15,11 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
 
+#define THING_TABLE_INIT_SIZE			100
+#define THING_TABLE_EXTRA_SIZE			100
+/** This is to prevent us from making giant table accidentally */
+#define THING_MAX_TABLE_SIZE			65536
+
 struct sdm_action {
 	sdm_action_t func;
 	void *ptr;
@@ -26,14 +31,34 @@ struct sdm_object_type sdm_thing_obj_type = {
 	sizeof(struct sdm_thing),
 	NULL,
 	(sdm_object_init_t) sdm_thing_init,
-	(sdm_object_release_t) sdm_thing_release
+	(sdm_object_release_t) sdm_thing_release,
+	(sdm_object_read_entry_t) sdm_thing_read_entry,
+	(sdm_object_write_data_t) sdm_thing_write_data
 };
+
+static int next_id = 1;
+static int table_size = 0;
+static struct sdm_thing **thing_table = NULL;
 
 static void sdm_thing_destroy_action(struct sdm_action *);
 
+int init_thing(void)
+{
+	if (!(thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
+		return(-1);
+	table_size = THING_TABLE_INIT_SIZE;
+	return(0);
+}
+
+int release_thing(void)
+{
+	// TODO free all things??
+	memory_free(thing_table);
+	return(0);
+}
+
 int sdm_thing_init(struct sdm_thing *thing, va_list va)
 {
-	// TODO should we take "parent" as an argument?
 	if (!(thing->properties = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, (destroy_t) destroy_sdm_object)))
 		return(-1);
 	// TODO we could choose to only create an actions list when we want to place a new
@@ -41,6 +66,16 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 	//	only send the request to it's parent object
 	if (!(thing->actions = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, (destroy_t) sdm_thing_destroy_action)))
 		return(-1);
+
+	/** Set the thing id and add the thing to the table.  If id = 0, don't add it to a table.
+	    If the id = -1 then assign the next available id */
+	thing->id = va_arg(va, int);
+	if (thing->id > 0)
+		sdm_thing_assign_id(thing, thing->id);
+	else if (thing->id == -1)
+		sdm_thing_assign_new_id(thing);
+
+	thing->parent = va_arg(va, struct sdm_thing *);
 	return(0);
 }
 
@@ -52,9 +87,11 @@ void sdm_thing_release(struct sdm_thing *thing)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
 		destroy_sdm_hash(thing->actions);
+	if ((thing->id > 0) && (thing->id < table_size))
+		thing_table[thing->id] = NULL;
 }
 
-int sdm_thing_read_data(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
+int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
 {
 	struct sdm_object *obj;
 	char buffer[STRING_SIZE];
@@ -82,6 +119,11 @@ int sdm_thing_read_data(struct sdm_thing *thing, const char *type, struct sdm_da
 		// TODO find the parent
 	}
 	return(0);
+}
+
+int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
+{
+	// TODO write data
 }
 
 
@@ -137,6 +179,58 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const ch
 		}
 	}
 	return(-1);
+}
+
+
+int sdm_thing_assign_id(struct sdm_thing *thing, int id)
+{
+	struct sdm_thing **tmp;
+
+	/** If the thing already has a valid id, remove it's existing entry in the table.  If an error
+	    happens in this function, the thing's id will be 0 in case the caller doesn't check */
+	if ((thing->id > 0) && (thing->id < table_size)) {
+		thing_table[thing->id] = NULL;
+		thing->id = 0;
+	}
+
+	/** If the new id is invalid, then don't do anything.  This maximum size is to prevent us from
+	    inadvertanly creating a gigantic table */
+	if ((id <= 0) || (id >= THING_MAX_TABLE_SIZE))
+		return(-1);
+
+	/** Increase the size of the table if id is too big to have a spot in the table */
+	if (id >= table_size) {
+		if (!(tmp = (struct sdm_thing **) memory_realloc(thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
+			return(-1);
+		thing_table = tmp;
+		table_size = id + THING_TABLE_EXTRA_SIZE;
+	}
+
+	/** If there is already a thing with the same id, then destroy it */
+	if (thing_table[id])
+		destroy_sdm_object(SDM_OBJECT(thing_table[id]));
+	thing->id = id;
+	thing_table[id] = thing;
+
+	// TODO for now we always make the next id the largest unassign id
+	if (next_id <= id)
+		next_id = id + 1;
+	return(0);
+}
+
+int sdm_thing_assign_new_id(struct sdm_thing *thing)
+{
+	// TODO for now we will not assign the ids of holes in the table
+	/** Keep in mind that as it stands, the id of the parent of an object must be smaller than the id
+	    of that object itself or the loading of the object will fail. */
+	return(sdm_thing_assign_id(thing, next_id++));
+}
+
+struct sdm_thing *sdm_thing_lookup_id(int id)
+{
+	if ((id >= 0) && (id < table_size))
+		return(thing_table[id]);
+	return(NULL);
 }
 
 

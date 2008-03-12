@@ -112,7 +112,7 @@ static int telnet_register_verify_password(struct sdm_login *login, struct sdm_t
 		}
 		else {
 			sdm_login_write_data(login);
-			sdm_user_write_data(user);
+			sdm_user_write(user);
 			destroy_sdm_object(SDM_OBJECT(login));
 			sdm_telnet_write(inter, "\n");
 			// TODO invoke the game character generation object scripty stuff or else put that

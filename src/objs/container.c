@@ -17,7 +17,9 @@ struct sdm_object_type sdm_container_obj_type = {
 	sizeof(struct sdm_container),
 	NULL,
 	(sdm_object_init_t) sdm_container_init,
-	(sdm_object_release_t) sdm_container_release
+	(sdm_object_release_t) sdm_container_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL
 };
 
 int sdm_container_init(struct sdm_container *container, va_list va)
@@ -43,33 +45,30 @@ int sdm_container_read_data(struct sdm_container *container, const char *type, s
 	struct sdm_thing *obj;
 
 	if (!strcmp(type, "thing")) {
-		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_thing_obj_type)))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_thing_obj_type, SDM_THING_ARGS(0, NULL))))
 			return(-1);
 		sdm_data_read_children(data);
-		do {
-			if (!(type = sdm_data_read_name(data)))
-				return(-1);
-			sdm_thing_read_data(obj, type, data);
-		} while (sdm_data_read_next(data));
+		sdm_object_read_data(SDM_OBJECT(obj), data);
 		sdm_data_read_parent(data);
 		sdm_container_add(container, obj);
 	}
 	else if (!strcmp(type, "container")) {
-		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_container_obj_type)))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_container_obj_type, SDM_CONTAINER_ARGS(0, NULL))))
 			return(-1);
 		sdm_data_read_children(data);
-		do {
-			if (!(type = sdm_data_read_name(data)))
-				return(-1);
-			sdm_container_read_data(SDM_CONTAINER(obj), type, data);
-		} while (sdm_data_read_next(data));
+		sdm_object_read_data(SDM_OBJECT(obj), data);
 		sdm_data_read_parent(data);
 		sdm_container_add(container, obj);
 	}
 	else {
-		sdm_thing_read_data(SDM_THING(container), type, data);
+		return(0);
 	}
-	return(0);
+	return(1);
+}
+
+int sdm_container_write_data(struct sdm_container *container, struct sdm_data_file *data)
+{
+	// TODO write data
 }
 
 

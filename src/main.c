@@ -38,6 +38,8 @@ int init_mud(void)
 
 	if (init_interpreter() < 0)
 		return(-1);
+	if (init_thing() < 0)
+		return(-1);
 	if (init_world() < 0)
 		return(-1);
 	if (init_user() < 0)
@@ -51,6 +53,7 @@ int release_mud(void)
 {
 	release_user();
 	release_world();
+	release_thing();
 	release_interpreter();
 
 	release_telnet();

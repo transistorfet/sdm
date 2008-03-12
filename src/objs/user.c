@@ -27,7 +27,9 @@ struct sdm_object_type sdm_user_obj_type = {
 	sizeof(struct sdm_user),
 	NULL,
 	(sdm_object_init_t) sdm_user_init,
-	(sdm_object_release_t) sdm_user_release
+	(sdm_object_release_t) sdm_user_release,
+	(sdm_object_read_entry_t) sdm_user_read_entry,
+	(sdm_object_write_data_t) sdm_user_write_data
 };
 
 static struct sdm_hash *user_list = NULL;
@@ -61,7 +63,7 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 
 	if ((user = sdm_hash_find(user_list, name)))
 		return(user);
-	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, name, inter));
+	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, 0, NULL)));
 }
 
 int sdm_user_init(struct sdm_user *user, va_list va)
@@ -77,9 +79,9 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
 
-	if (CALL_SDM_OBJECT_INIT((sdm_object_init_t) sdm_mobile_init, SDM_OBJECT(user)) < 0)
+	if (sdm_mobile_init(SDM_OBJECT(user), va) < 0)
 		return(-1);
-	sdm_user_read_data(user);
+	sdm_user_read(user);
 
 	// TODO this should probably be created in read_data or as a result of reading data
 	if (!(user->proc = (struct sdm_processor *) create_sdm_object(&sdm_interpreter_obj_type)))
@@ -92,8 +94,9 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 
 void sdm_user_release(struct sdm_user *user)
 {
+
 	/** Save the user information to the user's file */
-	sdm_user_write_data(user);
+	sdm_user_write(user);
 	/** Shutdown the input processor */
 	sdm_processor_shutdown(user->proc, user);
 	destroy_sdm_object(SDM_OBJECT(user->proc));
@@ -106,31 +109,16 @@ void sdm_user_release(struct sdm_user *user)
 	sdm_mobile_release(SDM_MOBILE(user));
 }
 
-
-int sdm_user_read_data(struct sdm_user *user)
+int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data_file *data)
 {
-	char buffer[STRING_SIZE];
-	struct sdm_data_file *data;
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
-	if (!(sdm_data_file_exists(buffer)) || !(data = sdm_data_open(buffer, SDM_DATA_READ, "user")))
-		return(-1);
 	// TODO read in data
-	sdm_data_close(data);
 	return(0);
 }
 
-int sdm_user_write_data(struct sdm_user *user)
+int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)
 {
-	char buffer[STRING_SIZE];
-	struct sdm_data_file *data;
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
-	if (!(data = sdm_data_open(buffer, SDM_DATA_WRITE, "user")))
-		return(-1);
 	sdm_data_write_string_entry(data, "name", user->name);
 	// TODO write everything else
-	sdm_data_close(data);
 	return(0);
 }
 

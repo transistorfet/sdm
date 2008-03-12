@@ -18,7 +18,9 @@ struct sdm_object_type sdm_string_obj_type = {
 	sizeof(struct sdm_string),
 	NULL,
 	(sdm_object_init_t) sdm_string_init,
-	(sdm_object_release_t) sdm_string_release
+	(sdm_object_release_t) sdm_string_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL
 };
 
 int sdm_string_init(struct sdm_string *string, va_list va)

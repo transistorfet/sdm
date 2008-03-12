@@ -6,6 +6,7 @@
 #ifndef _SDM_OBJS_USER_H
 #define _SDM_OBJS_USER_H
 
+#include <stdio.h>
 #include <stdarg.h>
 
 #include <sdm/string.h>
@@ -27,6 +28,8 @@ struct sdm_user {
 
 };
 
+#define SDM_USER_ARGS(name, inter, id, parent)		(name), (inter), SDM_MOBILE_ARGS((id), (parent))
+
 extern struct sdm_object_type sdm_user_obj_type;
 
 int init_user(void);
@@ -36,9 +39,8 @@ struct sdm_user *create_sdm_user(const char *, struct sdm_interface *);
 
 int sdm_user_init(struct sdm_user *, va_list);
 void sdm_user_release(struct sdm_user *);
-
-int sdm_user_read_data(struct sdm_user *);
-int sdm_user_write_data(struct sdm_user *);
+int sdm_user_read_entry(struct sdm_user *, const char *, struct sdm_data_file *);
+int sdm_user_write_data(struct sdm_user *, struct sdm_data_file *);
 
 int sdm_user_exists(const char *);
 int sdm_user_logged_in(const char *);
@@ -48,6 +50,20 @@ int sdm_user_startup(struct sdm_user *);
 int sdm_user_process_input(struct sdm_user *, char *);
 int sdm_user_tell(struct sdm_user *, const char *, ...);
 int sdm_user_announce(struct sdm_user *, const char *, ...);
+
+static inline int sdm_user_read(struct sdm_user *user) {
+	char buffer[STRING_SIZE];
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
+	return(sdm_object_read_file(SDM_OBJECT(user), buffer, "user"));
+}
+
+static inline int sdm_user_write(struct sdm_user *user) {
+	char buffer[STRING_SIZE];
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
+	return(sdm_object_write_file(SDM_OBJECT(user), buffer, "user"));
+}
 
 #endif
 
