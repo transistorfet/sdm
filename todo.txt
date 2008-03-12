@@ -1,21 +1,28 @@
 
 	* finish implementing the container_find() function
-	* make the action script subsystems in action/ or script/ or the plural of either (or something else)
-	* exits in rooms would store the target room as an object ID to make it easier to load and easier
-	  pehaps to build outwards without having dangling or NULL pointers while building online
+	* what mechanism will you use to interact with the actions system particularily in order to read
+	  action data from a file and pass it to the appropriate module's language interpreter
+	* should exit targets be stored as integer/number objects or as a special object id reference object?
+	* how will you resolve the issue with objects that haven't been loaded yet?  It seems that this is
+	  going to be a killer problem at some point one way or another so you can either make things always
+	  refer to objects by ID or you can load all objects and the resolve the IDs afterwards (which then
+	  you need a way to store the ID temporarily or else load the file twice)
 	* add colour tag parsing to telnet
 
+	* make the input interpreter convert a #23857 to an object by id lookup
 	* add a status message that prints login attempts and logins and logouts
 	* add the argment macro thing to the other classes
-	* how/where will you store script processors?
 	* add a way to write CDATA to data.c
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
 	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
+	* add command shortcuts like lambdamoo's \" for say and : for emote
 
-	* we need a way to create game objects that are different in their actions but the same in their C
-	  class
-	* make user load data from a file
+	* implement all of the read_data functions
+	* how will you represent/differentiate objects in a container with regards to writing them to a file.
+	  In other words, do you always write those objects a seperate objects or as inside the container
+	  and how do you tell which objects to write and which not (because users certainly wouldn't be
+	  written in the world file).
 	* implement all of the write_data functions
 
 	* make telnet (and other interfaces) convert <format> tags into colours based on themes such that
@@ -23,16 +30,31 @@
 	  table and blue, say, would be outputted as the colour for title but that assignment could be changed.
 	  You could also set a mode that allows the xml itself to be transmitted raw so that the other end
 	  can use it for displaying with a special client able to recognize it
+	* change the way input is processed between the interface, user, and processor objects.  It's
+	  somewhat messy, somewhat cumbersome, and somewhat difficult to change the processor temporarily
+	* resolve the issue of telnet/interface user specific configuration data and where it is stored,
+	  loaded from and saved too (should be loaded/stored from within the user's data file i would presume)
+	  This is things like what format to return (raw xml, ANSI colours, no colours) and colour themes
 	* make a character creation game object thingie that telnet can call to generate your character
 	* implement proper handling of telnet commands
 
 	* make the login track invalid attempts and terminate the connection after a while
 	* add a way to automatically timeout login attempts
 	* accept a "-d" command line arg and fork to a daemon process
-	* make the login object use multiple methods of authentication (primarily for other interfaces)
+	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
 
 	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
 	* make it possible for the command prompt to display info (call a function to generate it)
+	* modify interface read/write commands such that seperate channels of text can be supported in a
+	  way that the interface received the data seperately and must render it accordingly (?? this is
+	  in order to support an IRC server interface where you have various seperate channels and then a
+	  #world channel or something is where you interact but it gets very complicated, especially with
+	  things like emote/me which would be rendered differently on telnet vs IRC and therefore rendering
+	  of the command would ideally have to be passed to the interface which starts a slippery slide).
+
+Refactoring:
+
+	* should you change interface/ to interfaces/
 
 Structural Issues:
 

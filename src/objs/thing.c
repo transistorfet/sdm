@@ -101,8 +101,10 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		if ((sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
 		    || !(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
 			return(-1);
-		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
+		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0) {
+			destroy_sdm_object(obj);
 			return(-1);
+		}
 		sdm_thing_set_property(thing, buffer, obj);
 	}
 	else if (!strcmp(type, "action")) {
@@ -138,12 +140,19 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 {
+	struct sdm_object *obj;
+
 	sdm_data_write_integer_entry(data, "id", thing->id);
 	if (thing->parent)
 		sdm_data_write_integer_entry(data, "parent", thing->parent->id);
 	if (thing->owner)
 		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
-	// TODO write properties
+	/** Write the properties to the file */
+	sdm_hash_traverse_reset(thing->properties);
+	while ((obj = sdm_hash_traverse_next(thing->properties))) {
+		// TODO write properties
+	}
+
 	// TODO write actions
 	return(0);
 }

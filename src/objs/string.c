@@ -30,7 +30,8 @@ int sdm_string_init(struct sdm_string *string, va_list va)
 
 	fmt = va_arg(va, char *);
 	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
-	if (!(string->str = memory_alloc(strlen(buffer) + 1)))
+	string->len = strlen(buffer);
+	if (!(string->str = memory_alloc(string->len + 1)))
 		return(-1);
 	strcpy(string->str, buffer);
 	return(0);

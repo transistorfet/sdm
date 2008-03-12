@@ -15,6 +15,7 @@
 struct sdm_string {
 	struct sdm_object object;
 	char *str;
+	int len;
 };
 
 extern struct sdm_object_type sdm_string_obj_type;
