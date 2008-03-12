@@ -22,6 +22,7 @@ typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_actionable *, 
 
 struct sdm_actionable {
 	struct sdm_object object;
+	int id;
 	struct sdm_actionable *parent;
 	struct sdm_container *owner;
 	struct sdm_actionable *next;
@@ -34,10 +35,9 @@ extern struct sdm_object_type sdm_actionable_obj_type;
 
 int sdm_actionable_init(struct sdm_actionable *, va_list);
 void sdm_actionable_release(struct sdm_actionable *);
-int sdm_actionable_read_data(struct sdm_actionable *, struct sdm_data_file *);
-int sdm_actionable_write_data(struct sdm_actionable *, struct sdm_data_file *);
+int sdm_actionable_read_data(struct sdm_actionable *, const char *, struct sdm_data_file *);
 
-int sdm_actionable_set_proprety(struct sdm_actionable *, const char *, struct sdm_object *);
+int sdm_actionable_set_property(struct sdm_actionable *, const char *, struct sdm_object *);
 struct sdm_object *sdm_actionable_get_property(struct sdm_actionable *, const char *, struct sdm_object_type *);
 
 int sdm_actionable_set_action(struct sdm_actionable *, const char *, sdm_action_t, void *, destroy_t);

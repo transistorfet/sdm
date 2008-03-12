@@ -8,7 +8,7 @@
 
 #include <stdarg.h>
 
-#include <sdm/hash.h>
+#include <sdm/data.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/actionable.h>
 #include <sdm/objs/container.h>
@@ -26,6 +26,9 @@ int release_world(void);
 
 int sdm_world_init(struct sdm_world *, va_list);
 void sdm_world_release(struct sdm_world *);
+
+int sdm_world_read_data(struct sdm_world *, const char *);
+int sdm_world_write_data(struct sdm_world *, const char *);
 
 struct sdm_world *sdm_world_get_root(void);
 

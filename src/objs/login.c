@@ -17,6 +17,7 @@
 #include <sdm/objs/login.h>
 
 struct sdm_object_type sdm_login_obj_type = {
+	NULL,
 	sizeof(struct sdm_login),
 	NULL,
 	(sdm_object_init_t) sdm_login_init,

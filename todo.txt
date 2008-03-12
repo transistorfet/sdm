@@ -1,20 +1,50 @@
 
-	* make the data_open function take vargs and build the filename to open from that
-	* make the write_data/read_data functions of various objects take an open data filehandle
+	* make actionable "thing"
+	* make data read/write functions virtual (as part of the thing class)
+	* make the functions in world.c that load data generic enough to be reused by other object, namely
+	  to allow container's read function to recursively call the world function that loads an object
+	* make the virtual functions *not* call recursively
+	* make the action script subsystems in action/ or script/ or the plural of either (or something else)
+	* make the object ID system as an array of object pointers that grows and possibly shrinks as needed
+	  within the world object.  The actual IDs assign would be globally unique but each world may be able
+	  to have it's own range of IDs?  Will we have to try particularily hard to fill object holes?
+	* exits in rooms would store the target room as an object ID to make it easier to load and easier
+	  pehaps to build outwards without having dangling or NULL pointers while building online
+	* add colour tag parsing to telnet
 
-	* should all actionable names have a name field that can be directly accessed, particularily for
-	  being able to find an object by name when used in a command?
-	* for performing a "look" command, do you have to be able to determine that an object is a "mobile"
-	  C class in order to list it as a person in the room?  Can this info be found out through the
-	  actionable (game object) type information?
-	* should you implement an object id system to make it easier to refer to objects in the data files?
+	* make an object id system, perhaps as part of actionable (if we need to split actionable into
+	  multiple objects later, it wont be to difficult to split all of it's parts) such that each new
+	  instance of an actionable object gets a new unique object id unless one is provided (??? provided
+	  at object creation?  or do we assign it later?  do we need a central list of all objects and their
+	  corresponding id?)
+	* implement the id system.
+	* how will you find an object of a given id?  Should all objects be in a hashtable?  Should the
+	  necessary pointers for that hash be in the object itself?  Should this be a special object below
+	  actionable?
+	
+	* how/where will you store script processors?
+	* add a way to write CDATA to data.c
+	* add a virtual function (perhaps to a new object type for actionable or else object) that given a
+	  data file handle and the name of the current item, it reads in that item and store it in itself
+	  and if it can't load that item, it returns.  The function is then called starting at the object's
+	  type and moving to the parent object type for each time the type is unrecognized
+	* make various commands use the extra text passed in a command as a text modifier.  For example you
+	  could say "give apple to trans carefully" and it will interpret the command like normal and the
+	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
 
 	* finish implementing the container_find() function
-	* figure out how all data will be loaded and from where
 	* we need a way to create game objects that are different in their actions but the same in their C
 	  class
 	* make user load data from a file
+	* add a series of macros to pass arguments to the constructors of objects such that you can
+	  specify them for each object or do it hierachically such that an error will be generated if not
+	  all the expected args are sent to the constructor (  sdm_user_args(name, (id, parent))  )
 
+	* make telnet (and other interfaces) convert <format> tags into colours based on themes such that
+	  output would instead be <title>The Room</title> for example and title would be looked up in a colour
+	  table and blue, say, would be outputted as the colour for title but that assignment could be changed.
+	  You could also set a mode that allows the xml itself to be transmitted raw so that the other end
+	  can use it for displaying with a special client able to recognize it
 	* make a character creation game object thingie that telnet can call to generate your character
 	* implement proper handling of telnet commands
 
@@ -31,6 +61,14 @@ Structural Issues:
 	* should object types have some kind of "parent type" pointer so that code can look up to make sure
 	  an object is castable to a parent type? or can you always assume that a given object is castable to
 	  one of it's superclasses?
+	* there is no guarentee that an object with a given ID will be loaded after all other objects (namely
+	  it's parent object) are first loaded which would mean we can't resolve the ID to a pointer at that
+	  time.  Perhaps we can store the objects in their own file but that makes it tough to hand-edit.
+	  If we had a way to know what file an object of a given ID is in, we could still load objects on
+	  demand.  We could also put some things off until after loading and do all resolutions after the
+	  objects are loaded.  The last option is to just store things like parents by only their ID but that
+	  means you need to perform a lookup (although not an expensive one) every time you refer to the
+	  parent which would be every time an action is performed among other things.
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each

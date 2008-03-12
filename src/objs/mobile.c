@@ -14,6 +14,7 @@
 #include <sdm/objs/mobile.h>
 
 struct sdm_object_type sdm_mobile_obj_type = {
+	&sdm_container_obj_type,
 	sizeof(struct sdm_mobile),
 	NULL,
 	(sdm_object_init_t) sdm_mobile_init,

@@ -24,6 +24,7 @@ struct sdm_command {
 
 struct sdm_processor_type sdm_interpreter_obj_type = {
     {
+	(struct sdm_object_type *) &sdm_processor_obj_type,
 	sizeof(struct sdm_interpreter),
 	NULL,
 	(sdm_object_init_t) sdm_interpreter_init,

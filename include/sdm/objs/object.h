@@ -26,6 +26,7 @@ struct sdm_object {
 };
 
 struct sdm_object_type {
+	struct sdm_object_type *parent;
 	int size;
 	void *ptr;
 	sdm_object_init_t init;
@@ -34,6 +35,16 @@ struct sdm_object_type {
 
 struct sdm_object *create_sdm_object(struct sdm_object_type *, ...);
 void destroy_sdm_object(struct sdm_object *);
+
+static inline int SDM_OBJECT_IS_A(struct sdm_object *obj, struct sdm_object_type *type) {
+	struct sdm_object_type *cur;
+
+	for (cur = obj->type; cur; cur = cur->parent) {
+		if (cur == type)
+			return(1);
+	}
+	return(0);
+}
 
 static inline int CALL_SDM_OBJECT_INIT(sdm_object_init_t init, struct sdm_object *obj, ...) {
 	int ret;

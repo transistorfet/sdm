@@ -13,6 +13,7 @@
 #include <sdm/objs/container.h>
 
 struct sdm_object_type sdm_container_obj_type = {
+	&sdm_actionable_obj_type,
 	sizeof(struct sdm_container),
 	NULL,
 	(sdm_object_init_t) sdm_container_init,
@@ -36,6 +37,41 @@ void sdm_container_release(struct sdm_container *container)
 	}
 	sdm_actionable_release(SDM_ACTIONABLE(container));
 }
+
+int sdm_container_read_data(struct sdm_container *container, const char *type, struct sdm_data_file *data)
+{
+	struct sdm_actionable *obj;
+
+	if (!strcmp(type, "thing")) {
+		if (!(obj = (struct sdm_actionable *) create_sdm_object(&sdm_actionable_obj_type)))
+			return(-1);
+		sdm_data_read_children(data);
+		do {
+			if (!(type = sdm_data_read_name(data)))
+				return(-1);
+			sdm_actionable_read_data(obj, type, data);
+		} while (sdm_data_read_next(data));
+		sdm_data_read_parent(data);
+		sdm_container_add(container, obj);
+	}
+	else if (!strcmp(type, "container")) {
+		if (!(obj = (struct sdm_actionable *) create_sdm_object(&sdm_container_obj_type)))
+			return(-1);
+		sdm_data_read_children(data);
+		do {
+			if (!(type = sdm_data_read_name(data)))
+				return(-1);
+			sdm_container_read_data(SDM_CONTAINER(obj), type, data);
+		} while (sdm_data_read_next(data));
+		sdm_data_read_parent(data);
+		sdm_container_add(container, obj);
+	}
+	else {
+		sdm_actionable_read_data(SDM_ACTIONABLE(container), type, data);
+	}
+	return(0);
+}
+
 
 int sdm_container_add(struct sdm_container *container, struct sdm_actionable *obj)
 {

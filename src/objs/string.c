@@ -14,6 +14,7 @@
 #include <sdm/objs/string.h>
 
 struct sdm_object_type sdm_string_obj_type = {
+	NULL,
 	sizeof(struct sdm_string),
 	NULL,
 	(sdm_object_init_t) sdm_string_init,

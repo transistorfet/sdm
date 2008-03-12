@@ -9,6 +9,7 @@
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/string.h>
 #include <sdm/objs/container.h>
 
 #include <sdm/objs/object.h>
@@ -21,6 +22,7 @@ struct sdm_action {
 };
 
 struct sdm_object_type sdm_actionable_obj_type = {
+	NULL,
 	sizeof(struct sdm_actionable),
 	NULL,
 	(sdm_object_init_t) sdm_actionable_init,
@@ -52,19 +54,38 @@ void sdm_actionable_release(struct sdm_actionable *actionable)
 		destroy_sdm_hash(actionable->actions);
 }
 
-
-int sdm_actionable_read_data(struct sdm_actionable *actionable, struct sdm_data_file *data)
+int sdm_actionable_read_data(struct sdm_actionable *actionable, const char *type, struct sdm_data_file *data)
 {
+	struct sdm_object *obj;
+	char buffer[STRING_SIZE];
 
+	if (!strcmp(type, "string")) {
+		if ((sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
+		    || !(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
+			return(-1);
+		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
+			return(-1);
+		sdm_actionable_set_property(actionable, buffer, obj);
+	}
+	else if (!strcmp(type, "action")) {
+		// TODO how will you do this
+/*
+		if ((sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
+		    || !(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
+			return(-1);
+		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
+			return(-1);
+		sdm_actionable_set_property(actionable, buffer, obj);
+*/
+	}
+	else if (!strcmp(type, "parent")) {
+		// TODO find the parent
+	}
+	return(0);
 }
 
-int sdm_actionable_write_data(struct sdm_actionable *actionable, struct sdm_data_file *data)
-{
 
-}
-
-
-int sdm_actionable_set_proprety(struct sdm_actionable *actionable, const char *name, struct sdm_object *obj)
+int sdm_actionable_set_property(struct sdm_actionable *actionable, const char *name, struct sdm_object *obj)
 {
 	if (sdm_hash_find(actionable->properties, name))
 		return(sdm_hash_replace(actionable->properties, name, obj));

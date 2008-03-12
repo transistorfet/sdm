@@ -13,6 +13,7 @@
 
 struct sdm_processor_type sdm_processor_obj_type = {
     {
+	NULL,
 	sizeof(struct sdm_processor),
 	NULL,
 	(sdm_object_init_t) sdm_processor_init,
