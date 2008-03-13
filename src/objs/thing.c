@@ -171,7 +171,7 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *n
 
 	if (!(obj = sdm_hash_find(thing->properties, name)))
 		return(NULL);
-	if (!type || (obj->type == type))
+	if (!type || SDM_OBJECT_IS_A(obj, type))
 		return(obj);
 	return(NULL);
 }

@@ -13,6 +13,7 @@
 #include <sdm/interface/tcp.h>
 #include <sdm/interface/telnet.h>
 
+#include <sdm/modules/module.h>
 #include <sdm/modules/basic.h>
 
 #include <sdm/objs/user.h>
@@ -38,6 +39,8 @@ int init_mud(void)
 	if (init_telnet() < 0)
 		return(-1);
 
+	if (init_module() < 0)
+		return(-1);
 	if (init_basic() < 0)
 		return(-1);
 
@@ -62,6 +65,7 @@ int release_mud(void)
 	release_interpreter();
 
 	release_basic();
+	release_module();
 
 	release_telnet();
 	release_interface();

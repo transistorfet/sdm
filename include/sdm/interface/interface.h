@@ -14,9 +14,9 @@
 #define IO_COND_WRITE			0x0002
 #define IO_COND_ERROR			0x0004
 
-#define IO_WAIT_READ			0x0010
-#define IO_WAIT_WRITE			0x0020
-#define IO_WAIT_ERROR			0x0040
+#define IO_READY_READ			0x0010
+#define IO_READY_WRITE			0x0020
+#define IO_READY_ERROR			0x0040
 
 #define SDM_IBF_RELEASING		0x1000
 
@@ -34,6 +34,9 @@ typedef int (*sdm_int_write_t)(struct sdm_interface *, const char *);
 	SDM_INTERFACE(inter)->type->read(SDM_INTERFACE(inter), (buffer), (max))
 #define SDM_INTERFACE_WRITE(inter, str)	\
 	SDM_INTERFACE(inter)->type->write(SDM_INTERFACE(inter), (str))
+
+#define SDM_INTERFACE_SET_READY_READ(inter)	( SDM_INTERFACE(inter)->bitflags |= IO_READY_READ )
+#define SDM_INTERFACE_SET_NOT_READY_READ(inter)	( SDM_INTERFACE(inter)->bitflags &= ~IO_READY_READ )
 
 struct sdm_interface {
 	struct sdm_interface_type *type;

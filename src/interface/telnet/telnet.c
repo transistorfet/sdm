@@ -82,7 +82,7 @@ int sdm_telnet_read(struct sdm_tcp *inter, char *buffer, int max)
 			buffer[j] = '\0';
 			for (; (i < res) && ((inter->read_buffer[i] == '\r' || (inter->read_buffer[i] == '\n') || (inter->read_buffer[i] == '\0'))); i++)
 				;
-			sdm_tcp_advance_read_position(inter, res);
+			sdm_tcp_advance_read_position(inter, i);
 			return(j);
 		}
 		else if ((inter->read_buffer[i] == 0x08) && (j > 0)) {
@@ -94,6 +94,7 @@ int sdm_telnet_read(struct sdm_tcp *inter, char *buffer, int max)
 	}
 	/** We didn't receive a full line so we'll stick this back in the buffer */
 	sdm_tcp_set_read_buffer(inter, buffer, j);
+	SDM_INTERFACE_SET_NOT_READY_READ(inter);
 	return(0);
 }
 

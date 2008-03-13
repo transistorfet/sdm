@@ -79,7 +79,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
 
-	if (sdm_mobile_init(SDM_OBJECT(user), va) < 0)
+	if (sdm_mobile_init(SDM_MOBILE(user), va) < 0)
 		return(-1);
 	sdm_user_read(user);
 

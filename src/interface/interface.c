@@ -166,21 +166,21 @@ int sdm_interface_select(float t)
 		if (!interface_list.table[i])
 			continue;
 		if ((interface_list.table[i]->condition & IO_COND_READ)
-		  && (interface_list.table[i]->bitflags & IO_WAIT_READ)) {
+		  && (interface_list.table[i]->bitflags & IO_READY_READ)) {
 			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
 			ret++;
 		}
 		if (!interface_list.table[i])
 			continue;
 		if ((interface_list.table[i]->condition & IO_COND_WRITE)
-		  && (interface_list.table[i]->bitflags & IO_WAIT_WRITE)) {
+		  && (interface_list.table[i]->bitflags & IO_READY_WRITE)) {
 			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
 			ret++;
 		}
 		if (!interface_list.table[i])
 			continue;
 		if ((interface_list.table[i]->condition & IO_COND_ERROR)
-		  && (interface_list.table[i]->bitflags & IO_WAIT_ERROR)) {
+		  && (interface_list.table[i]->bitflags & IO_READY_ERROR)) {
 			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
 			ret++;
 		}

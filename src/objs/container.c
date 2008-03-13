@@ -7,6 +7,7 @@
 
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/string.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
@@ -108,10 +109,15 @@ int sdm_container_remove(struct sdm_container *container, struct sdm_thing *obj)
 struct sdm_thing *sdm_container_find(struct sdm_container *container, const char *name)
 {
 	struct sdm_thing *cur;
+	struct sdm_object *obj;
 
 	for (cur = container->objects; cur; cur = cur->next) {
-// TODO where is the name stored? should all thing objects have a name? or should it be from properties?
-//		if (!strncasecmp(cur->name, name, strlen(name)))
+		if (!(obj = sdm_thing_get_property(cur, "name", &sdm_string_obj_type)))
+			continue;
+		// TODO check alternative names stored in properties
+		// TODO keep looking after a match is found in order to find a possibly better match
+		if (!strncasecmp(SDM_STRING(obj)->str, name, strlen(name)))
+			return(cur);
 	}
 	return(NULL);
 }

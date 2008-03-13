@@ -2,13 +2,16 @@
 	* finish implementing the container_find() function
 	* what mechanism will you use to interact with the actions system particularily in order to read
 	  action data from a file and pass it to the appropriate module's language interpreter
-	* should exit targets be stored as integer/number objects or as a special object id reference object?
+	* modify the command interpreter to lookup actions on the user and users's owner (location) as
+	  part of the normal lookup sequence
+
 	* how will you resolve the issue with objects that haven't been loaded yet?  It seems that this is
 	  going to be a killer problem at some point one way or another so you can either make things always
 	  refer to objects by ID or you can load all objects and the resolve the IDs afterwards (which then
 	  you need a way to store the ID temporarily or else load the file twice)
-	* add colour tag parsing to telnet
 
+	* add colour tag parsing to telnet
+	* should exit targets be stored as integer/number objects or as a special object id reference object?
 	* make the input interpreter convert a #23857 to an object by id lookup
 	* add a status message that prints login attempts and logins and logouts
 	* add the argment macro thing to the other classes
@@ -17,6 +20,8 @@
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
 	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
 	* add command shortcuts like lambdamoo's \" for say and : for emote
+	* add a system of relative object shortcut names specified in commands like "me" will refer to the
+	  user object and "here" refers to the room the user is currently in
 
 	* implement all of the read_data functions
 	* how will you represent/differentiate objects in a container with regards to writing them to a file.
@@ -43,6 +48,7 @@
 	* accept a "-d" command line arg and fork to a daemon process
 	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
 
+	* add public git respository to catalogue after changing this working directory to sdm/
 	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
 	* make it possible for the command prompt to display info (call a function to generate it)
 	* modify interface read/write commands such that seperate channels of text can be supported in a

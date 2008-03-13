@@ -19,6 +19,7 @@ OBJS =	data.o	\
 	interface/telnet/login.o	\
 	interface/telnet/register.o	\
 	interface/telnet/telnet.o	\
+	modules/module.o	\
 	modules/basic/basic.o	\
 	objs/container.o	\
 	objs/interpreter.o	\
@@ -118,12 +119,18 @@ interface/telnet/telnet.o: interface/telnet/telnet.c \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h
 
+modules/module.o: modules/module.c ../include/sdm/misc.h \
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/thing.h \
+  ../include/sdm/hash.h
+
 modules/basic/basic.o: modules/basic/basic.c ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/globals.h
 
 objs/container.o: objs/container.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/objs/thing.h ../include/sdm/hash.h \
+  ../include/sdm/globals.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h
 
 objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \

@@ -101,7 +101,7 @@ int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
 
 	if (!inter)
 		return(-1);
-	SDM_INTERFACE(inter)->bitflags &= ~IO_WAIT_READ;
+	SDM_INTERFACE_SET_NOT_READY_READ(inter);
 
 	size--;
 	for (i = 0;i < size;i++) {
@@ -121,7 +121,7 @@ int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
 	}
 	buffer[i] = '\0';
 	if (inter->read_pos < inter->read_length)
-		SDM_INTERFACE(inter)->bitflags |= IO_WAIT_READ;
+		SDM_INTERFACE_SET_READY_READ(inter);
 	return(i);
 }
 
@@ -168,7 +168,7 @@ int sdm_tcp_read_to_buffer(struct sdm_tcp *inter)
 	res += inter->read_length;
 	inter->read_length = res;
 	inter->read_buffer[res] = '\0';
-	SDM_INTERFACE(inter)->bitflags |= IO_WAIT_READ;
+	SDM_INTERFACE_SET_READY_READ(inter);
 	return(res - inter->read_pos);
 }
 
@@ -182,7 +182,10 @@ int sdm_tcp_set_read_buffer(struct sdm_tcp *inter, const char *buffer, int len)
 	strncpy(inter->read_buffer, buffer, len);
 	inter->read_length = len;
 	inter->read_pos = 0;
-	SDM_INTERFACE(inter)->bitflags |= IO_WAIT_READ;
+	if (len)
+		SDM_INTERFACE_SET_READY_READ(inter);
+	else
+		SDM_INTERFACE_SET_NOT_READY_READ(inter);
 	return(len);
 }
 
@@ -194,12 +197,14 @@ int sdm_tcp_set_read_buffer(struct sdm_tcp *inter, const char *buffer, int len)
 int sdm_tcp_advance_read_position(struct sdm_tcp *inter, int pos)
 {
 	if (pos >= inter->read_length) {
-		SDM_INTERFACE(inter)->bitflags &= ~IO_WAIT_READ;
+		SDM_INTERFACE_SET_NOT_READY_READ(inter);
 		inter->read_pos = 0;
 		inter->read_length = 0;
 	}
-	else
+	else {
+		SDM_INTERFACE_SET_READY_READ(inter);
 		inter->read_pos = pos;
+	}
 	return(inter->read_pos);
 }
 
@@ -208,7 +213,7 @@ int sdm_tcp_advance_read_position(struct sdm_tcp *inter, int pos)
  */
 void sdm_tcp_clear_buffer(struct sdm_tcp *inter)
 {
-	SDM_INTERFACE(inter)->bitflags &= ~IO_WAIT_READ;
+	SDM_INTERFACE_SET_NOT_READY_READ(inter);
 	inter->read_pos = 0;
 	inter->read_length = 0;
 }
