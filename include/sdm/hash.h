@@ -9,11 +9,11 @@
 
 #include <sdm/globals.h>
 
-#define SDM_BBF_NO_ADD			0x0001			/** No entries can be added */
-#define SDM_BBF_NO_REPLACE		0x0002			/** No entries can be replaced */
-#define SDM_BBF_NO_REMOVE		0x0004			/** No entries can be removed */
-#define SDM_BBF_CONSTANT		0x0006			/** No entries can be replaced or removed */
-#define SDM_BBF_CASE_INSENSITIVE	0x0008			/** Ignore case when looking up entries */
+#define SDM_HBF_NO_ADD			0x0001			/** No entries can be added */
+#define SDM_HBF_NO_REPLACE		0x0002			/** No entries can be replaced */
+#define SDM_HBF_NO_REMOVE		0x0004			/** No entries can be removed */
+#define SDM_HBF_CONSTANT		0x0006			/** No entries can be replaced or removed */
+#define SDM_HBF_CASE_INSENSITIVE	0x0008			/** Ignore case when looking up entries */
 
 struct sdm_entry {
 	char *name;

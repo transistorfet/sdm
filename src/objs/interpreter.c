@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 
 #include <sdm/text.h>
@@ -65,7 +66,7 @@ int release_interpreter(void)
 
 int sdm_interpreter_init(struct sdm_interpreter *interpreter, va_list va)
 {
-	if (!(interpreter->commands = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, NULL)))
+	if (!(interpreter->commands = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, NULL)))
 		return(-1);
 	return(0);
 }
@@ -86,24 +87,8 @@ int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user, char *input)
 {
 	int i;
-	char *name;
 	struct sdm_thing *obj;
 	struct sdm_command *cmd;
-
-	/*
-		get command portion (up to first space)
-		if command is in global commands
-			evaluate command
-		else
-			get next portion of command line
-			(note: an object name need only match what was typed to allow for shorthands)
-			if name is contained by the user
-				evaluate command on that object
-			else if name is contained by the owner of user (room user is in)
-				evaluate command on that object
-			else
-				command not found
-	*/
 
 	/** Isolate the command */
 	for (i = 0; (input[i] != ' ') && (input[i] != '\0'); i++) ;
@@ -112,35 +97,18 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 		i++;
 	}
 
-	/** Evaluate the command if it's in global_commands */
 	if ((cmd = (struct sdm_command *) sdm_hash_find(global_commands, input))) {
 		if (cmd->func(cmd->ptr, user, &input[i]) == SDM_CMD_CLOSE)
 			return(-1);
 	}
+	else if ((sdm_thing_do_action(SDM_THING(user), user, input, &input[i]) < 0)
+	    && (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, input, &input[i]) < 0)
+	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i)))) {
+		if (sdm_thing_do_action(obj, user, input, &input[i]) < 0)
+			sdm_user_tell(user, SDM_TXT_ACTION_NOT_FOUND);
+	}
 	else {
-		/** Isolate the object name */
-		for (; (input[i] == ' ') && (input[i] != '\0'); i++) ;
-		name = &input[i];
-		if (input[i] == '\"')
-			for (; (input[i] != '\"') && (input[i] != '\0'); i++) ;
-		else
-			for (; (input[i] != ' ') && (input[i] != '\0'); i++) ;
-		input[i] = '\0';
-		if (input[i] != '\0') {
-			input[i] = '\0';
-			i++;
-		}
-		/** Evaluate the command as an action on the object */
-		if (*name == '\0') {
-			SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_NOT_FOUND);
-		}
-		else if ((obj = sdm_container_find(SDM_THING(user)->owner, name))) {
-			if (sdm_thing_do_action(obj, user, input, &input[i]) < 0)
-				sdm_user_tell(user, SDM_TXT_ACTION_NOT_FOUND);
-		}
-		else {
-			sdm_user_tell(user, SDM_TXT_OBJECT_NOT_FOUND, name);
-		}
+		sdm_user_tell(user, SDM_TXT_COMMAND_NOT_FOUND);
 	}
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
@@ -175,6 +143,33 @@ int sdm_interpreter_add(struct sdm_interpreter *proc, const char *name, sdm_comm
 	memory_free(cmd);
 	return(-1);
 }
+
+
+struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char *str, int *used)
+{
+	int id;
+	int i, j = 0;
+	char buffer[STRING_SIZE];
+
+	for (i = 0; (str[i] == ' ') && (str[i] != '\0'); i++) ;
+	if (str[i] == '\"')
+		for (; (i < STRING_SIZE) && (str[i] != '\"') && (str[i] != '\0'); i++)
+			buffer[j++] = str[i];
+	else
+		for (; (i < STRING_SIZE) && (str[i] != ' ') && (str[i] != '\0'); i++)
+			buffer[j++] = str[i];
+	buffer[j] = '\0';
+	if (used)
+		*used += i;
+	if (buffer[i] == '#') {
+		id = atoi(buffer);
+		if (id < 0)
+			return(NULL);
+		return(sdm_thing_lookup_id(id));
+	}
+	return(sdm_container_find(SDM_THING(user)->owner, buffer));
+}
+
 
 /*** Global Commands ***/
 

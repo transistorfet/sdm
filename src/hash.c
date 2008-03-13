@@ -16,7 +16,7 @@
 #define SDM_HASH_GROWTH_FACTOR		1.75
 
 #define HASH_ENTRY_COMPARE(env, str1, str2) \
-	( ((env)->bitflags & SDM_BBF_CASE_INSENSITIVE) ? !sdm_stricmp((str1), (str2)) : !strcmp((str1), (str2)) )
+	( ((env)->bitflags & SDM_HBF_CASE_INSENSITIVE) ? !sdm_stricmp((str1), (str2)) : !strcmp((str1), (str2)) )
 
 #define LOWERCASE(ch) \
 	( (ch >= 0x41 && ch <= 0x5a) ? ch + 0x20 : ch )
@@ -81,7 +81,7 @@ int sdm_hash_add(struct sdm_hash *env, const char *name, void *data)
 	unsigned int hash;
 	struct sdm_entry *entry;
 
-	if (!name || !data || (env->bitflags & SDM_BBF_NO_ADD))
+	if (!name || !data || (env->bitflags & SDM_HBF_NO_ADD))
 		return(-1);
 	/** Search for an existing entry */
 	hash = sdm_hash_func(name) % env->size;
@@ -112,7 +112,7 @@ int sdm_hash_replace(struct sdm_hash *env, const char *name, void *data)
 	unsigned int hash;
 	struct sdm_entry *cur;
 
-	if (!name || !data || (env->bitflags & SDM_BBF_NO_REPLACE))
+	if (!name || !data || (env->bitflags & SDM_HBF_NO_REPLACE))
 		return(-1);
 
 	hash = sdm_hash_func(name) % env->size;
@@ -135,7 +135,7 @@ int sdm_hash_remove(struct sdm_hash *env, const char *name)
 	unsigned int hash;
 	struct sdm_entry *cur, *prev;
 
-	if (!name || (env->bitflags & SDM_BBF_NO_REMOVE))
+	if (!name || (env->bitflags & SDM_HBF_NO_REMOVE))
 		return(-1);
 	hash = sdm_hash_func(name) % env->size;
 	prev = NULL;

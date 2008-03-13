@@ -11,6 +11,7 @@
 #include <sdm/globals.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/container.h>
+#include <sdm/modules/module.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
@@ -59,12 +60,12 @@ int release_thing(void)
 
 int sdm_thing_init(struct sdm_thing *thing, va_list va)
 {
-	if (!(thing->properties = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, (destroy_t) destroy_sdm_object)))
+	if (!(thing->properties = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) destroy_sdm_object)))
 		return(-1);
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(thing->actions = create_sdm_hash(SDM_BBF_CASE_INSENSITIVE, (destroy_t) sdm_thing_destroy_action)))
+	if (!(thing->actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) sdm_thing_destroy_action)))
 		return(-1);
 
 	/** Set the thing id and add the thing to the table.  If id = 0, don't add it to a table.
@@ -108,15 +109,9 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		sdm_thing_set_property(thing, buffer, obj);
 	}
 	else if (!strcmp(type, "action")) {
-		// TODO how will you do this
-/*
-		if ((sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
-		    || !(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
+		if (sdm_data_read_attrib(data, "type", buffer, STRING_SIZE) < 0)
 			return(-1);
-		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
-			return(-1);
-		sdm_thing_set_property(thing, buffer, obj);
-*/
+		sdm_module_read_action(buffer, thing, data);
 	}
 	else if (!strcmp(type, "id")) {
 		if ((num = sdm_data_read_integer(data)) > 0)

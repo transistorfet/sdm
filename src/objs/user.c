@@ -3,6 +3,7 @@
  * Description:	User Object
  */
 
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -69,6 +70,7 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 int sdm_user_init(struct sdm_user *user, va_list va)
 {
 	const char *name;
+	struct sdm_container *obj;
 
 	name = va_arg(va, const char *);
 	if (!name || (*name == '\0') || !(user->name = create_string("%s", name)))
@@ -81,14 +83,22 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 
 	if (sdm_mobile_init(SDM_MOBILE(user), va) < 0)
 		return(-1);
-	sdm_user_read(user);
-
-	// TODO this should probably be created in read_data or as a result of reading data
-	if (!(user->proc = (struct sdm_processor *) create_sdm_object(&sdm_interpreter_obj_type)))
-		return(-1);
-
-	// TODO this is temporary until you get a way to determine a user's location based on the datafile
-	//sdm_container_add(SDM_CONTAINER(sdm_world_get_root()), SDM_THING(user));
+	if (sdm_user_exists(user->name)) {
+		sdm_user_read(user);
+		// TODO should this be specified and loaded from the file?
+		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
+			return(-1);
+	}
+	else {
+		sdm_thing_assign_new_id(SDM_THING(user));
+		// TODO hack, remove when you get a chargen process that can set the owner
+		if ((obj = SDM_CONTAINER(sdm_thing_lookup_id(3))))
+			sdm_container_add(obj, SDM_THING(user));		
+		// TODO use a character generation processor
+		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
+			return(-1);
+		// TODO should you write the user to disk at this point?
+	}
 	return(0);
 }
 
@@ -111,8 +121,8 @@ void sdm_user_release(struct sdm_user *user)
 
 int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data_file *data)
 {
-	if (!strcmp(type, "location")) {
-
+	if (!strcmp(type, "name")) {
+		// TODO this should already have been set but maybe we can generate an error if it doesn't match
 	}
 	else {
 		return(0);
@@ -123,6 +133,7 @@ int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data
 int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)
 {
 	sdm_data_write_string_entry(data, "name", user->name);
+	sdm_data_write_integer_entry(data, "lastseen", time(NULL));
 	// TODO write everything else
 	return(0);
 }

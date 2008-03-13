@@ -30,6 +30,8 @@
 	  written in the world file).
 	* implement all of the write_data functions
 
+	* should an lookup of a property lookup in the parent of the object until a value is found or just
+	  stop at the immediate object and look no further?
 	* make telnet (and other interfaces) convert <format> tags into colours based on themes such that
 	  output would instead be <title>The Room</title> for example and title would be looked up in a colour
 	  table and blue, say, would be outputted as the colour for title but that assignment could be changed.

@@ -12,6 +12,9 @@
 #include <sdm/string.h>
 #include <sdm/memory.h>
 
+#define IS_WHITESPACE(ch)	\
+	( ((ch) == ' ') || ((ch) == '\t') || ((ch) == '\n') || ((ch) == '\r') )
+
 struct sdm_data_file {
 	string_t filename;
 	xmlDoc *doc;
@@ -22,6 +25,8 @@ struct sdm_data_file {
 };
 
 static string_t data_path = NULL;
+
+static int sdm_data_strip_copy(char *, const char *, int);
 
 int init_data(void)
 {
@@ -201,13 +206,13 @@ double sdm_data_read_float(struct sdm_data_file *data)
 
 int sdm_data_read_string(struct sdm_data_file *data, char *buffer, int max)
 {
+	int size;
 	char *str;
 
 	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
-		strncpy(buffer, (char *) str, max - 1);
-		buffer[max - 1] = '\0';
+		size = sdm_data_strip_copy(buffer, str, max);
 		xmlFree(str);
-		return(strlen(buffer));
+		return(size);
 	}
 	return(0);
 }
@@ -294,5 +299,29 @@ int sdm_data_write_string_entry(struct sdm_data_file *data, const char *name, co
 	return(0);
 }
 
+
+/*** Local Functions ***/
+
+static int sdm_data_strip_copy(char *dest, const char *src, int max)
+{
+	int i, j;
+
+	max--;		/** Reserve space for the \0 character */
+	for (i = 0, j = 0; IS_WHITESPACE(src[i]) && (src[i] != '\0'); i++)
+		;
+	for (; (j < max) && (src[i] != '\0'); i++, j++) {
+		if (IS_WHITESPACE(src[i])) {
+			for (; (j < max) && IS_WHITESPACE(src[i]) && (src[i] != '\0'); i++)
+				;
+			dest[j] = ' ';
+			if (src[i] == '\0')
+				break;
+		}
+		else
+			dest[j] = src[i];
+	}
+	dest[j] = '\0';
+	return(j);
+}
 
 

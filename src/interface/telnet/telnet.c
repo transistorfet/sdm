@@ -171,8 +171,6 @@ static int telnet_handle_read(struct sdm_user *user, struct sdm_tcp *inter)
 		destroy_sdm_interface(SDM_INTERFACE(inter));
 		return(-1);
 	}
-	if (i == 0)
-		return(0);
 
 	if (sdm_user_process_input(user, buffer) < 0) {
 		destroy_sdm_interface(SDM_INTERFACE(inter));

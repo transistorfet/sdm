@@ -72,6 +72,7 @@ int sdm_world_read_entry(struct sdm_world *world, const char *type, struct sdm_d
 int sdm_world_write_data(struct sdm_world *world, struct sdm_data_file *data)
 {
 	// TODO write data
+	return(0);
 }
 
 

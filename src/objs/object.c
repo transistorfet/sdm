@@ -62,7 +62,7 @@ int sdm_object_write_file(struct sdm_object *obj, const char *file, const char *
 	struct sdm_data_file *data;
 
 	sdm_status("Writing %s data to file \"%s\".", type, file);
-	if (!(sdm_data_file_exists(file)) || !(data = sdm_data_open(file, SDM_DATA_WRITE, type)))
+	if (!(data = sdm_data_open(file, SDM_DATA_WRITE, type)))
 		return(-1);
 	sdm_object_write_data(obj, data);
 	sdm_data_close(data);
@@ -97,10 +97,12 @@ int sdm_object_write_data(struct sdm_object *obj, struct sdm_data_file *data)
 	struct sdm_object_type *cur;
 	struct sdm_object_type *list[SDM_OBJECT_MAX_INHERITENCE];
 
-	for (i = 0, cur = obj->type; cur && (i < SDM_OBJECT_MAX_INHERITENCE); cur = cur->parent)
+	for (cur = obj->type, i = 0; cur && (i < SDM_OBJECT_MAX_INHERITENCE); cur = cur->parent, i++)
 		list[i] = cur;
-	for (; i >= 0; i--)
-		list[i]->write_data(obj, data);
+	for (i -= 1; i >= 0; i--) {
+		if (list[i]->write_data)
+			list[i]->write_data(obj, data);
+	}
 	return(0);
 }
 

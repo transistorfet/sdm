@@ -7,19 +7,70 @@
 #include <string.h>
 
 #include <sdm/misc.h>
+#include <sdm/hash.h>
+#include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/user.h>
+#include <sdm/objs/thing.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/object.h>
+#include <sdm/objs/container.h>
+#include <sdm/modules/module.h>
+#include <sdm/modules/basic.h>
+
+struct sdm_module sdm_basic_module = {
+	(sdm_module_read_action_t) sdm_basic_read_action
+};
+
+static struct sdm_hash *basic_actions = NULL;
+
 int init_basic(void)
 {
-	// TODO register with a central module table thing and then commands and actions will be
-	// 	loaded based on input from a data file (most likely as part of world.xml)
+	if (basic_actions)
+		return(1);
+	if (!(basic_actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, NULL)))
+		return(-1);
+	if (sdm_module_register("basic", &sdm_basic_module) < 0)
+		return(-1);
+
+	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
+	return(0);
 }
 
 int release_basic(void)
 {
-
+	if (!basic_actions)
+		return(1);
+	destroy_sdm_hash(basic_actions);
+	basic_actions = NULL;
+	sdm_module_deregister("basic");
+	return(0);
 }
 
+int sdm_basic_read_action(struct sdm_thing *thing, struct sdm_data_file *data)
+{
+	sdm_action_t action;
+	char buffer[STRING_SIZE];
+
+	if (sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
+		return(-1);
+	if (!(action = sdm_hash_find(basic_actions, buffer)))
+		return(-1);
+	if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
+		return(-1);
+	return(sdm_thing_set_action(thing, buffer, action, NULL, NULL));
+}
+
+int sdm_basic_action_look(void *ptr, struct sdm_user *user, struct sdm_thing *thing, const char *args)
+{
+	struct sdm_string *obj;
+
+	if (!(obj = SDM_STRING(sdm_thing_get_property(thing, "description", &sdm_string_obj_type))))
+		return(-1);
+	sdm_user_tell(user, obj->str);
+	return(0);
+}
 
 
