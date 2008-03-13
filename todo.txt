@@ -1,9 +1,35 @@
 
+	* OMG!! the crazy problem was because the id of the user was the same as the id of the object that
+	  had the look action that i was trying to test and therefore the duplicate object was destroyed but
+	  the parent pointers were not updated of course so we had a segfault waiting to happen (too bad it
+	  didn't cause a segfault or it would have been easier to catch).  How opportune/coincidental that
+	  this happened now just as I was considering the object id vs pointer thing.  First of all, there
+	  are problems with dangling pointers and we would need to introduce reference counting which might
+	  not be a bad thing anyways.  Second, should objects with the same ID replace existing objects
+	  (i guess assuming that you are trying to replace the object with a new version) or should an
+	  attempt to assign the same ID to a new object fail for the new object?  And thirdly, although it is
+	  safer against dangling points and stuff to use IDs for parent references at least, would it be more
+	  prone to hard to find bugs where an object replaces another with the same ID but the sytem doesn't
+	  notice?
+
+	* make object_id_t
+	* change formatting of processor class declarations
+	* delete the CALL_ inline function in objects
+	* rename some inline functions to lowercases where appropriate
+	* add a static inline function to do the object id lookup to make it faster
+	* have telnet directly call the processor functions
+	* have a linked list of processors in the user object with a pointer to the currently active one
+	  and read/write the processor's data to the user file.  There should be a function for code to select
+	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
+
+	* There is no easy way to find out the function name of a basic action since the name is stored in
+	  the hash table and we are unable to access it.  We could make that info available to the hash table
+	  but not necessarily without upsetting existing hashtables or added a lot of complexity
+
+	* test the input interpreter convert a #23857 to an object by id lookup
 	* finish implementing the container_find() function
 	* what mechanism will you use to interact with the actions system particularily in order to read
 	  action data from a file and pass it to the appropriate module's language interpreter
-	* modify the command interpreter to lookup actions on the user and users's owner (location) as
-	  part of the normal lookup sequence
 
 	* how will you resolve the issue with objects that haven't been loaded yet?  It seems that this is
 	  going to be a killer problem at some point one way or another so you can either make things always
@@ -12,7 +38,6 @@
 
 	* add colour tag parsing to telnet
 	* should exit targets be stored as integer/number objects or as a special object id reference object?
-	* make the input interpreter convert a #23857 to an object by id lookup
 	* add a status message that prints login attempts and logins and logouts
 	* add the argment macro thing to the other classes
 	* add a way to write CDATA to data.c
