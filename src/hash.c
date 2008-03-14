@@ -30,10 +30,10 @@ static inline unsigned int sdm_hash_func(const char *);
  */
 struct sdm_hash *create_sdm_hash(short bitflags, destroy_t destroy)
 {
-	struct sdm_entry **table;
+	struct sdm_hash_entry **table;
 	struct sdm_hash *env;
 
-	if (!(table = (struct sdm_entry **) memory_alloc(SDM_HASH_INIT_SIZE * sizeof(struct sdm_entry *))))
+	if (!(table = (struct sdm_hash_entry **) memory_alloc(SDM_HASH_INIT_SIZE * sizeof(struct sdm_hash_entry *))))
 		return(NULL);
 	if (!(env = (struct sdm_hash *) memory_alloc(sizeof(struct sdm_hash)))) {
 		memory_free(table);
@@ -46,7 +46,7 @@ struct sdm_hash *create_sdm_hash(short bitflags, destroy_t destroy)
 	env->size = SDM_HASH_INIT_SIZE;
 	env->entries = 0;
 	env->table = table;
-	memset(env->table, '\0', SDM_HASH_INIT_SIZE * sizeof(struct sdm_entry *));
+	memset(env->table, '\0', SDM_HASH_INIT_SIZE * sizeof(struct sdm_hash_entry *));
 	return(env);
 }
 
@@ -56,7 +56,7 @@ struct sdm_hash *create_sdm_hash(short bitflags, destroy_t destroy)
 void destroy_sdm_hash(struct sdm_hash *env)
 {
 	unsigned int i;
-	struct sdm_entry *cur, *next;
+	struct sdm_hash_entry *cur, *next;
 
 	for (i = 0;i < env->size;i++) {
 		cur = env->table[i];
@@ -79,7 +79,7 @@ void destroy_sdm_hash(struct sdm_hash *env)
 int sdm_hash_add(struct sdm_hash *env, const char *name, void *data)
 {
 	unsigned int hash;
-	struct sdm_entry *entry;
+	struct sdm_hash_entry *entry;
 
 	if (!name || !data || (env->bitflags & SDM_HBF_NO_ADD))
 		return(-1);
@@ -90,7 +90,7 @@ int sdm_hash_add(struct sdm_hash *env, const char *name, void *data)
 			return(-1);
 	}
 
-	if (!(entry = (struct sdm_entry *) memory_alloc(sizeof(struct sdm_entry) + strlen(name) + 1)))
+	if (!(entry = (struct sdm_hash_entry *) memory_alloc(sizeof(struct sdm_hash_entry) + strlen(name) + 1)))
 		return(-1);
 	entry->name = (char *) (entry + 1);
 	strcpy(entry->name, name);
@@ -110,7 +110,7 @@ int sdm_hash_add(struct sdm_hash *env, const char *name, void *data)
 int sdm_hash_replace(struct sdm_hash *env, const char *name, void *data)
 {
 	unsigned int hash;
-	struct sdm_entry *cur;
+	struct sdm_hash_entry *cur;
 
 	if (!name || !data || (env->bitflags & SDM_HBF_NO_REPLACE))
 		return(-1);
@@ -133,7 +133,7 @@ int sdm_hash_replace(struct sdm_hash *env, const char *name, void *data)
 int sdm_hash_remove(struct sdm_hash *env, const char *name)
 {
 	unsigned int hash;
-	struct sdm_entry *cur, *prev;
+	struct sdm_hash_entry *cur, *prev;
 
 	if (!name || (env->bitflags & SDM_HBF_NO_REMOVE))
 		return(-1);
@@ -163,15 +163,15 @@ int sdm_hash_remove(struct sdm_hash *env, const char *name)
 /**
  * Find the value bound to name in table.
  */
-void *sdm_hash_find(struct sdm_hash *env, const char *name)
+struct sdm_hash_entry *sdm_hash_find_entry(struct sdm_hash *env, const char *name)
 {
 	unsigned int hash;
-	struct sdm_entry *cur;
+	struct sdm_hash_entry *cur;
 
 	hash = sdm_hash_func(name) % env->size;
 	for (cur = env->table[hash % env->size]; cur; cur = cur->next) {
 		if (HASH_ENTRY_COMPARE(env, name, cur->name))
-			return(cur->data);
+			return(cur);
 	}
 	return(NULL);
 }
@@ -184,20 +184,20 @@ void sdm_hash_traverse_reset(struct sdm_hash *env)
 	}
 }
 
-void *sdm_hash_traverse_next(struct sdm_hash *env)
+struct sdm_hash_entry *sdm_hash_traverse_next_entry(struct sdm_hash *env)
 {
-	struct sdm_entry *entry;
+	struct sdm_hash_entry *entry;
 
 	if ((env->traverse_index >= env->size) || !(entry = env->traverse_next))
 		return(NULL);
 	else if ((env->traverse_next = env->traverse_next->next))
-		return(entry->data);
+		return(entry);
 
 	while (++env->traverse_index < env->size) {
 		if ((env->traverse_next = env->table[env->traverse_index]))
-			return(entry->data);
+			return(entry);
 	}
-	return(entry->data);
+	return(entry);
 }
 
 
@@ -209,12 +209,12 @@ void *sdm_hash_traverse_next(struct sdm_hash *env)
 static inline int sdm_entries_rehash(struct sdm_hash *env, int newsize)
 {
 	unsigned int i, hash, oldsize;
-	struct sdm_entry **newtable;
-	struct sdm_entry *cur, *next;
+	struct sdm_hash_entry **newtable;
+	struct sdm_hash_entry *cur, *next;
 
-	if (!(newtable = (struct sdm_entry **) memory_alloc(newsize * sizeof(struct sdm_entry *))))
+	if (!(newtable = (struct sdm_hash_entry **) memory_alloc(newsize * sizeof(struct sdm_hash_entry *))))
 		return(-1);
-	memset(newtable, '\0', newsize * sizeof(struct sdm_entry *));
+	memset(newtable, '\0', newsize * sizeof(struct sdm_hash_entry *));
 	oldsize = env->size;
 	env->size = newsize;
 	for (i = 0;i < oldsize;i++) {

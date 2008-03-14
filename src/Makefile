@@ -25,6 +25,7 @@ OBJS =	data.o	\
 	objs/interpreter.o	\
 	objs/login.o	\
 	objs/mobile.o	\
+	objs/number.o	\
 	objs/object.o	\
 	objs/processor.o	\
 	objs/string.o	\
@@ -72,8 +73,9 @@ main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/user.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
-  ../include/sdm/objs/container.h ../include/sdm/modules/basic.h \
-  ../include/sdm/objs/world.h ../include/sdm/objs/interpreter.h
+  ../include/sdm/objs/container.h ../include/sdm/modules/module.h \
+  ../include/sdm/modules/basic.h ../include/sdm/objs/world.h \
+  ../include/sdm/objs/interpreter.h
 
 misc.o: misc.c ../include/sdm/misc.h
 
@@ -120,12 +122,19 @@ interface/telnet/telnet.o: interface/telnet/telnet.c \
   ../include/sdm/objs/container.h
 
 modules/module.o: modules/module.c ../include/sdm/misc.h \
-  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/memory.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/thing.h \
-  ../include/sdm/hash.h
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h ../include/sdm/modules/module.h \
+  ../include/sdm/objs/thing.h ../include/sdm/objs/object.h
 
 modules/basic/basic.o: modules/basic/basic.c ../include/sdm/misc.h \
-  ../include/sdm/memory.h ../include/sdm/globals.h
+  ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
+  ../include/sdm/memory.h ../include/sdm/objs/user.h \
+  ../include/sdm/string.h ../include/sdm/interface/interface.h \
+  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/objs/container.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/modules/module.h \
+  ../include/sdm/modules/basic.h
 
 objs/container.o: objs/container.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/string.h \
@@ -152,6 +161,10 @@ objs/mobile.o: objs/mobile.c ../include/sdm/memory.h \
   ../include/sdm/data.h ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/mobile.h
 
+objs/number.o: objs/number.c ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/objs/number.h
+
 objs/object.o: objs/object.c ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/globals.h
@@ -166,8 +179,9 @@ objs/string.o: objs/string.c ../include/sdm/memory.h \
 
 objs/thing.o: objs/thing.c ../include/sdm/hash.h ../include/sdm/globals.h \
   ../include/sdm/data.h ../include/sdm/memory.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/container.h ../include/sdm/objs/thing.h
+  ../include/sdm/objs/number.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/container.h \
+  ../include/sdm/objs/thing.h ../include/sdm/modules/module.h
 
 objs/user.o: objs/user.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/hash.h ../include/sdm/string.h ../include/sdm/memory.h \

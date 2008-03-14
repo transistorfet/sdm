@@ -23,16 +23,14 @@ struct sdm_command {
 	destroy_t destroy;
 };
 
-struct sdm_processor_type sdm_interpreter_obj_type = {
-    {
+struct sdm_processor_type sdm_interpreter_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,
 	sizeof(struct sdm_interpreter),
 	NULL,
 	(sdm_object_init_t) sdm_interpreter_init,
 	(sdm_object_release_t) sdm_interpreter_release,
 	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL
-    },
+	(sdm_object_write_data_t) NULL	},
 	(sdm_processor_startup_t) sdm_interpreter_startup,
 	(sdm_processor_process_t) sdm_interpreter_process,
 	(sdm_processor_shutdown_t) sdm_interpreter_shutdown
@@ -81,14 +79,16 @@ void sdm_interpreter_release(struct sdm_interpreter *interpreter)
 int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 {
 	// TODO print motd
-	// TODO print initial look
+
+	// TODO is the right way to do this?
+	sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, "look", "");
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
 
 int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user, char *input)
 {
-	int i;
+	int i, res;
 	struct sdm_thing *obj;
 	struct sdm_command *cmd;
 
@@ -99,19 +99,17 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 		i++;
 	}
 
-	if ((cmd = (struct sdm_command *) sdm_hash_find(global_commands, input))) {
-		if (cmd->func(cmd->ptr, user, &input[i]) == SDM_CMD_CLOSE)
-			return(-1);
+	if ((cmd = (struct sdm_command *) sdm_hash_find(global_commands, input)))
+		res = cmd->func(cmd->ptr, user, &input[i]);
+	else if (((res = sdm_thing_do_action(SDM_THING(user), user, input, &input[i])) != 0)
+	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, input, &input[i])) != 0)
+	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i))))) {
+		res = sdm_thing_do_action(obj, user, input, &input[i]);
 	}
-	else if ((sdm_thing_do_action(SDM_THING(user), user, input, &input[i]) < 0)
-	    && (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, input, &input[i]) < 0)
-	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i)))) {
-		if (sdm_thing_do_action(obj, user, input, &input[i]) < 0)
-			sdm_user_tell(user, SDM_TXT_ACTION_NOT_FOUND);
-	}
-	else {
+ 	if (res == SDM_CMD_CLOSE)
+		return(1);
+	if (res > 0)
 		sdm_user_tell(user, SDM_TXT_COMMAND_NOT_FOUND);
-	}
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
@@ -163,12 +161,14 @@ struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char 
 	buffer[j] = '\0';
 	if (used)
 		*used += i;
-	if (buffer[i] == '#') {
-		id = atoi(buffer);
+	if (buffer[0] == '#') {
+		id = atoi(&buffer[1]);
 		if (id < 0)
 			return(NULL);
 		return(sdm_thing_lookup_id(id));
 	}
+	if (!SDM_THING(user)->owner)
+		return(NULL);
 	return(sdm_container_find(SDM_THING(user)->owner, buffer));
 }
 

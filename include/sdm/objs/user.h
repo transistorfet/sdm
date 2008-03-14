@@ -44,10 +44,9 @@ int sdm_user_exists(const char *);
 int sdm_user_logged_in(const char *);
 int sdm_user_valid_username(const char *);
 
-int sdm_user_startup(struct sdm_user *);
-int sdm_user_process_input(struct sdm_user *, char *);
 int sdm_user_tell(struct sdm_user *, const char *, ...);
 int sdm_user_announce(struct sdm_user *, const char *, ...);
+
 
 static inline int sdm_user_read(struct sdm_user *user) {
 	char buffer[STRING_SIZE];

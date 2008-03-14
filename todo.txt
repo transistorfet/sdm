@@ -1,74 +1,41 @@
 
-	* OMG!! the crazy problem was because the id of the user was the same as the id of the object that
-	  had the look action that i was trying to test and therefore the duplicate object was destroyed but
-	  the parent pointers were not updated of course so we had a segfault waiting to happen (too bad it
-	  didn't cause a segfault or it would have been easier to catch).  How opportune/coincidental that
-	  this happened now just as I was considering the object id vs pointer thing.  First of all, there
-	  are problems with dangling pointers and we would need to introduce reference counting which might
-	  not be a bad thing anyways.  Second, should objects with the same ID replace existing objects
-	  (i guess assuming that you are trying to replace the object with a new version) or should an
-	  attempt to assign the same ID to a new object fail for the new object?  And thirdly, although it is
-	  safer against dangling points and stuff to use IDs for parent references at least, would it be more
-	  prone to hard to find bugs where an object replaces another with the same ID but the sytem doesn't
-	  notice?
-
-	* make the interpreter not print the command not found message when a user/location action is done
-	* change formatting of processor class declarations
-	* rename some inline functions to lowercases where appropriate
-	* add a static inline function to do the object id lookup to make it faster
-	* have telnet directly call the processor functions
 	* have a linked list of processors in the user object with a pointer to the currently active one
 	  and read/write the processor's data to the user file.  There should be a function for code to select
 	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
-
-	* There is no easy way to find out the function name of a basic action since the name is stored in
-	  the hash table and we are unable to access it.  We could make that info available to the hash table
-	  but not necessarily without upsetting existing hashtables or added a lot of complexity
-
 	* the owner data file tag might cause problems because the object might be created by the container
 	  but the owner tag might override that.  You have to make sure this ins't an issue
-	* test the input interpreter convert a #23857 to an object by id lookup
-	* finish implementing the container_find() function
-	* what mechanism will you use to interact with the actions system particularily in order to read
-	  action data from a file and pass it to the appropriate module's language interpreter
-
-	* how will you resolve the issue with objects that haven't been loaded yet?  It seems that this is
-	  going to be a killer problem at some point one way or another so you can either make things always
-	  refer to objects by ID or you can load all objects and the resolve the IDs afterwards (which then
-	  you need a way to store the ID temporarily or else load the file twice)
+	* maybe eventually you should make the world object assignable to id 0 but that might require changes
+	  to objects that pass around ids so that another object doesn't accidentally override it
 
 	* add colour tag parsing to telnet
-	* should exit targets be stored as integer/number objects or as a special object id reference object?
+	* implement the writing of actions in module/basic
+	* make some kind of method of preventing new text from popping up in the middle of what is typed
 	* add a status message that prints login attempts and logins and logouts
 	* add the argment macro thing to the other classes
 	* add a way to write CDATA to data.c
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
 	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
+	* add support for up/down (?) or should that only be the client's responsability?
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
-	* make things configurable through xml files
+	* make system things configurable through xml files
 
 	* implement all of the read_data functions
-	* how will you represent/differentiate objects in a container with regards to writing them to a file.
-	  In other words, do you always write those objects a seperate objects or as inside the container
-	  and how do you tell which objects to write and which not (because users certainly wouldn't be
-	  written in the world file).
+	* make container write certain types of objects to different files (like users and mobiles should
+	  probably go in their own files
 	* implement all of the write_data functions
+	* implement the container_find() function with more detail
 
-	* should an lookup of a property lookup in the parent of the object until a value is found or just
-	  stop at the immediate object and look no further?
 	* make telnet (and other interfaces) convert <format> tags into colours based on themes such that
 	  output would instead be <title>The Room</title> for example and title would be looked up in a colour
 	  table and blue, say, would be outputted as the colour for title but that assignment could be changed.
 	  You could also set a mode that allows the xml itself to be transmitted raw so that the other end
 	  can use it for displaying with a special client able to recognize it
-	* change the way input is processed between the interface, user, and processor objects.  It's
-	  somewhat messy, somewhat cumbersome, and somewhat difficult to change the processor temporarily
-	* resolve the issue of telnet/interface user specific configuration data and where it is stored,
-	  loaded from and saved too (should be loaded/stored from within the user's data file i would presume)
-	  This is things like what format to return (raw xml, ANSI colours, no colours) and colour themes
+
+	* add the ability for telnet to read user specific configuration data from the user file
+	* read and write the processor from the user data file
 	* make a character creation game object thingie that telnet can call to generate your character
 	* implement proper handling of telnet commands
 
@@ -94,17 +61,14 @@ Refactoring:
 
 Structural Issues:
 
-	* should object types have some kind of "parent type" pointer so that code can look up to make sure
-	  an object is castable to a parent type? or can you always assume that a given object is castable to
-	  one of it's superclasses?
-	* there is no guarentee that an object with a given ID will be loaded after all other objects (namely
-	  it's parent object) are first loaded which would mean we can't resolve the ID to a pointer at that
-	  time.  Perhaps we can store the objects in their own file but that makes it tough to hand-edit.
-	  If we had a way to know what file an object of a given ID is in, we could still load objects on
-	  demand.  We could also put some things off until after loading and do all resolutions after the
-	  objects are loaded.  The last option is to just store things like parents by only their ID but that
-	  means you need to perform a lookup (although not an expensive one) every time you refer to the
-	  parent which would be every time an action is performed among other things.
+	* how can you determine what xml element name to use for property objects without having to handle
+	  each object type seperatly?
+	* when you attempt to perform an action on the user and user's owner before the object, you run
+	  into issues such as "look" being defined for the location and an object but because you look up
+	  the location first, you do the location's look action and not the object's look action even if
+	  the object is specified in the look command.  One solution is of course to force these objects to
+	  have different commands for "look".  Another option is to be able to specify parameters that an
+	  action will accept so only if there are no args will the "look" in location be executed
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each

@@ -13,6 +13,7 @@
 #include <sdm/string.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/string.h>
 #include <sdm/objs/processor.h>
 #include <sdm/objs/interpreter.h>
 #include <sdm/interface/interface.h>
@@ -95,6 +96,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		if ((obj = SDM_CONTAINER(sdm_thing_lookup_id(3))))
 			sdm_container_add(obj, SDM_THING(user));		
 		// TODO use a character generation processor
+		// TODO assign a parent in the chargen
 		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
 			return(-1);
 		// TODO should you write the user to disk at this point?
@@ -104,17 +106,18 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 
 void sdm_user_release(struct sdm_user *user)
 {
-
 	/** Save the user information to the user's file */
 	sdm_user_write(user);
+
 	/** Shutdown the input processor */
 	sdm_processor_shutdown(user->proc, user);
 	destroy_sdm_object(SDM_OBJECT(user->proc));
+
 	/** Release the user's other resources */
 	sdm_hash_remove(user_list, user->name);
 	destroy_string(user->name);
 	destroy_sdm_interface(user->inter);
-	// TODO do all the other releasing
+
 	/** Release the superclass */
 	sdm_mobile_release(SDM_MOBILE(user));
 }
@@ -169,20 +172,6 @@ int sdm_user_valid_username(const char *name)
 }
 
 
-int sdm_user_startup(struct sdm_user *user)
-{
-	// TODO should telnet or whatever interface call this directly?
-	sdm_processor_startup(user->proc, user);
-	return(0);
-}
-
-int sdm_user_process_input(struct sdm_user *user, char *input)
-{
-	// TODO should telnet or whatever interface call this directly?
-	return(sdm_processor_process(user->proc, user, input));
-}
-
-
 // TODO should these go here?
 int sdm_user_tell(struct sdm_user *user, const char *fmt, ...)
 {
@@ -212,4 +201,5 @@ int sdm_user_announce(struct sdm_user *user, const char *fmt, ...)
 	}
 	return(0);
 }
+
 

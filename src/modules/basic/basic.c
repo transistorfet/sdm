@@ -14,6 +14,7 @@
 
 #include <sdm/objs/user.h>
 #include <sdm/objs/thing.h>
+#include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/container.h>
@@ -36,6 +37,7 @@ int init_basic(void)
 		return(-1);
 
 	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
+	sdm_hash_add(basic_actions, "basic_move", sdm_basic_action_move);
 	return(0);
 }
 
@@ -63,14 +65,30 @@ int sdm_basic_read_action(struct sdm_thing *thing, struct sdm_data_file *data)
 	return(sdm_thing_set_action(thing, buffer, action, NULL, NULL));
 }
 
+
 int sdm_basic_action_look(void *ptr, struct sdm_user *user, struct sdm_thing *thing, const char *args)
 {
 	struct sdm_string *obj;
 
+	if ((obj = SDM_STRING(sdm_thing_get_property(thing, "name", &sdm_string_obj_type))))
+		sdm_user_tell(user, "%s\n", obj->str);
 	if (!(obj = SDM_STRING(sdm_thing_get_property(thing, "description", &sdm_string_obj_type))))
 		return(-1);
-	sdm_user_tell(user, obj->str);
+	sdm_user_tell(user, "%s\n", obj->str);
 	return(0);
 }
 
+int sdm_basic_action_move(void *ptr, struct sdm_user *user, struct sdm_thing *thing, const char *args)
+{
+	struct sdm_number *obj;
+	struct sdm_container *target;
+
+	if (!(obj = SDM_NUMBER(sdm_thing_get_property(thing, "target", &sdm_number_obj_type)))
+	    || !(target = SDM_CONTAINER(sdm_thing_lookup_id((sdm_id_t) obj->num)))
+	    || !sdm_object_is_a(SDM_OBJECT(target), &sdm_container_obj_type))
+		return(-1);
+	sdm_container_add(target, SDM_THING(user));
+	sdm_thing_do_action(SDM_THING(target), user, "look", "");
+	return(0);
+}
 

@@ -9,6 +9,7 @@
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/container.h>
 #include <sdm/modules/module.h>
@@ -94,7 +95,8 @@ void sdm_thing_release(struct sdm_thing *thing)
 
 int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
 {
-	int num;
+	sdm_id_t id;
+	sdm_number_t num;
 	struct sdm_object *obj;
 	char buffer[STRING_SIZE];
 
@@ -108,23 +110,33 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		}
 		sdm_thing_set_property(thing, buffer, obj);
 	}
+	else if (!strcmp(type, "number")) {
+		if (((num = sdm_data_read_float(data)) < 0)
+		    || !(obj = create_sdm_object(&sdm_number_obj_type, num)))
+			return(-1);
+		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0) {
+			destroy_sdm_object(obj);
+			return(-1);
+		}
+		sdm_thing_set_property(thing, buffer, obj);
+	}
 	else if (!strcmp(type, "action")) {
 		if (sdm_data_read_attrib(data, "type", buffer, STRING_SIZE) < 0)
 			return(-1);
 		sdm_module_read_action(buffer, thing, data);
 	}
 	else if (!strcmp(type, "id")) {
-		if ((num = sdm_data_read_integer(data)) > 0)
-			sdm_thing_assign_id(thing, num);
+		if ((id = sdm_data_read_integer(data)) > 0)
+			sdm_thing_assign_id(thing, id);
 	}
 	else if (!strcmp(type, "owner")) {
 		// TODO this will not load add the object to the owner if the owner hasn't been loaded yet =/
-		if (((num = sdm_data_read_integer(data)) > 0) && (obj = SDM_OBJECT(sdm_thing_lookup_id(num))))
+		if (((id = sdm_data_read_integer(data)) > 0) && (obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
 			sdm_container_add(SDM_CONTAINER(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
-		if ((num = sdm_data_read_integer(data)) > 0)
-			thing->parent = num;
+		if ((id = sdm_data_read_integer(data)) > 0)
+			thing->parent = id;
 	}
 	else {
 		return(1);
@@ -134,7 +146,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 {
-	struct sdm_object *obj;
+	struct sdm_hash_entry *entry;
 
 	sdm_data_write_integer_entry(data, "id", thing->id);
 	if (thing->parent > 0)
@@ -143,11 +155,25 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
-	while ((obj = sdm_hash_traverse_next(thing->properties))) {
-		// TODO write properties
+	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {
+		if (SDM_OBJECT(entry->data)->type == &sdm_string_obj_type) {
+			sdm_data_write_begin_entry(data, "string");
+			sdm_data_write_attrib(data, "name", entry->name);
+			sdm_data_write_string(data, SDM_STRING(SDM_OBJECT(entry->data))->str);
+			sdm_data_write_end_entry(data);
+		}
+		else if (SDM_OBJECT(entry->data)->type == &sdm_number_obj_type) {
+			sdm_data_write_begin_entry(data, "number");
+			sdm_data_write_attrib(data, "name", entry->name);
+			sdm_data_write_float(data, SDM_NUMBER(SDM_OBJECT(entry->data))->num);
+			sdm_data_write_end_entry(data);
+		}
 	}
-
-	// TODO write actions
+	/** Write the actions to the file */
+	sdm_hash_traverse_reset(thing->actions);
+	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
+		// TODO write actions
+	}
 	return(0);
 }
 
@@ -161,12 +187,15 @@ int sdm_thing_set_property(struct sdm_thing *thing, const char *name, struct sdm
 
 struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *name, struct sdm_object_type *type)
 {
+	struct sdm_thing *cur;
 	struct sdm_object *obj;
 
-	if (!(obj = sdm_hash_find(thing->properties, name)))
-		return(NULL);
-	if (!type || SDM_OBJECT_IS_A(obj, type))
-		return(obj);
+	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
+		if (!(obj = sdm_hash_find(thing->properties, name)))
+			continue;
+		if (!type || sdm_object_is_a(obj, type))
+			return(obj);
+	}
 	return(NULL);
 }
 
@@ -194,8 +223,8 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, sdm_action_t
 
 int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const char *name, const char *args)
 {
-	struct sdm_action *action;
 	struct sdm_thing *cur;
+	struct sdm_action *action;
 
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
@@ -203,7 +232,7 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const ch
 			return(0);
 		}
 	}
-	return(-1);
+	return(1);
 }
 
 
@@ -231,6 +260,7 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 		sdm_thing_table_size = id + THING_TABLE_EXTRA_SIZE;
 	}
 
+	// TODO should we destroy the object or prevent the new object from taking that ID?
 	/** If there is already a thing with the same id, then destroy it */
 	if (sdm_thing_table[id])
 		destroy_sdm_object(SDM_OBJECT(sdm_thing_table[id]));

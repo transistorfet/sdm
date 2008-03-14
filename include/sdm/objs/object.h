@@ -59,7 +59,7 @@ int sdm_object_write_file(struct sdm_object *, const char *, const char *);
 int sdm_object_read_data(struct sdm_object *, struct sdm_data_file *);
 int sdm_object_write_data(struct sdm_object *, struct sdm_data_file *);
 
-static inline int SDM_OBJECT_IS_A(struct sdm_object *obj, struct sdm_object_type *type) {
+static inline int sdm_object_is_a(struct sdm_object *obj, struct sdm_object_type *type) {
 	struct sdm_object_type *cur;
 
 	for (cur = obj->type; cur; cur = cur->parent) {
