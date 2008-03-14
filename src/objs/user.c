@@ -64,7 +64,7 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 
 	if ((user = sdm_hash_find(user_list, name)))
 		return(user);
-	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, 0, NULL)));
+	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, 0, 0)));
 }
 
 int sdm_user_init(struct sdm_user *user, va_list va)

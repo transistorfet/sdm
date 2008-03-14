@@ -80,6 +80,8 @@ void sdm_interpreter_release(struct sdm_interpreter *interpreter)
 
 int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 {
+	// TODO print motd
+	// TODO print initial look
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
@@ -147,7 +149,7 @@ int sdm_interpreter_add(struct sdm_interpreter *proc, const char *name, sdm_comm
 
 struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char *str, int *used)
 {
-	int id;
+	sdm_id_t id;
 	int i, j = 0;
 	char buffer[STRING_SIZE];
 

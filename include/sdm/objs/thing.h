@@ -12,6 +12,8 @@
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
 
+typedef int sdm_id_t;
+
 #define SDM_THING(ptr)	( (struct sdm_thing *) (ptr) )
 
 struct sdm_user;
@@ -22,8 +24,8 @@ typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_thing *, const
 
 struct sdm_thing {
 	struct sdm_object object;
-	int id;
-	struct sdm_thing *parent;
+	sdm_id_t id;
+	sdm_id_t parent;
 	struct sdm_container *owner;
 	struct sdm_thing *next;
 	struct sdm_hash *properties;
@@ -49,9 +51,17 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, stru
 int sdm_thing_set_action(struct sdm_thing *, const char *, sdm_action_t, void *, destroy_t);
 int sdm_thing_do_action(struct sdm_thing *, struct sdm_user *, const char *, const char *);
 
-int sdm_thing_assign_id(struct sdm_thing *, int);
+int sdm_thing_assign_id(struct sdm_thing *, sdm_id_t);
 int sdm_thing_assign_new_id(struct sdm_thing *);
-struct sdm_thing *sdm_thing_lookup_id(int);
+
+extern int sdm_thing_table_size;
+extern struct sdm_thing **sdm_thing_table;
+
+static inline struct sdm_thing *sdm_thing_lookup_id(sdm_id_t id) {
+	if ((id >= 0) && (id < sdm_thing_table_size))
+		return(sdm_thing_table[id]);
+	return(NULL);
+}
 
 #endif
 

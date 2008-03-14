@@ -46,7 +46,7 @@ int sdm_container_read_entry(struct sdm_container *container, const char *type, 
 	struct sdm_thing *obj;
 
 	if (!strcmp(type, "thing")) {
-		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_thing_obj_type, SDM_THING_ARGS(0, NULL))))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_thing_obj_type, SDM_THING_ARGS(0, 0))))
 			return(-1);
 		sdm_data_read_children(data);
 		sdm_object_read_data(SDM_OBJECT(obj), data);
@@ -54,7 +54,7 @@ int sdm_container_read_entry(struct sdm_container *container, const char *type, 
 		sdm_container_add(container, obj);
 	}
 	else if (!strcmp(type, "container")) {
-		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_container_obj_type, SDM_CONTAINER_ARGS(0, NULL))))
+		if (!(obj = (struct sdm_thing *) create_sdm_object(&sdm_container_obj_type, SDM_CONTAINER_ARGS(0, 0))))
 			return(-1);
 		sdm_data_read_children(data);
 		sdm_object_read_data(SDM_OBJECT(obj), data);

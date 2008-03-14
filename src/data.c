@@ -316,6 +316,8 @@ static int sdm_data_strip_copy(char *dest, const char *src, int max)
 			dest[j] = ' ';
 			if (src[i] == '\0')
 				break;
+			else if (j < max - 1)
+				dest[++j] = src[i];
 		}
 		else
 			dest[j] = src[i];

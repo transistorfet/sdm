@@ -37,24 +37,24 @@ struct sdm_object_type sdm_thing_obj_type = {
 	(sdm_object_write_data_t) sdm_thing_write_data
 };
 
-static int next_id = 1;
-static int table_size = 0;
-static struct sdm_thing **thing_table = NULL;
+static sdm_id_t next_id = 1;
+int sdm_thing_table_size = 0;
+struct sdm_thing **sdm_thing_table = NULL;
 
 static void sdm_thing_destroy_action(struct sdm_action *);
 
 int init_thing(void)
 {
-	if (!(thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
+	if (!(sdm_thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
 		return(-1);
-	table_size = THING_TABLE_INIT_SIZE;
+	sdm_thing_table_size = THING_TABLE_INIT_SIZE;
 	return(0);
 }
 
 int release_thing(void)
 {
 	// TODO free all things??
-	memory_free(thing_table);
+	memory_free(sdm_thing_table);
 	return(0);
 }
 
@@ -76,7 +76,7 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 	else if (thing->id == -1)
 		sdm_thing_assign_new_id(thing);
 
-	thing->parent = va_arg(va, struct sdm_thing *);
+	thing->parent = va_arg(va, sdm_id_t);
 	return(0);
 }
 
@@ -88,8 +88,8 @@ void sdm_thing_release(struct sdm_thing *thing)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
 		destroy_sdm_hash(thing->actions);
-	if ((thing->id > 0) && (thing->id < table_size))
-		thing_table[thing->id] = NULL;
+	if ((thing->id > 0) && (thing->id < sdm_thing_table_size))
+		sdm_thing_table[thing->id] = NULL;
 }
 
 int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
@@ -123,9 +123,8 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 			sdm_container_add(SDM_CONTAINER(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
-		// TODO this will set parent to NULL if the parent hasn't been loaded yet =/
 		if ((num = sdm_data_read_integer(data)) > 0)
-			thing->parent = sdm_thing_lookup_id(num);
+			thing->parent = num;
 	}
 	else {
 		return(1);
@@ -138,8 +137,8 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	struct sdm_object *obj;
 
 	sdm_data_write_integer_entry(data, "id", thing->id);
-	if (thing->parent)
-		sdm_data_write_integer_entry(data, "parent", thing->parent->id);
+	if (thing->parent > 0)
+		sdm_data_write_integer_entry(data, "parent", thing->parent);
 	if (thing->owner)
 		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
 	/** Write the properties to the file */
@@ -198,7 +197,7 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const ch
 	struct sdm_action *action;
 	struct sdm_thing *cur;
 
-	for (cur = thing; cur; cur = cur->parent) {
+	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
 			action->func(action->ptr, user, thing, args);
 			return(0);
@@ -208,14 +207,14 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const ch
 }
 
 
-int sdm_thing_assign_id(struct sdm_thing *thing, int id)
+int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 {
 	struct sdm_thing **tmp;
 
 	/** If the thing already has a valid id, remove it's existing entry in the table.  If an error
 	    happens in this function, the thing's id will be 0 in case the caller doesn't check */
-	if ((thing->id > 0) && (thing->id < table_size)) {
-		thing_table[thing->id] = NULL;
+	if ((thing->id > 0) && (thing->id < sdm_thing_table_size)) {
+		sdm_thing_table[thing->id] = NULL;
 		thing->id = 0;
 	}
 
@@ -225,18 +224,18 @@ int sdm_thing_assign_id(struct sdm_thing *thing, int id)
 		return(-1);
 
 	/** Increase the size of the table if id is too big to have a spot in the table */
-	if (id >= table_size) {
-		if (!(tmp = (struct sdm_thing **) memory_realloc(thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
+	if (id >= sdm_thing_table_size) {
+		if (!(tmp = (struct sdm_thing **) memory_realloc(sdm_thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
 			return(-1);
-		thing_table = tmp;
-		table_size = id + THING_TABLE_EXTRA_SIZE;
+		sdm_thing_table = tmp;
+		sdm_thing_table_size = id + THING_TABLE_EXTRA_SIZE;
 	}
 
 	/** If there is already a thing with the same id, then destroy it */
-	if (thing_table[id])
-		destroy_sdm_object(SDM_OBJECT(thing_table[id]));
+	if (sdm_thing_table[id])
+		destroy_sdm_object(SDM_OBJECT(sdm_thing_table[id]));
 	thing->id = id;
-	thing_table[id] = thing;
+	sdm_thing_table[id] = thing;
 
 	// TODO for now we always make the next id the largest unassign id
 	if (next_id <= id)
@@ -250,13 +249,6 @@ int sdm_thing_assign_new_id(struct sdm_thing *thing)
 	/** Keep in mind that as it stands, the id of the parent of an object must be smaller than the id
 	    of that object itself or the loading of the object will fail. */
 	return(sdm_thing_assign_id(thing, next_id++));
-}
-
-struct sdm_thing *sdm_thing_lookup_id(int id)
-{
-	if ((id >= 0) && (id < table_size))
-		return(thing_table[id]);
-	return(NULL);
 }
 
 

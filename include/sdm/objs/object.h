@@ -69,15 +69,5 @@ static inline int SDM_OBJECT_IS_A(struct sdm_object *obj, struct sdm_object_type
 	return(0);
 }
 
-static inline int CALL_SDM_OBJECT_INIT(sdm_object_init_t init, struct sdm_object *obj, ...) {
-	int ret;
-	va_list va;
-
-	va_start(va, obj);
-	ret = init(obj, va);
-	va_end(va);
-	return(ret);
-}
-
 #endif
 

@@ -12,9 +12,8 @@
 	  prone to hard to find bugs where an object replaces another with the same ID but the sytem doesn't
 	  notice?
 
-	* make object_id_t
+	* make the interpreter not print the command not found message when a user/location action is done
 	* change formatting of processor class declarations
-	* delete the CALL_ inline function in objects
 	* rename some inline functions to lowercases where appropriate
 	* add a static inline function to do the object id lookup to make it faster
 	* have telnet directly call the processor functions
@@ -26,6 +25,8 @@
 	  the hash table and we are unable to access it.  We could make that info available to the hash table
 	  but not necessarily without upsetting existing hashtables or added a lot of complexity
 
+	* the owner data file tag might cause problems because the object might be created by the container
+	  but the owner tag might override that.  You have to make sure this ins't an issue
 	* test the input interpreter convert a #23857 to an object by id lookup
 	* finish implementing the container_find() function
 	* what mechanism will you use to interact with the actions system particularily in order to read
@@ -47,6 +48,7 @@
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
+	* make things configurable through xml files
 
 	* implement all of the read_data functions
 	* how will you represent/differentiate objects in a container with regards to writing them to a file.
@@ -87,6 +89,7 @@
 
 Refactoring:
 
+	* change the member "owner" of thing to something else
 	* should you change interface/ to interfaces/
 
 Structural Issues:
@@ -112,6 +115,7 @@ Structural Issues:
 
 Features:
 
+	* multiserver somehow (perhaps using xml-rpc or something)
 	* an irc server interface (such that you enter a channel #world or something and the server
 	  sends output for the room you are currently in and people that enter the room will be be displayed
 	  as join/leaves).  You could also enter multiple channels in a way where only the #world channel is
