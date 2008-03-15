@@ -44,7 +44,10 @@ int sdm_tcp_init(struct sdm_tcp *, va_list);
 void sdm_tcp_release(struct sdm_tcp *);
 
 int sdm_tcp_read(struct sdm_tcp *, char *, int);
-int sdm_tcp_write(struct sdm_tcp *, const char *, int);
+int sdm_tcp_write(struct sdm_tcp *, const char *);
+
+int sdm_tcp_receive(struct sdm_tcp *, char *, int);
+int sdm_tcp_send(struct sdm_tcp *, const char *, int);
 
 int sdm_tcp_read_to_buffer(struct sdm_tcp *);
 int sdm_tcp_set_read_buffer(struct sdm_tcp *, const char *, int);

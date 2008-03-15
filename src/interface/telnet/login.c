@@ -16,8 +16,8 @@
 #include <sdm/objs/login.h>
 #include <sdm/objs/user.h>
 
-static int telnet_login_read_name(struct sdm_login *, struct sdm_tcp *);
-static int telnet_login_read_password(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_login_read_name(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_login_read_password(struct sdm_login *, struct sdm_tcp *);
 
 int sdm_telnet_login(struct sdm_tcp *inter)
 {
@@ -32,13 +32,13 @@ int sdm_telnet_login(struct sdm_tcp *inter)
 	// TODO print welcome screen
 	sdm_telnet_write(inter, "\n");
 	sdm_telnet_write(inter, SDM_TXT_LOGIN_PROMPT);
-	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_login_read_name, login);
+	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_login_read_name, login);
 	return(0);
 }
 
 /*** Local Functions ***/
 
-static int telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *inter)
 {
 	int res;
 	char buffer[STRING_SIZE];
@@ -64,12 +64,12 @@ static int telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *inter
 	else {
 		sdm_telnet_echo(inter, 0);
 		sdm_telnet_write(inter, SDM_TXT_PASSWORD_PROMPT);
-		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_login_read_password, login);
+		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_login_read_password, login);
 	}
 	return(0);
 }
 
-static int telnet_login_read_password(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_tcp *inter)
 {
 	int res;
 	struct sdm_user *user;
@@ -110,7 +110,7 @@ static int telnet_login_read_password(struct sdm_login *login, struct sdm_tcp *i
 	else  {
 		sdm_telnet_write(inter, SDM_TXT_WRONG_USER_OR_PASSWORD);
 		sdm_telnet_write(inter, SDM_TXT_LOGIN_PROMPT);
-		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_login_read_name, login);
+		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_login_read_name, login);
 	}
 	return(0);
 }

@@ -89,11 +89,27 @@ void sdm_tcp_release(struct sdm_tcp *inter)
 }
 
 
+int sdm_tcp_read(struct sdm_tcp *inter, char *str, int max)
+{
+	int res;
+
+	if ((res = sdm_tcp_receive(inter, str, max - 1)) < 0)
+		return(res);
+	str[res] = '\0';
+	return(res);
+}
+
+int sdm_tcp_write(struct sdm_tcp *inter, const char *str)
+{
+	return(sdm_tcp_send(inter, str, strlen(str)));
+}
+
+
 /**
  * Receive the given number of bytes, store them in the given buffer
  * and return the number of bytes read or -1 on error or disconnect.
  */ 
-int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
+int sdm_tcp_receive(struct sdm_tcp *inter, char *buffer, int size)
 {
 	int i, j;
 	fd_set rd;
@@ -103,7 +119,6 @@ int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
 		return(-1);
 	SDM_INTERFACE_SET_NOT_READY_READ(inter);
 
-	size--;
 	for (i = 0;i < size;i++) {
 		if (inter->read_pos >= inter->read_length)
 			break;
@@ -119,7 +134,6 @@ int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
 		if (j <= 0)
 			return(-1);
 	}
-	buffer[i] = '\0';
 	if (inter->read_pos < inter->read_length)
 		SDM_INTERFACE_SET_READY_READ(inter);
 	return(i);
@@ -129,7 +143,7 @@ int sdm_tcp_read(struct sdm_tcp *inter, char *buffer, int size)
  * Send the string of length size to the given network connection and
  * return the number of bytes written or -1 on error.
  */
-int sdm_tcp_write(struct sdm_tcp *inter, const char *msg, int size)
+int sdm_tcp_send(struct sdm_tcp *inter, const char *msg, int size)
 {
 	int sent, count = 0;
 

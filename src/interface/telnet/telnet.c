@@ -5,6 +5,7 @@
 
 #include <crypt.h>
 
+#include <sdm/hash.h>
 #include <sdm/memory.h>
 
 #include <sdm/interface/interface.h>
@@ -15,9 +16,29 @@
 
 #define TELNET_PORT		4000
 #define BUFFER_SIZE		512
+#define MAX_ATTRIB		64
+
+#define SDM_ATTR_BOLD		0x01
+#define SDM_ATTR_FLASH		0x02
+#define SDM_ATTR_UNDERLINE	0x04
+
+#define SDM_ATTR_BLACK		0
+#define SDM_ATTR_RED		1
+#define SDM_ATTR_GREEN		2
+#define SDM_ATTR_YELLOW		3
+#define SDM_ATTR_BLUE		4
+#define SDM_ATTR_MAGENTA	5
+#define SDM_ATTR_CYAN		6
+#define SDM_ATTR_WHITE		7
 
 #define IS_WHITESPACE(ch)	\
 	( ((ch) == ' ') || ((ch) == '\t') )
+
+struct sdm_telnet_attrib {
+	char attrib;
+	char fg;
+	char bg;
+};
 
 struct sdm_interface_type sdm_telnet_type = {
 	sizeof(struct sdm_tcp),
@@ -29,9 +50,10 @@ struct sdm_interface_type sdm_telnet_type = {
 
 static struct sdm_tcp *telnet_server;
 
-static int telnet_accept_connection(void *, struct sdm_tcp *);
-static int telnet_handle_read(struct sdm_user *, struct sdm_tcp *);
-static int telnet_interpret_command(struct sdm_tcp *, const char *, int);
+static int sdm_telnet_accept_connection(void *, struct sdm_tcp *);
+static int sdm_telnet_handle_read(struct sdm_user *, struct sdm_tcp *);
+static inline int sdm_telnet_interpret_command(struct sdm_tcp *, const char *, int);
+static inline int sdm_telnet_rewrite_attrib(struct sdm_tcp *, char *, struct sdm_telnet_attrib *, int *);
 
 int init_telnet(void)
 {
@@ -39,7 +61,7 @@ int init_telnet(void)
 		return(1);
 	if (!(telnet_server = (struct sdm_tcp *) create_sdm_interface(&sdm_telnet_type, SDM_TCP_LISTEN, TELNET_PORT)))
 		return(-1);
-	sdm_interface_set_callback(SDM_INTERFACE(telnet_server), IO_COND_READ, (callback_t) telnet_accept_connection, NULL);
+	sdm_interface_set_callback(SDM_INTERFACE(telnet_server), IO_COND_READ, (callback_t) sdm_telnet_accept_connection, NULL);
 	return(0);
 }
 
@@ -80,7 +102,7 @@ int sdm_telnet_read(struct sdm_tcp *inter, char *buffer, int max)
 	for (; i < res; i++) {
 		if (inter->read_buffer[i] == 0xff) {
 			i++;
-			i += telnet_interpret_command(inter, &inter->read_buffer[i], res - i);
+			i += sdm_telnet_interpret_command(inter, &inter->read_buffer[i], res - i);
 		}
 		else if ((inter->read_buffer[i] == '\r') || (inter->read_buffer[i] == '\n')) {
 			buffer[j] = '\0';
@@ -104,25 +126,70 @@ int sdm_telnet_read(struct sdm_tcp *inter, char *buffer, int max)
 
 int sdm_telnet_write(struct sdm_tcp *inter, const char *str)
 {
-	int res;
-	char *line;
-	int len = 0;
+	int i, j, k;
+	int attr_sp = 0;
+	char buffer[STRING_SIZE];
+	struct sdm_telnet_attrib attribs[MAX_ATTRIB];
 
-	// TODO rewrite this later to convert colour formatting tags
-	while ((*str != '\0') && (line = strchr(str, '\n'))) {
-		if ((res = sdm_tcp_write(inter, str, line - str)) < 0)
-			return(-1);
-		len += res + 1;
-		if (sdm_tcp_write(inter, "\r\n", 2) < 0)
-			return(-1);
-		str = line + 1;
+	for (i = 0, j = 0; (j < STRING_SIZE) && (str[i] != '\0'); i++) {
+		switch (str[i]) {
+		    case '\n': {
+			buffer[j++] = '\r';
+			buffer[j++] = '\n';
+			break;
+		    }
+		    case '<': {
+			k = j;
+			buffer[j++] = str[i++];
+			if (str[i] == '/')
+				buffer[j++] = str[i++];
+			for (; (j < STRING_SIZE) && (str[i] != '\0'); i++, j++) {
+				/** Break at the first non-alphanumeric or '_' character. */
+				if (!(((str[i] >= '0') && (str[i] <= '9'))
+				    || ((str[i] >= 'A') && (str[i] <= 'Z'))
+				    || ((str[i] >= 'a') && (str[i] <= 'z')) || (str[i] == '_')))
+					break;
+				buffer[j] = str[i];
+			}
+			if (str[i] != '>') {
+				/** This wasn't a tag so we'll ignore it */
+				buffer[j++] = str[i];
+				break;
+			}
+			buffer[j] = '\0';
+			j = k + sdm_telnet_rewrite_attrib(inter, &buffer[k], attribs, &attr_sp);
+			break;
+		    }
+		    case '&': {
+			if (!strncmp(&str[i + 1], "lt;", 3))
+				buffer[j++] = '<';
+			else if (!strncmp(&str[i + 1], "gt;", 3))
+				buffer[j++] = '>';
+			else
+				buffer[j++] = '&';
+			break;
+		    }
+		    default: {
+			buffer[j++] = str[i];
+			break;
+		    }
+		}
 	}
-	if (*str != '\0') {
-		if ((res = sdm_tcp_write(inter, str, strlen(str))) < 0)
-			return(-1);
-		len += res;
+
+	/** If we haven't closed all attribute tags then send the reset escape to put us back to normal */
+	if (attr_sp) {
+		if (j + 3 < STRING_SIZE) {
+			strncpy(&buffer[j], "\x1b[m", 3);
+			j += 3;
+		}
+		else {
+			strncpy(&buffer[STRING_SIZE - 3], "\x1b[m", 3);
+			j = STRING_SIZE;
+		}
 	}
-	return(len);
+	if (sdm_tcp_send(inter, buffer, j) < 0)
+		return(-1);
+	return(j);
 }
 
 
@@ -130,11 +197,11 @@ void sdm_telnet_echo(struct sdm_tcp *inter, int action)
 {
 	if (action) {
 		/** Request the other end echo input locally */
-		sdm_telnet_write(inter, "\xff\xfc\x01");
+		sdm_tcp_send(inter, "\xff\xfc\x01", 3);
 	}
 	else {
 		/** Request the other end stop echoing input locally */
-		sdm_telnet_write(inter, "\xff\xfb\x01");
+		sdm_tcp_send(inter, "\xff\xfb\x01", 3);
 	}
 }
 
@@ -151,13 +218,13 @@ void sdm_telnet_encrypt_password(const char *salt, char *buffer, int max)
 int sdm_telnet_run(struct sdm_tcp *inter, struct sdm_user *user)
 {
 	sdm_processor_startup(user->proc, user);
-	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_handle_read, user);
+	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_handle_read, user);
 	return(0);
 }
 
 /*** Local Functions ***/
 
-static int telnet_accept_connection(void *ptr, struct sdm_tcp *server)
+static int sdm_telnet_accept_connection(void *ptr, struct sdm_tcp *server)
 {
 	struct sdm_tcp *inter;
 	if (!(inter = sdm_tcp_accept(&sdm_telnet_type, server)))
@@ -166,7 +233,7 @@ static int telnet_accept_connection(void *ptr, struct sdm_tcp *server)
 	return(0);
 }
 
-static int telnet_handle_read(struct sdm_user *user, struct sdm_tcp *inter)
+static int sdm_telnet_handle_read(struct sdm_user *user, struct sdm_tcp *inter)
 {
 	int i;
 	char buffer[BUFFER_SIZE];
@@ -185,7 +252,7 @@ static int telnet_handle_read(struct sdm_user *user, struct sdm_tcp *inter)
 	return(0);
 }
 
-static int telnet_interpret_command(struct sdm_tcp *inter, const char *cmd, int len)
+static inline int sdm_telnet_interpret_command(struct sdm_tcp *inter, const char *cmd, int len)
 {
 	// TODO do this properly
 	switch (cmd[0]) {
@@ -201,5 +268,41 @@ static int telnet_interpret_command(struct sdm_tcp *inter, const char *cmd, int 
 	}
 }
 
+static inline int sdm_telnet_rewrite_attrib(struct sdm_tcp *inter, char *buffer, struct sdm_telnet_attrib *attrib, int *attr_sp)
+{
+	// TODO implement this properly
+	if (buffer[1] == '/') {
+		strncpy(buffer, "\x1b[0m", 4);
+		return(4);
+	}
+	else if (!strcmp(&buffer[1], "b")) {
+		strncpy(buffer, "\x1b[1m", 4);
+		return(4);
+	}
+	return(0);
+}
+
+
+/*
+	{ "b",			{ SDM_ATTR_BOLD, 0, 0 } },
+	{ "black",		{ 0, SDM_ATTR_BLACK, 0 } },
+	{ "blue",		{ 0, SDM_ATTR_BLUE, 0 } },
+	{ "brightblue",		{ SDM_ATTR_BOLD, SDM_ATTR_BLUE, 0 } },
+	{ "brightcyan",		{ SDM_ATTR_BOLD, SDM_ATTR_CYAN, 0 } },
+	{ "brightgreen",	{ SDM_ATTR_BOLD, SDM_ATTR_GREEN, 0 } },
+	{ "brightmagenta",	{ SDM_ATTR_BOLD, SDM_ATTR_MAGENTA, 0 } },
+	{ "brightred",		{ SDM_ATTR_BOLD, SDM_ATTR_RED, 0 } },
+	{ "brightwhite",	{ SDM_ATTR_BOLD, SDM_ATTR_WHITE, 0 } },
+	{ "brightyellow",	{ SDM_ATTR_BOLD, SDM_ATTR_YELLOW, 0 } },
+	{ "cyan",		{ 0, SDM_ATTR_CYAN, 0 } },
+	{ "f",			{ SDM_ATTR_FLASH, 0, 0 } },
+	{ "green",		{ 0, SDM_ATTR_GREEN, 0 } },
+	{ "magenta",		{ 0, SDM_ATTR_MAGENTA, 0 } },
+	{ "red",		{ 0, SDM_ATTR_RED, 0 } },
+	{ "u",			{ SDM_ATTR_UNDERLINE, 0, 0 } },
+	{ "white",		{ 0, SDM_ATTR_WHITE, 0 } },
+	{ "yellow",		{ 0, SDM_ATTR_YELLOW, 0 } },
+	{ NULL,			{ 0, 0, 0 } }
+*/
 
 

@@ -16,21 +16,21 @@
 #include <sdm/objs/login.h>
 #include <sdm/objs/user.h>
 
-static int telnet_register_read_name(struct sdm_login *, struct sdm_tcp *);
-static int telnet_register_read_password(struct sdm_login *, struct sdm_tcp *);
-static int telnet_register_verify_password(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_register_read_name(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_register_read_password(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_register_verify_password(struct sdm_login *, struct sdm_tcp *);
 
 int sdm_telnet_register(struct sdm_tcp *inter, struct sdm_login *login)
 {
 	sdm_telnet_write(inter, "\n");
 	sdm_telnet_write(inter, SDM_TXT_CHARGEN_NAME_PROMPT);
-	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_register_read_name, login);
+	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_register_read_name, login);
 	return(0);
 }
 
 /*** Local Functions ***/
 
-static int telnet_register_read_name(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_register_read_name(struct sdm_login *login, struct sdm_tcp *inter)
 {
 	int res;
 	char buffer[STRING_SIZE];
@@ -57,12 +57,12 @@ static int telnet_register_read_name(struct sdm_login *login, struct sdm_tcp *in
 	else {
 		sdm_telnet_echo(inter, 0);
 		sdm_telnet_write(inter, SDM_TXT_CHARGEN_PASSWORD_PROMPT);
-		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_register_read_password, login);
+		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_register_read_password, login);
 	}
 	return(0);
 }
 
-static int telnet_register_read_password(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_register_read_password(struct sdm_login *login, struct sdm_tcp *inter)
 {
 	int res;
 	char buffer[STRING_SIZE];
@@ -83,12 +83,12 @@ static int telnet_register_read_password(struct sdm_login *login, struct sdm_tcp
 	else {
 		sdm_login_set_password(login, buffer);
 		sdm_telnet_write(inter, SDM_TXT_REPEAT_PASSWORD_PROMPT);
-		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_register_verify_password, login);
+		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_register_verify_password, login);
 	}
 	return(0);
 }
 
-static int telnet_register_verify_password(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_register_verify_password(struct sdm_login *login, struct sdm_tcp *inter)
 {
 	int res;
 	struct sdm_user *user;
@@ -124,7 +124,7 @@ static int telnet_register_verify_password(struct sdm_login *login, struct sdm_t
 	else  {
 		sdm_telnet_write(inter, SDM_TXT_PASSWORDS_DONT_MATCH);
 		sdm_telnet_write(inter, SDM_TXT_CHARGEN_PASSWORD_PROMPT);
-		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) telnet_register_read_password, login);
+		sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_register_read_password, login);
 	}
 	return(0);
 }

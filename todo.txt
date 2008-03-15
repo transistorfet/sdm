@@ -1,4 +1,10 @@
 
+	* make new functions for read/write and make the read/write functions now send/receive
+	* write core server format documentation
+	* make telnet use it's own extension of the tcp struct
+	* find out how attribs are turned on and off with something like attron() (uses termcap?)
+	* finish implementing the xml formatting in telnet
+
 	* sdrl has one shared machine
 	* read_action makes an expr and stores it with an do_action function.  The do action function makes a
 	  new environment, assigns "user", "this", "args" as variables where user and this are special
@@ -11,8 +17,7 @@
 	* the owner data file tag might cause problems because the object might be created by the container
 	  but the owner tag might override that.  You have to make sure this ins't an issue
 
-	* add colour tag parsing to telnet
-	* implement the writing of actions in module/basic
+	* implement the writing to a data file of actions in module/basic
 	* add a way to write CDATA to data.c
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
@@ -43,7 +48,6 @@
 	* accept a "-d" command line arg and fork to a daemon process
 	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
 
-	* add public git respository to catalogue after changing this working directory to sdm/
 	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
 	* make it possible for the command prompt to display info (call a function to generate it)
 
@@ -64,6 +68,12 @@ Structural Issues:
 	  action will accept so only if there are no args will the "look" in location be executed
 	* how will the "\n before line instead of after" affect telnet vs IRC?  Would this need to be somehow
 	  abstracted so that it happens automatically yet is usable by both systems?
+	* there is a potential problem with xml format codes inside of xml files but only really in terms of
+	  manual editing.  Should you store various property strings as CDATA strings or switch to bbcode
+	  or do nothing?
+	* should there be some way to determine the end of output or the assumption that all output must be
+	  put in a single string and written at once such that when the end is reached and the attributes
+	  have been changed, a reset attribute command can be sent in case the xml formatting wasn't complete.
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each
