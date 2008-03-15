@@ -13,16 +13,12 @@
 
 	* add colour tag parsing to telnet
 	* implement the writing of actions in module/basic
-	* add a status message that prints login attempts and logins and logouts
 	* add a way to write CDATA to data.c
-	* make various commands use the extra text passed in a command as a text modifier.  For example you
-	  could say "give apple to trans carefully" and it will interpret the command like normal and the
-	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
-	* add support for up/down (?) or should that only be the client's responsability?
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
-	* make system things configurable through xml files
+	* make system things configurable through xml files such as the port that telnet uses
+	* make a character creation game object thingie that telnet can call to generate your character
 
 	* make a central list of object types added somehow and searchable by both name and type pointer which
 	  can possibly be used for loading data but it might get pretty messy
@@ -33,15 +29,13 @@
 	* implement all of the write_data functions
 	* make the container_find() function continue searching for more complete matches
 
-	* make telnet (and other interfaces) convert <format> tags into colours based on themes such that
-	  output would instead be <title>The Room</title> for example and title would be looked up in a colour
-	  table and blue, say, would be outputted as the colour for title but that assignment could be changed.
-	  You could also set a mode that allows the xml itself to be transmitted raw so that the other end
-	  can use it for displaying with a special client able to recognize it
+	* make various commands use the extra text passed in a command as a text modifier.  For example you
+	  could say "give apple to trans carefully" and it will interpret the command like normal and the
+	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
+	* make telnet use non-colour xml tags as theme colour specifiers
 
 	* add the ability for telnet to read user specific configuration data from the user file
-	* read and write the processora object from the user data file
-	* make a character creation game object thingie that telnet can call to generate your character
+	* read and write the processor object from the user data file
 	* implement proper handling of telnet commands
 
 	* make the login track invalid attempts and terminate the connection after a while
