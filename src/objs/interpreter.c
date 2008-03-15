@@ -163,8 +163,6 @@ struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char 
 		*used += i;
 	if (buffer[0] == '#') {
 		id = atoi(&buffer[1]);
-		if (id < 0)
-			return(NULL);
 		return(sdm_thing_lookup_id(id));
 	}
 	if (!SDM_THING(user)->owner)
@@ -180,8 +178,8 @@ int sdm_cmd_say(void *ptr, struct sdm_user *user, char *args)
 {
 	if (!args || *args == '\0')
 		return(-1);
-	sdm_user_tell(user, "You say \"%s\"\n", args);
-	sdm_user_announce(user, "%s says \"%s\"\n", user->name, args);
+	sdm_user_tell(user, "\nYou say \"%s\"", args);
+	sdm_user_announce(user, "\n%s says \"%s\"", user->name, args);
 	return(0);
 }
 

@@ -83,7 +83,7 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 				res = cur->read_entry(obj, type, data);
 				if (res < 0)
 					return(-1);
-				else if (res > 0)
+				else if (res == SDM_HANDLED)
 					break;
 			}
 		}

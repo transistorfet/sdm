@@ -51,7 +51,7 @@ int release_basic(void)
 	return(0);
 }
 
-int sdm_basic_read_action(struct sdm_thing *thing, struct sdm_data_file *data)
+int sdm_basic_read_action(struct sdm_data_file *data, struct sdm_thing *thing)
 {
 	sdm_action_t action;
 	char buffer[STRING_SIZE];

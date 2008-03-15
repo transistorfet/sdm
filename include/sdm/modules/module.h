@@ -12,7 +12,7 @@
 
 struct sdm_module;
 
-typedef int (*sdm_module_read_action_t)(struct sdm_thing *, struct sdm_data_file *);
+typedef int (*sdm_module_read_action_t)(struct sdm_data_file *, struct sdm_thing *);
 // TODO maybe you should pass a a module pointer to the set_action function
 //typedef int (*sdm_module_write_action_t)(struct sdm_thing *, struct sdm_data_file *);
 
@@ -25,6 +25,6 @@ int release_module(void);
 
 int sdm_module_register(const char *, struct sdm_module *);
 int sdm_module_deregister(const char *);
-int sdm_module_read_action(const char *, struct sdm_thing *, struct sdm_data_file *);
+int sdm_module_read_action(const char *, struct sdm_data_file *, struct sdm_thing *);
 
 #endif

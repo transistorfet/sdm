@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <sdm/misc.h>
 #include <sdm/data.h>
 #include <sdm/hash.h>
 #include <sdm/string.h>
@@ -120,8 +121,11 @@ int sdm_login_authenticate(struct sdm_login *login, const char *password)
 		if (!login->password)
 			return(0);
 	}
-	if (!strcmp(login->password, password))
+	if (!strcmp(login->password, password)) {
+		sdm_status("User %s successfully authenticated.", login->name);
 		return(1);
+	}
+	sdm_status("Failed login attempt for user %s.", login->name);
 	return(0);
 }
 

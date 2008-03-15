@@ -65,7 +65,7 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 
 	if ((user = sdm_hash_find(user_list, name)))
 		return(user);
-	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, 0, 0)));
+	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, SDM_NO_ID, 0)));
 }
 
 int sdm_user_init(struct sdm_user *user, va_list va)
@@ -127,10 +127,9 @@ int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data
 	if (!strcmp(type, "name")) {
 		// TODO this should already have been set but maybe we can generate an error if it doesn't match
 	}
-	else {
-		return(0);
-	}
-	return(1);
+	else
+		return(SDM_NOT_HANDLED);
+	return(SDM_HANDLED);
 }
 
 int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)

@@ -9,6 +9,9 @@
 #include <stdarg.h>
 #include <sdm/data.h>
 
+#define SDM_HANDLED		1
+#define SDM_NOT_HANDLED		0
+
 #define SDM_OBF_RELEASING	0x1000
 
 #define SDM_OBJECT(ptr)		( (struct sdm_object *) (ptr) )

@@ -12,6 +12,9 @@
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
 
+#define SDM_NO_ID		-1
+#define SDM_NEW_ID		-2
+
 typedef int sdm_id_t;
 
 #define SDM_THING(ptr)	( (struct sdm_thing *) (ptr) )

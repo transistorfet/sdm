@@ -54,7 +54,7 @@ int init_thing(void)
 
 int release_thing(void)
 {
-	// TODO free all things??
+	// TODO free all things in the table???
 	memory_free(sdm_thing_table);
 	return(0);
 }
@@ -69,12 +69,12 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 	if (!(thing->actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) sdm_thing_destroy_action)))
 		return(-1);
 
-	/** Set the thing id and add the thing to the table.  If id = 0, don't add it to a table.
-	    If the id = -1 then assign the next available id */
+	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
+	    If the id = SDM_NEW_ID then assign the next available id */
 	thing->id = va_arg(va, int);
-	if (thing->id > 0)
+	if (thing->id >= 0)
 		sdm_thing_assign_id(thing, thing->id);
-	else if (thing->id == -1)
+	else if (thing->id == SDM_NEW_ID)
 		sdm_thing_assign_new_id(thing);
 
 	thing->parent = va_arg(va, sdm_id_t);
@@ -89,7 +89,7 @@ void sdm_thing_release(struct sdm_thing *thing)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
 		destroy_sdm_hash(thing->actions);
-	if ((thing->id > 0) && (thing->id < sdm_thing_table_size))
+	if ((thing->id >= 0) && (thing->id < sdm_thing_table_size))
 		sdm_thing_table[thing->id] = NULL;
 }
 
@@ -123,7 +123,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	else if (!strcmp(type, "action")) {
 		if (sdm_data_read_attrib(data, "type", buffer, STRING_SIZE) < 0)
 			return(-1);
-		sdm_module_read_action(buffer, thing, data);
+		sdm_module_read_action(buffer, data, thing);
 	}
 	else if (!strcmp(type, "id")) {
 		if ((id = sdm_data_read_integer(data)) > 0)
@@ -138,10 +138,9 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		if ((id = sdm_data_read_integer(data)) > 0)
 			thing->parent = id;
 	}
-	else {
-		return(1);
-	}
-	return(0);
+	else
+		return(SDM_NOT_HANDLED);
+	return(SDM_HANDLED);
 }
 
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
@@ -241,15 +240,15 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 	struct sdm_thing **tmp;
 
 	/** If the thing already has a valid id, remove it's existing entry in the table.  If an error
-	    happens in this function, the thing's id will be 0 in case the caller doesn't check */
+	    happens in this function, the thing's id will be -1 in case the caller doesn't check */
 	if ((thing->id > 0) && (thing->id < sdm_thing_table_size)) {
 		sdm_thing_table[thing->id] = NULL;
-		thing->id = 0;
+		thing->id = -1;
 	}
 
 	/** If the new id is invalid, then don't do anything.  This maximum size is to prevent us from
 	    inadvertanly creating a gigantic table */
-	if ((id <= 0) || (id >= THING_MAX_TABLE_SIZE))
+	if ((id < 0) || (id >= THING_MAX_TABLE_SIZE))
 		return(-1);
 
 	/** Increase the size of the table if id is too big to have a spot in the table */
@@ -261,9 +260,11 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 	}
 
 	// TODO should we destroy the object or prevent the new object from taking that ID?
-	/** If there is already a thing with the same id, then destroy it */
+	//if (sdm_thing_table[id])
+	//	destroy_sdm_object(SDM_OBJECT(sdm_thing_table[id]));
+	/** If there is already a thing with the same id, then don't make the assignmet */
 	if (sdm_thing_table[id])
-		destroy_sdm_object(SDM_OBJECT(sdm_thing_table[id]));
+		return(-1);
 	thing->id = id;
 	sdm_thing_table[id] = thing;
 
