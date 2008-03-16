@@ -95,7 +95,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		if ((obj = create_sdm_string(user->name)))
 			sdm_thing_set_property(SDM_THING(user), "name", obj);
 		// TODO hack, remove when you get a chargen process that can set the owner
-		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(3))))
+		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
 			sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));		
 		// TODO use a character generation processor
 		// TODO assign a parent in the chargen

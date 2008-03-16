@@ -85,10 +85,10 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_user *user, stru
 	struct sdm_string *string;
 
 	if ((string = SDM_STRING(sdm_thing_get_property(thing, "name", &sdm_string_obj_type))))
-		sdm_user_tell(user, "%s\n", string->str);
+		sdm_user_tell(user, "<brightyellow>%s</brightyellow>\n", string->str);
 	if (!(string = SDM_STRING(sdm_thing_get_property(thing, "description", &sdm_string_obj_type))))
 		return(-1);
-	sdm_user_tell(user, "%s\n", string->str);
+	sdm_user_tell(user, "<brightgreen>%s</brightgreen>\n", string->str);
 	if (sdm_object_is_a(SDM_OBJECT(thing), &sdm_container_obj_type)) {
 		for (cur = thing; cur; cur = cur->next) {
 

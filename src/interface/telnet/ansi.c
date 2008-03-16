@@ -76,17 +76,76 @@ void sdm_telnet_reset_attribs(struct sdm_telnet *inter)
 	sdm_tcp_send(SDM_TCP(inter), "\x1b[m", 3);
 }
 
-int sdm_telnet_write_attrib(struct sdm_telnet *inter, const char *attrib, char *buffer, int max, struct sdm_telnet_attrib_stack *stack)
+int sdm_telnet_write_attrib(struct sdm_telnet *inter, const char *name, char *buffer, int max, struct sdm_telnet_attrib_stack *stack)
 {
+	int i = 0;
 	int close = 0;
+	struct sdm_telnet_attrib *attrib;
 
-	if (attrib[0] == '/') {
+	if (name[0] == '/') {
 		close = 1;
-		attrib = &attrib[1];
+		name = &name[1];
 	}
+	if (!(attrib = (struct sdm_telnet_attrib *) sdm_hash_find(telnet_attribs, name)))
+		return(0);
+	if (!close && stack->sp + 1 >= SDM_TELNET_MAX_ATTRIB)
+		return(0);
 
-	// TODO finish
-	return(0);
+	strncpy(buffer, "\x1b[", 2);
+	i = 2;
+	if (close) {
+		if (stack->sp)
+			stack->sp--;
+		if (stack->sp) {
+			buffer[i++] = '0';
+			buffer[i++] = ';';
+			if (stack->attribs[stack->sp - 1].style & SDM_ATTR_BOLD) {
+				buffer[i++] = '1';
+				buffer[i++] = ';';
+			}
+			if (stack->attribs[stack->sp - 1].style & SDM_ATTR_FLASH) {
+				buffer[i++] = '5';
+				buffer[i++] = ';';
+			}
+			buffer[i++] = '3';
+			buffer[i++] = stack->attribs[stack->sp - 1].fg + 0x30;
+			buffer[i++] = ';';
+			buffer[i++] = '4';
+			buffer[i++] = stack->attribs[stack->sp - 1].bg + 0x30;
+			buffer[i++] = ';';
+		}
+	}
+	else {
+		stack->attribs[stack->sp].style = attrib->style;
+		stack->attribs[stack->sp].fg = attrib->fg;
+		stack->attribs[stack->sp].bg = attrib->bg;
+
+		if (attrib->style & SDM_ATTR_BOLD) {
+			buffer[i++] = '1';
+			buffer[i++] = ';';
+		}
+		if (attrib->style & SDM_ATTR_FLASH) {
+			buffer[i++] = '5';
+			buffer[i++] = ';';
+		}
+		if (!stack->sp || attrib->fg != stack->attribs[stack->sp - 1].fg) {
+			buffer[i++] = '3';
+			buffer[i++] = attrib->fg + 0x30;
+			buffer[i++] = ';';
+		}
+		if (!stack->sp || attrib->bg != stack->attribs[stack->sp - 1].bg) {
+			buffer[i++] = '4';
+			buffer[i++] = attrib->bg + 0x30;
+			buffer[i++] = ';';
+		}
+		if (stack->sp)
+			attrib->style |= stack->attribs[stack->sp - 1].style;
+		stack->sp++;
+	}
+	if (buffer[i - 1] == ';')
+		i--;
+	buffer[i++] = 'm';
+	return(i);
 }
 
 

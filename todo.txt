@@ -1,6 +1,5 @@
 
 	* implement the writing of action in basic and sdrl
-	* finish implementing the xml formatting in telnet
 	* make a character creation game object thingie that telnet can call to generate your character
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
@@ -8,6 +7,7 @@
 	  requirement that the type must extend sdm_thing)
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
+	* (should you) add all object types to the object type list (who makes the calls?)
 
 	* tidy up the sdrl compling system
 	* make sdrl's do_action bind the argument variables
@@ -25,6 +25,7 @@
 	  user object and "here" refers to the room the user is currently in
 	* make system things configurable through xml files such as the port that telnet uses
 	* write and implement details on input converting (in the server core format document)
+	* tidy up the xml formatting in telnet perhaps and add theme tags (tags that indirectly refer to format)
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
@@ -104,6 +105,8 @@ Features:
 	  as join/leaves).  You could also enter multiple channels in a way where only the #world channel is
 	  the game and the other channels are special "game" areas for chat only (normally accessable by
 	  a special teleport command or something)
+	* a super client extension thingie that is just a special xml command to the client to play a certain
+	  piece of music that the client can optionally download through some other protocol
 	* interactive interface (ncurses) through telnet as a mini-client (or should this complexity always
 	  be offloaded to the clients to boost server-side performance?)
 	* an irc client interface that is an irc bot that you pm through your irc client with to play the game.
