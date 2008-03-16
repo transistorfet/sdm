@@ -21,6 +21,9 @@ struct sdm_number {
 
 extern struct sdm_object_type sdm_number_obj_type;
 
+#define create_sdm_number(num)	\
+	( create_sdm_object(&sdm_number_obj_type, (num)) )
+
 int sdm_number_init(struct sdm_number *, va_list);
 void sdm_number_release(struct sdm_number *);
 

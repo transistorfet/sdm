@@ -1,0 +1,52 @@
+
+Server Core Format
+2008/03/16
+
+The server core format is the format of the output from the server core to the
+interfaces and clients.  All script outputs and so on must output text data in
+this format.  This format will then be converted as needed by the interfaces
+for their various protocols.  For example, the telnet interface will convert
+this format into ANSI escape codes.  This format may also be sent as is to a
+client-side program that does the necessary conversion on the client's machine.
+The format is based on XML/HTML.
+
+Currently, the input received is *not* processed to ensure that the a client
+sends strictly correct XML and therefore it currently allows sloppiness in the
+output format.  This may be changed at a later date requiring all text to be
+filtered before being handled by the server and therefore all output shall
+conform to strict xml formatting when possible.
+
+All output shall contain contain only only 8bit characters between 0x20 and
+0xFD inclusively, the linefeed character '\n' (0x0A).  All other characters
+coming from the server core (written to an interface) shall be ignored.  All
+text shall be encoding agnostic when possible.
+
+Format tags are delimited by < and >.  An opening tag shall contain a name
+consisting of alphanumeric characters or the '_' (underscore) character.  A
+closing tag shall match the opening tag in name with the addition of a leading
+'/' (backslash) character.  Tags shall not contain spaces (xml attributes are
+not allowed).  If text starting with a '<' (less than sign) does not match the
+form <[_0-9A-Za-z]+> then it shall be ignored and passed to the output as is.
+If the name of a tag is not recognized, then it shall be ignored and nothing
+shall be passed to the output in its place.
+
+The escape sequences may be used in the output stream.  An escape sequence
+is delimited by '&' and ';'.  An escape name shall contain a name consisting of
+alphanumeric characters or the '_' (underscore) character.  If the escape does
+not match the form &[_0-9A-Za-z]+; then it shall be ignored and passed to the
+output as is.  If the name of the escape is not recognized, then it shall be
+passed to the output stream as is.  All interfaces must convert "quot" to '\"',
+"amp" to '&', "lt" to '<', and "gt" to '>'.  The conversion of any other escape
+is optional and should be avoided if possible.
+
+Each sequence of output from the server core passed to an interface write
+function shall be assumed to be complete and formatting in the output shall be
+reset to the default formatting.  Perminent changes to the formatting shall be
+achieved through configuration of the interface itself as supported.
+
+
+
+Please report variations between the behaviour of interfaces and the format
+described in this document.  While this document should be assumed to be the
+correct behaviour, the issue way lie in either behavioural definition.
+

@@ -16,10 +16,10 @@
 #include <sdm/objs/login.h>
 #include <sdm/objs/user.h>
 
-static int sdm_telnet_login_read_name(struct sdm_login *, struct sdm_tcp *);
-static int sdm_telnet_login_read_password(struct sdm_login *, struct sdm_tcp *);
+static int sdm_telnet_login_read_name(struct sdm_login *, struct sdm_telnet *);
+static int sdm_telnet_login_read_password(struct sdm_login *, struct sdm_telnet *);
 
-int sdm_telnet_login(struct sdm_tcp *inter)
+int sdm_telnet_login(struct sdm_telnet *inter)
 {
 	struct sdm_login *login;
 
@@ -38,7 +38,7 @@ int sdm_telnet_login(struct sdm_tcp *inter)
 
 /*** Local Functions ***/
 
-static int sdm_telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_login_read_name(struct sdm_login *login, struct sdm_telnet *inter)
 {
 	int res;
 	char buffer[STRING_SIZE];
@@ -69,7 +69,7 @@ static int sdm_telnet_login_read_name(struct sdm_login *login, struct sdm_tcp *i
 	return(0);
 }
 
-static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_tcp *inter)
+static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_telnet *inter)
 {
 	int res;
 	struct sdm_user *user;

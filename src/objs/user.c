@@ -71,7 +71,7 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 int sdm_user_init(struct sdm_user *user, va_list va)
 {
 	const char *name;
-	struct sdm_container *obj;
+	struct sdm_object *obj;
 
 	name = va_arg(va, const char *);
 	if (!name || (*name == '\0') || !(user->name = create_string("%s", name)))
@@ -92,9 +92,11 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	}
 	else {
 		sdm_thing_assign_new_id(SDM_THING(user));
+		if ((obj = create_sdm_string(user->name)))
+			sdm_thing_set_property(SDM_THING(user), "name", obj);
 		// TODO hack, remove when you get a chargen process that can set the owner
-		if ((obj = SDM_CONTAINER(sdm_thing_lookup_id(3))))
-			sdm_container_add(obj, SDM_THING(user));		
+		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(3))))
+			sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));		
 		// TODO use a character generation processor
 		// TODO assign a parent in the chargen
 		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
@@ -127,6 +129,8 @@ int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data
 	if (!strcmp(type, "name")) {
 		// TODO this should already have been set but maybe we can generate an error if it doesn't match
 	}
+	// TODO read processor type and settings
+	// TODO read telnet/interface settings if we are going to do that
 	else
 		return(SDM_NOT_HANDLED);
 	return(SDM_HANDLED);
@@ -136,7 +140,8 @@ int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)
 {
 	sdm_data_write_string_entry(data, "name", user->name);
 	sdm_data_write_integer_entry(data, "lastseen", time(NULL));
-	// TODO write everything else
+	// TODO write telnet/interface settings
+	// TODO write processor settings and types
 	return(0);
 }
 

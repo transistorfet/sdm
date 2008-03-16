@@ -130,7 +130,6 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 			sdm_thing_assign_id(thing, id);
 	}
 	else if (!strcmp(type, "owner")) {
-		// TODO this will not load add the object to the owner if the owner hasn't been loaded yet =/
 		if (((id = sdm_data_read_integer(data)) > 0) && (obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
 			sdm_container_add(SDM_CONTAINER(obj), thing);
 	}
@@ -148,7 +147,7 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	struct sdm_hash_entry *entry;
 
 	sdm_data_write_integer_entry(data, "id", thing->id);
-	if (thing->parent > 0)
+	if (thing->parent >= 0)
 		sdm_data_write_integer_entry(data, "parent", thing->parent);
 	if (thing->owner)
 		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
@@ -167,6 +166,7 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 			sdm_data_write_float(data, SDM_NUMBER(SDM_OBJECT(entry->data))->num);
 			sdm_data_write_end_entry(data);
 		}
+		// TODO what do we do about other property object types?
 	}
 	/** Write the actions to the file */
 	sdm_hash_traverse_reset(thing->actions);

@@ -30,23 +30,29 @@
 #define TELNET_CMD_DONT			254
 #define TELNET_CMD_IAC			255
 
+#define SDM_TELNET(ptr)		( (struct sdm_telnet *) (ptr) )
+
+struct sdm_telnet {
+	struct sdm_tcp tcp;
+
+};
 
 extern struct sdm_interface_type sdm_telnet_type;
 
 int init_telnet(void);
 int release_telnet(void);
 
-void sdm_telnet_release(struct sdm_tcp *);
+void sdm_telnet_release(struct sdm_telnet *);
 
-int sdm_telnet_read(struct sdm_tcp *, char *, int);
-int sdm_telnet_write(struct sdm_tcp *, const char *);
-void sdm_telnet_echo(struct sdm_tcp *, int);
+int sdm_telnet_read(struct sdm_telnet *, char *, int);
+int sdm_telnet_write(struct sdm_telnet *, const char *);
+void sdm_telnet_echo(struct sdm_telnet *, int);
 
 void sdm_telnet_encrypt_password(const char *, char *, int);
 
-int sdm_telnet_login(struct sdm_tcp *);
-int sdm_telnet_register(struct sdm_tcp *, struct sdm_login *);
-int sdm_telnet_run(struct sdm_tcp *, struct sdm_user *);
+int sdm_telnet_login(struct sdm_telnet *);
+int sdm_telnet_register(struct sdm_telnet *, struct sdm_login *);
+int sdm_telnet_run(struct sdm_telnet *, struct sdm_user *);
 
 #endif
 

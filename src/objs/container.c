@@ -9,6 +9,9 @@
 #include <sdm/globals.h>
 #include <sdm/objs/string.h>
 
+#include <sdm/objs/user.h>
+#include <sdm/objs/world.h>
+
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
 #include <sdm/objs/container.h>
@@ -68,7 +71,24 @@ int sdm_container_read_entry(struct sdm_container *container, const char *type, 
 
 int sdm_container_write_data(struct sdm_container *container, struct sdm_data_file *data)
 {
-	// TODO write data
+	struct sdm_thing *cur;
+
+	for (cur = container->objects; cur; cur = cur->next) {
+		if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_user_obj_type))
+			continue;
+		else if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_world_obj_type)) {
+			sdm_world_write(SDM_WORLD(cur), data);
+			/** If we don't continue here, the world will be written to this file which we don't
+			    because the world object is a reference only and is written to it's own file */
+			continue;
+		}
+		else if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_container_obj_type))
+			sdm_data_write_begin_entry(data, "container");
+		else
+			sdm_data_write_begin_entry(data, "thing");
+		sdm_object_write_data(SDM_OBJECT(cur), data);
+		sdm_data_write_end_entry(data);
+	}
 	return(0);
 }
 

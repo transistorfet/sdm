@@ -1,37 +1,32 @@
 
-	* make new functions for read/write and make the read/write functions now send/receive
-	* write core server format documentation
+	* implement the writing to a data file of actions in module/basic.  Could you possibly make action
+	  an object that you extend in modules?  where the do action function is virtual
 	* make telnet use it's own extension of the tcp struct
-	* find out how attribs are turned on and off with something like attron() (uses termcap?)
 	* finish implementing the xml formatting in telnet
+	* make a character creation game object thingie that telnet can call to generate your character
 
-	* sdrl has one shared machine
-	* read_action makes an expr and stores it with an do_action function.  The do action function makes a
-	  new environment, assigns "user", "this", "args" as variables where user and this are special
-	  sdm object types and args is jsut a string. It then evals the expr
+	* tidy up the sdrl compling system
+	* make sdrl's do_action bind the argument variables
+	* make sdrl types for user, thing, etc
 	* make a sdrl unparser (perhaps as part of SDRL itself)
 
 	* have a linked list of processors in the user object with a pointer to the currently active one
 	  and read/write the processor's data to the user file.  There should be a function for code to select
 	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
-	* the owner data file tag might cause problems because the object might be created by the container
-	  but the owner tag might override that.  You have to make sure this ins't an issue
 
-	* implement the writing to a data file of actions in module/basic
 	* add a way to write CDATA to data.c
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
 	* make system things configurable through xml files such as the port that telnet uses
-	* make a character creation game object thingie that telnet can call to generate your character
+	* write and implement details on input converting (in the server core format document)
 
 	* make a central list of object types added somehow and searchable by both name and type pointer which
 	  can possibly be used for loading data but it might get pretty messy
+	* read and writing of the object type can be handled directly by the reading and writing functions in
+	  object.c which read and write the proper tag openning
 
-	* implement all of the read_data functions
-	* make container write certain types of objects to different files (like users and mobiles should
-	  probably go in their own files
-	* implement all of the write_data functions
+	* should container_write_data() specifically target objects for special writing?
 	* make the container_find() function continue searching for more complete matches
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
