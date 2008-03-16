@@ -11,6 +11,7 @@
 #include <sdm/hash.h>
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/action.h>
 
 #define SDM_NO_ID		-1
 #define SDM_NEW_ID		-2
@@ -19,11 +20,7 @@ typedef int sdm_id_t;
 
 #define SDM_THING(ptr)	( (struct sdm_thing *) (ptr) )
 
-struct sdm_user;
 struct sdm_container;
-struct sdm_thing;
-
-typedef int (*sdm_action_t)(void *, struct sdm_user *, struct sdm_thing *, const char *);
 
 struct sdm_thing {
 	struct sdm_object object;
@@ -51,7 +48,7 @@ int sdm_thing_write_data(struct sdm_thing *, struct sdm_data_file *);
 int sdm_thing_set_property(struct sdm_thing *, const char *, struct sdm_object *);
 struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, struct sdm_object_type *);
 
-int sdm_thing_set_action(struct sdm_thing *, const char *, sdm_action_t, void *, destroy_t);
+int sdm_thing_set_action(struct sdm_thing *, const char *, struct sdm_action *);
 int sdm_thing_do_action(struct sdm_thing *, struct sdm_user *, const char *, const char *);
 
 int sdm_thing_assign_id(struct sdm_thing *, sdm_id_t);

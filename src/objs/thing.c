@@ -22,12 +22,6 @@
 /** This is to prevent us from making giant table accidentally */
 #define THING_MAX_TABLE_SIZE			65536
 
-struct sdm_action {
-	sdm_action_t func;
-	void *ptr;
-	destroy_t destroy;
-};
-
 struct sdm_object_type sdm_thing_obj_type = {
 	NULL,
 	sizeof(struct sdm_thing),
@@ -41,8 +35,6 @@ struct sdm_object_type sdm_thing_obj_type = {
 static sdm_id_t next_id = 1;
 int sdm_thing_table_size = 0;
 struct sdm_thing **sdm_thing_table = NULL;
-
-static void sdm_thing_destroy_action(struct sdm_action *);
 
 int init_thing(void)
 {
@@ -66,7 +58,7 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(thing->actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) sdm_thing_destroy_action)))
+	if (!(thing->actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) destroy_sdm_object)))
 		return(-1);
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
@@ -123,7 +115,14 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	else if (!strcmp(type, "action")) {
 		if (sdm_data_read_attrib(data, "type", buffer, STRING_SIZE) < 0)
 			return(-1);
-		sdm_module_read_action(buffer, data, thing);
+		if (!(obj = create_sdm_object(sdm_object_find_type(buffer, &sdm_action_obj_type))))
+			return(-1);
+		if ((sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
+		    || (obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))) {
+			destroy_sdm_object(obj);
+			return(-1);
+		}
+		sdm_thing_set_action(thing, buffer, SDM_ACTION(obj));
 	}
 	else if (!strcmp(type, "id")) {
 		if ((id = sdm_data_read_integer(data)) > 0)
@@ -154,6 +153,9 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
 	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {
+		// TODO what do we do about other property object types?
+		// TODO if you can get a typename from the object's type, you can make this like the action
+		// 	writing code
 		if (SDM_OBJECT(entry->data)->type == &sdm_string_obj_type) {
 			sdm_data_write_begin_entry(data, "string");
 			sdm_data_write_attrib(data, "name", entry->name);
@@ -166,12 +168,16 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 			sdm_data_write_float(data, SDM_NUMBER(SDM_OBJECT(entry->data))->num);
 			sdm_data_write_end_entry(data);
 		}
-		// TODO what do we do about other property object types?
 	}
 	/** Write the actions to the file */
 	sdm_hash_traverse_reset(thing->actions);
 	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
-		// TODO write actions
+		sdm_data_write_begin_entry(data, "action");
+		sdm_data_write_attrib(data, "name", entry->name);
+		// TODO can you somehow get the type name
+		if  (SDM_OBJECT(entry->data)->type->write_data)
+			SDM_OBJECT(entry->data)->type->write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_end_entry(data);
 	}
 	return(0);
 }
@@ -199,25 +205,11 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *n
 }
 
 
-int sdm_thing_set_action(struct sdm_thing *thing, const char *name, sdm_action_t func, void *ptr, destroy_t destroy)
+int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_action *action)
 {
-	int res;
-	struct sdm_action *action;
-
-	if (!(action = (struct sdm_action *) memory_alloc(sizeof(struct sdm_action))))
-		return(-1);
-	action->func = func;
-	action->ptr = ptr;
-	action->destroy = destroy;
 	if (sdm_hash_find(thing->actions, name))
-		res = sdm_hash_replace(thing->actions, name, action);
-	else
-		res = sdm_hash_add(thing->actions, name, action);
-
-	if (res >= 0)
-		return(0);
-	memory_free(action);
-	return(-1);
+		return(sdm_hash_replace(thing->actions, name, action));
+	return(sdm_hash_add(thing->actions, name, action));
 }
 
 int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const char *name, const char *args)
@@ -227,7 +219,7 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const ch
 
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
-			action->func(action->ptr, user, thing, args);
+			action->func(action, user, thing, args);
 			return(0);
 		}
 	}
@@ -280,16 +272,6 @@ int sdm_thing_assign_new_id(struct sdm_thing *thing)
 	/** Keep in mind that as it stands, the id of the parent of an object must be smaller than the id
 	    of that object itself or the loading of the object will fail. */
 	return(sdm_thing_assign_id(thing, next_id++));
-}
-
-
-/*** Local Functions ***/
-
-static void sdm_thing_destroy_action(struct sdm_action *action)
-{
-	if (action->destroy)
-		action->destroy(action->ptr);
-	memory_free(action);
 }
 
 

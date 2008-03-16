@@ -54,6 +54,13 @@ struct sdm_object_type {
 	sdm_object_write_data_t write_data;
 };
 
+int init_object(void);
+int release_object(void);
+
+int sdm_object_register_type(const char *, struct sdm_object_type *);
+int sdm_object_deregister_type(const char *);
+struct sdm_object_type *sdm_object_find_type(const char *, struct sdm_object_type *);
+
 struct sdm_object *create_sdm_object(struct sdm_object_type *, ...);
 void destroy_sdm_object(struct sdm_object *);
 

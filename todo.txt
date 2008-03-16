@@ -1,9 +1,13 @@
 
-	* implement the writing to a data file of actions in module/basic.  Could you possibly make action
-	  an object that you extend in modules?  where the do action function is virtual
-	* make telnet use it's own extension of the tcp struct
+	* implement the writing of action in basic and sdrl
 	* finish implementing the xml formatting in telnet
 	* make a character creation game object thingie that telnet can call to generate your character
+	* make it possible to get the object name given a pointer to the object type (either through a reverse
+	  lookup or by storing the name in the type itself) for reading/writing properties and actions
+	* should you make container use the element name to lookup the type of object to create? (with the
+	  requirement that the type must extend sdm_thing)
+	* should you add a flag to objects somewhere that specifies that the object should be written to a
+	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 
 	* tidy up the sdrl compling system
 	* make sdrl's do_action bind the argument variables
@@ -15,19 +19,12 @@
 	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
 
 	* add a way to write CDATA to data.c
+	* make the container_find() function continue searching for more complete matches
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
 	* make system things configurable through xml files such as the port that telnet uses
 	* write and implement details on input converting (in the server core format document)
-
-	* make a central list of object types added somehow and searchable by both name and type pointer which
-	  can possibly be used for loading data but it might get pretty messy
-	* read and writing of the object type can be handled directly by the reading and writing functions in
-	  object.c which read and write the proper tag openning
-
-	* should container_write_data() specifically target objects for special writing?
-	* make the container_find() function continue searching for more complete matches
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
@@ -38,6 +35,7 @@
 	* read and write the processor object from the user data file
 	* implement proper handling of telnet commands
 
+	* should you remove the module.c file?
 	* make the login track invalid attempts and terminate the connection after a while
 	* add a way to automatically timeout login attempts
 	* accept a "-d" command line arg and fork to a daemon process

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <sdm/misc.h>
+#include <sdm/hash.h>
 #include <sdm/memory.h>
 
 #include <sdm/objs/object.h>
@@ -15,11 +16,60 @@
     to the file with the root object first working down through the children */
 #define SDM_OBJECT_MAX_INHERITENCE		100
 
+static struct sdm_hash *object_type_list = NULL;
+
+int init_object(void)
+{
+	if (object_type_list)
+		return(1);
+	if (!(object_type_list = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, NULL)))
+		return(-1);
+	return(0);
+}
+
+int release_object(void)
+{
+	if (!object_type_list)
+		return(1);
+	destroy_sdm_hash(object_type_list);
+	object_type_list = NULL;
+	return(0);
+}
+
+int sdm_object_register_type(const char *name, struct sdm_object_type *type)
+{
+	return(sdm_hash_add(object_type_list, name, type));
+}
+
+int sdm_object_deregister_type(const char *name)
+{
+	return(sdm_hash_remove(object_type_list, name));
+}
+
+struct sdm_object_type *sdm_object_find_type(const char *name, struct sdm_object_type *base)
+{
+	struct sdm_object_type *type, *cur;
+
+	if (!(type = sdm_hash_find(object_type_list, name)))
+		return(NULL);
+	/** If base is given, then only return this type if it is a subclass of base */
+	if (!base)
+		return(type);
+	for (cur = type; cur; cur = cur->parent) {
+		if (cur == base)
+			return(type);
+	}
+	return(NULL);
+}
+
+
 struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
 {
 	va_list va;
 	struct sdm_object *obj;
 
+	if (!type)
+		return(NULL);
 	if (!(obj = memory_alloc(type->size)))
 		return(NULL);
 	memset(obj, '\0', type->size);

@@ -41,7 +41,7 @@ int release_world(void)
 {
 	if (root_world) {
 		// TODO activate when you are ready to write the world
-		sdm_world_write(root_world, NULL);
+		//sdm_world_write(root_world, NULL);
 		destroy_sdm_object(SDM_OBJECT(root_world));
 	}
 	return(0);

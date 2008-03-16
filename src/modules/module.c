@@ -3,9 +3,6 @@
  * Description:	Module Manager
  */
 
-#include <stdio.h>
-#include <string.h>
-
 #include <sdm/misc.h>
 #include <sdm/data.h>
 #include <sdm/hash.h>
@@ -45,18 +42,6 @@ int sdm_module_deregister(const char *name)
 {
 	return(sdm_hash_remove(modules_list, name));
 }
-
-int sdm_module_read_action(const char *type, struct sdm_data_file *data, struct sdm_thing *thing)
-{
-	struct sdm_module *module;
-
-	if (!(module = sdm_hash_find(modules_list, type)) || !module->read_action)
-		return(-1);
-	return(module->read_action(data, thing));
-}
-
-
-
 
 
 

@@ -11,6 +11,7 @@
 #include <sdm/interface/interface.h>
 #include <sdm/interface/tcp.h>
 #include <sdm/interface/telnet.h>
+#include "ansi.h"
 
 #include <sdm/objs/user.h>
 
@@ -18,27 +19,8 @@
 #define BUFFER_SIZE		512
 #define MAX_ATTRIB		64
 
-#define SDM_ATTR_BOLD		0x01
-#define SDM_ATTR_FLASH		0x02
-#define SDM_ATTR_UNDERLINE	0x04
-
-#define SDM_ATTR_BLACK		0
-#define SDM_ATTR_RED		1
-#define SDM_ATTR_GREEN		2
-#define SDM_ATTR_YELLOW		3
-#define SDM_ATTR_BLUE		4
-#define SDM_ATTR_MAGENTA	5
-#define SDM_ATTR_CYAN		6
-#define SDM_ATTR_WHITE		7
-
 #define IS_WHITESPACE(ch)	\
 	( ((ch) == ' ') || ((ch) == '\t') )
-
-struct sdm_telnet_attrib {
-	char attrib;
-	char fg;
-	char bg;
-};
 
 struct sdm_interface_type sdm_telnet_type = {
 	sizeof(struct sdm_telnet),
@@ -48,18 +30,19 @@ struct sdm_interface_type sdm_telnet_type = {
 	(sdm_int_write_t) sdm_telnet_write
 };
 
-static struct sdm_telnet *telnet_server;
+static struct sdm_telnet *telnet_server = NULL;
 
 static int sdm_telnet_accept_connection(void *, struct sdm_telnet *);
 static int sdm_telnet_handle_read(struct sdm_user *, struct sdm_telnet *);
 static inline int sdm_telnet_interpret_command(struct sdm_telnet *, const char *, int);
-static inline int sdm_telnet_rewrite_attrib(struct sdm_telnet *, char *, struct sdm_telnet_attrib *, int *);
 
 int init_telnet(void)
 {
 	if (telnet_server)
 		return(1);
 	if (!(telnet_server = (struct sdm_telnet *) create_sdm_interface(&sdm_telnet_type, SDM_TCP_LISTEN, TELNET_PORT)))
+		return(-1);
+	if (init_telnet_ansi() < 0)
 		return(-1);
 	sdm_interface_set_callback(SDM_INTERFACE(telnet_server), IO_COND_READ, (callback_t) sdm_telnet_accept_connection, NULL);
 	return(0);
@@ -69,6 +52,7 @@ int release_telnet(void)
 {
 	if (!telnet_server)
 		return(1);
+	release_telnet_ansi();
 	destroy_sdm_interface(SDM_INTERFACE(telnet_server));
 	telnet_server = NULL;
 	return(0);
@@ -126,12 +110,13 @@ int sdm_telnet_read(struct sdm_telnet *inter, char *buffer, int max)
 
 int sdm_telnet_write(struct sdm_telnet *inter, const char *str)
 {
+	int res;
 	int i, j, k;
-	int attr_sp = 0;
-	char buffer[STRING_SIZE];
-	struct sdm_telnet_attrib attribs[MAX_ATTRIB];
+	char buffer[LARGE_STRING_SIZE];
+	struct sdm_telnet_attrib_stack stack;
 
-	for (i = 0, j = 0; (j < STRING_SIZE) && (str[i] != '\0'); i++) {
+	stack.sp = 0;
+	for (i = 0, j = 0; (j < LARGE_STRING_SIZE) && (str[i] != '\0'); i++) {
 		switch (str[i]) {
 		    case '\n': {
 			buffer[j++] = '\r';
@@ -143,7 +128,7 @@ int sdm_telnet_write(struct sdm_telnet *inter, const char *str)
 			buffer[j++] = str[i++];
 			if (str[i] == '/')
 				buffer[j++] = str[i++];
-			for (; (j < STRING_SIZE) && (str[i] != '\0'); i++, j++) {
+			for (; (j < LARGE_STRING_SIZE) && (str[i] != '\0'); i++, j++) {
 				/** Break at the first non-alphanumeric or '_' character. */
 				if (!(((str[i] >= '0') && (str[i] <= '9'))
 				    || ((str[i] >= 'A') && (str[i] <= 'Z'))
@@ -157,7 +142,7 @@ int sdm_telnet_write(struct sdm_telnet *inter, const char *str)
 				break;
 			}
 			buffer[j] = '\0';
-			j = k + sdm_telnet_rewrite_attrib(inter, &buffer[k], attribs, &attr_sp);
+			j = k + sdm_telnet_write_attrib(inter, &buffer[k + 1], &buffer[k], LARGE_STRING_SIZE - k - 1, &stack);
 			break;
 		    }
 		    case '&': {
@@ -189,18 +174,11 @@ int sdm_telnet_write(struct sdm_telnet *inter, const char *str)
 		}
 	}
 
+	res = sdm_tcp_send(SDM_TCP(inter), buffer, j);
 	/** If we haven't closed all attribute tags then send the reset escape to put us back to normal */
-	if (attr_sp) {
-		if (j + 3 < STRING_SIZE) {
-			strncpy(&buffer[j], "\x1b[m", 3);
-			j += 3;
-		}
-		else {
-			strncpy(&buffer[STRING_SIZE - 3], "\x1b[m", 3);
-			j = STRING_SIZE;
-		}
-	}
-	if (sdm_tcp_send(SDM_TCP(inter), buffer, j) < 0)
+	if (stack.sp != 0)
+		sdm_telnet_reset_attribs(inter);
+	if (res < 0)
 		return(-1);
 	return(j);
 }
@@ -280,42 +258,5 @@ static inline int sdm_telnet_interpret_command(struct sdm_telnet *inter, const c
 	    }
 	}
 }
-
-static inline int sdm_telnet_rewrite_attrib(struct sdm_telnet *inter, char *buffer, struct sdm_telnet_attrib *attrib, int *attr_sp)
-{
-	// TODO implement this properly
-	if (buffer[1] == '/') {
-		strncpy(buffer, "\x1b[0m", 4);
-		return(4);
-	}
-	else if (!strcmp(&buffer[1], "b")) {
-		strncpy(buffer, "\x1b[1m", 4);
-		return(4);
-	}
-	return(0);
-}
-
-
-/*
-	{ "b",			{ SDM_ATTR_BOLD, 0, 0 } },
-	{ "black",		{ 0, SDM_ATTR_BLACK, 0 } },
-	{ "blue",		{ 0, SDM_ATTR_BLUE, 0 } },
-	{ "brightblue",		{ SDM_ATTR_BOLD, SDM_ATTR_BLUE, 0 } },
-	{ "brightcyan",		{ SDM_ATTR_BOLD, SDM_ATTR_CYAN, 0 } },
-	{ "brightgreen",	{ SDM_ATTR_BOLD, SDM_ATTR_GREEN, 0 } },
-	{ "brightmagenta",	{ SDM_ATTR_BOLD, SDM_ATTR_MAGENTA, 0 } },
-	{ "brightred",		{ SDM_ATTR_BOLD, SDM_ATTR_RED, 0 } },
-	{ "brightwhite",	{ SDM_ATTR_BOLD, SDM_ATTR_WHITE, 0 } },
-	{ "brightyellow",	{ SDM_ATTR_BOLD, SDM_ATTR_YELLOW, 0 } },
-	{ "cyan",		{ 0, SDM_ATTR_CYAN, 0 } },
-	{ "f",			{ SDM_ATTR_FLASH, 0, 0 } },
-	{ "green",		{ 0, SDM_ATTR_GREEN, 0 } },
-	{ "magenta",		{ 0, SDM_ATTR_MAGENTA, 0 } },
-	{ "red",		{ 0, SDM_ATTR_RED, 0 } },
-	{ "u",			{ SDM_ATTR_UNDERLINE, 0, 0 } },
-	{ "white",		{ 0, SDM_ATTR_WHITE, 0 } },
-	{ "yellow",		{ 0, SDM_ATTR_YELLOW, 0 } },
-	{ NULL,			{ 0, 0, 0 } }
-*/
 
 
