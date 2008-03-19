@@ -59,7 +59,7 @@ int init_mud(void)
 	return(0);
 }
 
-int release_mud(void)
+void release_mud(void)
 {
 	release_user();
 	release_world();
@@ -75,7 +75,6 @@ int release_mud(void)
 	release_timer();
 
 	release_data();
-	return(0);
 }
 
 /**

@@ -51,11 +51,12 @@ int init_interpreter(void)
 	sdm_interpreter_add(NULL, "quit", sdm_cmd_quit, NULL, NULL);
 	return(0);}
 
-int release_interpreter(void)
+void release_interpreter(void)
 {
-	if (global_commands)
-		destroy_sdm_hash(global_commands);
-	return(0);
+	if (!global_commands)
+		return;
+	destroy_sdm_hash(global_commands);
+	global_commands = NULL;
 }
 
 int sdm_interpreter_init(struct sdm_interpreter *interpreter, va_list va)

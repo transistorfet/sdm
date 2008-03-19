@@ -25,7 +25,7 @@ struct sdm_lua {
 extern struct sdm_object_type sdm_lua_obj_type;
 
 int init_lua(void);
-int release_lua(void);
+void release_lua(void);
 
 int sdm_lua_read_entry(struct sdm_lua *, const char *, struct sdm_data_file *);
 int sdm_lua_write_data(struct sdm_lua *, struct sdm_data_file *);

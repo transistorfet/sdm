@@ -38,7 +38,7 @@ struct sdm_thing {
 extern struct sdm_object_type sdm_thing_obj_type;
 
 int init_thing(void);
-int release_thing(void);
+void release_thing(void);
 
 int sdm_thing_init(struct sdm_thing *, va_list);
 void sdm_thing_release(struct sdm_thing *);

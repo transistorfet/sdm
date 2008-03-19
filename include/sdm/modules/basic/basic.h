@@ -22,7 +22,7 @@ extern struct sdm_object_type sdm_basic_obj_type;
 #define SDM_BASIC_ARGS(func)			SDM_ACTION_ARGS(func)
 
 int init_basic(void);
-int release_basic(void);
+void release_basic(void);
 
 int sdm_basic_read_entry(struct sdm_basic *, const char *, struct sdm_data_file *);
 int sdm_basic_write_data(struct sdm_basic *, struct sdm_data_file *);

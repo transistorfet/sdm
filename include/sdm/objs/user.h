@@ -31,7 +31,7 @@ struct sdm_user {
 extern struct sdm_object_type sdm_user_obj_type;
 
 int init_user(void);
-int release_user(void);
+void release_user(void);
 
 struct sdm_user *create_sdm_user(const char *, struct sdm_interface *);
 

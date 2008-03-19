@@ -15,7 +15,7 @@
 struct sdm_data_file;
 
 int init_data(void);
-int release_data(void);
+void release_data(void);
 
 int sdm_set_data_path(const char *);
 int sdm_data_file_exists(const char *);

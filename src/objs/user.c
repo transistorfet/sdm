@@ -45,7 +45,7 @@ int init_user(void)
 	return(0);
 }
 
-int release_user(void)
+void release_user(void)
 {
 	struct sdm_user *user;
 
@@ -56,7 +56,6 @@ int release_user(void)
 		destroy_sdm_hash(user_list);
 	}
 	user_list = NULL;
-	return(0);
 }
 
 struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)

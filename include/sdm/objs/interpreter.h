@@ -28,7 +28,7 @@ struct sdm_interpreter {
 extern struct sdm_processor_type sdm_interpreter_obj_type;
 
 int init_interpreter(void);
-int release_interpreter(void);
+void release_interpreter(void);
 
 int sdm_interpreter_init(struct sdm_interpreter *, va_list);
 void sdm_interpreter_release(struct sdm_interpreter *);

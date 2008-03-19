@@ -36,7 +36,6 @@
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* you need a way to return an sdm_object from an action (where? is this really need, give example)
 
-	* make functions return void at times such as release_*()s
 	* can you make object lookup in the interpreter try to match the whole command line and whatever
 	  matches the best is used as the object name and the rest is passed as the args string?
 	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more

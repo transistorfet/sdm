@@ -28,7 +28,7 @@ int init_timer(void)
 	return(0);
 }
 
-int release_timer(void)
+void release_timer(void)
 {
 	struct sdm_timer *cur, *tmp;
 
@@ -37,7 +37,6 @@ int release_timer(void)
 		memory_free(cur);
 		cur = tmp;
 	}
-	return(0);
 }
 
 /**

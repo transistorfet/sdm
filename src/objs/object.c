@@ -27,13 +27,12 @@ int init_object(void)
 	return(0);
 }
 
-int release_object(void)
+void release_object(void)
 {
 	if (!object_type_list)
-		return(1);
+		return;
 	destroy_sdm_hash(object_type_list);
 	object_type_list = NULL;
-	return(0);
 }
 
 int sdm_object_register_type(const char *name, struct sdm_object_type *type)

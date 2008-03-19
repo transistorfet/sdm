@@ -50,14 +50,13 @@ int init_telnet(void)
 	return(0);
 }
 
-int release_telnet(void)
+void release_telnet(void)
 {
 	if (!telnet_server)
-		return(1);
+		return;
 	release_telnet_ansi();
 	destroy_sdm_interface(SDM_INTERFACE(telnet_server));
 	telnet_server = NULL;
-	return(0);
 }
 
 

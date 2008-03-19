@@ -24,7 +24,7 @@ struct sdm_telnet {
 extern struct sdm_interface_type sdm_telnet_type;
 
 int init_telnet(void);
-int release_telnet(void);
+void release_telnet(void);
 
 void sdm_telnet_release(struct sdm_telnet *);
 

@@ -25,7 +25,7 @@ struct sdm_sdrl {
 extern struct sdm_object_type sdm_sdrl_obj_type;
 
 int init_sdrl(void);
-int release_sdrl(void);
+void release_sdrl(void);
 
 int sdm_sdrl_read_entry(struct sdm_sdrl *, const char *, struct sdm_data_file *);
 int sdm_sdrl_write_data(struct sdm_sdrl *, struct sdm_data_file *);

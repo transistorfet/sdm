@@ -46,11 +46,10 @@ int init_thing(void)
 	return(0);
 }
 
-int release_thing(void)
+void release_thing(void)
 {
 	// TODO free all things in the table???
 	memory_free(sdm_thing_table);
-	return(0);
 }
 
 int sdm_thing_init(struct sdm_thing *thing, va_list va)

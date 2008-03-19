@@ -52,14 +52,13 @@ int init_basic(void)
 	return(0);
 }
 
-int release_basic(void)
+void release_basic(void)
 {
 	if (!basic_actions)
-		return(1);
+		return;
 	destroy_sdm_hash(basic_actions);
 	basic_actions = NULL;
 	sdm_object_deregister_type("basic");
-	return(0);
 }
 
 

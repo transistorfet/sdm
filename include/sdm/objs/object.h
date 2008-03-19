@@ -55,7 +55,7 @@ struct sdm_object_type {
 };
 
 int init_object(void);
-int release_object(void);
+void release_object(void);
 
 int sdm_object_register_type(const char *, struct sdm_object_type *);
 int sdm_object_deregister_type(const char *);

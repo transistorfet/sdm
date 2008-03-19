@@ -34,10 +34,9 @@ int init_data(void)
 	return(0);
 }
 
-int release_data(void)
+void release_data(void)
 {
 	xmlCleanupParser();
-	return(0);
 }
 
 int sdm_set_data_path(const char *path)

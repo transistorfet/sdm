@@ -15,7 +15,7 @@
 struct sdm_timer;
 
 int init_timer(void);
-int release_timer(void);
+void release_timer(void);
 
 struct sdm_timer *create_sdm_timer(int, float, callback_t, void *);
 void destroy_sdm_timer(struct sdm_timer *);

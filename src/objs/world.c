@@ -37,14 +37,13 @@ int init_world(void)
 	return(0);
 }
 
-int release_world(void)
+void release_world(void)
 {
 	if (root_world) {
 		// TODO activate when you are ready to write the world
 		//sdm_world_write(root_world, NULL);
 		destroy_sdm_object(SDM_OBJECT(root_world));
 	}
-	return(0);
 }
 
 int sdm_world_init(struct sdm_world *world, va_list va)

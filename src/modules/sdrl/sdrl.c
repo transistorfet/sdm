@@ -52,15 +52,14 @@ int init_sdrl(void)
 	return(0);
 }
 
-int release_sdrl(void)
+void release_sdrl(void)
 {
 	if (!global_mach)
-		return(1);
+		return;
 	sdm_object_deregister_type("sdrl");
 	if (global_mach)
 		sdrl_destroy_machine(global_mach);
 	global_mach = NULL;
-	return(0);
 }
 
 

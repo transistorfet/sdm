@@ -38,7 +38,7 @@ int init_interface(void)
 	return(0);
 }
 
-int release_interface(void)
+void release_interface(void)
 {
 	int i;
 
@@ -50,7 +50,6 @@ int release_interface(void)
 		}
 	}
 	memory_free(interface_list.table);
-	return(0);
 }
 
 /**

@@ -35,7 +35,7 @@ struct sdm_telnet_attrib_stack {
 };
 
 int init_telnet_ansi(void);
-int release_telnet_ansi(void);
+void release_telnet_ansi(void);
 
 int sdm_telnet_add_attrib(const char *, char, char, char);
 void sdm_telnet_reset_attribs(struct sdm_telnet *);

@@ -43,13 +43,12 @@ int init_telnet_ansi(void)
 	return(0);
 }
 
-int release_telnet_ansi(void)
+void release_telnet_ansi(void)
 {
 	if (!telnet_attribs)
-		return(1);
+		return;
 	destroy_sdm_hash(telnet_attribs);
 	telnet_attribs = NULL;
-	return(0);
 }
 
 

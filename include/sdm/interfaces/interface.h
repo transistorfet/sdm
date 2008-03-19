@@ -57,7 +57,7 @@ struct sdm_interface_type {
 };
 
 int init_interface(void);
-int release_interface(void);
+void release_interface(void);
 
 struct sdm_interface *create_sdm_interface(struct sdm_interface_type *, ...);
 void destroy_sdm_interface(struct sdm_interface *);

@@ -29,7 +29,7 @@ extern struct sdm_object_type sdm_world_obj_type;
 	( create_sdm_object(&sdm_world_obj_type, SDM_WORLD_ARGS((file), (id), (parent))) )
 
 int init_world(void);
-int release_world(void);
+void release_world(void);
 
 int sdm_world_init(struct sdm_world *, va_list);
 void sdm_world_release(struct sdm_world *);
