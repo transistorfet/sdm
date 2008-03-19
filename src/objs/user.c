@@ -119,7 +119,7 @@ void sdm_user_release(struct sdm_user *user)
 	/** Release the user's other resources */
 	sdm_hash_remove(user_list, user->name);
 	destroy_string(user->name);
-	destroy_sdm_interface(user->inter);
+	destroy_sdm_object(SDM_OBJECT(user->inter));
 
 	/** Release the superclass */
 	sdm_mobile_release(SDM_MOBILE(user));

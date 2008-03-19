@@ -10,6 +10,7 @@
 
 #include <sdm/globals.h>
 
+#include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
 #define SDM_TCP_CONNECT		1
@@ -29,16 +30,16 @@ struct sdm_tcp {
 	unsigned char read_buffer[TCP_READ_BUFFER];
 };
 
-extern struct sdm_interface_type sdm_tcp_type;
+extern struct sdm_interface_type sdm_tcp_ob_type;
 
 #define sdm_tcp_connect(server, port)	\
-	( (struct sdm_tcp *) create_sdm_interface(&sdm_tcp_type, SDM_TCP_CONNECT, (server), (port)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), SDM_TCP_CONNECT, (server), (port)) )
 
 #define sdm_tcp_listen(port)	\
-	( (struct sdm_tcp *) create_sdm_interface(&sdm_tcp_type, SDM_TCP_LISTEN, (port)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), SDM_TCP_LISTEN, (port)) )
 
 #define sdm_tcp_accept(type, inter)	\
-	( (struct sdm_tcp *) create_sdm_interface((type), SDM_TCP_ACCEPT, (inter)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(type), SDM_TCP_ACCEPT, (inter)) )
 
 int sdm_tcp_init(struct sdm_tcp *, va_list);
 void sdm_tcp_release(struct sdm_tcp *);

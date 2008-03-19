@@ -10,6 +10,7 @@
 #include <sdm/objs/user.h>
 #include <sdm/objs/login.h>
 
+#include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
@@ -24,10 +25,14 @@
 #define IS_WHITESPACE(ch)	\
 	( ((ch) == ' ') || ((ch) == '\t') )
 
-struct sdm_interface_type sdm_telnet_type = {
+struct sdm_interface_type sdm_telnet_obj_type = { {
+	NULL,
 	sizeof(struct sdm_telnet),
-	(sdm_int_init_t) sdm_tcp_init,
-	(sdm_int_release_t) sdm_telnet_release,
+	NULL,
+	(sdm_object_init_t) sdm_tcp_init,
+	(sdm_object_release_t) sdm_telnet_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL	},
 	(sdm_int_read_t) sdm_telnet_read,
 	(sdm_int_write_t) sdm_telnet_write
 };
@@ -42,7 +47,7 @@ int init_telnet(void)
 {
 	if (telnet_server)
 		return(1);
-	if (!(telnet_server = (struct sdm_telnet *) create_sdm_interface(&sdm_telnet_type, SDM_TCP_LISTEN, TELNET_PORT)))
+	if (!(telnet_server = (struct sdm_telnet *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_telnet_obj_type), SDM_TCP_LISTEN, TELNET_PORT)))
 		return(-1);
 	if (init_telnet_ansi() < 0)
 		return(-1);
@@ -55,7 +60,7 @@ void release_telnet(void)
 	if (!telnet_server)
 		return;
 	release_telnet_ansi();
-	destroy_sdm_interface(SDM_INTERFACE(telnet_server));
+	destroy_sdm_object(SDM_OBJECT(telnet_server));
 	telnet_server = NULL;
 }
 
@@ -219,7 +224,7 @@ int sdm_telnet_run(struct sdm_telnet *inter, struct sdm_user *user)
 static int sdm_telnet_accept_connection(void *ptr, struct sdm_telnet *server)
 {
 	struct sdm_telnet *inter;
-	if (!(inter = SDM_TELNET(sdm_tcp_accept(&sdm_telnet_type, server))))
+	if (!(inter = SDM_TELNET(sdm_tcp_accept(&sdm_telnet_obj_type, server))))
 		return(0);
 	sdm_telnet_login(inter);
 	return(0);
@@ -231,14 +236,14 @@ static int sdm_telnet_handle_read(struct sdm_user *user, struct sdm_telnet *inte
 	char buffer[BUFFER_SIZE];
 
 	if ((i = sdm_telnet_read(inter, buffer, BUFFER_SIZE - 1)) < 0) {
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 		return(-1);
 	}
 	if (i == 0)
 		return(0);
 
 	if (sdm_processor_process(user->proc, user, buffer) != 0) {
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 		return(1);
 	}
 	return(0);

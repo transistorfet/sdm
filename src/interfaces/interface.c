@@ -15,6 +15,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
 #define INTERFACE_INIT_SIZE		4
@@ -27,6 +28,18 @@ struct sdm_interface_list {
 };
 
 static struct sdm_interface_list interface_list;
+
+struct sdm_interface_type sdm_interface_obj_type = { {
+	NULL,
+	sizeof(struct sdm_interface),
+	NULL,
+	(sdm_object_init_t) sdm_interface_init,
+	(sdm_object_release_t) sdm_interface_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL	},
+	(sdm_int_read_t) NULL,
+	(sdm_int_write_t) NULL
+};
 
 int init_interface(void)
 {
@@ -44,41 +57,25 @@ void release_interface(void)
 
 	for (i = 0;i < interface_list.size;i++) {
 		if (interface_list.table[i]) {
-			if (interface_list.table[i]->type->release)
-				interface_list.table[i]->type->release(interface_list.table[i]);
-			memory_free(interface_list.table[i]);
+			destroy_sdm_object(SDM_OBJECT(interface_list.table[i]));
 		}
 	}
 	memory_free(interface_list.table);
 }
 
-/**
- * Create a new interface of the given type and with the given arguments.  A
- * pointer to the interface is returned or NULL on error.
- */
-struct sdm_interface *create_sdm_interface(struct sdm_interface_type *type, ...)
+int sdm_interface_init(struct sdm_interface *inter, va_list va)
 {
-	va_list va;
 	int newsize;
-	struct sdm_interface *inter;
 	struct sdm_interface **newtable;
 
-	if (!(inter = (struct sdm_interface *) memory_alloc(type->size)))
-		return(NULL);
-	inter->type = type;
-	inter->bitflags = 0;
-	inter->condition = 0;
-	inter->callback.func = NULL;
 	inter->read = -1;
 	inter->write = -1;
 	inter->error = -1;
 
 	if (interface_list.next_space == interface_list.size) {
 		newsize = interface_list.size * INTERFACE_GROWTH_FACTOR;
-		if (!(newtable = (struct sdm_interface **) memory_realloc(interface_list.table, newsize * sizeof(struct sdm_interface *)))) {
-			memory_free(inter);
-			return(NULL);
-		}
+		if (!(newtable = (struct sdm_interface **) memory_realloc(interface_list.table, newsize * sizeof(struct sdm_interface *))))
+			return(-1);
 		interface_list.table = newtable;
 		memset(&interface_list.table[interface_list.size], '\0', (newsize - interface_list.size) * sizeof(struct sdm_interface *));
 		interface_list.next_space = interface_list.size;
@@ -89,31 +86,12 @@ struct sdm_interface *create_sdm_interface(struct sdm_interface_type *type, ...)
 		if (!interface_list.table[interface_list.next_space])
 			break;
 	}
-
-	va_start(va, type);
-	if (type->init && type->init(inter, va)) {
-		destroy_sdm_interface(inter);
-		return(NULL);
-	}
-	va_end(va);
-	return(inter);
+	return(0);
 }
 
-/**
- * Destroy the given interface.  A 0 is returned on success or a negative
- * number on error.
- */
-void destroy_sdm_interface(struct sdm_interface *inter)
+void sdm_interface_release(struct sdm_interface *inter)
 {
 	int i;
-
-	/** We don't want to attempt to free this object twice */
-	if (!inter || (inter->bitflags & SDM_IBF_RELEASING))
-		return;
-	inter->bitflags |= SDM_IBF_RELEASING;
-	if (inter->type->release)
-		inter->type->release(inter);
-	memory_free(inter);
 
 	for (i = 0;i < interface_list.size;i++) {
 		if (interface_list.table[i] == inter) {
@@ -121,7 +99,13 @@ void destroy_sdm_interface(struct sdm_interface *inter)
 			if (i < interface_list.next_space)
 				interface_list.next_space = i;
 		}
-	}	
+	}
+	if (inter->read > 0)
+		close(inter->read);
+	if ((inter->write > 0) && (inter->write != inter->read))
+		close(inter->write);
+	if ((inter->error > 0) && (inter->error != inter->read) && (inter->error != inter->write))
+		close(inter->error);
 }
 
 

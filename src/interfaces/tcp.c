@@ -19,6 +19,7 @@
 #include <sys/select.h>
 #include <netinet/in.h>
 
+#include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 
@@ -33,10 +34,14 @@
 #define TCP_LISTEN_QUEUE		5
 #endif
 
-struct sdm_interface_type sdm_tcp_type = {
+struct sdm_interface_type sdm_tcp_obj_type = { {
+	NULL,
 	sizeof(struct sdm_tcp),
-	(sdm_int_init_t) sdm_tcp_init,
-	(sdm_int_release_t) sdm_tcp_release,
+	NULL,
+	(sdm_object_init_t) sdm_tcp_init,
+	(sdm_object_release_t) sdm_tcp_release,
+	(sdm_object_read_entry_t) NULL,
+	(sdm_object_write_data_t) NULL	},
 	(sdm_int_read_t) sdm_tcp_read,
 	(sdm_int_write_t) sdm_tcp_write
 };
@@ -49,6 +54,8 @@ int sdm_tcp_init(struct sdm_tcp *inter, va_list va)
 {
 	int type;
 
+	if (sdm_interface_init(SDM_INTERFACE(inter), va) < 0)
+		return(-1);
 	inter->read_pos = 0;
 	inter->read_length = 0;
 	memset(inter->read_buffer, '\0', TCP_READ_BUFFER);
@@ -86,6 +93,8 @@ void sdm_tcp_release(struct sdm_tcp *inter)
 {
 	shutdown(SDM_INTERFACE(inter)->read, 2);
 	close(SDM_INTERFACE(inter)->read);
+	SDM_INTERFACE(inter)->read = 0;
+	sdm_interface_release(SDM_INTERFACE(inter));
 }
 
 

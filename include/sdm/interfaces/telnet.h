@@ -8,6 +8,7 @@
 
 #include <sdm/globals.h>
 
+#include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 
@@ -21,7 +22,7 @@ struct sdm_telnet {
 
 };
 
-extern struct sdm_interface_type sdm_telnet_type;
+extern struct sdm_interface_type sdm_telnet_obj_type;
 
 int init_telnet(void);
 void release_telnet(void);

@@ -36,7 +36,7 @@ static int sdm_telnet_register_read_name(struct sdm_login *login, struct sdm_tel
 	char buffer[STRING_SIZE];
 
 	if ((res = sdm_telnet_read(inter, buffer, STRING_SIZE - 1)) < 0) {
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 		return(-1);
 	}
 	else if (res == 0)
@@ -52,7 +52,7 @@ static int sdm_telnet_register_read_name(struct sdm_login *login, struct sdm_tel
 	}
 	else if (sdm_login_set_name(login, buffer)) {
 		sdm_telnet_write(inter, SDM_TXT_OUT_OF_MEMORY);
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 	}
 	else {
 		sdm_telnet_echo(inter, 0);
@@ -68,7 +68,7 @@ static int sdm_telnet_register_read_password(struct sdm_login *login, struct sdm
 	char buffer[STRING_SIZE];
 
 	if ((res = sdm_telnet_read(inter, buffer, STRING_SIZE - 1)) < 0) {
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 		return(-1);
 	}
 	else if (res == 0)
@@ -95,7 +95,7 @@ static int sdm_telnet_register_verify_password(struct sdm_login *login, struct s
 	char buffer[STRING_SIZE];
 
 	if ((res = sdm_telnet_read(inter, buffer, STRING_SIZE - 1)) < 0) {
-		destroy_sdm_interface(SDM_INTERFACE(inter));
+		destroy_sdm_object(SDM_OBJECT(inter));
 		return(-1);
 	}
 	else if (res == 0)
@@ -107,7 +107,7 @@ static int sdm_telnet_register_verify_password(struct sdm_login *login, struct s
 		sdm_telnet_echo(inter, 1);
 		if (!(user = create_sdm_user(login->name, SDM_INTERFACE(inter)))) {
 			sdm_telnet_write(inter, SDM_TXT_OUT_OF_MEMORY);
-			destroy_sdm_interface(SDM_INTERFACE(inter));
+			destroy_sdm_object(SDM_OBJECT(inter));
 			return(-1);
 		}
 		else {

@@ -26,7 +26,7 @@ struct sdm_processor {
 };
 
 struct sdm_processor_type {
-	struct sdm_object_type object;
+	struct sdm_object_type object_type;
 	sdm_processor_startup_t startup;
 	sdm_processor_process_t process;
 	sdm_processor_shutdown_t shutdown;
