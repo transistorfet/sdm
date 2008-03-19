@@ -40,7 +40,7 @@ int init_user(void)
 {
 	if (user_list)
 		return(1);
-	if (!(user_list = create_sdm_hash(0, NULL)))
+	if (!(user_list = create_sdm_hash(0, -1, NULL)))
 		return(-1);
 	return(0);
 }

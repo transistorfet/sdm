@@ -31,7 +31,7 @@ struct sdm_hash {
 	struct sdm_hash_entry **table;
 };
 
-struct sdm_hash *create_sdm_hash(short, destroy_t);
+struct sdm_hash *create_sdm_hash(short, int, destroy_t);
 void destroy_sdm_hash(struct sdm_hash *);
 
 int sdm_hash_add(struct sdm_hash *, const char *, void *);

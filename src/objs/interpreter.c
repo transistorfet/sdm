@@ -44,7 +44,7 @@ static void destroy_sdm_command(struct sdm_command *);
 int init_interpreter(void)
 {
 	// TODO how will you store commands?  will you need a destroy function here?
-	if (!(global_commands = create_sdm_hash(0, (destroy_t) destroy_sdm_command)))
+	if (!(global_commands = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, (destroy_t) destroy_sdm_command)))
 		return(-1);
 
 	// TODO should the quit command go elsewhere too?
@@ -60,7 +60,7 @@ int release_interpreter(void)
 
 int sdm_interpreter_init(struct sdm_interpreter *interpreter, va_list va)
 {
-	if (!(interpreter->commands = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, NULL)))
+	if (!(interpreter->commands = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, NULL)))
 		return(-1);
 	return(0);
 }

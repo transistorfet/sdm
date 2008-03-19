@@ -19,7 +19,7 @@ int init_telnet_ansi(void)
 {
 	if (telnet_attribs)
 		return(1);
-	if (!(telnet_attribs = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, (destroy_t) sdm_telnet_destroy_attrib)))
+	if (!(telnet_attribs = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, (destroy_t) sdm_telnet_destroy_attrib)))
 		return(-1);
 
 	sdm_telnet_add_attrib("b", SDM_ATTR_BOLD, 0, 0);

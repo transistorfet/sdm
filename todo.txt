@@ -22,8 +22,7 @@
 	  system if needed such that objects that aren't used can be written to disk and removed from memory
 	  but they can be read back in at any time.
 
-	* reorganize the code, especially sdrl (move object.c outside of types/)
-	* fix the build system to compile the system the way you want it to
+	* clean up sdrl a bit
 	* make interface inherit from the object system
 	* should all scripting be supported only through actions and if so, i guess we should rename modules/
 	  to be actions/ and put the action.c file in there just like we have for interfaces
@@ -85,10 +84,6 @@
 	* perhaps you can add a binary tree implementation for partial match searches such as commands that
 	  can automatically be abbreviated.  You could also perhaps make the container store objects in a
 	  in a binary tree for faster accessing
-	* should you add an arg to hashtable to specify an initial size or -1 or something for the default?
-	  otherwise we'll be storing 2 huge hashtables for each thing (over 50000 things = too much mem)
-	* make it possible somehow to prevent a user from "entering" certain objects (like items but also
-	  special locked rooms and stuff)
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
@@ -99,12 +94,13 @@
 	* read and write the processor object from the user data file
 	* implement proper handling of telnet commands
 
-	* should you remove the module.c file?
 	* make the login track invalid attempts and terminate the connection after a while
 	* add a way to automatically timeout login attempts
 	* accept a "-d" command line arg and fork to a daemon process
 	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
 
+	* make build.pl only use the cflags for certain modules as needed instead of all modules being
+	  compiled with the flags for all embedded languages for example
 	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
 	* make it possible for the command prompt to display info (call a function to generate it)
 

@@ -28,12 +28,14 @@ static inline unsigned int sdm_hash_func(const char *);
 /**
  * Allocate a hash table generic data.
  */
-struct sdm_hash *create_sdm_hash(short bitflags, destroy_t destroy)
+struct sdm_hash *create_sdm_hash(short bitflags, int init_size, destroy_t destroy)
 {
 	struct sdm_hash_entry **table;
 	struct sdm_hash *env;
 
-	if (!(table = (struct sdm_hash_entry **) memory_alloc(SDM_HASH_INIT_SIZE * sizeof(struct sdm_hash_entry *))))
+	if (init_size <= 0)
+		init_size = SDM_HASH_INIT_SIZE;
+	if (!(table = (struct sdm_hash_entry **) memory_alloc(init_size * sizeof(struct sdm_hash_entry *))))
 		return(NULL);
 	if (!(env = (struct sdm_hash *) memory_alloc(sizeof(struct sdm_hash)))) {
 		memory_free(table);
@@ -43,10 +45,10 @@ struct sdm_hash *create_sdm_hash(short bitflags, destroy_t destroy)
 	env->destroy = destroy;
 	env->traverse_index = 0;
 	env->traverse_next = NULL;
-	env->size = SDM_HASH_INIT_SIZE;
+	env->size = init_size;
 	env->entries = 0;
 	env->table = table;
-	memset(env->table, '\0', SDM_HASH_INIT_SIZE * sizeof(struct sdm_hash_entry *));
+	memset(env->table, '\0', env->size * sizeof(struct sdm_hash_entry *));
 	return(env);
 }
 
