@@ -15,7 +15,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/interface/interface.h>
+#include <sdm/interfaces/interface.h>
 
 #define INTERFACE_INIT_SIZE		4
 #define INTERFACE_GROWTH_FACTOR		2

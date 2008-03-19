@@ -10,7 +10,7 @@
 
 #include <sdm/globals.h>
 
-#include <sdm/interface/interface.h>
+#include <sdm/interfaces/interface.h>
 
 #define SDM_TCP_CONNECT		1
 #define SDM_TCP_LISTEN		2

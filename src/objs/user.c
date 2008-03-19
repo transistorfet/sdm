@@ -16,7 +16,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/processor.h>
 #include <sdm/objs/interpreter.h>
-#include <sdm/interface/interface.h>
+#include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>

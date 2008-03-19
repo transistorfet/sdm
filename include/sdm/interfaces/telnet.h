@@ -8,8 +8,8 @@
 
 #include <sdm/globals.h>
 
-#include <sdm/interface/interface.h>
-#include <sdm/interface/tcp.h>
+#include <sdm/interfaces/interface.h>
+#include <sdm/interfaces/tcp.h>
 
 #include <sdm/objs/login.h>
 #include <sdm/objs/user.h>

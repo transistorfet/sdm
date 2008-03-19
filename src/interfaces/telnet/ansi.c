@@ -6,9 +6,9 @@
 #include <sdm/hash.h>
 #include <sdm/memory.h>
 
-#include <sdm/interface/interface.h>
-#include <sdm/interface/tcp.h>
-#include <sdm/interface/telnet.h>
+#include <sdm/interfaces/interface.h>
+#include <sdm/interfaces/tcp.h>
+#include <sdm/interfaces/telnet.h>
 #include "ansi.h"
 
 static struct sdm_hash *telnet_attribs = NULL;

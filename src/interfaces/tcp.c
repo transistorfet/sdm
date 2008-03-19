@@ -19,8 +19,8 @@
 #include <sys/select.h>
 #include <netinet/in.h>
 
-#include <sdm/interface/interface.h>
-#include <sdm/interface/tcp.h>
+#include <sdm/interfaces/interface.h>
+#include <sdm/interfaces/tcp.h>
 
 #include <sdm/misc.h>
 #include <sdm/globals.h>

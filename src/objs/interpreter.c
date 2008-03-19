@@ -11,7 +11,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
-#include <sdm/interface/interface.h>
+#include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/processor.h>
