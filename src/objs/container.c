@@ -101,12 +101,12 @@ int sdm_container_add(struct sdm_container *container, struct sdm_thing *obj)
 	/** If the 'on_enter' action returns an error, then the object should not be added */
 	if (sdm_thing_do_action(SDM_THING(container), obj, "on_enter", NULL, "") < 0)
 		return(-1);
-	if (obj->owner == container)
+	if (obj->location == container)
 		return(0);
 	/** If this object is in another object and it can't be removed, then we don't add it */
-	if (obj->owner && sdm_container_remove(obj->owner, obj))
+	if (obj->location && sdm_container_remove(obj->location, obj))
 		return(-1);
-	obj->owner = container;
+	obj->location = container;
 	obj->next = container->objects;
 	container->objects = obj;
 	return(0);
@@ -126,7 +126,7 @@ int sdm_container_remove(struct sdm_container *container, struct sdm_thing *obj)
 				prev->next = cur->next;
 			else
 				container->objects = cur->next;
-			cur->owner = NULL;
+			cur->location = NULL;
 			return(0);
 		}
 	}

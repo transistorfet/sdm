@@ -12,7 +12,6 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/container.h>
-#include <sdm/modules/module.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
@@ -75,8 +74,8 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 
 void sdm_thing_release(struct sdm_thing *thing)
 {
-	if (thing->owner)
-		sdm_container_remove(thing->owner, thing);
+	if (thing->location)
+		sdm_container_remove(thing->location, thing);
 	if (thing->properties)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
@@ -129,7 +128,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		id = sdm_data_read_integer(data);
 		sdm_thing_assign_id(thing, id);
 	}
-	else if (!strcmp(type, "owner")) {
+	else if (!strcmp(type, "location")) {
 		id = sdm_data_read_integer(data);
 		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
 			sdm_container_add(SDM_CONTAINER(obj), thing);
@@ -150,8 +149,8 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	sdm_data_write_integer_entry(data, "id", thing->id);
 	if (thing->parent >= 0)
 		sdm_data_write_integer_entry(data, "parent", thing->parent);
-	if (thing->owner)
-		sdm_data_write_integer_entry(data, "owner", SDM_THING(thing->owner)->id);
+	if (thing->location)
+		sdm_data_write_integer_entry(data, "location", SDM_THING(thing->location)->id);
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
 	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {

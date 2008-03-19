@@ -1,0 +1,26 @@
+/*
+ * Header Name:	commands.h
+ * Description:	Telnet Command Codes Header
+ */
+
+#ifndef _SDM_INTERFACE_TELNET_COMMANDS_H
+#define _SDM_INTERFACE_TELNET_COMMANDS_H
+
+#define TELNET_CMD_SE			240
+#define TELNET_CMD_NOP			241
+#define TELNET_CMD_DATA_MARK		242
+#define TELNET_CMD_BREAK		243
+#define TELNET_CMD_INTERRUPT		244
+#define TELNET_CMD_ABORT_OUTPUT		245
+#define TELNET_CMD_ARE_YOU_THERE	246
+#define TELNET_CMD_ERASE_CHARACTER	247
+#define TELNET_CMD_ERASE_LINE		248
+#define TELNET_CMD_GO_AHEAD		250
+#define TELNET_CMD_WILL			251
+#define TELNET_CMD_WONT			252
+#define TELNET_CMD_DO			253
+#define TELNET_CMD_DONT			254
+#define TELNET_CMD_IAC			255
+
+#endif
+

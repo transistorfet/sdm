@@ -10,8 +10,8 @@
 #include <stdarg.h>
 
 #include <sdm/string.h>
-#include <sdm/interfaces/interface.h>
 #include <sdm/objs/processor.h>
+#include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/mobile.h>

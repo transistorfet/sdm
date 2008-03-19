@@ -14,17 +14,16 @@ OBJS =	data.o	\
 	misc.o	\
 	string.o	\
 	timer.o	\
-	interface/interface.o	\
-	interface/tcp.o	\
-	interface/telnet/ansi.o	\
-	interface/telnet/login.o	\
-	interface/telnet/register.o	\
-	interface/telnet/telnet.o	\
-	modules/module.o	\
+	interfaces/interface.o	\
+	interfaces/tcp.o	\
+	interfaces/telnet/ansi.o	\
+	interfaces/telnet/login.o	\
+	interfaces/telnet/register.o	\
+	interfaces/telnet/telnet.o	\
 	modules/basic/basic.o	\
 	modules/sdrl/funcs.o	\
+	modules/sdrl/object.o	\
 	modules/sdrl/sdrl.o	\
-	modules/sdrl/types/object.o	\
 	objs/action.o	\
 	objs/container.o	\
 	objs/interpreter.o	\
@@ -76,16 +75,16 @@ hash.o: hash.c ../include/sdm/hash.h ../include/sdm/globals.h \
   ../include/sdm/memory.h
 
 main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/timer.h ../include/sdm/interface/interface.h \
-  ../include/sdm/interface/tcp.h ../include/sdm/interface/telnet.h \
-  ../include/sdm/objs/login.h ../include/sdm/string.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/user.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
+  ../include/sdm/timer.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
+  ../include/sdm/modules/basic/basic.h ../include/sdm/objs/user.h \
+  ../include/sdm/string.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/mobile.h \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
-  ../include/sdm/modules/module.h ../include/sdm/modules/basic/basic.h \
-  ../include/sdm/modules/sdrl/sdrl.h ../include/sdm/modules/sdrl/object.h \
-  ../include/sdm/objs/world.h ../include/sdm/objs/interpreter.h
+  ../include/sdm/modules/sdrl/sdrl.h ../include/sdm/modules/sdrl/funcs.h \
+  ../include/sdm/modules/sdrl/object.h ../include/sdm/objs/world.h \
+  ../include/sdm/objs/interpreter.h
 
 misc.o: misc.c ../include/sdm/misc.h
 
@@ -94,91 +93,82 @@ string.o: string.c ../include/sdm/string.h ../include/sdm/memory.h
 timer.o: timer.c ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/memory.h
 
-interface/interface.o: interface/interface.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/interface/interface.h
+interfaces/interface.o: interfaces/interface.c ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/interfaces/interface.h
 
-interface/tcp.o: interface/tcp.c ../include/sdm/interface/interface.h \
-  ../include/sdm/globals.h ../include/sdm/interface/tcp.h \
+interfaces/tcp.o: interfaces/tcp.c ../include/sdm/interfaces/interface.h \
+  ../include/sdm/globals.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/misc.h
 
-interface/telnet/ansi.o: interface/telnet/ansi.c ../include/sdm/hash.h \
+interfaces/telnet/ansi.o: interfaces/telnet/ansi.c ../include/sdm/hash.h \
   ../include/sdm/globals.h ../include/sdm/memory.h \
-  ../include/sdm/interface/interface.h ../include/sdm/interface/tcp.h \
-  ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
-  ../include/sdm/string.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/objs/user.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
-  ../include/sdm/objs/thing.h ../include/sdm/objs/action.h \
-  ../include/sdm/objs/container.h interface/telnet/ansi.h
+  ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/telnet.h interfaces/telnet/ansi.h
 
-interface/telnet/login.o: interface/telnet/login.c ../include/sdm/text.h \
-  ../include/sdm/misc.h ../include/sdm/globals.h \
-  ../include/sdm/interface/interface.h ../include/sdm/interface/tcp.h \
-  ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
-  ../include/sdm/string.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/objs/user.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
-  ../include/sdm/objs/thing.h ../include/sdm/hash.h \
-  ../include/sdm/objs/action.h ../include/sdm/objs/container.h
-
-interface/telnet/register.o: interface/telnet/register.c \
+interfaces/telnet/login.o: interfaces/telnet/login.c \
   ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
-  ../include/sdm/interface/interface.h ../include/sdm/interface/tcp.h \
-  ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/string.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/objs/user.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h
 
-interface/telnet/telnet.o: interface/telnet/telnet.c \
-  ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/memory.h \
-  ../include/sdm/interface/interface.h ../include/sdm/interface/tcp.h \
-  ../include/sdm/interface/telnet.h ../include/sdm/objs/login.h \
+interfaces/telnet/register.o: interfaces/telnet/register.c \
+  ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/string.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/objs/user.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/mobile.h \
-  ../include/sdm/objs/thing.h ../include/sdm/objs/action.h \
-  ../include/sdm/objs/container.h interface/telnet/ansi.h
+  ../include/sdm/objs/thing.h ../include/sdm/hash.h \
+  ../include/sdm/objs/action.h ../include/sdm/objs/container.h
 
-modules/module.o: modules/module.c ../include/sdm/misc.h \
-  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/hash.h \
-  ../include/sdm/memory.h ../include/sdm/modules/module.h \
-  ../include/sdm/objs/thing.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/action.h
+interfaces/telnet/telnet.o: interfaces/telnet/telnet.c \
+  ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/memory.h \
+  ../include/sdm/objs/user.h ../include/sdm/string.h \
+  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
+  ../include/sdm/objs/login.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/telnet.h interfaces/telnet/ansi.h \
+  interfaces/telnet/commands.h
 
 modules/basic/basic.o: modules/basic/basic.c ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
   ../include/sdm/memory.h ../include/sdm/objs/user.h \
-  ../include/sdm/string.h ../include/sdm/interface/interface.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/string.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/object.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/modules/module.h ../include/sdm/modules/basic/basic.h
+  ../include/sdm/modules/basic/basic.h
 
 modules/sdrl/funcs.o: modules/sdrl/funcs.c ../include/sdm/objs/user.h \
-  ../include/sdm/string.h ../include/sdm/interface/interface.h \
-  ../include/sdm/globals.h ../include/sdm/objs/processor.h \
+  ../include/sdm/string.h ../include/sdm/objs/processor.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/hash.h ../include/sdm/objs/action.h \
-  ../include/sdm/objs/container.h ../include/sdm/modules/sdrl/funcs.h
+  ../include/sdm/objs/container.h ../include/sdm/modules/sdrl/funcs.h \
+  ../include/sdm/modules/sdrl/object.h
+
+modules/sdrl/object.o: modules/sdrl/object.c ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/modules/sdrl/object.h
 
 modules/sdrl/sdrl.o: modules/sdrl/sdrl.c ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
   ../include/sdm/memory.h ../include/sdm/objs/user.h \
-  ../include/sdm/string.h ../include/sdm/interface/interface.h \
-  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/string.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/object.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/modules/module.h ../include/sdm/modules/sdrl/sdrl.h \
+  ../include/sdm/modules/sdrl/sdrl.h ../include/sdm/modules/sdrl/funcs.h \
   ../include/sdm/modules/sdrl/object.h
-
-modules/sdrl/types/object.o: modules/sdrl/types/object.c \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/globals.h
 
 objs/action.o: objs/action.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
@@ -188,7 +178,7 @@ objs/container.o: objs/container.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/string.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
   ../include/sdm/objs/user.h ../include/sdm/string.h \
-  ../include/sdm/interface/interface.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/processor.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/hash.h ../include/sdm/objs/action.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/world.h
@@ -196,8 +186,8 @@ objs/container.o: objs/container.c ../include/sdm/memory.h \
 objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
   ../include/sdm/objs/user.h ../include/sdm/string.h \
-  ../include/sdm/interface/interface.h ../include/sdm/objs/processor.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/objs/processor.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/hash.h ../include/sdm/objs/action.h \
   ../include/sdm/objs/container.h ../include/sdm/objs/interpreter.h
@@ -205,7 +195,7 @@ objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
 objs/login.o: objs/login.c ../include/sdm/misc.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/hash.h ../include/sdm/string.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/login.h ../include/sdm/interface/interface.h
+  ../include/sdm/objs/login.h ../include/sdm/interfaces/interface.h
 
 objs/mobile.o: objs/mobile.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
@@ -233,14 +223,13 @@ objs/thing.o: objs/thing.c ../include/sdm/hash.h ../include/sdm/globals.h \
   ../include/sdm/data.h ../include/sdm/memory.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/container.h \
-  ../include/sdm/objs/thing.h ../include/sdm/objs/action.h \
-  ../include/sdm/modules/module.h
+  ../include/sdm/objs/thing.h ../include/sdm/objs/action.h
 
 objs/user.o: objs/user.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/hash.h ../include/sdm/string.h ../include/sdm/memory.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
   ../include/sdm/objs/processor.h ../include/sdm/objs/interpreter.h \
-  ../include/sdm/interface/interface.h ../include/sdm/objs/thing.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/objs/thing.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/user.h
 

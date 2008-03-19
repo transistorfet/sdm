@@ -7,13 +7,15 @@
 
 #include <sdm/hash.h>
 #include <sdm/memory.h>
+#include <sdm/objs/user.h>
+#include <sdm/objs/login.h>
 
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
-#include "ansi.h"
 
-#include <sdm/objs/user.h>
+#include "ansi.h"
+#include "commands.h"
 
 #define TELNET_PORT		4000
 #define BUFFER_SIZE		512

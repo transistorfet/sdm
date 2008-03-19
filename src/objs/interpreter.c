@@ -77,7 +77,7 @@ int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 	// TODO print motd
 
 	// TODO this will be handled in the "on_enter" action
-	//sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, "look", "");
+	//sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), user, "look", "");
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
@@ -99,7 +99,7 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 	if ((cmd = (struct sdm_command *) sdm_hash_find(global_commands, input)))
 		res = cmd->func(cmd->ptr, user, &input[i]);
 	else if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i])) != 0)
-	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), SDM_THING(user), input, NULL, &input[i])) != 0)
+	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), SDM_THING(user), input, NULL, &input[i])) != 0)
 	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i))))) {
 		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i]);
 	}
@@ -162,9 +162,9 @@ struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char 
 		id = atoi(&buffer[1]);
 		return(sdm_thing_lookup_id(id));
 	}
-	if (!SDM_THING(user)->owner)
+	if (!SDM_THING(user)->location)
 		return(NULL);
-	return(sdm_container_find(SDM_THING(user)->owner, buffer));
+	return(sdm_container_find(SDM_THING(user)->location, buffer));
 }
 
 

@@ -20,7 +20,6 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/action.h>
 #include <sdm/objs/container.h>
-#include <sdm/modules/module.h>
 #include <sdm/modules/basic/basic.h>
 
 struct sdm_object_type sdm_basic_obj_type = {

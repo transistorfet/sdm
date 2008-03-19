@@ -26,7 +26,7 @@ struct sdm_thing {
 	struct sdm_object object;
 	sdm_id_t id;
 	sdm_id_t parent;
-	struct sdm_container *owner;
+	struct sdm_container *location;
 	struct sdm_thing *next;
 	struct sdm_hash *properties;
 	struct sdm_hash *actions;

@@ -110,14 +110,12 @@
 
 Refactoring:
 
-	* change the member "owner" of thing to something else like "location"
-	* should you change interface/ to interfaces/
 
 Structural Issues:
 
 	* how can you determine what xml element name to use for property objects without having to handle
 	  each object type seperatly?
-	* when you attempt to perform an action on the user and user's owner before the object, you run
+	* when you attempt to perform an action on the user and user's location before the object, you run
 	  into issues such as "look" being defined for the location and an object but because you look up
 	  the location first, you do the location's look action and not the object's look action even if
 	  the object is specified in the look command.  One solution is of course to force these objects to
