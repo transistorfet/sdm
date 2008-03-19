@@ -27,21 +27,6 @@ struct callback_s {
 	if ((callback).func)			\
 		((callback).func)((callback).ptr, arg)
 
-struct property_s {
-	char *name;
-	char *value;
-	struct property_s *next;
-};
-
-static inline char *GET_PROPERTY(struct property_s *prop, const char *name) {
-	while (prop) {
-		if (!strcmp(prop->name, name))
-			return(prop->value);
-		prop = prop->next;
-	}
-	return(NULL);
-}
-
 #define DECLARE_UNUSED(arg)	((void) arg)
 
 #endif
