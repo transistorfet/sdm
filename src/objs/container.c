@@ -95,11 +95,17 @@ int sdm_container_write_data(struct sdm_container *container, struct sdm_data_fi
 
 int sdm_container_add(struct sdm_container *container, struct sdm_thing *obj)
 {
-	// TODO should you notify the objcet somehow that it's being added? (or are these funcs lower level)
+	// TODO is this right?  we are passing the obj as the caller because that is how basic_look
+	//	expects things but is this correct generally?  if not, we'd just have to make a special
+	//	function that redirects the args to look
+	/** If the 'on_enter' action returns an error, then the object should not be added */
+	if (sdm_thing_do_action(SDM_THING(container), obj, "on_enter", NULL, "") < 0)
+		return(-1);
 	if (obj->owner == container)
 		return(0);
-	if (obj->owner)
-		sdm_container_remove(obj->owner, obj);
+	/** If this object is in another object and it can't be removed, then we don't add it */
+	if (obj->owner && sdm_container_remove(obj->owner, obj))
+		return(-1);
 	obj->owner = container;
 	obj->next = container->objects;
 	container->objects = obj;
@@ -110,7 +116,10 @@ int sdm_container_remove(struct sdm_container *container, struct sdm_thing *obj)
 {
 	struct sdm_thing *cur, *prev;
 
-	// TODO should you notify the object somehow that it is being remove?
+	// TODO is this correct?
+	/** If the 'on_exit' action returns an error, then the object should not be removed */
+	if (sdm_thing_do_action(SDM_THING(container), obj, "on_exit", NULL, "") < 0)
+		return(-1);
 	for (prev = NULL, cur = container->objects; cur; prev = cur, cur = cur->next) {
 		if (cur == obj) {
 			if (prev)

@@ -35,8 +35,6 @@ struct sdm_object_type sdm_sdrl_obj_type = {
 
 static struct sdrl_machine *global_mach = NULL;
 
-static int sdm_load_sdrl_library(struct sdrl_machine *);
-
 int init_sdrl(void)
 {
 	if (global_mach)
@@ -45,8 +43,11 @@ int init_sdrl(void)
 		return(-1);
 	if (sdrl_load_base(global_mach))
 		return(-1);
+
+	sdrl_add_binding(global_mach->type_env, "object", sdm_sdrl_make_object_type(global_mach));
 	if (sdm_load_sdrl_library(global_mach))
 		return(-1);
+
 	if (sdm_object_register_type("sdrl", &sdm_sdrl_obj_type) < 0)
 		return(-1);
 	return(0);
@@ -74,7 +75,7 @@ int sdm_sdrl_read_entry(struct sdm_sdrl *action, const char *name, struct sdm_da
 		return(-1);
 	if (!(expr = sdrl_base_parse_string(global_mach, (sdrl_parser_t) sdrl_base_parse_lambda_input, buffer, res)))
 		return(-1);
-	SDM_ACTION(action)->func = (sdm_action_t) sdm_sdrl_do_action;
+	SDM_ACTION(action)->func = (sdm_action_t) sdm_sdrl_action;
 	action->expr = expr;
 	return(SDM_HANDLED);
 }
@@ -86,22 +87,20 @@ int sdm_sdrl_write_data(struct sdm_sdrl *action, struct sdm_data_file *data)
 }
 
 
-int sdm_sdrl_do_action(struct sdrl_expr *expr, struct sdm_user *user, struct sdm_thing *thing, const char *args)
+int sdm_sdrl_action(struct sdm_sdrl *sdrl, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
 {
-	if (!(global_mach->env = sdrl_extend_environment(global_mach->env))) {
+	if (!(global_mach->env = sdrl_extend_environment(global_mach->global))) {
 		SDRL_ERROR(global_mach, SDRL_ES_HIGH, SDRL_ERR_OUT_OF_MEMORY, NULL);
 		return(-1);
 	}
-	// TODO add bindings for user, this, and args
-	//sdrl_add_binding(env, "args", SDRL_MAKE_REFERENCE(args));
-	sdrl_evaluate(global_mach, expr);
+	sdrl_add_binding(global_mach->env, "caller", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(caller)));
+	sdrl_add_binding(global_mach->env, "this", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(thing)));
+	sdrl_add_binding(global_mach->env, "target", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(target)));
+	sdrl_add_binding(global_mach->env, "args", sdrl_make_string(global_mach->heap, sdrl_find_binding(global_mach->type_env, "string"), args, strlen(args)));
+	sdrl_evaluate(global_mach, sdrl->expr);
 	global_mach->env = sdrl_retract_environment(global_mach->env);
 	return(0);
 }
 
-static int sdm_load_sdrl_library(struct sdrl_machine *mach)
-{
-	return(0);
-}
 
 

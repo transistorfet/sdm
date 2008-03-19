@@ -49,7 +49,7 @@ int sdm_thing_set_property(struct sdm_thing *, const char *, struct sdm_object *
 struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, struct sdm_object_type *);
 
 int sdm_thing_set_action(struct sdm_thing *, const char *, struct sdm_action *);
-int sdm_thing_do_action(struct sdm_thing *, struct sdm_user *, const char *, const char *);
+int sdm_thing_do_action(struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_thing *, const char *);
 
 int sdm_thing_assign_id(struct sdm_thing *, sdm_id_t);
 int sdm_thing_assign_new_id(struct sdm_thing *);

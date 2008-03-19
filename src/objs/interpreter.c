@@ -38,9 +38,7 @@ struct sdm_processor_type sdm_interpreter_obj_type = { {
 
 static struct sdm_hash *global_commands = NULL;
 
-int sdm_cmd_say(void *, struct sdm_user *, char *);
 int sdm_cmd_quit(void *, struct sdm_user *, char *);
-
 static void destroy_sdm_command(struct sdm_command *);
 
 int init_interpreter(void)
@@ -49,10 +47,8 @@ int init_interpreter(void)
 	if (!(global_commands = create_sdm_hash(0, (destroy_t) destroy_sdm_command)))
 		return(-1);
 
-	// TODO this is only here temporarily
-	sdm_interpreter_add(NULL, "say", sdm_cmd_say, NULL, NULL);
+	// TODO should the quit command go elsewhere too?
 	sdm_interpreter_add(NULL, "quit", sdm_cmd_quit, NULL, NULL);
-
 	return(0);}
 
 int release_interpreter(void)
@@ -80,8 +76,8 @@ int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 {
 	// TODO print motd
 
-	// TODO is the right way to do this?
-	sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, "look", "");
+	// TODO this will be handled in the "on_enter" action
+	//sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, "look", "");
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
@@ -99,17 +95,18 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 		i++;
 	}
 
+	// TODO should you automatically grap the object from the args instead of passing null to do_action?
 	if ((cmd = (struct sdm_command *) sdm_hash_find(global_commands, input)))
 		res = cmd->func(cmd->ptr, user, &input[i]);
-	else if (((res = sdm_thing_do_action(SDM_THING(user), user, input, &input[i])) != 0)
-	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), user, input, &input[i])) != 0)
+	else if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i])) != 0)
+	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->owner), SDM_THING(user), input, NULL, &input[i])) != 0)
 	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i))))) {
-		res = sdm_thing_do_action(obj, user, input, &input[i]);
+		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i]);
 	}
  	if (res == SDM_CMD_CLOSE)
 		return(1);
 	if (res > 0)
-		sdm_user_tell(user, SDM_TXT_COMMAND_NOT_FOUND);
+		SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_NOT_FOUND);
 	SDM_INTERFACE_WRITE(user->inter, SDM_TXT_COMMAND_PROMPT);
 	return(0);
 }
@@ -172,16 +169,6 @@ struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char 
 
 
 /*** Global Commands ***/
-
-// TODO where should this really go?
-int sdm_cmd_say(void *ptr, struct sdm_user *user, char *args)
-{
-	if (!args || *args == '\0')
-		return(-1);
-	sdm_user_tell(user, "\nYou say \"%s\"", args);
-	sdm_user_announce(user, "\n%s says \"%s\"", user->name, args);
-	return(0);
-}
 
 int sdm_cmd_quit(void *ptr, struct sdm_user *user, char *args)
 {

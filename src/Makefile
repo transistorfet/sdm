@@ -22,7 +22,9 @@ OBJS =	data.o	\
 	interface/telnet/telnet.o	\
 	modules/module.o	\
 	modules/basic/basic.o	\
+	modules/sdrl/funcs.o	\
 	modules/sdrl/sdrl.o	\
+	modules/sdrl/types/object.o	\
 	objs/action.o	\
 	objs/container.o	\
 	objs/interpreter.o	\
@@ -82,8 +84,8 @@ main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
   ../include/sdm/modules/module.h ../include/sdm/modules/basic/basic.h \
-  ../include/sdm/modules/sdrl/sdrl.h ../include/sdm/objs/world.h \
-  ../include/sdm/objs/interpreter.h
+  ../include/sdm/modules/sdrl/sdrl.h ../include/sdm/modules/sdrl/object.h \
+  ../include/sdm/objs/world.h ../include/sdm/objs/interpreter.h
 
 misc.o: misc.c ../include/sdm/misc.h
 
@@ -155,6 +157,14 @@ modules/basic/basic.o: modules/basic/basic.c ../include/sdm/misc.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/modules/module.h ../include/sdm/modules/basic/basic.h
 
+modules/sdrl/funcs.o: modules/sdrl/funcs.c ../include/sdm/objs/user.h \
+  ../include/sdm/string.h ../include/sdm/interface/interface.h \
+  ../include/sdm/globals.h ../include/sdm/objs/processor.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
+  ../include/sdm/hash.h ../include/sdm/objs/action.h \
+  ../include/sdm/objs/container.h ../include/sdm/modules/sdrl/funcs.h
+
 modules/sdrl/sdrl.o: modules/sdrl/sdrl.c ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
   ../include/sdm/memory.h ../include/sdm/objs/user.h \
@@ -163,7 +173,12 @@ modules/sdrl/sdrl.o: modules/sdrl/sdrl.c ../include/sdm/misc.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/modules/module.h ../include/sdm/modules/sdrl/sdrl.h
+  ../include/sdm/modules/module.h ../include/sdm/modules/sdrl/sdrl.h \
+  ../include/sdm/modules/sdrl/object.h
+
+modules/sdrl/types/object.o: modules/sdrl/types/object.c \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/globals.h
 
 objs/action.o: objs/action.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \

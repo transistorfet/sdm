@@ -68,9 +68,7 @@ struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
 	va_list va;
 	struct sdm_object *obj;
 
-	if (!type)
-		return(NULL);
-	if (!(obj = memory_alloc(type->size)))
+	if (!type || !(obj = memory_alloc(type->size)))
 		return(NULL);
 	memset(obj, '\0', type->size);
 	obj->type = type;
@@ -122,6 +120,7 @@ int sdm_object_write_file(struct sdm_object *obj, const char *file, const char *
 int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 {
 	int res;
+	int error = 0;
 	const char *type;
 	struct sdm_object_type *cur;
 
@@ -132,28 +131,33 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 			if (cur->read_entry) {
 				res = cur->read_entry(obj, type, data);
 				if (res < 0)
-					return(-1);
+					error = 1;
 				else if (res == SDM_HANDLED)
 					break;
 			}
 		}
 	} while (sdm_data_read_next(data));
-	return(0);
+	/** We return if the file loaded incorrectly but we don't stop trying to load the file */
+	return(error);
 }
 
 int sdm_object_write_data(struct sdm_object *obj, struct sdm_data_file *data)
 {
 	int i;
+	int error = 0;
 	struct sdm_object_type *cur;
 	struct sdm_object_type *list[SDM_OBJECT_MAX_INHERITENCE];
 
 	for (cur = obj->type, i = 0; cur && (i < SDM_OBJECT_MAX_INHERITENCE); cur = cur->parent, i++)
 		list[i] = cur;
 	for (i -= 1; i >= 0; i--) {
-		if (list[i]->write_data)
-			list[i]->write_data(obj, data);
+		if (list[i]->write_data) {
+			if (list[i]->write_data(obj, data) < 0)
+				error = 1;
+		}
 	}
-	return(0);
+	/** We return if there was a problem but we try to write the whole file */
+	return(error);
 }
 
 

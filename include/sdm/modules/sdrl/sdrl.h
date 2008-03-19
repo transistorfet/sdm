@@ -3,8 +3,8 @@
  * Description:	SDRL Scripting Module Header
  */
 
-#ifndef _SDM_MODULES_SDRL_H
-#define _SDM_MODULES_SDRL_H
+#ifndef _SDM_MODULES_SDRL_SDRL_H
+#define _SDM_MODULES_SDRL_SDRL_H
 
 #include <sdrl/sdrl.h>
 
@@ -12,6 +12,8 @@
 #include <sdm/objs/user.h>
 #include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
+#include <sdm/modules/sdrl/funcs.h>
+#include <sdm/modules/sdrl/object.h>
 
 #define SDM_SDRL(ptr)		( (struct sdm_sdrl *) (ptr) )
 
@@ -28,7 +30,7 @@ int release_sdrl(void);
 int sdm_sdrl_read_entry(struct sdm_sdrl *, const char *, struct sdm_data_file *);
 int sdm_sdrl_write_data(struct sdm_sdrl *, struct sdm_data_file *);
 
-int sdm_sdrl_do_action(struct sdrl_expr *, struct sdm_user *, struct sdm_thing *, const char *);
+int sdm_sdrl_action(struct sdm_sdrl *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *);
 
 #endif
 

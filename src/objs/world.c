@@ -76,11 +76,13 @@ int sdm_world_read_entry(struct sdm_world *world, const char *type, struct sdm_d
 	char buffer[STRING_SIZE];
 
 	if (!strcmp(type, "load")) {
-		if (sdm_data_read_attrib(data, "ref", buffer, STRING_SIZE) < 0)
-			return(-1);
+		sdm_data_read_attrib(data, "ref", buffer, STRING_SIZE);
 		if (!(obj = create_sdm_world(buffer, SDM_NO_ID, 0)))
 			return(-1);
-		sdm_container_add(SDM_CONTAINER(world), SDM_THING(obj));
+		if (sdm_container_add(SDM_CONTAINER(world), SDM_THING(obj)) < 0) {
+			destroy_sdm_object(obj);
+			return(-1);
+		}
 	}
 	else
 		return(SDM_NOT_HANDLED);

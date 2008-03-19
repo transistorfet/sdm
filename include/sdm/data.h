@@ -33,12 +33,14 @@ int sdm_data_read_attrib(struct sdm_data_file *, const char *, char *, int);
 long int sdm_data_read_integer(struct sdm_data_file *);
 double sdm_data_read_float(struct sdm_data_file *);
 int sdm_data_read_string(struct sdm_data_file *, char *, int);
+int sdm_data_read_raw_string(struct sdm_data_file *, char *, int);
 
 int sdm_data_write_begin_entry(struct sdm_data_file *, const char *);
 int sdm_data_write_attrib(struct sdm_data_file *, const char *, const char *);
 int sdm_data_write_integer(struct sdm_data_file *, long int);
 int sdm_data_write_float(struct sdm_data_file *, double);
 int sdm_data_write_string(struct sdm_data_file *, const char *);
+int sdm_data_write_raw_string(struct sdm_data_file *, const char *);
 int sdm_data_write_end_entry(struct sdm_data_file *);
 int sdm_data_write_current(struct sdm_data_file *);
 

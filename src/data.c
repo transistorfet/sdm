@@ -214,9 +214,23 @@ int sdm_data_read_string(struct sdm_data_file *data, char *buffer, int max)
 		xmlFree(str);
 		return(size);
 	}
+	buffer[0] = '\0';
 	return(0);
 }
 
+int sdm_data_read_raw_string(struct sdm_data_file *data, char *buffer, int max)
+{
+	char *str;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		strncpy(buffer, str, max);
+		xmlFree(str);
+		buffer[max - 1] = '\0';
+		return(strlen(buffer));
+	}
+	buffer[0] = '\0';
+	return(0);
+}
 
 
 int sdm_data_write_begin_entry(struct sdm_data_file *data, const char *name)
@@ -250,6 +264,13 @@ int sdm_data_write_float(struct sdm_data_file *data, double value)
 int sdm_data_write_string(struct sdm_data_file *data, const char *value)
 {
 	if (xmlTextWriterWriteFormatString(data->writer, "%s", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int sdm_data_write_raw_string(struct sdm_data_file *data, const char *value)
+{
+	if (xmlTextWriterWriteCDATA(data->writer, value) < 0)
 		return(-1);
 	return(0);
 }

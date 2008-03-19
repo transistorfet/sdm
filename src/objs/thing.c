@@ -91,50 +91,52 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	sdm_number_t num;
 	struct sdm_object *obj;
 	char buffer[STRING_SIZE];
+	struct sdm_object_type *objtype;
 
 	if (!strcmp(type, "string")) {
-		if ((sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
-		    || !(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
+		sdm_data_read_string(data, buffer, STRING_SIZE);
+		if (!(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
 			return(-1);
-		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0) {
+		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+		if (sdm_thing_set_property(thing, buffer, obj) < 0) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}
-		sdm_thing_set_property(thing, buffer, obj);
 	}
 	else if (!strcmp(type, "number")) {
-		if (((num = sdm_data_read_float(data)) < 0)
-		    || !(obj = create_sdm_object(&sdm_number_obj_type, num)))
+		num = sdm_data_read_float(data);
+		if (!(obj = create_sdm_object(&sdm_number_obj_type, num)))
 			return(-1);
-		if (sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0) {
+		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+		if (sdm_thing_set_property(thing, buffer, obj)) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}
-		sdm_thing_set_property(thing, buffer, obj);
 	}
 	else if (!strcmp(type, "action")) {
-		if (sdm_data_read_attrib(data, "type", buffer, STRING_SIZE) < 0)
+		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
+		if (!(objtype = sdm_object_find_type(buffer, &sdm_action_obj_type))
+		    || !(obj = create_sdm_object(objtype)))
 			return(-1);
-		if (!(obj = create_sdm_object(sdm_object_find_type(buffer, &sdm_action_obj_type))))
-			return(-1);
-		if ((sdm_data_read_attrib(data, "name", buffer, STRING_SIZE) < 0)
-		    || (obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))) {
+		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+		if ((obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))
+		    || (sdm_thing_set_action(thing, buffer, SDM_ACTION(obj)) < 0)) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}
-		sdm_thing_set_action(thing, buffer, SDM_ACTION(obj));
 	}
 	else if (!strcmp(type, "id")) {
-		if ((id = sdm_data_read_integer(data)) > 0)
-			sdm_thing_assign_id(thing, id);
+		id = sdm_data_read_integer(data);
+		sdm_thing_assign_id(thing, id);
 	}
 	else if (!strcmp(type, "owner")) {
-		if (((id = sdm_data_read_integer(data)) > 0) && (obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
+		id = sdm_data_read_integer(data);
+		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
 			sdm_container_add(SDM_CONTAINER(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
-		if ((id = sdm_data_read_integer(data)) > 0)
-			thing->parent = id;
+		id = sdm_data_read_integer(data);
+		thing->parent = id;
 	}
 	else
 		return(SDM_NOT_HANDLED);
@@ -185,6 +187,8 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 
 int sdm_thing_set_property(struct sdm_thing *thing, const char *name, struct sdm_object *obj)
 {
+	if (!name || (*name == '\0'))
+		return(-1);
 	if (sdm_hash_find(thing->properties, name))
 		return(sdm_hash_replace(thing->properties, name, obj));
 	return(sdm_hash_add(thing->properties, name, obj));
@@ -207,19 +211,21 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *n
 
 int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_action *action)
 {
+	if (!name || (*name == '\0'))
+		return(-1);
 	if (sdm_hash_find(thing->actions, name))
 		return(sdm_hash_replace(thing->actions, name, action));
 	return(sdm_hash_add(thing->actions, name, action));
 }
 
-int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_user *user, const char *name, const char *args)
+int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *args)
 {
 	struct sdm_thing *cur;
 	struct sdm_action *action;
 
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
-			action->func(action, user, thing, args);
+			action->func(action, caller, thing, target, args);
 			return(0);
 		}
 	}

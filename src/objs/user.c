@@ -74,7 +74,7 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	struct sdm_object *obj;
 
 	name = va_arg(va, const char *);
-	if (!name || (*name == '\0') || !(user->name = create_string("%s", name)))
+	if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
 		return(-1);
 	user->inter = va_arg(va, struct sdm_interface *);
 
@@ -94,9 +94,11 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 		sdm_thing_assign_new_id(SDM_THING(user));
 		if ((obj = create_sdm_string(user->name)))
 			sdm_thing_set_property(SDM_THING(user), "name", obj);
+
 		// TODO hack, remove when you get a chargen process that can set the owner
 		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
-			sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));		
+			sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));
+
 		// TODO use a character generation processor
 		// TODO assign a parent in the chargen
 		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
@@ -174,36 +176,4 @@ int sdm_user_valid_username(const char *name)
 	}
 	return(1);
 }
-
-
-// TODO should these go here?
-int sdm_user_tell(struct sdm_user *user, const char *fmt, ...)
-{
-	va_list va;
-	char buffer[STRING_SIZE];
-
-	va_start(va, fmt);
-	vsnprintf(buffer, STRING_SIZE, fmt, va);
-	va_end(va);
-	return(SDM_INTERFACE_WRITE(user->inter, buffer));
-}
-
-int sdm_user_announce(struct sdm_user *user, const char *fmt, ...)
-{
-	va_list va;
-	struct sdm_thing *cur;
-	char buffer[STRING_SIZE];
-
-	va_start(va, fmt);
-	vsnprintf(buffer, STRING_SIZE, fmt, va);
-	va_end(va);
-	if (!SDM_THING(user)->owner)
-		return(0);
-	for (cur = SDM_THING(user)->owner->objects; cur; cur = cur->next) {
-		if ((SDM_OBJECT(cur)->type == &sdm_user_obj_type) && (SDM_USER(cur) != user))
-			SDM_INTERFACE_WRITE(SDM_USER(cur)->inter, buffer);
-	}
-	return(0);
-}
-
 
