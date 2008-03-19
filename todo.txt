@@ -22,7 +22,7 @@
 	  system if needed such that objects that aren't used can be written to disk and removed from memory
 	  but they can be read back in at any time.
 
-	* reorganize the code, especially sdrl
+	* reorganize the code, especially sdrl (move object.c outside of types/)
 	* fix the build system to compile the system the way you want it to
 	* make interface inherit from the object system
 	* should all scripting be supported only through actions and if so, i guess we should rename modules/
