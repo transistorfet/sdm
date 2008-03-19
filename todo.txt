@@ -26,36 +26,32 @@
 	* make interface inherit from the object system
 	* should all scripting be supported only through actions and if so, i guess we should rename modules/
 	  to be actions/ and put the action.c file in there just like we have for interfaces
+	* read and write the processor object from the user data file
 
-	* make it so that if you set a property or action to NULL, it removes it
 	* should various fixed values in objects such as id, parent, location, etc be checked/returned as
 	  a property using a special check during get_property? or should they be duplicated in the properties
 	  list or something?  or have special read-only reference object types or what?
 	* implement the writing of action in basic and sdrl
-	* make a character creation game object thingie that telnet can call to generate your character
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* you need a way to return an sdm_object from an action (where? is this really need, give example)
+
+	* make functions return void at times such as release_*()s
 	* can you make object lookup in the interpreter try to match the whole command line and whatever
 	  matches the best is used as the object name and the rest is passed as the args string?
-
 	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
 	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
 	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
 	  to the appropriate values
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
-	* go through all the code and re-evaluate all the error handling to determine the failure conditions
-	  and what would happen if the function failed without you checking.
-	* make functions return void at times such as release_*()s
 	* evaluate error handling for all interface stuff
 	* evaluate error handling for all non-object code
 
+
+
 	* implement a permissions system for object modification
-	* you should make special functions that are usable by the module functions that restrict various
-	  things like changing the parent of an object so that there is less chance of a bug in the module
-	  that is exploitable such as making your user inherit from a different object.  Any changing of things
-	  like the parent would have to go through functions that check permissions.
+	* make some handy util static inline functions (what ones should i make?)
 	* should you make container use the element name to lookup the type of object to create? (with the
 	  requirement that the type must extend sdm_thing)
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
@@ -64,15 +60,9 @@
 
 	* make SDRL convert bare words to variable lookups like lisp would
 	* make a proper (if ) and any other handy forms to make it easy to program
-	* make reverse SDRL parser
-	* tidy up the sdrl compling system
-	* make sdrl's do_action bind the argument variables
-	* make sdrl types for user, thing, etc
 	* make a sdrl unparser (perhaps as part of SDRL itself)
-
-	* have a linked list of processors in the user object with a pointer to the currently active one
-	  and read/write the processor's data to the user file.  There should be a function for code to select
-	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
+	* make functions for controlling the properties of sdm_things
+	* make functions for moving objects between containers
 
 	* make the container_find() function continue searching for more complete matches
 	* add command shortcuts like lambdamoo's \" for say and : for emote
@@ -80,7 +70,8 @@
 	  user object and "here" refers to the room the user is currently in
 	* make system things configurable through xml files such as the port that telnet uses
 	* write and implement details on input converting (in the server core format document)
-	* tidy up the xml formatting in telnet perhaps and add theme tags (tags that indirectly refer to format)
+	* tidy up the xml formatting in telnet perhaps and add theme tags (tags that indirectly refer to
+	  format)
 	* perhaps you can add a binary tree implementation for partial match searches such as commands that
 	  can automatically be abbreviated.  You could also perhaps make the container store objects in a
 	  in a binary tree for faster accessing
@@ -91,8 +82,10 @@
 	* make telnet use non-colour xml tags as theme colour specifiers
 
 	* add the ability for telnet to read user specific configuration data from the user file
-	* read and write the processor object from the user data file
 	* implement proper handling of telnet commands
+	* have a linked list of processors in the user object with a pointer to the currently active one
+	  and read/write the processor's data to the user file.  There should be a function for code to select
+	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
 
 	* make the login track invalid attempts and terminate the connection after a while
 	* add a way to automatically timeout login attempts

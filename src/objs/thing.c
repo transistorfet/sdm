@@ -191,6 +191,9 @@ int sdm_thing_set_property(struct sdm_thing *thing, const char *name, struct sdm
 {
 	if (!name || (*name == '\0'))
 		return(-1);
+	/** If the object is NULL, remove the entry from the table */
+	if (!obj)
+		return(sdm_hash_remove(thing->properties, name));
 	if (sdm_hash_find(thing->properties, name))
 		return(sdm_hash_replace(thing->properties, name, obj));
 	return(sdm_hash_add(thing->properties, name, obj));
@@ -215,6 +218,9 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_a
 {
 	if (!name || (*name == '\0'))
 		return(-1);
+	/** If the action is NULL, remove the entry from the table */
+	if (!action)
+		return(sdm_hash_remove(thing->actions, name));
 	if (sdm_hash_find(thing->actions, name))
 		return(sdm_hash_replace(thing->actions, name, action));
 	return(sdm_hash_add(thing->actions, name, action));
