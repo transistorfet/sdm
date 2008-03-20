@@ -71,7 +71,7 @@ int sdm_sdrl_read_entry(struct sdm_sdrl *action, const char *name, struct sdm_da
 
 	if ((res = sdm_data_read_string(data, buffer, LARGE_STRING_SIZE)) < 0)
 		return(-1);
-	if (!(expr = sdrl_base_parse_string(global_mach, (sdrl_parser_t) sdrl_base_parse_lambda_input, buffer, res)))
+	if (!(expr = sdrl_base_parse_string(global_mach, (sdrl_parser_t) sdrl_base_parse_lispy_input, buffer, res)))
 		return(-1);
 	SDM_ACTION(action)->func = (sdm_action_t) sdm_sdrl_action;
 	action->expr = expr;

@@ -18,6 +18,9 @@
 int sdm_load_sdrl_library(struct sdrl_machine *);
 
 int sdm_sdrl_do_action(struct sdrl_machine *, struct sdrl_value *);
+int sdm_sdrl_get_location(struct sdrl_machine *, struct sdrl_value *);
+int sdm_sdrl_get_parent(struct sdrl_machine *, struct sdrl_value *);
+int sdm_sdrl_get_property(struct sdrl_machine *, struct sdrl_value *);
 
 static inline const char *sdm_sdrl_get_string(struct sdrl_value **args)
 {
@@ -40,7 +43,7 @@ static inline struct sdm_object *sdm_sdrl_get_object(struct sdrl_value **args, s
 	*args = (*args)->next;
 	if (value->type->basetype != SDM_BT_SDM_OBJ_REF)
 		return(NULL);
-	if (type && (sdm_object_is_a(SDM_SDRL_OBJ_REF(value)->ref, type)))
+	if (type && !sdm_object_is_a(SDM_SDRL_OBJ_REF(value)->ref, type))
 		return(NULL);
 	return(SDM_SDRL_OBJ_REF(value)->ref);
 }

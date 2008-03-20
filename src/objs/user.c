@@ -13,6 +13,7 @@
 #include <sdm/string.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/form.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/processor.h>
 #include <sdm/objs/interpreter.h>
@@ -70,7 +71,6 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 int sdm_user_init(struct sdm_user *user, va_list va)
 {
 	const char *name;
-	struct sdm_object *obj;
 
 	name = va_arg(va, const char *);
 	if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
@@ -86,21 +86,12 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 	if (sdm_user_exists(user->name)) {
 		sdm_user_read(user);
 		// TODO should this be specified and loaded from the file?
-		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
+		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type)))))
 			return(-1);
 	}
 	else {
-		sdm_thing_assign_new_id(SDM_THING(user));
-		if ((obj = create_sdm_string(user->name)))
-			sdm_thing_set_property(SDM_THING(user), "name", obj);
-
-		// TODO hack, remove when you get a chargen process that can set the location
-		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
-			sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));
-
-		// TODO use a character generation processor
-		// TODO assign a parent in the chargen
-		if (!(user->proc = (struct sdm_processor *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type))))
+		// TODO should there be another way to find out what form to use to register users?
+		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), "etc/register.xml"))))
 			return(-1);
 		// TODO should you write the user to disk at this point?
 	}
@@ -113,7 +104,10 @@ void sdm_user_release(struct sdm_user *user)
 	sdm_user_write(user);
 
 	/** Shutdown the input processor */
-	sdm_processor_shutdown(user->proc, user);
+	// TODO we shouldn't shut down the processor here since it's shutdown in telnet.  If we are
+	//	destroying the user without destroying the connection to initiate it, we are doing it wrong
+	//	(possibly the server is dying with users logged in, thus we don't need to shutdown).
+	//sdm_processor_shutdown(user->proc, user);
 	destroy_sdm_object(SDM_OBJECT(user->proc));
 
 	/** Release the user's other resources */

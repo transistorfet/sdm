@@ -150,12 +150,13 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, s
 {
 	char buffer[STRING_SIZE];
 
-	if (!target && args && (*args != '\0'))
+	if (!target && args && (*args != '\0')) {
 		target = sdm_interpreter_find_object(caller, args, NULL);
-	if (!target && (*args != '\0')) {
-		if (snprintf(buffer, STRING_SIZE, "You don't see a %s here\n", args))
-			sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
-		return(0);
+		if (!target) {
+			if (snprintf(buffer, STRING_SIZE, "You don't see a %s here\n", args))
+				sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
+			return(0);
+		}
 	}
 	if (!target)
 		target = thing;

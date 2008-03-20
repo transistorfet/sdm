@@ -1,11 +1,7 @@
 
-	* we could do a registration thing as a special questionaire processor that is configured through
-	  xml code that tells what to read in <input name="class" type="number" min="1" max="32">prompt</input>
-	  kind of thing.  The values read in would be placed in an sdm_thing object as properties.  An action
-	  on that thing would then be called at the end called "finalize" or something that does any
-	  additional configuring based on the collected data.  How would you make different subselections
-	  based on previous input though (only ask a certain question if the answer to a previous question
-	  was a certain answer)?
+	* how do you get the thing to record information in?
+	* how would you make different subselections in a form based on previous input (only ask a certain
+	  question if the answer to a previous question was a certain answer)?
 
 	* how do you decide what things to print in the list of contents since you don't want to print all
 	  objects such as exist and stuff
@@ -21,18 +17,16 @@
 	  "be" while not logged in but still loaded into the system.  You could then have a special swapping
 	  system if needed such that objects that aren't used can be written to disk and removed from memory
 	  but they can be read back in at any time.
+	* if you write the largest thing id to a file and read it in each time and always make new ids based
+	  on that, you can at least get by without dealing with this problem properly until later
 
-	* make interface inherit from the object system
 	* should you change the name of processor to something shorter and less confusing?
+	* should you move processors and things to their own directory like interfaces/
 	* should all scripting be supported only through actions and if so, i guess we should rename modules/
 	  to be actions/ and put the action.c file in there just like we have for interfaces
-	* clean up sdrl a bit
 	* read and write the processor object from the user data file
 
-	* should various fixed values in objects such as id, parent, location, etc be checked/returned as
-	  a property using a special check during get_property? or should they be duplicated in the properties
-	  list or something?  or have special read-only reference object types or what?
-	* implement the writing of action in basic and sdrl
+	* implement the writing of actions in basic and sdrl
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* you need a way to return an sdm_object from an action (where? is this really need, give example)
@@ -58,7 +52,6 @@
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* (should you) add all object types to the object type list (who makes the calls?)
 
-	* make SDRL convert bare words to variable lookups like lisp would
 	* make a proper (if ) and any other handy forms to make it easy to program
 	* make a sdrl unparser (perhaps as part of SDRL itself)
 	* make functions for controlling the properties of sdm_things

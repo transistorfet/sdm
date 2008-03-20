@@ -14,7 +14,7 @@
 #define SDM_TXT_ALREADY_EXISTS			"That username has already been taken.\n"
 #define SDM_TXT_WRONG_USER_OR_PASSWORD		"Incorrect username or password.\n"
 
-#define SDM_TXT_CHARGEN_NAME_PROMPT		"Character Name: "
+#define SDM_TXT_CHARGEN_NAME_PROMPT		"Login Name: "
 #define SDM_TXT_CHARGEN_PASSWORD_PROMPT		"Enter Password: "
 #define SDM_TXT_REPEAT_PASSWORD_PROMPT		"Verify password: "
 #define SDM_TXT_INVALID_PASSWORD		"Password must be at least 5 characters.\n"

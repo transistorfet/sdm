@@ -49,7 +49,8 @@ int init_interpreter(void)
 
 	// TODO should the quit command go elsewhere too?
 	sdm_interpreter_add(NULL, "quit", sdm_cmd_quit, NULL, NULL);
-	return(0);}
+	return(0);
+}
 
 void release_interpreter(void)
 {
