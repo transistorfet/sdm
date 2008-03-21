@@ -72,9 +72,13 @@ void sdm_telnet_release(struct sdm_telnet *inter)
 
 	callback = sdm_interface_get_callback(SDM_INTERFACE(inter));
 	if ((obj = SDM_OBJECT(callback.ptr))) {
-		if (sdm_object_is_a(obj, &sdm_user_obj_type) && SDM_USER(obj)->proc)
-			sdm_processor_shutdown(SDM_USER(obj)->proc, SDM_USER(obj));
-		destroy_sdm_object(obj);
+		if (sdm_object_is_a(obj, &sdm_user_obj_type)) {
+			if (SDM_USER(obj)->proc)
+				sdm_processor_shutdown(SDM_USER(obj)->proc, SDM_USER(obj));
+			sdm_user_disconnect(SDM_USER(obj));
+		}
+		else
+			destroy_sdm_object(obj);
 	}
 	sdm_tcp_release(SDM_TCP(inter));
 }

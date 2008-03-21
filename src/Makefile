@@ -39,8 +39,9 @@ OBJS =	data.o	\
 	objs/world.o
 
 LIBS =	-lcrypt	\
-	-lsdrl	\
-	-lbase
+	-lbase	\
+	-lstring	\
+	-lsdrl
 
 include $(ROOT)/config.mk
 
@@ -156,7 +157,8 @@ modules/sdrl/funcs.o: modules/sdrl/funcs.c ../include/sdm/objs/user.h \
   ../include/sdm/globals.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/mobile.h ../include/sdm/objs/thing.h \
   ../include/sdm/hash.h ../include/sdm/objs/action.h \
-  ../include/sdm/objs/container.h ../include/sdm/modules/sdrl/funcs.h \
+  ../include/sdm/objs/container.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/number.h ../include/sdm/modules/sdrl/funcs.h \
   ../include/sdm/modules/sdrl/object.h
 
 modules/sdrl/object.o: modules/sdrl/object.c ../include/sdm/objs/object.h \
@@ -194,7 +196,8 @@ objs/form.o: objs/form.c ../include/sdm/text.h ../include/sdm/memory.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/objs/mobile.h \
   ../include/sdm/objs/thing.h ../include/sdm/hash.h \
   ../include/sdm/objs/action.h ../include/sdm/objs/container.h \
-  ../include/sdm/objs/interpreter.h ../include/sdm/objs/form.h
+  ../include/sdm/objs/string.h ../include/sdm/objs/interpreter.h \
+  ../include/sdm/objs/form.h
 
 objs/interpreter.o: objs/interpreter.c ../include/sdm/text.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \

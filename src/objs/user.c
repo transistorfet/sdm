@@ -14,6 +14,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/form.h>
+#include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/processor.h>
 #include <sdm/objs/interpreter.h>
@@ -39,10 +40,27 @@ static struct sdm_hash *user_list = NULL;
 
 int init_user(void)
 {
+	const char *str;
+	char buffer[STRING_SIZE];
+	struct sdm_data_file *data;
+
 	if (user_list)
 		return(1);
 	if (!(user_list = create_sdm_hash(0, -1, NULL)))
 		return(-1);
+
+	/** Load all the users into memory in a disconnected state */
+	if (!(data = sdm_data_open("etc/passwd.xml", SDM_DATA_READ, "passwd")))
+		return(-1);
+	do {
+		if ((str = sdm_data_read_name(data)) && !strcmp(str, "user")) {
+			sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+			// TODO make sure the user is in it's proper disconnected state of being in
+			//	the cryolocker.  A NULL interface should cause disconnect to be called on load
+			create_sdm_user(buffer, NULL);
+		}
+	} while (sdm_data_read_next(data));
+	sdm_data_close(data);
 	return(0);
 }
 
@@ -63,19 +81,22 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 {
 	struct sdm_user *user;
 
-	if ((user = sdm_hash_find(user_list, name)))
+	if ((user = sdm_hash_find(user_list, name))) {
+		sdm_user_connect(user, inter);
 		return(user);
+	}
 	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, SDM_NO_ID, 0)));
 }
 
 int sdm_user_init(struct sdm_user *user, va_list va)
 {
 	const char *name;
+	struct sdm_interface *inter;
 
 	name = va_arg(va, const char *);
 	if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
 		return(-1);
-	user->inter = va_arg(va, struct sdm_interface *);
+	inter = va_arg(va, struct sdm_interface *);
 
 	/** If there is already a user with that name then fail */
 	if (sdm_hash_add(user_list, name, user))
@@ -95,13 +116,20 @@ int sdm_user_init(struct sdm_user *user, va_list va)
 			return(-1);
 		// TODO should you write the user to disk at this point?
 	}
+
+	/** Put the user in the connected state if we were given an interface connection, otherwise make
+	    sure the user is in the disconnected state (in the cryolocker). */
+	if (inter)
+		sdm_user_connect(user, inter);
+	else
+		sdm_user_disconnect(user);
 	return(0);
 }
 
 void sdm_user_release(struct sdm_user *user)
 {
-	/** Save the user information to the user's file */
-	sdm_user_write(user);
+	/** Save the user information to the user's file, and disconnect */
+	sdm_user_disconnect(user);
 
 	/** Shutdown the input processor */
 	// TODO we shouldn't shut down the processor here since it's shutdown in telnet.  If we are
@@ -118,6 +146,46 @@ void sdm_user_release(struct sdm_user *user)
 	/** Release the superclass */
 	sdm_mobile_release(SDM_MOBILE(user));
 }
+
+int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
+{
+	struct sdm_number *number;
+	struct sdm_container *location;
+
+	if (user->inter)
+		destroy_sdm_object(SDM_OBJECT(user->inter));
+	user->inter = inter;
+
+	/** Move the user to the last location recorded or to a safe place if there is no last location */
+	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
+	    && (location = SDM_CONTAINER(sdm_thing_lookup_id(number->num))))
+		sdm_container_add(location, SDM_THING(user));
+	else
+		// TODO you should do this some othe way
+		sdm_container_add(SDM_CONTAINER(sdm_thing_lookup_id(50)), SDM_THING(user));
+	return(0);
+}
+
+void sdm_user_disconnect(struct sdm_user *user)
+{
+	struct sdm_number *number;
+
+	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
+	    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {
+		number->num = SDM_THING(user)->location ? SDM_THING(SDM_THING(user)->location)->id : -1;
+	}
+	// TODO how do you tell this function to forcefully remove the user
+	if (SDM_THING(user)->location)
+		sdm_container_remove(SDM_THING(user)->location, SDM_THING(user));
+
+	/** Save the user information to the user's file only if we were already connected */
+	if (user->inter)
+		sdm_user_write(user);
+	// TODO We assume here that the interface is already beeing destroyed which is why we are being
+	//	called but this is still a potential memory leak.
+	user->inter = NULL;
+}
+
 
 int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data_file *data)
 {
@@ -151,7 +219,9 @@ int sdm_user_exists(const char *name)
 
 int sdm_user_logged_in(const char *name)
 {
-	if (sdm_hash_find(user_list, name))
+	struct sdm_user *user;
+
+	if ((user = sdm_hash_find(user_list, name)) && user->inter)
 		return(1);
 	return(0);
 }

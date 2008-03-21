@@ -37,6 +37,10 @@ struct sdm_user *create_sdm_user(const char *, struct sdm_interface *);
 
 int sdm_user_init(struct sdm_user *, va_list);
 void sdm_user_release(struct sdm_user *);
+
+int sdm_user_connect(struct sdm_user *, struct sdm_interface *);
+void sdm_user_disconnect(struct sdm_user *);
+
 int sdm_user_read_entry(struct sdm_user *, const char *, struct sdm_data_file *);
 int sdm_user_write_data(struct sdm_user *, struct sdm_data_file *);
 

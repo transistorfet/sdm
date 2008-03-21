@@ -1,48 +1,33 @@
 
-	* how do you get the thing to record information in?
+	* how do you get the thing to record information in for a form?
 	* how would you make different subselections in a form based on previous input (only ask a certain
 	  question if the answer to a previous question was a certain answer)?
+	* since we put the user in the test room (50) when they connect and there is no other room to put them
+	  in, when it's a user registering, the character isn't set up until later and when we put them in the
+	  same room, the enter function wont be called and they wont get the initial "look" action
+	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
+	  be done?
 
 	* how do you decide what things to print in the list of contents since you don't want to print all
 	  objects such as exist and stuff
 
-	* BIG PROB: we assign new user ids based on the next available object id *according to the objects
-	  loaded in the system* so since not all users are loaded, we could reassign the same id to a new
-	  user which would cause serious problems.  We need a way to syncronize ids between loaded and
-	  unloaded objects.  We can't just make an new id be assigned when the user logs on since the objects
-	  that the user has will also be effected by this and i don't think all objects should have variable
-	  ids.  The only other way would be to keep track of the used ids such that you load the list of ids
-	  even if the object isn't loaded...  You could move the users to a special "cryostorage" area when
-	  they quit (a place that you should never be able to be in while logged in) thus having a place to
-	  "be" while not logged in but still loaded into the system.  You could then have a special swapping
-	  system if needed such that objects that aren't used can be written to disk and removed from memory
-	  but they can be read back in at any time.
-	* if you write the largest thing id to a file and read it in each time and always make new ids based
-	  on that, you can at least get by without dealing with this problem properly until later
-
-	* should you change the name of processor to something shorter and less confusing?
-	* should you move processors and things to their own directory like interfaces/
-	* should all scripting be supported only through actions and if so, i guess we should rename modules/
-	  to be actions/ and put the action.c file in there just like we have for interfaces
+	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
+	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
+	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
+	  to the appropriate values
+	* evaluate error handling for all interface stuff
+	* evaluate error handling for all non-object code
 	* read and write the processor object from the user data file
-
 	* implement the writing of actions in basic and sdrl
+
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* you need a way to return an sdm_object from an action (where? is this really need, give example)
 
 	* can you make object lookup in the interpreter try to match the whole command line and whatever
 	  matches the best is used as the object name and the rest is passed as the args string?
-	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
-	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
-	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
-	  to the appropriate values
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
-	* evaluate error handling for all interface stuff
-	* evaluate error handling for all non-object code
-
-
 
 	* implement a permissions system for object modification
 	* make some handy util static inline functions (what ones should i make?)
@@ -57,6 +42,8 @@
 	* make functions for controlling the properties of sdm_things
 	* make functions for moving objects between containers
 
+	* should you have a method of finding certain locations/objects by name or something for things like
+	  finding the starting room, safe room, dead room, cryolocker, etc
 	* make the container_find() function continue searching for more complete matches
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
@@ -92,25 +79,18 @@
 
 Refactoring:
 
+	* should you change the name of processor to something shorter and less confusing?
+	* should you move processors and things to their own directory like interfaces/
+	* should all scripting be supported only through actions and if so, i guess we should rename modules/
+	  to be actions/ and put the action.c file in there just like we have for interfaces
 
 Structural Issues:
 
 	* how can you determine what xml element name to use for property objects without having to handle
 	  each object type seperatly?
-	* when you attempt to perform an action on the user and user's location before the object, you run
-	  into issues such as "look" being defined for the location and an object but because you look up
-	  the location first, you do the location's look action and not the object's look action even if
-	  the object is specified in the look command.  One solution is of course to force these objects to
-	  have different commands for "look".  Another option is to be able to specify parameters that an
-	  action will accept so only if there are no args will the "look" in location be executed
 	* how will the "\n before line instead of after" affect telnet vs IRC?  Would this need to be somehow
 	  abstracted so that it happens automatically yet is usable by both systems?
-	* there is a potential problem with xml format codes inside of xml files but only really in terms of
-	  manual editing.  Should you store various property strings as CDATA strings or switch to bbcode
-	  or do nothing?
-	* should there be some way to determine the end of output or the assumption that all output must be
-	  put in a single string and written at once such that when the end is reached and the attributes
-	  have been changed, a reset attribute command can be sent in case the xml formatting wasn't complete.
+	* should you change format codes to something like bbcode ( [red] instead of <red> )
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each

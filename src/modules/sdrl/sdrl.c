@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sdrl/sdrl.h>
 #include <sdrl/lib/base.h>
+#include <sdrl/lib/string.h>
 
 #include <sdm/misc.h>
 #include <sdm/hash.h>
@@ -40,7 +41,8 @@ int init_sdrl(void)
 		return(1);
 	if (!(global_mach = sdrl_create_machine()))
 		return(-1);
-	if (sdrl_load_base(global_mach))
+	if (sdrl_load_base(global_mach)
+	    ||sdrl_load_string(global_mach))
 		return(-1);
 
 	sdrl_add_binding(global_mach->type_env, "object", sdm_sdrl_make_object_type(global_mach));

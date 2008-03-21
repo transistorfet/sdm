@@ -92,7 +92,7 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
  */
 int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
 {
-	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type))
+	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
 	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args));
 }
