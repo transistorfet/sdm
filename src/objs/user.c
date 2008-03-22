@@ -179,10 +179,10 @@ void sdm_user_disconnect(struct sdm_user *user)
 		sdm_container_remove(SDM_THING(user)->location, SDM_THING(user));
 
 	/** Save the user information to the user's file only if we were already connected */
-	if (user->inter)
+	if (user->inter) {
 		sdm_user_write(user);
-	// TODO We assume here that the interface is already beeing destroyed which is why we are being
-	//	called but this is still a potential memory leak.
+		destroy_sdm_object(SDM_OBJECT(user->inter));
+	}
 	user->inter = NULL;
 }
 

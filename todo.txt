@@ -1,4 +1,7 @@
 
+	* how do you decide what things to print in the list of contents since you don't want to print all
+	  objects such as exist and stuff
+
 	* how do you get the thing to record information in for a form?
 	* how would you make different subselections in a form based on previous input (only ask a certain
 	  question if the answer to a previous question was a certain answer)?
@@ -8,16 +11,13 @@
 	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
 	  be done?
 
-	* how do you decide what things to print in the list of contents since you don't want to print all
-	  objects such as exist and stuff
-
 	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
 	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
 	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
 	  to the appropriate values
 	* evaluate error handling for all interface stuff
 	* evaluate error handling for all non-object code
-	* implement the writing of actions in basic and sdrl
+	* implement the writing of actions in basic and lua
 
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
@@ -36,11 +36,6 @@
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* (should you) add all object types to the object type list (who makes the calls?)
 	* read and write the processor object from the user data file
-
-	* make a proper (if ) and any other handy forms to make it easy to program
-	* make a sdrl unparser (perhaps as part of SDRL itself)
-	* make functions for controlling the properties of sdm_things
-	* make functions for moving objects between containers
 
 	* should you have a method of finding certain locations/objects by name or something for things like
 	  finding the starting room, safe room, dead room, cryolocker, etc
@@ -76,6 +71,18 @@
 	  compiled with the flags for all embedded languages for example
 	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
 	* make it possible for the command prompt to display info (call a function to generate it)
+
+
+	* add a release function to SDRL to release the expr when the sdrl action object is destroyed
+	* make a proper (if ) and any other handy forms to make it easy to program
+	* make a sdrl unparser (perhaps as part of SDRL itself)
+	* make functions for controlling the properties of sdm_things
+	* make functions for moving objects between containers
+
+Bugs:
+
+	* the thing id for my user object was set to -1 and there was no error or warning generated.  I have
+	  no idea how or when it happened.
 
 Refactoring:
 

@@ -44,6 +44,7 @@ int init_thing(void)
 	if (!(sdm_thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
 		return(-1);
 	sdm_thing_table_size = THING_TABLE_INIT_SIZE;
+	memset(sdm_thing_table, '\0', sizeof(struct sdm_thing *) * sdm_thing_table_size);
 	return(0);
 }
 
@@ -180,7 +181,7 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
 		sdm_data_write_begin_entry(data, "action");
 		sdm_data_write_attrib(data, "name", entry->name);
-		// TODO can you somehow get the type name
+		// TODO can you somehow get the type name (we are assuming the write_data func does this)
 		if  (SDM_OBJECT(entry->data)->type->write_data)
 			SDM_OBJECT(entry->data)->type->write_data(SDM_OBJECT(entry->data), data);
 		sdm_data_write_end_entry(data);

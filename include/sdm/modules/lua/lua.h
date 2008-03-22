@@ -8,6 +8,7 @@
 
 #include <lua.h>
 
+#include <sdm/string.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
 #include <sdm/objs/thing.h>
@@ -18,7 +19,7 @@
 
 struct sdm_lua {
 	struct sdm_action action;
-
+	string_t code;
 };
 
 extern struct sdm_object_type sdm_lua_obj_type;
@@ -26,6 +27,7 @@ extern struct sdm_object_type sdm_lua_obj_type;
 int init_lua(void);
 void release_lua(void);
 
+void sdm_lua_release(struct sdm_lua *);
 int sdm_lua_read_entry(struct sdm_lua *, const char *, struct sdm_data_file *);
 int sdm_lua_write_data(struct sdm_lua *, struct sdm_data_file *);
 

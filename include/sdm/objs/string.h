@@ -21,7 +21,7 @@ struct sdm_string {
 extern struct sdm_object_type sdm_string_obj_type;
 
 #define create_sdm_string(str)	\
-	( create_sdm_object(&sdm_string_obj_type, (str)) )
+	( SDM_STRING(create_sdm_object(&sdm_string_obj_type, (str))) )
 
 int sdm_string_init(struct sdm_string *, va_list);
 void sdm_string_release(struct sdm_string *);
