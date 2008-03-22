@@ -14,7 +14,7 @@
 #include <sdm/interfaces/telnet.h>
 
 #include <sdm/modules/basic/basic.h>
-#include <sdm/modules/sdrl/sdrl.h>
+#include <sdm/modules/lua/lua.h>
 
 #include <sdm/objs/user.h>
 #include <sdm/objs/world.h>
@@ -43,7 +43,7 @@ int init_mud(void)
 		return(-1);
 	if (init_basic() < 0)
 		return(-1);
-	if (init_sdrl() < 0)
+	if (init_lua() < 0)
 		return(-1);
 
 	if (init_interpreter() < 0)
@@ -66,7 +66,7 @@ void release_mud(void)
 	release_thing();
 	release_interpreter();
 
-	release_sdrl();
+	release_lua();
 	release_basic();
 	release_object();
 

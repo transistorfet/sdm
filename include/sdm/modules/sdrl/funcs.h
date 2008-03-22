@@ -18,9 +18,27 @@
 int sdm_load_sdrl_library(struct sdrl_machine *);
 
 int sdm_sdrl_do_action(struct sdrl_machine *, struct sdrl_value *);
+int sdm_sdrl_get_thing(struct sdrl_machine *, struct sdrl_value *);
 int sdm_sdrl_get_location(struct sdrl_machine *, struct sdrl_value *);
 int sdm_sdrl_get_parent(struct sdrl_machine *, struct sdrl_value *);
 int sdm_sdrl_get_property(struct sdrl_machine *, struct sdrl_value *);
+int sdm_sdrl_set_property(struct sdrl_machine *, struct sdrl_value *);
+
+int sdm_sdrl_add_thing(struct sdrl_machine *, struct sdrl_value *);
+
+int sdm_sdrl_is_user(struct sdrl_machine *, struct sdrl_value *);
+
+static inline double sdm_sdrl_get_number(struct sdrl_value **args)
+{
+	struct sdrl_value *value;
+
+	if (!args || !(value = *args))
+		return(0);
+	*args = (*args)->next;
+	if (value->type->basetype != SDRL_BT_NUMBER)
+		return(0);
+	return(SDRL_NUMBER(value)->num);
+}
 
 static inline const char *sdm_sdrl_get_string(struct sdrl_value **args)
 {

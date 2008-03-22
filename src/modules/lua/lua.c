@@ -1,0 +1,106 @@
+/*
+ * Name:	lua.c
+ * Description:	Lua Scripting Module
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <lua.h>
+#include <lualib.h>
+
+#include <sdm/misc.h>
+#include <sdm/hash.h>
+#include <sdm/data.h>
+#include <sdm/memory.h>
+#include <sdm/globals.h>
+
+#include <sdm/objs/user.h>
+#include <sdm/objs/thing.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/object.h>
+#include <sdm/objs/container.h>
+
+#include <sdm/modules/lua/lua.h>
+#include <sdm/modules/lua/funcs.h>
+
+struct sdm_object_type sdm_lua_obj_type = {
+	&sdm_action_obj_type,
+	sizeof(struct sdm_lua),
+	NULL,
+	(sdm_object_init_t) NULL,
+	(sdm_object_release_t) NULL,
+	(sdm_object_read_entry_t) sdm_lua_read_entry,
+	(sdm_object_write_data_t) sdm_lua_write_data
+};
+
+lua_State *global_state = NULL;
+
+int init_lua(void)
+{
+	if (global_state)
+		return(1);
+	if (!(global_state = lua_open()))
+		return(-1);
+
+	if (sdm_load_lua_library(global_state))
+		return(-1);
+
+	if (sdm_object_register_type("lua", &sdm_lua_obj_type) < 0)
+		return(-1);
+	return(0);
+}
+
+void release_lua(void)
+{
+	if (!global_state)
+		return;
+	sdm_object_deregister_type("lua");
+	if (global_state)
+		lua_close(global_state);
+	global_state = NULL;
+}
+
+
+int sdm_lua_read_entry(struct sdm_lua *action, const char *name, struct sdm_data_file *data)
+{
+/*
+	int res;
+	struct sdrl_expr *expr;
+	char buffer[LARGE_STRING_SIZE];
+
+	if ((res = sdm_data_read_raw_string(data, buffer, LARGE_STRING_SIZE)) < 0)
+		return(-1);
+	if (!(expr = sdrl_base_parse_string(global_mach, (sdrl_parser_t) sdrl_base_parse_lambda_input, buffer, res)))
+		return(-1);
+	SDM_ACTION(action)->func = (sdm_action_t) sdm_sdrl_action;
+	action->expr = expr;
+*/
+	return(SDM_HANDLED);
+}
+
+int sdm_lua_write_data(struct sdm_lua *action, struct sdm_data_file *data)
+{
+	// TODO implement
+	return(0);
+}
+
+
+int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+{
+	/*
+	if (!(global_mach->env = sdrl_extend_environment(global_mach->global))) {
+		SDRL_ERROR(global_mach, SDRL_ES_HIGH, SDRL_ERR_OUT_OF_MEMORY, NULL);
+		return(-1);
+	}
+	sdrl_add_binding(global_mach->env, "user", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(caller)));
+	sdrl_add_binding(global_mach->env, "this", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(thing)));
+	sdrl_add_binding(global_mach->env, "args", sdrl_make_string(global_mach->heap, sdrl_find_binding(global_mach->type_env, "string"), args, strlen(args)));
+	sdrl_evaluate(global_mach, expr);
+	global_mach->env = sdrl_retract_environment(global_mach->env);
+*/
+	return(0);
+}
+
+
+

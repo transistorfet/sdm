@@ -7,6 +7,7 @@
 
 #include <sdm/hash.h>
 #include <sdm/data.h>
+#include <sdm/misc.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/number.h>
@@ -115,14 +116,16 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		}
 	}
 	else if (!strcmp(type, "action")) {
+		obj = NULL;
 		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
-		if (!(objtype = sdm_object_find_type(buffer, &sdm_action_obj_type))
-		    || !(obj = create_sdm_object(objtype)))
-			return(-1);
+		if ((objtype = sdm_object_find_type(buffer, &sdm_action_obj_type)))
+			obj = create_sdm_object(objtype);
 		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		if ((obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))
+		if (!obj || (obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))
 		    || (sdm_thing_set_action(thing, buffer, SDM_ACTION(obj)) < 0)) {
-			destroy_sdm_object(obj);
+			sdm_status("Error loading action, %s.", buffer);
+			if (obj)
+				destroy_sdm_object(obj);
 			return(-1);
 		}
 	}

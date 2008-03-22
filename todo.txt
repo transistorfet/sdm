@@ -17,7 +17,6 @@
 	  to the appropriate values
 	* evaluate error handling for all interface stuff
 	* evaluate error handling for all non-object code
-	* read and write the processor object from the user data file
 	* implement the writing of actions in basic and sdrl
 
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
@@ -36,6 +35,7 @@
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* (should you) add all object types to the object type list (who makes the calls?)
+	* read and write the processor object from the user data file
 
 	* make a proper (if ) and any other handy forms to make it easy to program
 	* make a sdrl unparser (perhaps as part of SDRL itself)

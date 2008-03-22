@@ -101,6 +101,9 @@ int sdm_container_add(struct sdm_container *container, struct sdm_thing *obj)
 	/** If the 'on_enter' action returns an error, then the object should not be added */
 	if (sdm_thing_do_action(SDM_THING(container), obj, "on_enter", NULL, "") < 0)
 		return(-1);
+	// TODO we test for location *after* we do on_entre which means we could accidentally call on_enter
+	//	multiple times.  It saves us atm for when a new char is registered and you re-add the user
+	//	to the same room and that causes the "look" action to be performed
 	if (obj->location == container)
 		return(0);
 	/** If this object is in another object and it can't be removed, then we don't add it */

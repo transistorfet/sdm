@@ -6,14 +6,13 @@
 #ifndef _SDM_MODULES_LUA_LUA_H
 #define _SDM_MODULES_LUA_LUA_H
 
-#include <lua/lua.h>
+#include <lua.h>
 
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
 #include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
-#include <sdm/modules/sdrl/funcs.h>
-#include <sdm/modules/sdrl/object.h>
+#include <sdm/modules/lua/funcs.h>
 
 #define SDM_LUA(ptr)		( (struct sdm_lua *) (ptr) )
 
@@ -30,7 +29,7 @@ void release_lua(void);
 int sdm_lua_read_entry(struct sdm_lua *, const char *, struct sdm_data_file *);
 int sdm_lua_write_data(struct sdm_lua *, struct sdm_data_file *);
 
-int sdm_lua_action(struct sdrl_expr *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *);
+int sdm_lua_action(struct sdm_lua *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *);
 
 #endif
 
