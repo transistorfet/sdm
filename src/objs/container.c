@@ -110,8 +110,15 @@ int sdm_container_add(struct sdm_container *container, struct sdm_thing *obj)
 	if (obj->location && sdm_container_remove(obj->location, obj))
 		return(-1);
 	obj->location = container;
-	obj->next = container->objects;
-	container->objects = obj;
+	obj->next = NULL;
+	if (container->end_objects) {
+		container->end_objects->next = obj;
+		container->end_objects = obj;
+	}
+	else {
+		container->objects = obj;
+		container->end_objects = obj;
+	}
 	return(0);
 }
 
@@ -129,28 +136,13 @@ int sdm_container_remove(struct sdm_container *container, struct sdm_thing *obj)
 				prev->next = cur->next;
 			else
 				container->objects = cur->next;
+			if (container->end_objects == cur)
+				container->end_objects = prev;
 			cur->location = NULL;
 			return(0);
 		}
 	}
 	return(-1);
-}
-
-
-struct sdm_thing *sdm_container_find(struct sdm_container *container, const char *name)
-{
-	struct sdm_thing *cur;
-	struct sdm_object *obj;
-
-	for (cur = container->objects; cur; cur = cur->next) {
-		if (!(obj = sdm_thing_get_property(cur, "name", &sdm_string_obj_type)))
-			continue;
-		// TODO check alternative names stored in properties
-		// TODO keep looking after a match is found in order to find a possibly better match
-		if (!strncasecmp(SDM_STRING(obj)->str, name, strlen(name)))
-			return(cur);
-	}
-	return(NULL);
 }
 
 

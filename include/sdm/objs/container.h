@@ -17,7 +17,7 @@
 struct sdm_container {
 	struct sdm_thing thing;
 	struct sdm_thing *objects;
-
+	struct sdm_thing *end_objects;
 };
 
 #define SDM_CONTAINER_ARGS(id, parent)		SDM_THING_ARGS((id), (parent))
@@ -31,8 +31,6 @@ int sdm_container_write_data(struct sdm_container *, struct sdm_data_file *);
 
 int sdm_container_add(struct sdm_container *, struct sdm_thing *);
 int sdm_container_remove(struct sdm_container *, struct sdm_thing *);
-
-struct sdm_thing *sdm_container_find(struct sdm_container *, const char *);
 
 #endif
 
