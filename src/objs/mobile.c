@@ -10,11 +10,10 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/objs/container.h>
 #include <sdm/objs/mobile.h>
 
 struct sdm_object_type sdm_mobile_obj_type = {
-	&sdm_container_obj_type,
+	&sdm_thing_obj_type,
 	sizeof(struct sdm_mobile),
 	NULL,
 	(sdm_object_init_t) sdm_mobile_init,

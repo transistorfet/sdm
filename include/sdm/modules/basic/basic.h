@@ -15,6 +15,7 @@
 
 struct sdm_basic {
 	struct sdm_action action;
+	struct sdm_hash_entry *entry;
 };
 
 extern struct sdm_object_type sdm_basic_obj_type;

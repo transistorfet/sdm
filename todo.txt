@@ -1,55 +1,50 @@
 
-	* how do you decide what things to print in the list of contents since you don't want to print all
-	  objects such as exist and stuff
-
-	* how do you get the thing to record information in for a form?
-	* how would you make different subselections in a form based on previous input (only ask a certain
-	  question if the answer to a previous question was a certain answer)?
-	* since we put the user in the test room (50) when they connect and there is no other room to put them
-	  in, when it's a user registering, the character isn't set up until later and when we put them in the
-	  same room, the enter function wont be called and they wont get the initial "look" action
-	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
-	  be done?
-
+	* make lua function binding to turn an args string into an object
 	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
 	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
 	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
 	  to the appropriate values
-	* evaluate error handling for all interface stuff
-	* evaluate error handling for all non-object code
-	* implement the writing of actions in basic and lua
+	* can you make object lookup in the interpreter try to match the whole command line and whatever
+	  matches the best is used as the object name and the rest is passed as the args string?
+	* make the container_find() function continue searching for more complete matches
+	* how do you decide what things to print in the list of contents since you don't want to print all
+	  objects such as exist and stuff
+	* should you add a flag to objects somewhere that specifies that the object should be written to a
+	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
+
+	* add actions for manipulating things: get, give, drop, inventory, etc
+	* implement a permissions system for object modification
+	* add command shortcuts like lambdamoo's \" for say and : for emote
+	* perhaps you can add a binary tree implementation for partial match searches such as commands that
+	  can automatically be abbreviated.  You could also perhaps make the container store objects in a
+	  in a binary tree for faster accessing
+
+	* should you make the announce action add a "\n" before each output to the user in order to prevent
+	  interrupting the current line being typed instead of putting it in all the places that generate
+	  output sent to the announce action?
 
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* you need a way to return an sdm_object from an action (where? is this really need, give example)
-
-	* can you make object lookup in the interpreter try to match the whole command line and whatever
-	  matches the best is used as the object name and the rest is passed as the args string?
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
 
-	* implement a permissions system for object modification
 	* make some handy util static inline functions (what ones should i make?)
 	* should you make container use the element name to lookup the type of object to create? (with the
 	  requirement that the type must extend sdm_thing)
-	* should you add a flag to objects somewhere that specifies that the object should be written to a
-	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* (should you) add all object types to the object type list (who makes the calls?)
 	* read and write the processor object from the user data file
+	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
+	  be done?
 
 	* should you have a method of finding certain locations/objects by name or something for things like
 	  finding the starting room, safe room, dead room, cryolocker, etc
-	* make the container_find() function continue searching for more complete matches
-	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* add a system of relative object shortcut names specified in commands like "me" will refer to the
 	  user object and "here" refers to the room the user is currently in
 	* make system things configurable through xml files such as the port that telnet uses
 	* write and implement details on input converting (in the server core format document)
 	* tidy up the xml formatting in telnet perhaps and add theme tags (tags that indirectly refer to
 	  format)
-	* perhaps you can add a binary tree implementation for partial match searches such as commands that
-	  can automatically be abbreviated.  You could also perhaps make the container store objects in a
-	  in a binary tree for faster accessing
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
@@ -79,11 +74,6 @@
 	* make functions for controlling the properties of sdm_things
 	* make functions for moving objects between containers
 
-Bugs:
-
-	* the thing id for my user object was set to -1 and there was no error or warning generated.  I have
-	  no idea how or when it happened.
-
 Refactoring:
 
 	* should you change the name of processor to something shorter and less confusing?
@@ -94,10 +84,15 @@ Refactoring:
 Structural Issues:
 
 	* how can you determine what xml element name to use for property objects without having to handle
-	  each object type seperatly?
-	* how will the "\n before line instead of after" affect telnet vs IRC?  Would this need to be somehow
-	  abstracted so that it happens automatically yet is usable by both systems?
+	  each object type seperatly? Do you need to now that thing and container are merged?
 	* should you change format codes to something like bbcode ( [red] instead of <red> )
+
+	* how do you get the thing to record information in when using a form?
+	* how would you make different subselections in a form based on previous input (only ask a certain
+	  question if the answer to a previous question was a certain answer)?
+	* since we put the user in the test room (50) when they connect and there is no other room to put them
+	  in, when it's a user registering, the character isn't set up until later and when we put them in the
+	  same room, the enter function wont be called and they wont get the initial "look" action
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each
@@ -106,6 +101,9 @@ Structural Issues:
 	  only be called once and it's up to the handling routine to check each descriptor to see which one
 	  is ready?  Isn't there a function called poll that can be used instead of select in those situations?
 
+    Output Formatting/Interfaces:
+	* how will the "\n before line instead of after" affect telnet vs IRC?  Would this need to be somehow
+	  abstracted so that it happens automatically yet is usable by both systems?
 	* There is a need in the future to change the method of sending data to the interface other than just
 	  colour formatting if we want to have an interactive system like a curses interface (much like using
 	  vim on a telnet session).  The code for this would be in a processor subclass most likely inheriting

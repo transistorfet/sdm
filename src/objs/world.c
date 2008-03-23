@@ -12,11 +12,10 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/objs/container.h>
 #include <sdm/objs/world.h>
 
 struct sdm_object_type sdm_world_obj_type = {
-	&sdm_container_obj_type,
+	&sdm_thing_obj_type,
 	sizeof(struct sdm_world),
 	NULL,
 	(sdm_object_init_t) sdm_world_init,
@@ -41,7 +40,7 @@ void release_world(void)
 {
 	if (root_world) {
 		// TODO activate when you are ready to write the world
-		//sdm_world_write(root_world, NULL);
+		sdm_world_write(root_world, NULL);
 		destroy_sdm_object(SDM_OBJECT(root_world));
 	}
 }
@@ -53,7 +52,7 @@ int sdm_world_init(struct sdm_world *world, va_list va)
 	filename = va_arg(va, const char *);
 	if (!(world->filename = create_string("%s", filename)))
 		return(-1);
-	if (sdm_container_init(SDM_CONTAINER(world), va))
+	if (sdm_thing_init(SDM_THING(world), va))
 		return(-1);
 	sdm_object_read_file(SDM_OBJECT(world), world->filename, "world");
 	return(0);
@@ -66,7 +65,7 @@ void sdm_world_release(struct sdm_world *world)
 	    the root world being destroyed, it must be written manually */
 	if (world->filename)
 		destroy_string(world->filename);
-	sdm_container_release(SDM_CONTAINER(world));
+	sdm_thing_release(SDM_THING(world));
 }
 
 int sdm_world_read_entry(struct sdm_world *world, const char *type, struct sdm_data_file *data)
@@ -78,7 +77,7 @@ int sdm_world_read_entry(struct sdm_world *world, const char *type, struct sdm_d
 		sdm_data_read_attrib(data, "ref", buffer, STRING_SIZE);
 		if (!(obj = create_sdm_world(buffer, SDM_NO_ID, 0)))
 			return(-1);
-		if (sdm_container_add(SDM_CONTAINER(world), SDM_THING(obj)) < 0) {
+		if (sdm_thing_add(SDM_THING(world), SDM_THING(obj)) < 0) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}

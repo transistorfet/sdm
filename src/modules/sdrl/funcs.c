@@ -169,15 +169,14 @@ int sdm_sdrl_set_property(struct sdrl_machine *mach, struct sdrl_value *args)
 int sdm_sdrl_add_thing(struct sdrl_machine *mach, struct sdrl_value *args)
 {
 	int res;
-	struct sdm_thing *thing;
-	struct sdm_container *container;
+	struct sdm_thing *thing, *container;
 
-	container = SDM_CONTAINER(sdm_sdrl_get_object(&args, &sdm_container_obj_type));
+	container = sdm_sdrl_get_object(&args, &sdm_thing_obj_type);
 	thing = SDM_THING(sdm_sdrl_get_object(&args, &sdm_thing_obj_type));
 	if (!container || !thing)
 		return(SDRL_ERROR(mach, SDRL_ES_LOW, SDRL_ERR_INVALID_ARGS, NULL));
 
-	res = sdm_container_add(container, thing);
+	res = sdm_thing_add(thing, thing);
 	mach->ret = sdrl_make_number(mach->heap, sdrl_find_binding(mach->type_env, "number"), res);
 	return(0);
 }

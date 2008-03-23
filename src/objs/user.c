@@ -22,7 +22,6 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/objs/container.h>
 #include <sdm/objs/mobile.h>
 #include <sdm/objs/user.h>
 
@@ -70,8 +69,11 @@ void release_user(void)
 
 	if (user_list) {
 		sdm_hash_traverse_reset(user_list);
-		while ((user = sdm_hash_traverse_next(user_list)))
+		while ((user = sdm_hash_traverse_next(user_list))) {
+			if (user->inter)
+				destroy_sdm_object(SDM_OBJECT(user->inter));
 			destroy_sdm_object(SDM_OBJECT(user));
+		}
 		destroy_sdm_hash(user_list);
 	}
 	user_list = NULL;
@@ -150,7 +152,7 @@ void sdm_user_release(struct sdm_user *user)
 int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 {
 	struct sdm_number *number;
-	struct sdm_container *location;
+	struct sdm_thing *location;
 
 	if (user->inter)
 		destroy_sdm_object(SDM_OBJECT(user->inter));
@@ -158,11 +160,11 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
-	    && (location = SDM_CONTAINER(sdm_thing_lookup_id(number->num))))
-		sdm_container_add(location, SDM_THING(user));
+	    && (location = sdm_thing_lookup_id(number->num)))
+		sdm_thing_add(location, SDM_THING(user));
 	else
 		// TODO you should do this some othe way
-		sdm_container_add(SDM_CONTAINER(sdm_thing_lookup_id(50)), SDM_THING(user));
+		sdm_thing_add(sdm_thing_lookup_id(50), SDM_THING(user));
 	return(0);
 }
 
@@ -172,17 +174,15 @@ void sdm_user_disconnect(struct sdm_user *user)
 
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
 	    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {
-		number->num = SDM_THING(user)->location ? SDM_THING(SDM_THING(user)->location)->id : -1;
+		number->num = SDM_THING(user)->location ? SDM_THING(user)->location->id : -1;
 	}
 	// TODO how do you tell this function to forcefully remove the user
 	if (SDM_THING(user)->location)
-		sdm_container_remove(SDM_THING(user)->location, SDM_THING(user));
+		sdm_thing_remove(SDM_THING(user)->location, SDM_THING(user));
 
 	/** Save the user information to the user's file only if we were already connected */
-	if (user->inter) {
+	if (user->inter)
 		sdm_user_write(user);
-		destroy_sdm_object(SDM_OBJECT(user->inter));
-	}
 	user->inter = NULL;
 }
 

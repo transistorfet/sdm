@@ -21,7 +21,6 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/container.h>
 
 #include <sdm/modules/lua/lua.h>
 #include <sdm/modules/lua/funcs.h>

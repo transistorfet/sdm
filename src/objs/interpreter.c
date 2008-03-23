@@ -11,6 +11,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
+#include <sdm/objs/string.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
@@ -40,6 +41,7 @@ static struct sdm_hash *global_commands = NULL;
 
 int sdm_cmd_quit(void *, struct sdm_user *, char *);
 static void destroy_sdm_command(struct sdm_command *);
+static struct sdm_thing *sdm_interpreter_find_object(struct sdm_thing *, const char *);
 
 int init_interpreter(void)
 {
@@ -102,7 +104,7 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 		res = cmd->func(cmd->ptr, user, &input[i]);
 	else if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i])) != 0)
 	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), SDM_THING(user), input, NULL, &input[i])) != 0)
-	    && ((obj = sdm_interpreter_find_object(user, &input[i], &i))))) {
+	    && ((obj = sdm_interpreter_get_object(SDM_THING(user), &input[i], &i))))) {
 		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i]);
 	}
  	if (res == SDM_CMD_CLOSE)
@@ -144,7 +146,7 @@ int sdm_interpreter_add(struct sdm_interpreter *proc, const char *name, sdm_comm
 }
 
 
-struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char *str, int *used)
+struct sdm_thing *sdm_interpreter_get_object(struct sdm_thing *thing, const char *str, int *used)
 {
 	sdm_id_t id;
 	int i, j = 0;
@@ -164,11 +166,10 @@ struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *user, const char 
 		id = atoi(&buffer[1]);
 		return(sdm_thing_lookup_id(id));
 	}
-	if (!SDM_THING(user)->location)
+	if (!thing->location)
 		return(NULL);
-	return(sdm_container_find(SDM_THING(user)->location, buffer));
+	return(sdm_interpreter_find_object(thing->location, buffer));
 }
-
 
 /*** Global Commands ***/
 
@@ -184,6 +185,22 @@ static void destroy_sdm_command(struct sdm_command *cmd)
 	if (cmd->destroy)
 		cmd->destroy(cmd->ptr);
 	memory_free(cmd);
+}
+
+static struct sdm_thing *sdm_interpreter_find_object(struct sdm_thing *thing, const char *name)
+{
+	struct sdm_thing *cur;
+	struct sdm_object *obj;
+
+	for (cur = thing->objects; cur; cur = cur->next) {
+		if (!(obj = sdm_thing_get_property(cur, "name", &sdm_string_obj_type)))
+			continue;
+		// TODO check alternative names stored in properties
+		// TODO keep looking after a match is found in order to find a possibly better match
+		if (!strncasecmp(SDM_STRING(obj)->str, name, strlen(name)))
+			return(cur);
+	}
+	return(NULL);
 }
 
 

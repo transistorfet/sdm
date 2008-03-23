@@ -15,6 +15,9 @@
 
 int sdm_load_lua_library(lua_State *);
 
+int sdm_lua_create_thing(lua_State *);
+int sdm_lua_destroy_thing(lua_State *);
+
 int sdm_lua_do_action(lua_State *);
 int sdm_lua_get_parent(lua_State *);
 int sdm_lua_get_location(lua_State *);

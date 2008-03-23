@@ -9,6 +9,7 @@
 #include <stdarg.h>
 
 #include <sdm/hash.h>
+#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/processor.h>
 
@@ -39,7 +40,8 @@ int sdm_interpreter_shutdown(struct sdm_interpreter *, struct sdm_user *);
 
 int sdm_interpreter_add(struct sdm_interpreter *, const char *, sdm_command_t, void *, destroy_t);
 
-struct sdm_thing *sdm_interpreter_find_object(struct sdm_user *, const char *, int *);
+int sdm_interpreter_get_string(struct sdm_thing *, const char *, int *);
+struct sdm_thing *sdm_interpreter_get_object(struct sdm_thing *, const char *, int *);
 
 #endif
 

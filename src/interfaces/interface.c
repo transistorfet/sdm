@@ -56,9 +56,8 @@ void release_interface(void)
 	int i;
 
 	for (i = 0;i < interface_list.size;i++) {
-		if (interface_list.table[i]) {
+		if (interface_list.table[i])
 			destroy_sdm_object(SDM_OBJECT(interface_list.table[i]));
-		}
 	}
 	memory_free(interface_list.table);
 }

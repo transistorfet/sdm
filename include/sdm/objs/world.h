@@ -12,16 +12,15 @@
 #include <sdm/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/objs/container.h>
 
 #define SDM_WORLD(ptr)		( (struct sdm_world *) (ptr) )
 
 struct sdm_world {
-	struct sdm_container container;
+	struct sdm_thing thing;
 	string_t filename;
 };
 
-#define SDM_WORLD_ARGS(file, id, parent)		(file), SDM_CONTAINER_ARGS((id), (parent))
+#define SDM_WORLD_ARGS(file, id, parent)		(file), SDM_THING_ARGS((id), (parent))
 
 extern struct sdm_object_type sdm_world_obj_type;
 

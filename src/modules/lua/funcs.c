@@ -17,6 +17,9 @@
 
 int sdm_load_lua_library(lua_State *state)
 {
+	lua_register(state, "create_thing", sdm_lua_create_thing);
+	lua_register(state, "destroy_thing", sdm_lua_destroy_thing);
+
 	lua_register(state, "do_action", sdm_lua_do_action);
 	lua_register(state, "get_parent", sdm_lua_get_parent);
 	lua_register(state, "get_location", sdm_lua_get_location);
@@ -27,6 +30,37 @@ int sdm_load_lua_library(lua_State *state)
 	lua_register(state, "tell", sdm_lua_tell);
 	return(0);
 }
+
+
+/**
+ * Args:	<parent>
+ * Description:	Creates a new thing and returns the id.
+ */
+int sdm_lua_create_thing(lua_State *state)
+{
+	struct sdm_thing *thing, *parent;
+
+	parent = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	if (!(thing = SDM_THING(create_sdm_object(SDM_OBJECT(parent)->type, SDM_THING_ARGS(SDM_NEW_ID, parent->id)))))
+		luaL_error(state, "Failed to create new thing");
+	else
+		lua_pushnumber(state, thing->id);
+	return(1);
+}
+
+/**
+ * Args:	<thing>
+ * Description:	Destroys the given thing
+ */
+int sdm_lua_destroy_thing(lua_State *state)
+{
+	struct sdm_thing *thing;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	destroy_sdm_object(SDM_OBJECT(thing));
+	return(0);
+}
+
 
 /**
  * Args:	<thing>, <caller>, <action>, [<target>], [<args>]
@@ -149,9 +183,7 @@ int sdm_lua_moveto(lua_State *state)
 	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
 	container = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 2));
 
-	if (!sdm_object_is_a(SDM_OBJECT(container), &sdm_container_obj_type))
-		luaL_argerror(state, 0, "object must be a container");
-	res = sdm_container_add(SDM_CONTAINER(container), thing);
+	res = sdm_thing_add(container, thing);
 	lua_pushnumber(state, res);
 	return(1);
 }
@@ -164,12 +196,17 @@ int sdm_lua_tell(lua_State *state)
 {
 	int res;
 	const char *args;
-	struct sdm_thing *thing;
+	struct sdm_thing *thing, *caller;
 
 	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
 	args = luaL_checkstring(state, 2);
+	lua_getglobal(state, "caller");
+	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
 
-	res = sdm_thing_do_action(thing, thing, "tell", NULL, args);
+	if (!thing || !caller)
+		res = -1;
+	else
+		res = sdm_thing_do_action(thing, caller, "tell", NULL, args);
 	lua_pushnumber(state, res);
 	return(1);
 }

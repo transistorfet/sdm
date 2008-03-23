@@ -62,7 +62,7 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 	// TODO hack, remove when you get a chargen process that can set the location
 	SDM_THING(user)->parent = 4;
 	if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
-		sdm_container_add(SDM_CONTAINER(obj), SDM_THING(user));
+		sdm_thing_add(SDM_THING(obj), SDM_THING(user));
 
 	/** Replace this processor with an interpreter */
 	destroy_sdm_object(SDM_OBJECT(user->proc));

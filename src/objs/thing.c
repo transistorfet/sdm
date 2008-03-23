@@ -10,9 +10,10 @@
 #include <sdm/misc.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/user.h>
+#include <sdm/objs/world.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/container.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
@@ -78,14 +79,21 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 
 void sdm_thing_release(struct sdm_thing *thing)
 {
+	struct sdm_thing *cur, *tmp;
+
 	if (thing->location)
-		sdm_container_remove(thing->location, thing);
+		sdm_thing_remove(thing->location, thing);
 	if (thing->properties)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
 		destroy_sdm_hash(thing->actions);
 	if ((thing->id >= 0) && (thing->id < sdm_thing_table_size))
 		sdm_thing_table[thing->id] = NULL;
+
+	for (cur = thing->objects; cur; cur = tmp) {
+		tmp = cur->next;
+		destroy_sdm_object(SDM_OBJECT(cur));
+	}
 }
 
 int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
@@ -116,6 +124,14 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 			return(-1);
 		}
 	}
+	else if (!strcmp(type, "thing")) {
+		if (!(obj = create_sdm_object(&sdm_thing_obj_type, SDM_THING_ARGS(SDM_NO_ID, 0))))
+			return(-1);
+		sdm_data_read_children(data);
+		sdm_object_read_data(obj, data);
+		sdm_data_read_parent(data);
+		sdm_thing_add(thing, SDM_THING(obj));
+	}
 	else if (!strcmp(type, "action")) {
 		obj = NULL;
 		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
@@ -137,7 +153,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	else if (!strcmp(type, "location")) {
 		id = sdm_data_read_integer(data);
 		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
-			sdm_container_add(SDM_CONTAINER(obj), thing);
+			sdm_thing_add(SDM_THING(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
 		id = sdm_data_read_integer(data);
@@ -150,6 +166,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 {
+	struct sdm_thing *cur;
 	struct sdm_hash_entry *entry;
 
 	sdm_data_write_integer_entry(data, "id", thing->id);
@@ -157,6 +174,7 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 		sdm_data_write_integer_entry(data, "parent", thing->parent);
 	if (thing->location)
 		sdm_data_write_integer_entry(data, "location", SDM_THING(thing->location)->id);
+
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
 	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {
@@ -176,6 +194,7 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 			sdm_data_write_end_entry(data);
 		}
 	}
+
 	/** Write the actions to the file */
 	sdm_hash_traverse_reset(thing->actions);
 	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
@@ -184,6 +203,22 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 		// TODO can you somehow get the type name (we are assuming the write_data func does this)
 		if  (SDM_OBJECT(entry->data)->type->write_data)
 			SDM_OBJECT(entry->data)->type->write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_end_entry(data);
+	}
+
+	/** Write the things we contain to the file */
+	for (cur = thing->objects; cur; cur = cur->next) {
+		if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_user_obj_type))
+			continue;
+		else if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_world_obj_type)) {
+			sdm_world_write(SDM_WORLD(cur), data);
+			/** If we don't continue here, the world will be written to this file which we don't
+			    because the world object is a reference only and is written to it's own file */
+			continue;
+		}
+		else
+			sdm_data_write_begin_entry(data, "thing");
+		sdm_object_write_data(SDM_OBJECT(cur), data);
 		sdm_data_write_end_entry(data);
 	}
 	return(0);
@@ -241,6 +276,59 @@ int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const
 		}
 	}
 	return(1);
+}
+
+
+int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
+{
+	// TODO is this right?  we are passing the obj as the caller because that is how basic_look
+	//	expects things but is this correct generally?  if not, we'd just have to make a special
+	//	function that redirects the args to look
+	/** If the 'on_enter' action returns an error, then the object should not be added */
+	if (sdm_thing_do_action(thing, obj, "on_enter", NULL, "") < 0)
+		return(-1);
+	// TODO we test for location *after* we do on_entre which means we could accidentally call on_enter
+	//	multiple times.  It saves us atm for when a new char is registered and you re-add the user
+	//	to the same room and that causes the "look" action to be performed
+	if (obj->location == thing)
+		return(0);
+	/** If this object is in another object and it can't be removed, then we don't add it */
+	if (obj->location && sdm_thing_remove(obj->location, obj))
+		return(-1);
+	obj->location = thing;
+	obj->next = NULL;
+	if (thing->end_objects) {
+		thing->end_objects->next = obj;
+		thing->end_objects = obj;
+	}
+	else {
+		thing->objects = obj;
+		thing->end_objects = obj;
+	}
+	return(0);
+}
+
+int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
+{
+	struct sdm_thing *cur, *prev;
+
+	// TODO is this correct?
+	/** If the 'on_exit' action returns an error, then the object should not be removed */
+	if (sdm_thing_do_action(thing, obj, "on_exit", NULL, "") < 0)
+		return(-1);
+	for (prev = NULL, cur = thing->objects; cur; prev = cur, cur = cur->next) {
+		if (cur == obj) {
+			if (prev)
+				prev->next = cur->next;
+			else
+				thing->objects = cur->next;
+			if (thing->end_objects == cur)
+				thing->end_objects = prev;
+			cur->location = NULL;
+			return(0);
+		}
+	}
+	return(-1);
 }
 
 

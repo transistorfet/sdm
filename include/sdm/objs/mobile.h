@@ -10,16 +10,15 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/objs/container.h>
 
 #define SDM_MOBILE(ptr)		( (struct sdm_mobile *) (ptr) )
 
 struct sdm_mobile {
-	struct sdm_container container;
+	struct sdm_thing thing;
 
 };
 
-#define SDM_MOBILE_ARGS(id, parent)		SDM_CONTAINER_ARGS((id), (parent))
+#define SDM_MOBILE_ARGS(id, parent)		SDM_THING_ARGS((id), (parent))
 
 extern struct sdm_object_type sdm_mobile_obj_type;
 

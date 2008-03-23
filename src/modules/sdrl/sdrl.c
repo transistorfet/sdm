@@ -20,7 +20,6 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/container.h>
 #include <sdm/modules/sdrl/sdrl.h>
 
 struct sdm_object_type sdm_sdrl_obj_type = {
