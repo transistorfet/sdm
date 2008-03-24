@@ -83,7 +83,7 @@ static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_te
 		return(0);
 
 	sdm_telnet_echo(inter, 1);
-	sdm_telnet_write(inter, "\n");
+	sdm_telnet_write(inter, "\n\n");
 	sdm_telnet_encrypt_password(login->name, buffer, STRING_SIZE);
 	if (sdm_login_authenticate(login, buffer)) {
 		if (sdm_user_logged_in(login->name)) {
@@ -103,7 +103,6 @@ static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_te
 		}
 		else {
 			destroy_sdm_object(SDM_OBJECT(login));
-			sdm_telnet_write(inter, "\n");
 			sdm_telnet_run(inter, user);
 		}
 	}

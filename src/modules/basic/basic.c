@@ -19,6 +19,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/action.h>
+#include <sdm/objs/interpreter.h>
 #include <sdm/modules/basic/basic.h>
 
 struct sdm_object_type sdm_basic_obj_type = {
@@ -89,7 +90,7 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
 	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
@@ -103,13 +104,13 @@ int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *call
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
 	struct sdm_thing *cur;
 
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur != caller)
-			sdm_thing_do_action(cur, caller, "tell", NULL, args);
+			sdm_thing_do_action(cur, caller, "tell", NULL, args, NULL);
 	}
 	return(0);
 }
@@ -121,18 +122,15 @@ int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *calle
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
-	struct sdm_string *str;
-	char buffer[STRING_SIZE];
+	const char *name;
 
 	if (!args || (*args == '\0'))
 		return(-1);
-	if (snprintf(buffer, STRING_SIZE, "You say \"%s\"\n", args))
-		sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
-	str = SDM_STRING(sdm_thing_get_property(caller, "name", &sdm_string_obj_type));
-	if (snprintf(buffer, STRING_SIZE, "\n%s says \"%s\"\n", str ? str->str : "something", args))
-		sdm_thing_do_action(thing, caller, "announce", NULL, buffer);
+	sdm_thing_format_action(caller, caller, "tell", "You say \"%s\"\n", args);
+	name = sdm_thing_get_string_property(caller, "name");
+	sdm_thing_format_action(thing, caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
 	return(0);
 }
 
@@ -143,21 +141,18 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *caller, st
  *	target:		the object being looked at
  *	args:		the name of the object being looked at if target is NULL, unused otherwise
  */
-int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
-	char buffer[STRING_SIZE];
-
 	if (!target && args && (*args != '\0')) {
-		target = sdm_interpreter_get_object(caller, args, NULL);
+		target = sdm_interpreter_get_thing(caller, args, NULL);
 		if (!target) {
-			if (snprintf(buffer, STRING_SIZE, "You don't see a %s here\n", args))
-				sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
+			sdm_thing_format_action(caller, caller, "tell", "You don't see a %s here\n", args);
 			return(0);
 		}
 	}
 	if (!target)
 		target = thing;
-	sdm_thing_do_action(target, caller, "examine", NULL, "");
+	sdm_thing_do_action(target, caller, "examine", NULL, "", NULL);
 	return(0);
 
 }
@@ -169,23 +164,18 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, s
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
+	const char *str;
 	struct sdm_thing *cur;
-	char buffer[STRING_SIZE];
-	struct sdm_string *string;
 
-	if ((string = SDM_STRING(sdm_thing_get_property(thing, "name", &sdm_string_obj_type)))
-	    && (snprintf(buffer, STRING_SIZE, "<brightyellow>%s</brightyellow>\n", string->str)))
-		sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
-	if ((string = SDM_STRING(sdm_thing_get_property(thing, "description", &sdm_string_obj_type)))
-	    && (snprintf(buffer, STRING_SIZE, "<brightgreen>%s</brightgreen>\n", string->str)))
-		sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
+	if ((str = sdm_thing_get_string_property(thing, "name")))
+		sdm_thing_format_action(caller, caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
+	if ((str = sdm_thing_get_string_property(thing, "description")))
+		sdm_thing_format_action(caller, caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
 	for (cur = thing->objects; cur; cur = cur->next) {
-		if ((cur != caller)
-		    && (string = SDM_STRING(sdm_thing_get_property(cur, "name", &sdm_string_obj_type)))
-		    && (snprintf(buffer, STRING_SIZE, "<brightblue>You see %s here.</brightblue>\n", string->str)))
-			sdm_thing_do_action(caller, caller, "tell", NULL, buffer);
+		if ((cur != caller) && (str = sdm_thing_get_string_property(cur, "name")))
+			sdm_thing_format_action(caller, caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
 	}
 	return(0);
 }
@@ -197,13 +187,13 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
-	struct sdm_number *obj;
+	double num;
 	struct sdm_thing *location;
 
-	if (!(obj = SDM_NUMBER(sdm_thing_get_property(thing, "target", &sdm_number_obj_type)))
-	    || !(location = sdm_thing_lookup_id((sdm_id_t) obj->num)))
+	if (((num = sdm_thing_get_number_property(thing, "target")) <= 0)
+	    || !(location = sdm_thing_lookup_id((sdm_id_t) num)))
 		return(-1);
 	sdm_thing_add(location, caller);
 	return(0);

@@ -1,16 +1,12 @@
 
-	* make lua function binding to turn an args string into an object
-	* change sdm_interpreter_find_object to take a more generic object than sdm_user and to do more
-	  searching.  It could take an sdm_thing and look inside the container that contains that thing and
-	  if that thing is a container itself, it could look inside itself as well.  Also convert me and here
-	  to the appropriate values
-	* can you make object lookup in the interpreter try to match the whole command line and whatever
-	  matches the best is used as the object name and the rest is passed as the args string?
-	* make the container_find() function continue searching for more complete matches
 	* how do you decide what things to print in the list of contents since you don't want to print all
 	  objects such as exist and stuff
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
+	* make the lua error print to the user (or at least optionally)
+	* you *HAVE* to make this fucking lua stuff easier!
+	* you need a way to get the direction from which a user has arrived or left a room.
+	* add is_user and is_mobile lua functions
 
 	* add actions for manipulating things: get, give, drop, inventory, etc
 	* implement a permissions system for object modification
@@ -25,9 +21,10 @@
 
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
-	* you need a way to return an sdm_object from an action (where? is this really need, give example)
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
+	* can you make object lookup in the interpreter try to match the whole command line and whatever
+	  matches the best is used as the object name and the rest is passed as the args string?
 
 	* make some handy util static inline functions (what ones should i make?)
 	* should you make container use the element name to lookup the type of object to create? (with the
@@ -93,6 +90,7 @@ Structural Issues:
 	* since we put the user in the test room (50) when they connect and there is no other room to put them
 	  in, when it's a user registering, the character isn't set up until later and when we put them in the
 	  same room, the enter function wont be called and they wont get the initial "look" action
+	* in lua, how do you tell if the result of an action is a number or a thing id?
 
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each

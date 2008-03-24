@@ -54,7 +54,8 @@ int sdm_sdrl_do_action(struct sdrl_machine *mach, struct sdrl_value *args)
 
 	if (!caller || !thing || !action)
 		return(SDRL_ERROR(mach, SDRL_ES_LOW, SDRL_ERR_INVALID_ARGS, NULL));
-	res = sdm_thing_do_action(thing, caller, action, target, rest);
+	// TODO make this return the result object
+	res = sdm_thing_do_action(thing, caller, action, target, rest, NULL);
 	if (!(type = sdrl_find_binding(mach->type_env, "number")))
 		return(SDRL_ERROR(mach, SDRL_ES_HIGH, SDRL_ERR_NOT_FOUND, NULL));
 	mach->ret = sdrl_make_number(mach->heap, type, res);

@@ -15,7 +15,7 @@
 struct sdm_thing;
 struct sdm_action;
 
-typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *);
+typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_object **);
 
 struct sdm_action {
 	struct sdm_object object;

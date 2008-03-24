@@ -91,7 +91,7 @@ int sdm_lua_write_data(struct sdm_lua *action, struct sdm_data_file *data)
 }
 
 
-int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
 	const char *error;
 
@@ -104,14 +104,19 @@ int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_
 	lua_pushstring(global_state, args);
 	lua_setglobal(global_state, "args");
 
-	luaL_loadbuffer(global_state, action->code, strlen(action->code), "action");
-	if (lua_pcall(global_state, 0, 0, 0)) {
+	if (luaL_loadbuffer(global_state, action->code, strlen(action->code), "action")
+	    || lua_pcall(global_state, 0, 1, 0)) {
 		if ((error = lua_tostring(global_state, -1)))
 			sdm_status("LUA: %s", error);
 		else
 			sdm_status("LUA: Unspecified error occurred while executing lua action");
 		return(-1);
 	}
+	// TODO What if an object is returned as a number (id)?
+	if (result)
+		sdm_lua_convert_lua_value(global_state, -1);
+	else
+		lua_pop(global_state, 1);
 	return(0);
 }
 

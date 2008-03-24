@@ -264,15 +264,17 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_a
 	return(sdm_hash_add(thing->actions, name, action));
 }
 
-int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *args)
+int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *args, struct sdm_object **result)
 {
 	struct sdm_thing *cur;
 	struct sdm_action *action;
 
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
-			action->func(action, caller, thing, target, args);
-			return(0);
+			/** Clear the result before we do the action */
+			if (result)
+				*result = NULL;
+			return(action->func(action, caller, thing, target, args, result));
 		}
 	}
 	return(1);
@@ -285,7 +287,7 @@ int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
 	//	expects things but is this correct generally?  if not, we'd just have to make a special
 	//	function that redirects the args to look
 	/** If the 'on_enter' action returns an error, then the object should not be added */
-	if (sdm_thing_do_action(thing, obj, "on_enter", NULL, "") < 0)
+	if (sdm_thing_do_action(thing, obj, "on_enter", NULL, "", NULL) < 0)
 		return(-1);
 	// TODO we test for location *after* we do on_entre which means we could accidentally call on_enter
 	//	multiple times.  It saves us atm for when a new char is registered and you re-add the user
@@ -314,7 +316,7 @@ int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
 
 	// TODO is this correct?
 	/** If the 'on_exit' action returns an error, then the object should not be removed */
-	if (sdm_thing_do_action(thing, obj, "on_exit", NULL, "") < 0)
+	if (sdm_thing_do_action(thing, obj, "on_exit", NULL, "", NULL) < 0)
 		return(-1);
 	for (prev = NULL, cur = thing->objects; cur; prev = cur, cur = cur->next) {
 		if (cur == obj) {
@@ -353,6 +355,7 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 		if (!(tmp = (struct sdm_thing **) memory_realloc(sdm_thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
 			return(-1);
 		sdm_thing_table = tmp;
+		memset(sdm_thing_table + sdm_thing_table_size, '\0', sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE - sdm_thing_table_size));
 		sdm_thing_table_size = id + THING_TABLE_EXTRA_SIZE;
 	}
 
