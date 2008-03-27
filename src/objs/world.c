@@ -16,6 +16,7 @@
 
 struct sdm_object_type sdm_world_obj_type = {
 	&sdm_thing_obj_type,
+	"world",
 	sizeof(struct sdm_world),
 	NULL,
 	(sdm_object_init_t) sdm_world_init,

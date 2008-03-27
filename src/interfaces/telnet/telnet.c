@@ -27,6 +27,7 @@
 
 struct sdm_interface_type sdm_telnet_obj_type = { {
 	NULL,
+	"telnet",
 	sizeof(struct sdm_telnet),
 	NULL,
 	(sdm_object_init_t) sdm_tcp_init,
@@ -115,6 +116,7 @@ int sdm_telnet_read(struct sdm_telnet *inter, char *buffer, int max)
 	/** We didn't receive a full line so we'll stick this back in the buffer */
 	sdm_tcp_set_read_buffer(SDM_TCP(inter), buffer, j);
 	SDM_INTERFACE_SET_NOT_READY_READ(inter);
+	buffer[0] = '\0';
 	return(0);
 }
 
@@ -243,8 +245,6 @@ static int sdm_telnet_handle_read(struct sdm_user *user, struct sdm_telnet *inte
 		destroy_sdm_object(SDM_OBJECT(inter));
 		return(-1);
 	}
-	if (i == 0)
-		return(0);
 
 	if (sdm_processor_process(user->proc, user, buffer) != 0) {
 		destroy_sdm_object(SDM_OBJECT(inter));

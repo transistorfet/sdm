@@ -24,6 +24,7 @@
 
 struct sdm_object_type sdm_basic_obj_type = {
 	&sdm_action_obj_type,
+	"basic",
 	sizeof(struct sdm_basic),
 	NULL,
 	(sdm_object_init_t) NULL,
@@ -40,7 +41,7 @@ int init_basic(void)
 		return(1);
 	if (!(basic_actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, NULL)))
 		return(-1);
-	if (sdm_object_register_type("basic", &sdm_basic_obj_type) < 0)
+	if (sdm_object_register_type(&sdm_basic_obj_type) < 0)
 		return(-1);
 
 	sdm_hash_add(basic_actions, "basic_tell_user", sdm_basic_action_tell_user);
@@ -49,6 +50,10 @@ int init_basic(void)
 	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
 	sdm_hash_add(basic_actions, "basic_examine", sdm_basic_action_examine);
 	sdm_hash_add(basic_actions, "basic_move", sdm_basic_action_move);
+
+	sdm_hash_add(basic_actions, "basic_create_object", sdm_basic_action_create_object);
+	sdm_hash_add(basic_actions, "basic_create_room", sdm_basic_action_create_room);
+	sdm_hash_add(basic_actions, "basic_create_exit", sdm_basic_action_create_exit);
 	return(0);
 }
 
@@ -58,7 +63,7 @@ void release_basic(void)
 		return;
 	destroy_sdm_hash(basic_actions);
 	basic_actions = NULL;
-	sdm_object_deregister_type("basic");
+	sdm_object_deregister_type(&sdm_basic_obj_type);
 }
 
 
@@ -71,12 +76,11 @@ int sdm_basic_read_entry(struct sdm_basic *basic, const char *name, struct sdm_d
 	if (!(basic->entry = sdm_hash_find_entry(basic_actions, buffer)))
 		return(-1);
 	SDM_ACTION(basic)->func = (sdm_action_t) basic->entry->data;
-	return(SDM_HANDLED);
+	return(SDM_HANDLED_ALL);
 }
 
 int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
 {
-	sdm_data_write_attrib(data, "type", "basic");
 	sdm_data_write_raw_string(data, basic->entry->name);
 	return(0);
 }
@@ -174,7 +178,14 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller
 	if ((str = sdm_thing_get_string_property(thing, "description")))
 		sdm_thing_format_action(caller, caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
 	for (cur = thing->objects; cur; cur = cur->next) {
-		if ((cur != caller) && (str = sdm_thing_get_string_property(cur, "name")))
+		if (cur == caller)
+			continue;
+		if (!(str = sdm_thing_get_string_property(cur, "name")))
+			continue;
+		//if (sdm_thing_is_a(cur, exit)) {
+			// TODO print properly
+		//}
+		//else
 			sdm_thing_format_action(caller, caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
 	}
 	return(0);
@@ -199,4 +210,33 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, s
 	return(0);
 }
 
+/**
+ * Create a basic object given a parent object and an optional name
+ *	caller:		creator of the object
+ *	thing:		not used
+ *	target:		not used
+ *	args:		not used
+ */
+int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+{
+	if (!target && args && (*args != '\0')) {
+		target = sdm_interpreter_get_thing(caller, args, NULL);
+		if (!target) {
+			sdm_thing_format_action(caller, caller, "tell", "<red>Unable to determine the parent\n");
+			return(0);
+		}
+	}
+
+
+}
+
+int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+{
+
+}
+
+int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+{
+
+}
 

@@ -28,6 +28,7 @@
 
 struct sdm_object_type sdm_thing_obj_type = {
 	NULL,
+	"thing",
 	sizeof(struct sdm_thing),
 	NULL,
 	(sdm_object_init_t) sdm_thing_init,
@@ -98,28 +99,23 @@ void sdm_thing_release(struct sdm_thing *thing)
 
 int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
 {
+	int res;
 	sdm_id_t id;
-	sdm_number_t num;
-	struct sdm_object *obj;
 	char buffer[STRING_SIZE];
+	struct sdm_object *obj = NULL;
 	struct sdm_object_type *objtype;
 
-	if (!strcmp(type, "string")) {
-		sdm_data_read_string(data, buffer, STRING_SIZE);
-		if (!(obj = create_sdm_object(&sdm_string_obj_type, buffer)))
+	if (!strcmp(type, "property")) {
+		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
+		if (!(objtype = sdm_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
 			return(-1);
 		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		if (sdm_thing_set_property(thing, buffer, obj) < 0) {
-			destroy_sdm_object(obj);
+		if (!(obj = create_sdm_object(objtype, NULL)))
 			return(-1);
-		}
-	}
-	else if (!strcmp(type, "number")) {
-		num = sdm_data_read_float(data);
-		if (!(obj = create_sdm_object(&sdm_number_obj_type, num)))
-			return(-1);
-		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		if (sdm_thing_set_property(thing, buffer, obj)) {
+		sdm_data_read_children(data);
+		res = sdm_object_read_data(obj, data);
+		sdm_data_read_parent(data);
+		if ((res < 0) || (sdm_thing_set_property(thing, buffer, obj) < 0)) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}
@@ -133,30 +129,31 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		sdm_thing_add(thing, SDM_THING(obj));
 	}
 	else if (!strcmp(type, "action")) {
-		obj = NULL;
 		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
-		if ((objtype = sdm_object_find_type(buffer, &sdm_action_obj_type)))
-			obj = create_sdm_object(objtype);
+		if (!(objtype = sdm_object_find_type(buffer, &sdm_action_obj_type))
+		    || !(obj = create_sdm_object(objtype)))
+			return(-1);
 		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		if (!obj || (obj->type->read_entry && (obj->type->read_entry(obj, type, data) != SDM_HANDLED))
-		    || (sdm_thing_set_action(thing, buffer, SDM_ACTION(obj)) < 0)) {
+		sdm_data_read_children(data);
+		res = sdm_object_read_data(obj, data);
+		sdm_data_read_parent(data);
+		if ((res < 0) || (sdm_thing_set_action(thing, buffer, SDM_ACTION(obj)) < 0)) {
 			sdm_status("Error loading action, %s.", buffer);
-			if (obj)
-				destroy_sdm_object(obj);
+			destroy_sdm_object(obj);
 			return(-1);
 		}
 	}
 	else if (!strcmp(type, "id")) {
-		id = sdm_data_read_integer(data);
+		id = sdm_data_read_integer_entry(data);
 		sdm_thing_assign_id(thing, id);
 	}
 	else if (!strcmp(type, "location")) {
-		id = sdm_data_read_integer(data);
+		id = sdm_data_read_integer_entry(data);
 		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
 			sdm_thing_add(SDM_THING(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
-		id = sdm_data_read_integer(data);
+		id = sdm_data_read_integer_entry(data);
 		thing->parent = id;
 	}
 	else
@@ -178,21 +175,11 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
 	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {
-		// TODO what do we do about other property object types?
-		// TODO if you can get a typename from the object's type, you can make this like the action
-		// 	writing code
-		if (SDM_OBJECT(entry->data)->type == &sdm_string_obj_type) {
-			sdm_data_write_begin_entry(data, "string");
-			sdm_data_write_attrib(data, "name", entry->name);
-			sdm_data_write_string(data, SDM_STRING(SDM_OBJECT(entry->data))->str);
-			sdm_data_write_end_entry(data);
-		}
-		else if (SDM_OBJECT(entry->data)->type == &sdm_number_obj_type) {
-			sdm_data_write_begin_entry(data, "number");
-			sdm_data_write_attrib(data, "name", entry->name);
-			sdm_data_write_float(data, SDM_NUMBER(SDM_OBJECT(entry->data))->num);
-			sdm_data_write_end_entry(data);
-		}
+		sdm_data_write_begin_entry(data, "property");
+		sdm_data_write_attrib(data, "type", SDM_OBJECT(entry->data)->type->name);
+		sdm_data_write_attrib(data, "name", entry->name);
+		sdm_object_write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_end_entry(data);
 	}
 
 	/** Write the actions to the file */
@@ -200,9 +187,8 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
 		sdm_data_write_begin_entry(data, "action");
 		sdm_data_write_attrib(data, "name", entry->name);
-		// TODO can you somehow get the type name (we are assuming the write_data func does this)
-		if  (SDM_OBJECT(entry->data)->type->write_data)
-			SDM_OBJECT(entry->data)->type->write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_attrib(data, "type", SDM_OBJECT(entry->data)->type->name);
+		sdm_object_write_data(SDM_OBJECT(entry->data), data);
 		sdm_data_write_end_entry(data);
 	}
 

@@ -23,8 +23,13 @@ extern struct sdm_object_type sdm_string_obj_type;
 #define create_sdm_string(str)	\
 	( SDM_STRING(create_sdm_object(&sdm_string_obj_type, (str))) )
 
+int init_sdm_string_type(void);
+void release_sdm_string_type(void);
+
 int sdm_string_init(struct sdm_string *, va_list);
 void sdm_string_release(struct sdm_string *);
+int sdm_string_read_entry(struct sdm_string *, const char *, struct sdm_data_file *);
+int sdm_string_write_data(struct sdm_string *, struct sdm_data_file *);
 
 #endif
 

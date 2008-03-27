@@ -36,6 +36,7 @@
 
 struct sdm_interface_type sdm_tcp_obj_type = { {
 	NULL,
+	"tcp",
 	sizeof(struct sdm_tcp),
 	NULL,
 	(sdm_object_init_t) sdm_tcp_init,

@@ -31,6 +31,7 @@ static struct sdm_interface_list interface_list;
 
 struct sdm_interface_type sdm_interface_obj_type = { {
 	NULL,
+	"interface",
 	sizeof(struct sdm_interface),
 	NULL,
 	(sdm_object_init_t) sdm_interface_init,

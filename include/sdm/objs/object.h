@@ -9,8 +9,9 @@
 #include <stdarg.h>
 #include <sdm/data.h>
 
-#define SDM_HANDLED		1
 #define SDM_NOT_HANDLED		0
+#define SDM_HANDLED		1
+#define SDM_HANDLED_ALL		2
 
 #define SDM_OBF_RELEASING	0x1000
 
@@ -46,6 +47,7 @@ struct sdm_object {
 
 struct sdm_object_type {
 	struct sdm_object_type *parent;
+	char *name;
 	int size;
 	void *ptr;
 	sdm_object_init_t init;
@@ -57,8 +59,8 @@ struct sdm_object_type {
 int init_object(void);
 void release_object(void);
 
-int sdm_object_register_type(const char *, struct sdm_object_type *);
-int sdm_object_deregister_type(const char *);
+int sdm_object_register_type(struct sdm_object_type *);
+int sdm_object_deregister_type(struct sdm_object_type *);
 struct sdm_object_type *sdm_object_find_type(const char *, struct sdm_object_type *);
 
 struct sdm_object *create_sdm_object(struct sdm_object_type *, ...);

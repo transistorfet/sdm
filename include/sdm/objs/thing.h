@@ -69,6 +69,14 @@ static inline struct sdm_thing *sdm_thing_lookup_id(sdm_id_t id) {
 	return(NULL);
 }
 
+static inline int sdm_thing_is_a(struct sdm_thing *thing, sdm_id_t id) {
+	for (; thing; thing = sdm_thing_lookup_id(thing->parent)) {
+		if (thing->id == id)
+			return(1);
+	}
+	return(0);
+}
+
 static inline int sdm_thing_format_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, const char *fmt, ...) {
 	int i;
 	va_list va;

@@ -112,7 +112,7 @@ int sdm_lua_get_thing(lua_State *state)
 
 
 /**
- * Args:	<thing>, <caller>, <action>, [<target>], [<args>]
+ * Args:	<thing>, <action>, [<target>], [<args>]
  * Description:	Calls the given action name on the given object reference.
  */
 int sdm_lua_do_action(lua_State *state)
@@ -124,12 +124,14 @@ int sdm_lua_do_action(lua_State *state)
 
 	nargs = lua_gettop(state);
 	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
-	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 2));
-	action = luaL_checkstring(state, 3);
+	action = luaL_checkstring(state, 2);
+	if (nargs >= 3)
+		target = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 3));
 	if (nargs >= 4)
-		target = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 4));
-	if (nargs >= 5)
-		args = luaL_checkstring(state, 5);
+		args = luaL_checkstring(state, 4);
+
+	lua_getglobal(state, "caller");
+	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
 
 	res = sdm_thing_do_action(thing, caller, action, target, args, &obj);
 	sdm_lua_convert_object(state, obj);

@@ -14,6 +14,7 @@
 
 struct sdm_object_type sdm_mobile_obj_type = {
 	&sdm_thing_obj_type,
+	"mobile",
 	sizeof(struct sdm_mobile),
 	NULL,
 	(sdm_object_init_t) sdm_mobile_init,

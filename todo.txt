@@ -1,4 +1,33 @@
 
+	* make all types register their type struct with the object type hash table
+	* you must change all constructors to be able to accept a "no arguments" state in order to work with
+	  thing.c properties generic object creation
+
+	* make a system for looking up objects (will replace the current get_thing function) that takes
+	  a relative position and a path name and looks up the elements of the path to find the final object
+	  like "/core/exit" and "/greathall/entrance".  Should this really replace the get_thing or should
+	  it be simpler?  Should it work only on a special "shortname" prorperty or on any of the name or
+	  aliases?
+
+	* can/should there be a way of doing an overridden action? (knowingly passing an object to an action
+	  on a parent of that object to avoid an overloaded action? (to change it's overt behaviour without
+	  reimplementing the functionality) (eg. override the say command to prevent talking while asleep)
+	* i still don't fucking understand how the fuck commands should fucking work.  I don't fully understand
+	  how lambdamoo does it.  Does it pass the direct object as "this" and thus you are doing an action
+	  of one object on a completely different object?  Lambdamoo passes the object on which the action is
+	  performed as well as the direct object which may be the same whereas i'm assuming they are always
+	  the same.
+
+	* make an "exits" command that prints the list of obvious exits and their descriptions
+	* have the telnet module more closely control the printing of the command prompt such that after
+	  output has been generated, a command prompt in printed (will be hard to know when output is over).
+	  You could have a special check in the main server loop that checks a flag set when output has been
+	  sent and if output was sent, print the command prompt?? (complex and lots of border cases)
+	* maybe you should implement a lot more in basic instead of lua so that it's a bit faster and
+	  hopefully more robust even though this might be a falicy
+	* print the equipment, weapons, armour, etc seperately and/or provide commands that print only
+	  one type
+
 	* how do you decide what things to print in the list of contents since you don't want to print all
 	  objects such as exist and stuff
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
@@ -19,60 +48,38 @@
 	  interrupting the current line being typed instead of putting it in all the places that generate
 	  output sent to the announce action?
 
+	* make the interpreter have an "evaluate" function that can be called with a const str to evaluate
+	  a command directly without being part of a process call
 	* make it possible to get the object name given a pointer to the object type (either through a reverse
 	  lookup or by storing the name in the type itself) for reading/writing properties and actions
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
 	* can you make object lookup in the interpreter try to match the whole command line and whatever
 	  matches the best is used as the object name and the rest is passed as the args string?
-
-	* make some handy util static inline functions (what ones should i make?)
-	* should you make container use the element name to lookup the type of object to create? (with the
-	  requirement that the type must extend sdm_thing)
-	* (should you) add all object types to the object type list (who makes the calls?)
-	* read and write the processor object from the user data file
 	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
 	  be done?
 
-	* should you have a method of finding certain locations/objects by name or something for things like
-	  finding the starting room, safe room, dead room, cryolocker, etc
-	* add a system of relative object shortcut names specified in commands like "me" will refer to the
-	  user object and "here" refers to the room the user is currently in
-	* make system things configurable through xml files such as the port that telnet uses
-	* write and implement details on input converting (in the server core format document)
-	* tidy up the xml formatting in telnet perhaps and add theme tags (tags that indirectly refer to
-	  format)
+	* should you make container use the element name to lookup the type of object to create? this is now
+	  only handy for mobiles if you even need a special mobiles class)
+	* (should you) add all object types to the object type list (who makes the calls?)
+	* read and write the processor object from the user data file
+	* write and implement details on converting input received (in the server core format document)
+	* tidy up the xml formatting in telnet and add theme tags (tags that indirectly refer to format)
 
 	* make various commands use the extra text passed in a command as a text modifier.  For example you
 	  could say "give apple to trans carefully" and it will interpret the command like normal and the
 	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
-	* make telnet use non-colour xml tags as theme colour specifiers
 
-	* add the ability for telnet to read user specific configuration data from the user file
+	* add the ability for telnet to read user specific configuration data from the user data file
 	* implement proper handling of telnet commands
 	* have a linked list of processors in the user object with a pointer to the currently active one
 	  and read/write the processor's data to the user file.  There should be a function for code to select
 	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
 
-	* make the login track invalid attempts and terminate the connection after a while
-	* add a way to automatically timeout login attempts
-	* accept a "-d" command line arg and fork to a daemon process
-	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
-
-	* make build.pl only use the cflags for certain modules as needed instead of all modules being
-	  compiled with the flags for all embedded languages for example
-	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
-	* make it possible for the command prompt to display info (call a function to generate it)
-
-
-	* add a release function to SDRL to release the expr when the sdrl action object is destroyed
-	* make a proper (if ) and any other handy forms to make it easy to program
-	* make a sdrl unparser (perhaps as part of SDRL itself)
-	* make functions for controlling the properties of sdm_things
-	* make functions for moving objects between containers
-
 Refactoring:
 
+	* make all types use init functions of the form "init_sdm_<name>_type" or else convert string and
+	  number to *not* use that form
 	* should you change the name of processor to something shorter and less confusing?
 	* should you move processors and things to their own directory like interfaces/
 	* should all scripting be supported only through actions and if so, i guess we should rename modules/
@@ -124,6 +131,23 @@ Structural Issues:
 	* think about the processor system.  it might be good to seperate it such that if a raw xml client
 	  was developed, it should be able to communicate directly with the code that handles telnet clients
 	  directly ontop of the code that accepts the xml client essentially
+
+Gerenal:
+
+	* make the login track invalid attempts and terminate the connection after a while
+	* add a way to automatically timeout login attempts
+	* make the login object use/store multiple methods of authentication (primarily for other interfaces)
+
+	* make build.pl only use the cflags for certain modules as needed instead of all modules being
+	  compiled with the flags for all embedded languages for example
+	* make it easy (through data.c) to have multiple "data modules" (only needed for maps and stuff)
+	* make it possible for the command prompt to display info (call a function to generate it)
+
+	* add a release function to SDRL to release the expr when the sdrl action object is destroyed
+	* make a proper (if ) and any other handy forms to make it easy to program
+	* make a sdrl unparser (perhaps as part of SDRL itself)
+	* make functions for controlling the properties of sdm_things
+	* make functions for moving objects between containers
 
 Features:
 

@@ -35,14 +35,14 @@ void release_object(void)
 	object_type_list = NULL;
 }
 
-int sdm_object_register_type(const char *name, struct sdm_object_type *type)
+int sdm_object_register_type(struct sdm_object_type *type)
 {
-	return(sdm_hash_add(object_type_list, name, type));
+	return(sdm_hash_add(object_type_list, type->name, type));
 }
 
-int sdm_object_deregister_type(const char *name)
+int sdm_object_deregister_type(struct sdm_object_type *type)
 {
-	return(sdm_hash_remove(object_type_list, name));
+	return(sdm_hash_remove(object_type_list, type->name));
 }
 
 struct sdm_object_type *sdm_object_find_type(const char *name, struct sdm_object_type *base)
@@ -133,6 +133,9 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 					error = 1;
 				else if (res == SDM_HANDLED)
 					break;
+				/** We handled the whole rest of the data so just exit */
+				else if (res == SDM_HANDLED_ALL)
+					return(0);
 			}
 		}
 	} while (sdm_data_read_next(data));

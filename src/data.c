@@ -158,8 +158,12 @@ int sdm_data_read_parent(struct sdm_data_file *data)
 
 const char *sdm_data_read_name(struct sdm_data_file *data)
 {
-	if (data->current)
-		return(data->current->name);
+	if (data->current) {
+		if (data->current->name)
+			return(data->current->name);
+		else if (data->current->type == XML_CDATA_SECTION_NODE)
+			return("cdata");
+	}
 	return(NULL);
 }
 
@@ -182,7 +186,7 @@ long int sdm_data_read_integer(struct sdm_data_file *data)
 	char *str;
 	long int num;
 
-	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current, 1))) {
 		num = atol(str);
 		xmlFree(str);
 		return(num);
@@ -195,7 +199,7 @@ double sdm_data_read_float(struct sdm_data_file *data)
 	char *str;
 	double num;
 
-	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current, 1))) {
 		num = atof(str);
 		xmlFree(str);
 		return(num);
@@ -204,6 +208,61 @@ double sdm_data_read_float(struct sdm_data_file *data)
 }
 
 int sdm_data_read_string(struct sdm_data_file *data, char *buffer, int max)
+{
+	int size;
+	char *str;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current, 1))) {
+		size = sdm_data_strip_copy(buffer, str, max);
+		xmlFree(str);
+		return(size);
+	}
+	buffer[0] = '\0';
+	return(0);
+}
+
+int sdm_data_read_raw_string(struct sdm_data_file *data, char *buffer, int max)
+{
+	char *str;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current, 1))) {
+		strncpy(buffer, str, max);
+		xmlFree(str);
+		buffer[max - 1] = '\0';
+		return(strlen(buffer));
+	}
+	buffer[0] = '\0';
+	return(0);
+}
+
+
+long int sdm_data_read_integer_entry(struct sdm_data_file *data)
+{
+	char *str;
+	long int num;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		num = atol(str);
+		xmlFree(str);
+		return(num);
+	}
+	return(0);
+}
+
+double sdm_data_read_float_entry(struct sdm_data_file *data)
+{
+	char *str;
+	double num;
+
+	if (data->current && (str = xmlNodeListGetString(data->doc, data->current->children, 1))) {
+		num = atof(str);
+		xmlFree(str);
+		return(num);
+	}
+	return(0);
+}
+
+int sdm_data_read_string_entry(struct sdm_data_file *data, char *buffer, int max)
 {
 	int size;
 	char *str;
@@ -217,7 +276,7 @@ int sdm_data_read_string(struct sdm_data_file *data, char *buffer, int max)
 	return(0);
 }
 
-int sdm_data_read_raw_string(struct sdm_data_file *data, char *buffer, int max)
+int sdm_data_read_raw_string_entry(struct sdm_data_file *data, char *buffer, int max)
 {
 	char *str;
 

@@ -22,6 +22,7 @@
 
 struct sdm_processor_type sdm_form_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,
+	"form",
 	sizeof(struct sdm_form),
 	NULL,
 	(sdm_object_init_t) sdm_form_init,
@@ -60,7 +61,7 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 		sdm_thing_set_property(SDM_THING(user), "name", obj);
 
 	// TODO hack, remove when you get a chargen process that can set the location
-	SDM_THING(user)->parent = 4;
+	SDM_THING(user)->parent = 6;
 	if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
 		sdm_thing_add(SDM_THING(obj), SDM_THING(user));
 

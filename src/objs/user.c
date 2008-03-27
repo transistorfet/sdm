@@ -27,6 +27,7 @@
 
 struct sdm_object_type sdm_user_obj_type = {
 	&sdm_mobile_obj_type,
+	"user",
 	sizeof(struct sdm_user),
 	NULL,
 	(sdm_object_init_t) sdm_user_init,

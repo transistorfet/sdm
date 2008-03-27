@@ -24,6 +24,7 @@
 
 struct sdm_object_type sdm_sdrl_obj_type = {
 	&sdm_action_obj_type,
+	"sdrl",
 	sizeof(struct sdm_sdrl),
 	NULL,
 	(sdm_object_init_t) NULL,
@@ -48,7 +49,7 @@ int init_sdrl(void)
 	if (sdm_load_sdrl_library(global_mach))
 		return(-1);
 
-	if (sdm_object_register_type("sdrl", &sdm_sdrl_obj_type) < 0)
+	if (sdm_object_register_type(&sdm_sdrl_obj_type) < 0)
 		return(-1);
 	return(0);
 }
@@ -57,7 +58,7 @@ void release_sdrl(void)
 {
 	if (!global_mach)
 		return;
-	sdm_object_deregister_type("sdrl");
+	sdm_object_deregister_type(&sdm_sdrl_obj_type);
 	if (global_mach)
 		sdrl_destroy_machine(global_mach);
 	global_mach = NULL;
@@ -76,7 +77,7 @@ int sdm_sdrl_read_entry(struct sdm_sdrl *action, const char *name, struct sdm_da
 		return(-1);
 	SDM_ACTION(action)->func = (sdm_action_t) sdm_sdrl_action;
 	action->expr = expr;
-	return(SDM_HANDLED);
+	return(SDM_HANDLED_ALL);
 }
 
 int sdm_sdrl_write_data(struct sdm_sdrl *action, struct sdm_data_file *data)

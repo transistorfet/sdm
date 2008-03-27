@@ -13,6 +13,7 @@
 
 struct sdm_object_type sdm_action_obj_type = {
 	NULL,
+	"action",
 	sizeof(struct sdm_action),
 	NULL,
 	(sdm_object_init_t) sdm_action_init,

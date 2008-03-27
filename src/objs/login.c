@@ -19,6 +19,7 @@
 
 struct sdm_object_type sdm_login_obj_type = {
 	NULL,
+	"login",
 	sizeof(struct sdm_login),
 	NULL,
 	(sdm_object_init_t) sdm_login_init,
@@ -56,7 +57,7 @@ int sdm_login_read_data(struct sdm_login *login)
 				sdm_data_read_children(data);
 				do {
 					if ((str = sdm_data_read_name(data)) && !strcmp(str, "password")) {
-						sdm_data_read_string(data, buffer, STRING_SIZE);
+						sdm_data_read_string_entry(data, buffer, STRING_SIZE);
 						login->password = create_string("%s", buffer);
 					}
 				} while (sdm_data_read_next(data));

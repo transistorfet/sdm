@@ -18,7 +18,8 @@
 
 #include <sdm/objs/user.h>
 #include <sdm/objs/world.h>
-#include <sdm/objs/interpreter.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
 
 static int exit_flag = 1;
 
@@ -41,13 +42,16 @@ int init_mud(void)
 
 	if (init_object() < 0)
 		return(-1);
+	if (init_sdm_number_type() < 0)
+		return(-1);
+	if (init_sdm_string_type() < 0)
+		return(-1);
+
 	if (init_basic() < 0)
 		return(-1);
 	if (init_lua() < 0)
 		return(-1);
 
-	if (init_interpreter() < 0)
-		return(-1);
 	if (init_thing() < 0)
 		return(-1);
 	if (init_world() < 0)
@@ -64,10 +68,12 @@ void release_mud(void)
 	release_user();
 	release_world();
 	release_thing();
-	release_interpreter();
 
 	release_lua();
 	release_basic();
+
+	release_sdm_string_type();
+	release_sdm_number_type();
 	release_object();
 
 	release_telnet();

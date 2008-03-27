@@ -27,6 +27,7 @@
 
 struct sdm_object_type sdm_lua_obj_type = {
 	&sdm_action_obj_type,
+	"lua",
 	sizeof(struct sdm_lua),
 	NULL,
 	(sdm_object_init_t) NULL,
@@ -48,7 +49,7 @@ int init_lua(void)
 	if (sdm_load_lua_library(global_state))
 		return(-1);
 
-	if (sdm_object_register_type("lua", &sdm_lua_obj_type) < 0)
+	if (sdm_object_register_type(&sdm_lua_obj_type) < 0)
 		return(-1);
 	return(0);
 }
@@ -57,7 +58,7 @@ void release_lua(void)
 {
 	if (!global_state)
 		return;
-	sdm_object_deregister_type("lua");
+	sdm_object_deregister_type(&sdm_lua_obj_type);
 	if (global_state)
 		lua_close(global_state);
 	global_state = NULL;
@@ -80,12 +81,11 @@ int sdm_lua_read_entry(struct sdm_lua *action, const char *name, struct sdm_data
 	if (!(action->code = create_string("%s", buffer)))
 		return(-1);
 	SDM_ACTION(action)->func = (sdm_action_t) sdm_lua_action;
-	return(SDM_HANDLED);
+	return(SDM_HANDLED_ALL);
 }
 
 int sdm_lua_write_data(struct sdm_lua *action, struct sdm_data_file *data)
 {
-	sdm_data_write_attrib(data, "type", "lua");
 	sdm_data_write_raw_string(data, action->code);
 	return(0);
 }
