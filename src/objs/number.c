@@ -36,9 +36,10 @@ void release_sdm_number_type(void)
 }
 
 
-int sdm_number_init(struct sdm_number *number, va_list va)
+int sdm_number_init(struct sdm_number *number, int nargs, va_list va)
 {
-	number->num = va_arg(va, sdm_number_t);
+	if (nargs > 0)
+		number->num = va_arg(va, sdm_number_t);
 	return(0);
 }
 

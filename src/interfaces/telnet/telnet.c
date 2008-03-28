@@ -48,7 +48,7 @@ int init_telnet(void)
 {
 	if (telnet_server)
 		return(1);
-	if (!(telnet_server = (struct sdm_telnet *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_telnet_obj_type), SDM_TCP_LISTEN, TELNET_PORT)))
+	if (!(telnet_server = (struct sdm_telnet *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_telnet_obj_type), 2, SDM_TCP_LISTEN, TELNET_PORT)))
 		return(-1);
 	if (init_telnet_ansi() < 0)
 		return(-1);

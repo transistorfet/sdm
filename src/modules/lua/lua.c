@@ -91,17 +91,17 @@ int sdm_lua_write_data(struct sdm_lua *action, struct sdm_data_file *data)
 }
 
 
-int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *error;
 
-	lua_pushnumber(global_state, caller ? caller->id : -1);
+	lua_pushnumber(global_state, args->caller ? args->caller->id : -1);
 	lua_setglobal(global_state, "caller");
 	lua_pushnumber(global_state, thing ? thing->id : -1);
 	lua_setglobal(global_state, "this");
-	lua_pushnumber(global_state, target ? target->id : -1);
+	lua_pushnumber(global_state, args->target ? args->target->id : -1);
 	lua_setglobal(global_state, "target");
-	lua_pushstring(global_state, args);
+	lua_pushstring(global_state, args->text);
 	lua_setglobal(global_state, "args");
 
 	if (luaL_loadbuffer(global_state, action->code, strlen(action->code), "action")
@@ -113,10 +113,7 @@ int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *caller, struct sdm_
 		return(-1);
 	}
 	// TODO What if an object is returned as a number (id)?
-	if (result)
-		sdm_lua_convert_lua_value(global_state, -1);
-	else
-		lua_pop(global_state, 1);
+	args->result = sdm_lua_convert_lua_value(global_state, -1);
 	return(0);
 }
 

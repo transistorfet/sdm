@@ -31,7 +31,7 @@ void sdm_lua_release(struct sdm_lua *);
 int sdm_lua_read_entry(struct sdm_lua *, const char *, struct sdm_data_file *);
 int sdm_lua_write_data(struct sdm_lua *, struct sdm_data_file *);
 
-int sdm_lua_action(struct sdm_lua *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_object **);
+int sdm_lua_action(struct sdm_lua *, struct sdm_thing *, struct sdm_action_args *);
 
 #endif
 

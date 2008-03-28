@@ -88,34 +88,37 @@ struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
 		sdm_user_connect(user, inter);
 		return(user);
 	}
-	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, SDM_USER_ARGS(name, inter, SDM_NO_ID, 0)));
+	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, 4, SDM_USER_ARGS(name, inter, SDM_NO_ID, 0)));
 }
 
-int sdm_user_init(struct sdm_user *user, va_list va)
+int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 {
 	const char *name;
 	struct sdm_interface *inter;
 
-	name = va_arg(va, const char *);
-	if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
-		return(-1);
-	inter = va_arg(va, struct sdm_interface *);
+	if (nargs > 2) {
+		name = va_arg(va, const char *);
+		if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
+			return(-1);
+		inter = va_arg(va, struct sdm_interface *);
+		nargs -= 2;
+	}
 
 	/** If there is already a user with that name then fail */
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
 
-	if (sdm_mobile_init(SDM_MOBILE(user), va) < 0)
+	if (sdm_mobile_init(SDM_MOBILE(user), nargs, va) < 0)
 		return(-1);
 	if (sdm_user_exists(user->name)) {
 		sdm_user_read(user);
 		// TODO should this be specified and loaded from the file?
-		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type)))))
+		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0))))
 			return(-1);
 	}
 	else {
 		// TODO should there be another way to find out what form to use to register users?
-		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), "etc/register.xml"))))
+		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"))))
 			return(-1);
 		// TODO should you write the user to disk at this point?
 	}

@@ -87,16 +87,16 @@ int sdm_sdrl_write_data(struct sdm_sdrl *action, struct sdm_data_file *data)
 }
 
 
-int sdm_sdrl_action(struct sdm_sdrl *sdrl, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args)
+int sdm_sdrl_action(struct sdm_sdrl *sdrl, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (!(global_mach->env = sdrl_extend_environment(global_mach->global))) {
 		SDRL_ERROR(global_mach, SDRL_ES_HIGH, SDRL_ERR_OUT_OF_MEMORY, NULL);
 		return(-1);
 	}
-	sdrl_add_binding(global_mach->env, "caller", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(caller)));
+	sdrl_add_binding(global_mach->env, "caller", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(args->caller)));
 	sdrl_add_binding(global_mach->env, "this", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(thing)));
-	sdrl_add_binding(global_mach->env, "target", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(target)));
-	sdrl_add_binding(global_mach->env, "args", sdrl_make_string(global_mach->heap, sdrl_find_binding(global_mach->type_env, "string"), args, strlen(args)));
+	sdrl_add_binding(global_mach->env, "target", sdm_sdrl_reference_object(global_mach, SDM_OBJECT(args->target)));
+	sdrl_add_binding(global_mach->env, "args", sdrl_make_string(global_mach->heap, sdrl_find_binding(global_mach->type_env, "string"), args->text, strlen(args->text)));
 	sdrl_evaluate(global_mach, sdrl->expr);
 	global_mach->env = sdrl_retract_environment(global_mach->env);
 	return(0);

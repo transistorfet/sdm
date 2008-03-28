@@ -31,8 +31,10 @@ int init_world(void)
 {
 	if (root_world)
 		return(1);
+	if (sdm_object_register_type(&sdm_world_obj_type) < 0)
+		return(-1);
 	/** Create the world object with ID = 0, and parent ID = -1 since the world has no parent */
-	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type, SDM_WORLD_ARGS("maps/world.xml", 0, -1))))
+	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type, 3, SDM_WORLD_ARGS("maps/world.xml", 0, -1))))
 		return(-1);
 	return(0);
 }
@@ -44,16 +46,20 @@ void release_world(void)
 		sdm_world_write(root_world, NULL);
 		destroy_sdm_object(SDM_OBJECT(root_world));
 	}
+	sdm_object_deregister_type(&sdm_world_obj_type);
 }
 
-int sdm_world_init(struct sdm_world *world, va_list va)
+int sdm_world_init(struct sdm_world *world, int nargs, va_list va)
 {
 	const char *filename;
 
-	filename = va_arg(va, const char *);
-	if (!(world->filename = create_string("%s", filename)))
-		return(-1);
-	if (sdm_thing_init(SDM_THING(world), va))
+	if (nargs > 0) {
+		filename = va_arg(va, const char *);
+		if (!(world->filename = create_string("%s", filename)))
+			return(-1);
+		nargs--;
+	}
+	if (sdm_thing_init(SDM_THING(world), nargs, va))
 		return(-1);
 	sdm_object_read_file(SDM_OBJECT(world), world->filename, "world");
 	return(0);

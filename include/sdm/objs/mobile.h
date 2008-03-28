@@ -22,7 +22,7 @@ struct sdm_mobile {
 
 extern struct sdm_object_type sdm_mobile_obj_type;
 
-int sdm_mobile_init(struct sdm_mobile *, va_list);
+int sdm_mobile_init(struct sdm_mobile *, int, va_list);
 void sdm_mobile_release(struct sdm_mobile *);
 
 #endif

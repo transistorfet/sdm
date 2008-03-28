@@ -34,7 +34,7 @@ struct sdm_processor_type {
 
 extern struct sdm_processor_type sdm_processor_obj_type;
 
-int sdm_processor_init(struct sdm_processor *, va_list);
+int sdm_processor_init(struct sdm_processor *, int, va_list);
 void sdm_processor_release(struct sdm_processor *);
 
 static inline int sdm_processor_startup(struct sdm_processor *proc, struct sdm_user *user) {

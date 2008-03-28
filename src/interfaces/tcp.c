@@ -51,11 +51,11 @@ static int tcp_connect(struct sdm_tcp *, const char *, int);
 static int tcp_listen(struct sdm_tcp *, int);
 static int tcp_accept(struct sdm_tcp *, struct sdm_tcp *);
 
-int sdm_tcp_init(struct sdm_tcp *inter, va_list va)
+int sdm_tcp_init(struct sdm_tcp *inter, int nargs, va_list va)
 {
 	int type;
 
-	if (sdm_interface_init(SDM_INTERFACE(inter), va) < 0)
+	if (sdm_interface_init(SDM_INTERFACE(inter), 0, va) < 0)
 		return(-1);
 	inter->read_pos = 0;
 	inter->read_length = 0;

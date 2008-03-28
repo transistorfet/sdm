@@ -60,7 +60,7 @@ extern struct sdm_interface_type sdm_interface_obj_type;
 int init_interface(void);
 void release_interface(void);
 
-int sdm_interface_init(struct sdm_interface *, va_list);
+int sdm_interface_init(struct sdm_interface *, int, va_list);
 void sdm_interface_release(struct sdm_interface *);
 
 void sdm_interface_set_callback(struct sdm_interface *, int, callback_t, void *);

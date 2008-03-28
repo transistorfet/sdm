@@ -37,11 +37,13 @@ void release_sdm_string_type(void)
 }
 
 
-int sdm_string_init(struct sdm_string *string, va_list va)
+int sdm_string_init(struct sdm_string *string, int nargs, va_list va)
 {
 	char *fmt;
 	char buffer[LARGE_STRING_SIZE];
 
+	if (nargs <= 0)
+		return(0);
 	fmt = va_arg(va, char *);
 	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
 	string->len = strlen(buffer);

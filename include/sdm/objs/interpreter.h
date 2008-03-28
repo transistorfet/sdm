@@ -25,13 +25,11 @@ extern struct sdm_processor_type sdm_interpreter_obj_type;
 int init_interpreter(void);
 void release_interpreter(void);
 
-int sdm_interpreter_init(struct sdm_interpreter *, va_list);
-void sdm_interpreter_release(struct sdm_interpreter *);
-
 int sdm_interpreter_startup(struct sdm_interpreter *, struct sdm_user *);
 int sdm_interpreter_process(struct sdm_interpreter *, struct sdm_user *, char *);
 int sdm_interpreter_shutdown(struct sdm_interpreter *, struct sdm_user *);
 
+int sdm_interpreter_do_command(struct sdm_thing *, const char *);
 int sdm_interpreter_get_string(const char *, char *, int, int *);
 struct sdm_thing *sdm_interpreter_get_thing(struct sdm_thing *, const char *, int *);
 

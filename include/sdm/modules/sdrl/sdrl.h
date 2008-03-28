@@ -30,7 +30,7 @@ void release_sdrl(void);
 int sdm_sdrl_read_entry(struct sdm_sdrl *, const char *, struct sdm_data_file *);
 int sdm_sdrl_write_data(struct sdm_sdrl *, struct sdm_data_file *);
 
-int sdm_sdrl_action(struct sdm_sdrl *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *);
+int sdm_sdrl_action(struct sdm_sdrl *, struct sdm_thing *, struct sdm_action_args *);
 
 #endif
 

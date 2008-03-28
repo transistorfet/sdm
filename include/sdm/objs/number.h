@@ -22,12 +22,12 @@ struct sdm_number {
 extern struct sdm_object_type sdm_number_obj_type;
 
 #define create_sdm_number(num)	\
-	( SDM_NUMBER(create_sdm_object(&sdm_number_obj_type, (num))) )
+	( SDM_NUMBER(create_sdm_object(&sdm_number_obj_type, 1, (num))) )
 
 int init_sdm_number_type(void);
 void release_sdm_number_type(void);
 
-int sdm_number_init(struct sdm_number *, va_list);
+int sdm_number_init(struct sdm_number *, int, va_list);
 void sdm_number_release(struct sdm_number *);
 int sdm_number_read_entry(struct sdm_number *, const char *, struct sdm_data_file *);
 int sdm_number_write_data(struct sdm_number *, struct sdm_data_file *);

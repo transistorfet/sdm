@@ -24,7 +24,7 @@ struct sdm_object_type;
 /** Initialize the preallocade object using the given variable args.  The object will be zero'd before
     the initialization function is called.  If a negative number is returned, the object will destroyed
     and the release function for that object will be called. */
-typedef int (*sdm_object_init_t)(struct sdm_object *, va_list);
+typedef int (*sdm_object_init_t)(struct sdm_object *, int, va_list);
 /** Release the resources freed by the object */
 typedef void (*sdm_object_release_t)(struct sdm_object *);
 /** Read an entry from the given open data handle and load the information into the object.  The name of
@@ -63,7 +63,7 @@ int sdm_object_register_type(struct sdm_object_type *);
 int sdm_object_deregister_type(struct sdm_object_type *);
 struct sdm_object_type *sdm_object_find_type(const char *, struct sdm_object_type *);
 
-struct sdm_object *create_sdm_object(struct sdm_object_type *, ...);
+struct sdm_object *create_sdm_object(struct sdm_object_type *, int, ...);
 void destroy_sdm_object(struct sdm_object *);
 
 int sdm_object_read_file(struct sdm_object *, const char *, const char *);

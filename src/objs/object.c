@@ -62,7 +62,7 @@ struct sdm_object_type *sdm_object_find_type(const char *name, struct sdm_object
 }
 
 
-struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
+struct sdm_object *create_sdm_object(struct sdm_object_type *type, int nargs, ...)
 {
 	va_list va;
 	struct sdm_object *obj;
@@ -72,8 +72,8 @@ struct sdm_object *create_sdm_object(struct sdm_object_type *type, ...)
 	memset(obj, '\0', type->size);
 	obj->type = type;
 
-	va_start(va, type);
-	if (type->init && type->init(obj, va)) {
+	va_start(va, nargs);
+	if (type->init && type->init(obj, nargs, va)) {
 		destroy_sdm_object(obj);
 		return(NULL);
 	}

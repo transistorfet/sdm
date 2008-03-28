@@ -33,15 +33,15 @@ struct sdm_tcp {
 extern struct sdm_interface_type sdm_tcp_ob_type;
 
 #define sdm_tcp_connect(server, port)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), SDM_TCP_CONNECT, (server), (port)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), 3, SDM_TCP_CONNECT, (server), (port)) )
 
 #define sdm_tcp_listen(port)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), SDM_TCP_LISTEN, (port)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), 2, SDM_TCP_LISTEN, (port)) )
 
 #define sdm_tcp_accept(type, inter)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(type), SDM_TCP_ACCEPT, (inter)) )
+	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(type), 2, SDM_TCP_ACCEPT, (inter)) )
 
-int sdm_tcp_init(struct sdm_tcp *, va_list);
+int sdm_tcp_init(struct sdm_tcp *, int, va_list);
 void sdm_tcp_release(struct sdm_tcp *);
 
 int sdm_tcp_read(struct sdm_tcp *, char *, int);

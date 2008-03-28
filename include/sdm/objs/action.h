@@ -14,8 +14,18 @@
 
 struct sdm_thing;
 struct sdm_action;
+struct sdm_action_args;
 
-typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_object **);
+//typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_object **);
+typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+
+struct sdm_action_args {
+	struct sdm_object *result;
+	struct sdm_thing *caller;
+	struct sdm_thing *obj;
+	struct sdm_thing *target;
+	const char *text;
+};
 
 struct sdm_action {
 	struct sdm_object object;
@@ -26,7 +36,7 @@ extern struct sdm_object_type sdm_action_obj_type;
 
 #define SDM_ACTION_ARGS(action)			(action)
 
-int sdm_action_init(struct sdm_action *, va_list);
+int sdm_action_init(struct sdm_action *, int, va_list);
 void sdm_action_release(struct sdm_action *);
 
 #endif

@@ -43,6 +43,10 @@ struct sdm_thing **sdm_thing_table = NULL;
 
 int init_thing(void)
 {
+	if (sdm_thing_table)
+		return(1);
+	if (sdm_object_register_type(&sdm_thing_obj_type) < 0)
+		return(-1);
 	if (!(sdm_thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
 		return(-1);
 	sdm_thing_table_size = THING_TABLE_INIT_SIZE;
@@ -53,10 +57,12 @@ int init_thing(void)
 void release_thing(void)
 {
 	// TODO free all things in the table???
-	memory_free(sdm_thing_table);
+	if (sdm_thing_table)
+		memory_free(sdm_thing_table);
+	sdm_object_deregister_type(&sdm_thing_obj_type);
 }
 
-int sdm_thing_init(struct sdm_thing *thing, va_list va)
+int sdm_thing_init(struct sdm_thing *thing, int nargs, va_list va)
 {
 	if (!(thing->properties = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
 		return(-1);
@@ -68,13 +74,18 @@ int sdm_thing_init(struct sdm_thing *thing, va_list va)
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
 	    If the id = SDM_NEW_ID then assign the next available id */
-	thing->id = va_arg(va, int);
-	if (thing->id >= 0)
-		sdm_thing_assign_id(thing, thing->id);
-	else if (thing->id == SDM_NEW_ID)
-		sdm_thing_assign_new_id(thing);
-
-	thing->parent = va_arg(va, sdm_id_t);
+	if (nargs < 2) {
+		thing->id = -1;
+		thing->parent = 0;
+	}
+	else {
+		thing->id = va_arg(va, int);
+		if (thing->id >= 0)
+			sdm_thing_assign_id(thing, thing->id);
+		else if (thing->id == SDM_NEW_ID)
+			sdm_thing_assign_new_id(thing);
+		thing->parent = va_arg(va, sdm_id_t);
+	}
 	return(0);
 }
 
@@ -110,7 +121,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		if (!(objtype = sdm_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
 			return(-1);
 		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		if (!(obj = create_sdm_object(objtype, NULL)))
+		if (!(obj = create_sdm_object(objtype, 0)))
 			return(-1);
 		sdm_data_read_children(data);
 		res = sdm_object_read_data(obj, data);
@@ -121,7 +132,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 		}
 	}
 	else if (!strcmp(type, "thing")) {
-		if (!(obj = create_sdm_object(&sdm_thing_obj_type, SDM_THING_ARGS(SDM_NO_ID, 0))))
+		if (!(obj = create_sdm_object(&sdm_thing_obj_type, 2, SDM_THING_ARGS(SDM_NO_ID, 0))))
 			return(-1);
 		sdm_data_read_children(data);
 		sdm_object_read_data(obj, data);
@@ -131,7 +142,7 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	else if (!strcmp(type, "action")) {
 		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
 		if (!(objtype = sdm_object_find_type(buffer, &sdm_action_obj_type))
-		    || !(obj = create_sdm_object(objtype)))
+		    || !(obj = create_sdm_object(objtype, 0)))
 			return(-1);
 		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
 		sdm_data_read_children(data);
@@ -250,17 +261,24 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_a
 	return(sdm_hash_add(thing->actions, name, action));
 }
 
-int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *text, struct sdm_object **result)
 {
+	int ret;
 	struct sdm_thing *cur;
 	struct sdm_action *action;
+	struct sdm_action_args args;
+
+	memset(&args, '\0', sizeof(struct sdm_action_args));
+	args.caller = caller;
+	args.target = target;
+	args.text = text ? text : "";
 
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_hash_find(cur->actions, name))) {
-			/** Clear the result before we do the action */
+			ret = action->func(action, thing, &args);
 			if (result)
-				*result = NULL;
-			return(action->func(action, caller, thing, target, args, result));
+				*result = args.result;
+			return(ret);
 		}
 	}
 	return(1);

@@ -34,10 +34,12 @@ struct sdm_processor_type sdm_form_obj_type = { {
 	(sdm_processor_shutdown_t) sdm_form_shutdown
 };
 
-int sdm_form_init(struct sdm_form *form, va_list va)
+int sdm_form_init(struct sdm_form *form, int nargs, va_list va)
 {
 	const char *filename;
 
+	if (nargs <= 0)
+		return(0);
 	filename = va_arg(va, const char *);
 	if (!(form->filename = create_string("%s", filename)))
 		return(-1);
@@ -67,7 +69,7 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 
 	/** Replace this processor with an interpreter */
 	destroy_sdm_object(SDM_OBJECT(user->proc));
-	if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type)))))
+	if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0))))
 		return(-1);
 	sdm_processor_startup(user->proc, user);
 	return(0);

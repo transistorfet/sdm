@@ -23,7 +23,7 @@ struct sdm_form {
 
 extern struct sdm_processor_type sdm_form_obj_type;
 
-int sdm_form_init(struct sdm_form *, va_list);
+int sdm_form_init(struct sdm_form *, int, va_list);
 void sdm_form_release(struct sdm_form *);
 
 int sdm_form_startup(struct sdm_form *, struct sdm_user *);

@@ -25,9 +25,9 @@ struct sdm_login {
 extern struct sdm_object_type sdm_login_obj_type;
 
 #define create_sdm_login()	\
-	( (struct sdm_login *) create_sdm_object(&sdm_login_obj_type) )
+	( (struct sdm_login *) create_sdm_object(&sdm_login_obj_type, 0) )
 
-int sdm_login_init(struct sdm_login *, va_list);
+int sdm_login_init(struct sdm_login *, int, va_list);
 void sdm_login_release(struct sdm_login *);
 
 int sdm_login_write_data(struct sdm_login *);

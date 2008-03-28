@@ -43,7 +43,7 @@ extern struct sdm_object_type sdm_thing_obj_type;
 int init_thing(void);
 void release_thing(void);
 
-int sdm_thing_init(struct sdm_thing *, va_list);
+int sdm_thing_init(struct sdm_thing *, int, va_list);
 void sdm_thing_release(struct sdm_thing *);
 int sdm_thing_read_entry(struct sdm_thing *, const char *, struct sdm_data_file *);
 int sdm_thing_write_data(struct sdm_thing *, struct sdm_data_file *);
@@ -77,6 +77,38 @@ static inline int sdm_thing_is_a(struct sdm_thing *thing, sdm_id_t id) {
 	return(0);
 }
 
+static inline double sdm_thing_get_number_property(struct sdm_thing *thing, const char *name) {
+	struct sdm_number *number;
+
+	if (!(number = SDM_NUMBER(sdm_thing_get_property(thing, name, &sdm_number_obj_type))))
+		return(0);
+	return(number->num);
+}
+
+static inline int sdm_thing_set_number_property(struct sdm_thing *thing, const char *name, double num) {
+	struct sdm_number *number;
+
+	if (!(number = create_sdm_number(num)))
+		return(-1);
+	return(sdm_thing_set_property(thing, name, SDM_OBJECT(number)));
+}
+
+static inline const char *sdm_thing_get_string_property(struct sdm_thing *thing, const char *name) {
+	struct sdm_string *string;
+
+	if (!(string = SDM_STRING(sdm_thing_get_property(thing, name, &sdm_string_obj_type))))
+		return(NULL);
+	return(string->str);
+}
+
+static inline int sdm_thing_set_string_property(struct sdm_thing *thing, const char *name, const char *str) {
+	struct sdm_string *string;
+
+	if (!(string = create_sdm_string(str)))
+		return(-1);
+	return(sdm_thing_set_property(thing, name, SDM_OBJECT(string)));
+}
+
 static inline int sdm_thing_format_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, const char *fmt, ...) {
 	int i;
 	va_list va;
@@ -89,38 +121,6 @@ static inline int sdm_thing_format_action(struct sdm_thing *thing, struct sdm_th
 		buffer[STRING_SIZE - 1] = '\0';
 	sdm_thing_do_action(thing, caller, action, NULL, buffer, NULL);
 	return(0);
-}
-
-static inline double sdm_thing_get_number_property(struct sdm_thing *thing, const char *name) {
-	struct sdm_number *number;
-
-	if (!(number = SDM_NUMBER(sdm_thing_get_property(thing, name, &sdm_number_obj_type))))
-		return(0);
-	return(number->num);
-}
-
-static inline const char *sdm_thing_get_string_property(struct sdm_thing *thing, const char *name) {
-	struct sdm_string *string;
-
-	if (!(string = SDM_STRING(sdm_thing_get_property(thing, name, &sdm_string_obj_type))))
-		return(NULL);
-	return(string->str);
-}
-
-static inline int sdm_thing_set_number_property(struct sdm_thing *thing, const char *name, double num) {
-	struct sdm_number *number;
-
-	if (!(number = create_sdm_number(num)))
-		return(-1);
-	return(sdm_thing_set_property(thing, name, SDM_OBJECT(number)));
-}
-
-static inline int sdm_thing_set_string_property(struct sdm_thing *thing, const char *name, const char *str) {
-	struct sdm_string *string;
-
-	if (!(string = create_sdm_string(str)))
-		return(-1);
-	return(sdm_thing_set_property(thing, name, SDM_OBJECT(string)));
 }
 
 #endif

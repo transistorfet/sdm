@@ -23,8 +23,8 @@ struct sdm_processor_type sdm_interpreter_obj_type = { {
 	"interpreter",
 	sizeof(struct sdm_interpreter),
 	NULL,
-	(sdm_object_init_t) sdm_interpreter_init,
-	(sdm_object_release_t) sdm_interpreter_release,
+	(sdm_object_init_t) NULL,
+	(sdm_object_release_t) NULL,
 	(sdm_object_read_entry_t) NULL,
 	(sdm_object_write_data_t) NULL	},
 	(sdm_processor_startup_t) sdm_interpreter_startup,
@@ -33,17 +33,6 @@ struct sdm_processor_type sdm_interpreter_obj_type = { {
 };
 
 static struct sdm_thing *sdm_interpreter_find_object(struct sdm_thing *, const char *);
-
-int sdm_interpreter_init(struct sdm_interpreter *interpreter, va_list va)
-{
-	return(0);
-}
-
-void sdm_interpreter_release(struct sdm_interpreter *interpreter)
-{
-
-}
-
 
 int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 {
@@ -92,6 +81,17 @@ int sdm_interpreter_shutdown(struct sdm_interpreter *proc, struct sdm_user *user
 	return(0);
 }
 
+int sdm_interpreter_do_command(struct sdm_thing *thing, const char *input)
+{
+	// TODO how do you get the command?
+/*
+	if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
+	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
+	    && ((obj = sdm_interpreter_get_thing(SDM_THING(user), &input[i], &i))))) {
+		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i], NULL);
+	}
+*/
+}
 
 int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used)
 {

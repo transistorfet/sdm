@@ -44,7 +44,7 @@ int sdm_lua_create_thing(lua_State *state)
 	struct sdm_thing *thing, *parent;
 
 	parent = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
-	if (!parent || !(thing = SDM_THING(create_sdm_object(SDM_OBJECT(parent)->type, SDM_THING_ARGS(SDM_NEW_ID, parent->id)))))
+	if (!parent || !(thing = SDM_THING(create_sdm_object(SDM_OBJECT(parent)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, parent->id)))))
 		luaL_error(state, "Failed to create new thing");
 	else
 		lua_pushnumber(state, thing->id);

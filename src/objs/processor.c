@@ -25,7 +25,7 @@ struct sdm_processor_type sdm_processor_obj_type = { {
 	NULL
 };
 
-int sdm_processor_init(struct sdm_processor *processor, va_list va)
+int sdm_processor_init(struct sdm_processor *processor, int nargs, va_list va)
 {
 	return(0);
 }

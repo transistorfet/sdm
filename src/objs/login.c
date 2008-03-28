@@ -28,7 +28,7 @@ struct sdm_object_type sdm_login_obj_type = {
 	(sdm_object_write_data_t) NULL
 };
 
-int sdm_login_init(struct sdm_login *login, va_list va)
+int sdm_login_init(struct sdm_login *login, int nargs, va_list va)
 {
 	return(0);
 }

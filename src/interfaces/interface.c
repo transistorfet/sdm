@@ -63,7 +63,7 @@ void release_interface(void)
 	memory_free(interface_list.table);
 }
 
-int sdm_interface_init(struct sdm_interface *inter, va_list va)
+int sdm_interface_init(struct sdm_interface *inter, int nargs, va_list va)
 {
 	int newsize;
 	struct sdm_interface **newtable;

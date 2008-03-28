@@ -22,9 +22,10 @@ struct sdm_object_type sdm_action_obj_type = {
 	(sdm_object_write_data_t) NULL
 };
 
-int sdm_action_init(struct sdm_action *action, va_list va)
+int sdm_action_init(struct sdm_action *action, int nargs, va_list va)
 {
-	action->func = va_arg(va, sdm_action_t);
+	if (nargs > 0)
+		action->func = va_arg(va, sdm_action_t);
 	return(0);
 }
 

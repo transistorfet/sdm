@@ -94,11 +94,11 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
-	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args));
+	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args->text));
 }
 
 /**
@@ -108,13 +108,13 @@ int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *call
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *cur;
 
 	for (cur = thing->objects; cur; cur = cur->next) {
-		if (cur != caller)
-			sdm_thing_do_action(cur, caller, "tell", NULL, args, NULL);
+		if (cur != args->caller)
+			sdm_thing_do_action(cur, args->caller, "tell", NULL, args->text, NULL);
 	}
 	return(0);
 }
@@ -126,15 +126,15 @@ int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *calle
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *name;
 
-	if (!args || (*args == '\0'))
+	if (*args->text == '\0')
 		return(-1);
-	sdm_thing_format_action(caller, caller, "tell", "You say \"%s\"\n", args);
-	name = sdm_thing_get_string_property(caller, "name");
-	sdm_thing_format_action(thing, caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
+	sdm_thing_format_action(args->caller, args->caller, "tell", "You say \"%s\"\n", args->text);
+	name = sdm_thing_get_string_property(args->caller, "name");
+	sdm_thing_format_action(thing, args->caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
 	return(0);
 }
 
@@ -145,18 +145,18 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *caller, st
  *	target:		the object being looked at
  *	args:		the name of the object being looked at if target is NULL, unused otherwise
  */
-int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	if (!target && args && (*args != '\0')) {
-		target = sdm_interpreter_get_thing(caller, args, NULL);
-		if (!target) {
-			sdm_thing_format_action(caller, caller, "tell", "You don't see a %s here\n", args);
+	if (!args->target && (*args->text != '\0')) {
+		args->target = sdm_interpreter_get_thing(args->caller, args->text, NULL);
+		if (!args->target) {
+			sdm_thing_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
 			return(0);
 		}
 	}
-	if (!target)
-		target = thing;
-	sdm_thing_do_action(target, caller, "examine", NULL, "", NULL);
+	if (!args->target)
+		args->target = thing;
+	sdm_thing_do_action(args->target, args->caller, "examine", NULL, "", NULL);
 	return(0);
 
 }
@@ -168,17 +168,17 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *caller, s
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *str;
 	struct sdm_thing *cur;
 
 	if ((str = sdm_thing_get_string_property(thing, "name")))
-		sdm_thing_format_action(caller, caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
 	if ((str = sdm_thing_get_string_property(thing, "description")))
-		sdm_thing_format_action(caller, caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
 	for (cur = thing->objects; cur; cur = cur->next) {
-		if (cur == caller)
+		if (cur == args->caller)
 			continue;
 		if (!(str = sdm_thing_get_string_property(cur, "name")))
 			continue;
@@ -186,7 +186,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller
 			// TODO print properly
 		//}
 		//else
-			sdm_thing_format_action(caller, caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
+			sdm_thing_format_action(args->caller, args->caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
 	}
 	return(0);
 }
@@ -198,7 +198,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *caller
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	double num;
 	struct sdm_thing *location;
@@ -206,7 +206,7 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, s
 	if (((num = sdm_thing_get_number_property(thing, "target")) <= 0)
 	    || !(location = sdm_thing_lookup_id((sdm_id_t) num)))
 		return(-1);
-	sdm_thing_add(location, caller);
+	sdm_thing_add(location, args->caller);
 	return(0);
 }
 
@@ -217,8 +217,9 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *caller, s
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
+/*
 	if (!target && args && (*args != '\0')) {
 		target = sdm_interpreter_get_thing(caller, args, NULL);
 		if (!target) {
@@ -226,17 +227,19 @@ int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *
 			return(0);
 		}
 	}
-
-
+*/
+	return(0);
 }
 
-int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 
+	return(0);
 }
 
-int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *target, const char *args, struct sdm_object **result)
+int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 
+	return(0);
 }
 
