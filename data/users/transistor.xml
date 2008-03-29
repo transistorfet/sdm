@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<user>
+ <id>100</id>
+ <parent>7</parent>
+ <property type="string" name="name">transistor</property>
+ <property type="string" name="description">You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</property>
+ <property type="number" name="last_location">50.000000</property>
+ <thing>
+  <id>106</id>
+  <parent>5</parent>
+  <location>100</location>
+  <property type="string" name="name">The Thing</property>
+ </thing>
+ <name>transistor</name>
+ <lastseen>1206824103</lastseen>
+</user>

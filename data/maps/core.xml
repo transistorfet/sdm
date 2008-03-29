@@ -1,0 +1,141 @@
+<world>
+	<id>2</id>
+	<property type="string" name="name">core</property>
+	<thing>
+		<id>5</id>
+		<parent>0</parent>
+		<property type="string" name="name">thing</property>
+		<action type="basic" name="examine">
+			basic_examine
+		</action>
+	</thing>
+	<thing>
+		<id>6</id>
+		<parent>5</parent>
+		<property type="string" name="name">user</property>
+		<action type="basic" name="tell">
+			basic_tell_user
+		</action>
+		<action type="basic" name="inventory">
+			basic_inventory
+		</action>
+		<action type="basic" name="get">
+			basic_get
+		</action>
+		<action type="basic" name="drop">
+			basic_drop
+		</action>
+		<action type="lua" name="description"><![CDATA[
+			if set_property(caller, "description", args) then
+				tell(caller, "<green>Description set successfully\n");
+			else
+				tell(caller, "<red>Error setting description\n");
+			end
+		]]></action>
+	</thing>
+	<thing>
+		<id>7</id>
+		<parent>6</parent>
+		<property type="string" name="name">wizard</property>
+		<action type="lua" name="teleport"><![CDATA[
+			local room = get_thing(caller, args);
+			moveto(caller, room);
+		]]></action>
+		<action type="basic" name="create_object">
+			basic_create_object
+		</action>
+		<action type="basic" name="create_room">
+			basic_create_room
+		</action>
+		<action type="basic" name="create_exit">
+			basic_create_exit
+		</action>
+<!--
+		<action type="lua" name="create_room"><![CDATA[
+			local dir, name = get_string(args);
+			local room = create_thing(get_thing(2, "room"));
+			set_property(room, "name", name);
+
+			local exit = create_thing(get_thing(2, "exit"));
+			set_property(exit, "name", dir);
+			set_property(exit, "target", room);
+			moveto(exit, get_location(caller));
+
+			tell(caller, "<green>Room #" .. room .. "created successfully.\n");
+		]]></action>
+		<action type="lua" name="create_exit"><![CDATA[
+			local dir, roomname = get_string(args);
+			local room = get_thing(caller, roomname)
+			local exit = create_thing(get_thing(2, "exit"));
+			set_property(exit, "name", dir);
+			set_property(exit, "target", room);
+			moveto(exit, get_location(caller));
+			tell(caller, "<green>Exit #" .. exit .. " created successfully.\n");
+		]]></action>
+		<action type="lua" name="describe"><![CDATA[
+			if target <= 0 then
+				local name;
+				name, args = get_string(args);
+				target = get_thing(caller, name);
+			end
+			if set_property(target, "description", args) then
+				tell(caller, "<green>Description set successfully\n");
+			else
+				tell(caller, "<red>Error setting description\n");
+			end
+		]]></action>
+-->
+	</thing>
+	<thing>
+		<id>8</id>
+		<parent>5</parent>
+		<property type="string" name="name">item</property>
+
+	</thing>
+
+	<thing>
+		<id>10</id>
+		<parent>5</parent>
+		<property type="string" name="name">room</property>
+		<action type="lua" name="on_enter"><![CDATA[
+			local name = get_property(caller, "name");
+			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " enters the room.\n"); end
+			do_action(this, "look");
+		]]></action>
+		<action type="lua" name="on_exit"><![CDATA[
+			local name = get_property(caller, "name");
+			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " leaves.\n"); end
+		]]></action>
+		<action type="basic" name="look">
+			basic_look
+		</action>
+		<action type="basic" name="say">
+			basic_say
+		</action>
+		<action type="basic" name="announce">
+			basic_announce
+		</action>
+		<action type="lua" name="emote"><![CDATA[
+			local str = get_property(caller, "name") .. " " .. args .. "\n";
+			tell(caller, str);
+			do_action(get_location(caller), "announce", -1, "\n" .. str);
+		]]></action>
+		<action type="lua" name="north"><![CDATA[
+			local exit = get_thing(caller, "north");
+			if exit > 0 then
+				do_action(exit, "move", -1, "");
+			else
+				tell(caller, "You can't go that way.");
+			end
+		]]></action>
+	</thing>
+	<thing>
+		<id>11</id>
+		<parent>5</parent>
+		<property type="string" name="name">exit</property>
+		<action type="basic" name="move">
+			basic_move
+		</action>
+	</thing>
+
+</world>

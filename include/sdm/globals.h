@@ -29,11 +29,8 @@ struct callback_s {
 
 #define DECLARE_UNUSED(arg)	((void) arg)
 
-static inline const char *TRIM_WHITESPACE(const char *str) {
-	int i;
-	for (i = 0; (str[i] == ' ') || (str[i] == '\t'); i++) ;
-	return(&str[i]);
-}
+#define TRIM_WHITESPACE(str, i) \
+	for (; ((str)[(i)] == ' ') || ((str)[(i)] == '\t'); (i)++) ;
 
 #endif
 

@@ -35,6 +35,10 @@ int sdm_basic_action_look(struct sdm_action *, struct sdm_thing *, struct sdm_ac
 int sdm_basic_action_examine(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_move(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 
+int sdm_basic_action_inventory(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_basic_action_get(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_basic_action_drop(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+
 int sdm_basic_action_create_object(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_create_exit(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);

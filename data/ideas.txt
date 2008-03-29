@@ -1,0 +1,148 @@
+
+- hp, mana, and movement points (fatigue?)
+
+- the great hall can be called "The Banquet Hall of Gobbles The Great".  Gobbles can be a god most likely
+- Perhaps you start in the entrance hall, outside the entrance to the great hall in the clouds.  The whole
+  things is surrounded by clouds with a beanstock or something poking through the clouds from below that you
+  can't see the bottom of (a the base of the great hall).  The entrance has a cloak room and mabye some other
+  things and then you go into the banquet hall of gobbles the great with rooms off to the sides (the hall
+  itself could be 3 rooms long).
+
+- List of monsters, might come in handy =)  http://en.wikipedia.org/wiki/List_of_Monsters
+
+- have a tutorial map area that everybody is put on when they first register (eventually) and maybe after
+  completing it, you get put in a different place depending on your character perhaps
+
+- you could have a special orb that if you gaze into it, you find yourself transported to an "other realms"
+  area or back to the world where you were.  This other realms area would also me a heaven sort of place
+  where you'd go when you die.  You would probably go to another area though.  It would not be difficult to
+  store the last place you were in each area (world or other realms) as a property either in the orb or in
+  the player depending on how the orb works (can it be given to other players and thus if other players can
+  go where you were last).
+- this other realms place could have a grand hall plus lots of other areas
+- there could be a morgue where you can go to get your body.  Perhaps when you die, your body's location and
+  such is recorded as to where it is.  You can either go back to the world and get it (with all your items)
+  or you can purchase it at the morgue which only then will cause your corpse in the world to "vanish" (or
+  have a mobile pop out of nowhere, pick it up, and vanish) and it will be given to you.
+- the other realms could have some kind of special provision against killing somehow so that you can't die
+- if you wanted to have a social and mud at the same time, you could optionally sign up for only a social
+  account and when you want to play, you go to a special "soul assignment" room or something with a person
+  that assigns you to a body (turns your account into a character and inserts you in the world)
+
+- gold/coins/money can be represented as a bag of money object such that you can loose your bag and thus your
+  money but you don't need an object for each piece of gold.  The object could be special such that if you
+  pick up someone else's bag, it deletes it and adds it's contents to the bag you have.  This might be
+  difficult for buying items since the buyer would have to search all your items for a money bag to take
+  your gold out of unless you want to make a system where you have to type a command to give gold in which
+  case, the receiver has an opportunity to not give you the item in return (or vise versa) as a form of
+  stealing
+
+- a secret area that is like a mini town/secret layer for a secret cult society place populated mostly by
+  mobiles and they only way to get in is by abandoning certain rights or privillages and if you violate them,
+  the npcs will kill you or something.
+
+- societies (secret societies)
+- a world inside of an orb (special orb object that teleports you when you
+  examine it)
+- should there be game areas and non-game (social only) areas?
+- should there be multiple games/world in the same server or just have
+  multiple server processes that are completely seperate?
+- a special map teleporter object? you can record certain locations and by
+  activating them, you travel to that location (either by making you travel or
+  via teleportation)
+
+- you could have the scene with the bridgekeeper as a guard to something and you have to answer the bridge
+  keepers questions where the first 2 are always the person's name and quest while the last is randomly
+  selected from an expanded list of obscure questions most of which are hard but occationally you'll get the
+  easy, favorite colour question and sometimes you'll get the airspeed velocity question which if you answer
+  with the proper response question, the bridgekeeper is thrown into the gorge of eternal peril instead (but
+  after a certain time, he's regenerated).
+
+14/03/2008: ^^^
+
+14/06/2004: vvv
+- command aliases
+- change max repeated command from 20 to 40 or something
+
+- Realms Of The Jabberwock
+- The Jabberwocky Realms
+- The Realms of the Mome Raths
+- The Realms of Wonder
+
+Classes
+- druid
+- warrior
+- theif
+- merchant
+- ranger
+
+- races?
+- sexual orientation (?)
+- mobs with particular orientations as well as certain other qualities may be
+  less likey to attack certain players and so on
+
+- multiple religions, cultures, countries, etc
+- religions like clans, complete with clan wars?
+- countries like this too?
+- can someone belong to more than one clan at a time?
+- country (or something) determines starting point?
+- secret societies?
+
+- the environment is harsh
+- forest mazes and stuff in order to get between areas
+
+
+Themes:
+- popular *
+- original *
+	*:
+	- fantasy
+	- sci-fi
+	- historical
+	- cyberpunk
+	- nonsensical/humourous
+	...
+- really down-to-earth (no fantastical magic or races etc)
+- comical
+- a series of themed areas * (where star is anything)
+
+- a series of some perhaps serious, some comical of areas and certain races
+  will start in certain areas (?) but they all share/connect at limbo (and
+  possibly other places)
+
+
+Jabberwocky:
+
+- jabberwocky
+- mome raths
+- slithy toves
+- jubjub bird
+- bandersnatch
+
+- tumtum tree
+
+- walled town (hard to get in)
+- small village (near lake) with a cooper
+
+Monty Python:
+
+- monty python (and the quest for the holy grail) area in mud with rooms like 
+  scene 24 and the bridge of eternal peril, convoluted maze to get to the area
+  (with wraps between rooms).
+- A clan called the knights who say ni with a clan headquarters in the monty
+  python area (in the forest) and maybe even a spell called "NI"
+- castle anthrax
+
+
+- Lojbanistan
+- Language Area
+- Old/Middle English
+
+- holy relics (enchanted items)
+
+--------------------------------------------------------------------------------------
+
+- balance gold received and price of potions so that it's harder to get money
+  and thus to buy equipment but potions are not impossible to get
+
+

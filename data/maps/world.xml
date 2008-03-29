@@ -1,0 +1,35 @@
+<world>
+	<id>1</id>
+	<load ref="maps/core.xml"/>
+
+	<thing>
+		<id>50</id>
+		<parent>10</parent>
+		<property type="string" name="name">The Test Room</property>
+		<property type="string" name="description">You are in a room with loose wires and duct tape everywhere.  You
+			fear that if you touch anything, it might break.</property>
+		<thing>
+			<id>51</id>
+			<parent>11</parent>
+			<property type="string" name="name">north</property>
+			<property type="string" name="brief">A typical looking wooden doorway</property>
+			<property type="string" name="description">It's a door that you don't need to open.  What more do you need to know</property>
+			<property type="number" name="target">55</property>
+		</thing>
+	</thing>
+	<thing>
+		<id>55</id>
+		<parent>10</parent>
+		<property type="string" name="name">The Lounge</property>
+		<property type="string" name="description">You are in some kind of lounge area.  There is an old couch against
+			one wall with a fridge, microwave and countertop on the opposite wall</property>
+		<thing>
+			<id>56</id>
+			<parent>11</parent>
+			<property type="string" name="name">south</property>
+			<property type="string" name="brief">A strange looking curved hallway</property>
+			<property type="string" name="description">For some reason you are unable to see the hallway clearly</property>
+			<property type="number" name="target">50</property>
+		</thing>
+	</thing>
+</world>

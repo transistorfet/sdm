@@ -51,6 +51,10 @@ int init_basic(void)
 	sdm_hash_add(basic_actions, "basic_examine", sdm_basic_action_examine);
 	sdm_hash_add(basic_actions, "basic_move", sdm_basic_action_move);
 
+	sdm_hash_add(basic_actions, "basic_inventory", sdm_basic_action_inventory);
+	sdm_hash_add(basic_actions, "basic_get", sdm_basic_action_get);
+	sdm_hash_add(basic_actions, "basic_drop", sdm_basic_action_drop);
+
 	sdm_hash_add(basic_actions, "basic_create_object", sdm_basic_action_create_object);
 	sdm_hash_add(basic_actions, "basic_create_room", sdm_basic_action_create_room);
 	sdm_hash_add(basic_actions, "basic_create_exit", sdm_basic_action_create_exit);
@@ -210,6 +214,71 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, st
 	return(0);
 }
 
+
+int sdm_basic_action_inventory(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	const char *str;
+	struct sdm_thing *cur;
+
+	if (!thing->objects) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>You aren't carrying anything.\n");
+		return(0);
+	}
+
+	sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>You are carrying:\n");
+	for (cur = thing->objects; cur; cur = cur->next) {
+		if (!(str = sdm_thing_get_string_property(cur, "name")))
+			continue;
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightblue>    %s.\n", str);
+	}
+	return(0);
+}
+
+int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	int i = 0;
+	const char *name, *objname;
+
+	if (!args->obj && ((*args->text == '\0')
+	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "You don't see that here.\n");
+		return(-1);
+	}
+	if (args->obj->location == args->caller) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "You already have that.\n");
+		return(0);
+	}
+	// TODO call action on object to see if it is gettable
+	sdm_thing_add(args->caller, args->obj);
+	objname = sdm_thing_get_string_property(args->obj, "name");
+	sdm_thing_format_action(args->caller, args->caller, "tell", "You get %s.\n", objname ? objname : "something");
+	name = sdm_thing_get_string_property(args->caller, "name");
+	sdm_thing_format_action(args->caller->location, args->caller, "announce", "%s gets %s.\n", name ? name : "something", objname ? objname : "something");
+	return(0);
+}
+
+int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	int i = 0;
+	const char *name, *objname;
+
+	if (!args->obj && ((*args->text == '\0')
+	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i))
+	    || (args->obj->location != args->caller))) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "You aren't carrying that.\n");
+		return(-1);
+	}
+	// TODO call action on object to see if it is removable
+	// TODO call action on room to see if object can be dropped here
+	sdm_thing_add(args->caller->location, args->obj);
+	objname = sdm_thing_get_string_property(args->obj, "name");
+	sdm_thing_format_action(args->caller, args->caller, "tell", "You drop %s.\n", objname ? objname : "something");
+	name = sdm_thing_get_string_property(args->caller, "name");
+	sdm_thing_format_action(args->caller->location, args->caller, "announce", "%s drops %s.\n", name ? name : "something", objname ? objname : "something");
+	return(0);
+}
+
+
 /**
  * Create a basic object given a parent object and an optional name
  *	caller:		creator of the object
@@ -219,15 +288,25 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, st
  */
 int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-/*
-	if (!target && args && (*args != '\0')) {
-		target = sdm_interpreter_get_thing(caller, args, NULL);
-		if (!target) {
-			sdm_thing_format_action(caller, caller, "tell", "<red>Unable to determine the parent\n");
-			return(0);
-		}
+	int i = 0;
+	struct sdm_thing *obj;
+
+	if (!args->target && ((*args->text == '\0')
+	    || !(args->target = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<red>Unable to find the given parent.\n");
+		return(-1);
 	}
-*/
+
+	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->target)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->target->id))))) {
+		sdm_thing_format_action(args->caller, args->caller, "tell", "<red>Error creating object.\n");
+		return(-1);
+	}
+
+	TRIM_WHITESPACE(args->text, i);
+	sdm_thing_set_string_property(obj, "name", &args->text[i]);
+	sdm_thing_add(args->caller, obj);
+	sdm_thing_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	args->result = SDM_OBJECT(obj);
 	return(0);
 }
 

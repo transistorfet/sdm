@@ -112,12 +112,15 @@ int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used
 
 struct sdm_thing *sdm_interpreter_get_thing(struct sdm_thing *thing, const char *str, int *used)
 {
+	int i = 0;
 	sdm_id_t id;
 	struct sdm_thing *obj;
 	char buffer[STRING_SIZE];
 
-	str = TRIM_WHITESPACE(str);
-	sdm_interpreter_get_string(str, buffer, STRING_SIZE, used);
+	TRIM_WHITESPACE(str, i);
+	if (used)
+		used += i;
+	sdm_interpreter_get_string(&str[i], buffer, STRING_SIZE, used);
 	if (buffer[0] == '#') {
 		id = atoi(&buffer[1]);
 		return(sdm_thing_lookup_id(id));
@@ -164,6 +167,8 @@ struct sdm_thing *sdm_interpreter_find_thing(struct sdm_thing *thing, const char
 				}
 			}
 		}
+		if (!cur)
+			return(NULL);
 	}
 	return(NULL);
 }

@@ -46,10 +46,7 @@ int sdm_string_init(struct sdm_string *string, int nargs, va_list va)
 		return(0);
 	fmt = va_arg(va, char *);
 	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
-	string->len = strlen(buffer);
-	if (!(string->str = memory_alloc(string->len + 1)))
-		return(-1);
-	strcpy(string->str, buffer);
+	sdm_string_set(string, buffer);
 	return(0);
 }
 
@@ -63,18 +60,27 @@ int sdm_string_read_entry(struct sdm_string *string, const char *type, struct sd
 	char buffer[STRING_SIZE];
 
 	sdm_data_read_string(data, buffer, STRING_SIZE);
-	if (string->str)
-		memory_free(string->str);
-	string->len = strlen(buffer);
-	if (!(string->str = memory_alloc(string->len + 1)))
-		return(-1);
-	strcpy(string->str, buffer);
+	sdm_string_set(string, buffer);
 	return(SDM_HANDLED_ALL);
 }
 
 int sdm_string_write_data(struct sdm_string *string, struct sdm_data_file *data)
 {
 	sdm_data_write_string(data, string->str);
+	return(0);
+}
+
+
+int sdm_string_set(struct sdm_string *string, const char *str)
+{
+	if (string->str)
+		memory_free(string->str);
+	string->len = strlen(str);
+	if (!(string->str = memory_alloc(string->len + 1))) {
+		string->len = 0;
+		return(-1);
+	}
+	strcpy(string->str, str);
 	return(0);
 }
 

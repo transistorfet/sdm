@@ -1,17 +1,19 @@
 
-	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
-	  matching of the string given.
-	* make functions for the various possible do_action functions and possibly make do_action itself
-	  take the args struct and have static inline functions that make that call nice
 	* remove the calls to on_exit and on_enter from the thing_add and thing_remove functions and make
 	  them be called manually
+	* implement binary tree
+	* convert actions to use the binary tree and do partial lookups
+
+	* make functions for the various possible do_action functions and possibly make do_action itself
+	  take the args struct and have static inline functions that make that call nice
+	* make a list object type that can be used as a property
+	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
+	  matching of the string given.
 	* implement a permissions system for object modification
-	* perhaps you can add a binary tree implementation for partial match searches such as commands that
-	  can automatically be abbreviated.  You could also perhaps make the container store objects in a
-	  in a binary tree for faster accessing
 	* make the interpreter have an "evaluate" function that can be called with a const str to evaluate
 	  a command directly without being part of a process call 
 	* add command shortcuts like lambdamoo's \" for say and : for emote
+	* make a system so that arguments can be preprocessed for an action (?)
 
 	* have the telnet module more closely control the printing of the command prompt such that after
 	  output has been generated, a command prompt in printed (will be hard to know when output is over).
@@ -21,14 +23,18 @@
 	  matches the best is used as the object name and the rest is passed as the args string?
 	* we'll have to add reference counting of objects at some point
 
+	* make the "examine" (rename to look_self?) action tailor the description to the type of object it
+	  is describing (ie. don't list the items a person is carrying)
+	* how do you decide what things to print in the list of contents since you don't want to print all
+	  objects such as exits and stuff (perhaps by calling a function on the object that makes it describe
+	  itself)
+	* make functions for setting the name and description of an object
+	* add actions for manipulating things: get, give, drop, inventory, etc
 	* convert all hardcoded id references to named references (such as the starting room in user and form)
 	* make an "exits" command that prints the list of obvious exits and their descriptions
 	* print the equipment, weapons, armour, etc seperately and/or provide commands that print only
 	  one type
-	* how do you decide what things to print in the list of contents since you don't want to print all
-	  objects such as exist and stuff
 	* you need a way to get the direction from which a user has arrived or left a room.
-	* add actions for manipulating things: get, give, drop, inventory, etc
 
 	* should you make the announce action add a "\n" before each output to the user in order to prevent
 	  interrupting the current line being typed instead of putting it in all the places that generate

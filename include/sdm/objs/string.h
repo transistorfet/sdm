@@ -31,5 +31,7 @@ void sdm_string_release(struct sdm_string *);
 int sdm_string_read_entry(struct sdm_string *, const char *, struct sdm_data_file *);
 int sdm_string_write_data(struct sdm_string *, struct sdm_data_file *);
 
+int sdm_string_set(struct sdm_string *, const char *);
+
 #endif
 
