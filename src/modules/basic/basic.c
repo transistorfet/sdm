@@ -233,6 +233,11 @@ int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *
 
 int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
+	struct sdm_thing *room;
+
+	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
+		return(-1);
+
 
 	return(0);
 }

@@ -11,6 +11,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
+#include <sdm/objs/world.h>
 #include <sdm/objs/string.h>
 #include <sdm/interfaces/interface.h>
 
@@ -31,8 +32,6 @@ struct sdm_processor_type sdm_interpreter_obj_type = { {
 	(sdm_processor_process_t) sdm_interpreter_process,
 	(sdm_processor_shutdown_t) sdm_interpreter_shutdown
 };
-
-static struct sdm_thing *sdm_interpreter_find_object(struct sdm_thing *, const char *);
 
 int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 {
@@ -91,6 +90,7 @@ int sdm_interpreter_do_command(struct sdm_thing *thing, const char *input)
 		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i], NULL);
 	}
 */
+	return(0);
 }
 
 int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used)
@@ -126,29 +126,44 @@ struct sdm_thing *sdm_interpreter_get_thing(struct sdm_thing *thing, const char 
 		return(thing);
 	if (!strcasecmp(buffer, "here"))
 		return(thing->location);
-	if ((obj = sdm_interpreter_find_object(thing, buffer)))
+	if ((obj = sdm_interpreter_find_thing(thing, buffer)))
 		return(obj);
 	if (!thing->location)
 		return(NULL);
-	return(sdm_interpreter_find_object(thing->location, buffer));
+	return(sdm_interpreter_find_thing(thing->location, buffer));
 }
 
-/*** Local Functions ***/
-
-static struct sdm_thing *sdm_interpreter_find_object(struct sdm_thing *thing, const char *name)
+struct sdm_thing *sdm_interpreter_find_thing(struct sdm_thing *thing, const char *name)
 {
 	int len;
-	const char *str;
+	const char *str, *end;
 	struct sdm_thing *cur;
 
 	// TODO modify to do a partial string match given the whole command line so that object names with
 	//	spaces will match without the need for quoting them
-	len = strlen(name);
-	for (cur = thing->objects; cur; cur = cur->next) {
-		if (!(str = sdm_thing_get_string_property(cur, "name")))
-			continue;
-		if (!strncasecmp(str, name, len))
-			return(cur);
+	if (name[0] == '/') {
+		thing = SDM_THING(sdm_world_get_root());
+		name = &name[1];
+	}
+
+	while (thing) {
+		if ((end = strchr(name, '/')))
+			len = end - name;
+		else
+			len = strlen(name);
+		for (cur = thing->objects; cur; cur = cur->next) {
+			if (!(str = sdm_thing_get_string_property(cur, "name")))
+				continue;
+			if (!strncasecmp(str, name, len)) {
+				if (name[len] == '\0')
+					return(cur);
+				else {
+					thing = cur;
+					name = &name[len + 1];
+					break;
+				}
+			}
+		}
 	}
 	return(NULL);
 }

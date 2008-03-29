@@ -123,5 +123,14 @@ static inline int sdm_thing_format_action(struct sdm_thing *thing, struct sdm_th
 	return(0);
 }
 
+static inline struct sdm_object *sdm_thing_action_get_object(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, struct sdm_object_type *type) {
+	struct sdm_object *obj;
+
+	sdm_thing_do_action(thing, caller, action, NULL, NULL, &obj);
+	if (!obj || !sdm_object_is_a(obj, type))
+		return(NULL);
+	return(obj);
+}
+
 #endif
 

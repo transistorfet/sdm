@@ -169,6 +169,7 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 	else
 		// TODO you should do this some othe way
 		sdm_thing_add(sdm_thing_lookup_id(50), SDM_THING(user));
+		//sdm_thing_add(sdm_interpreter_find_object(NULL, "/lost+found"), SDM_THING(user));
 	return(0);
 }
 
