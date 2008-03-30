@@ -118,23 +118,26 @@ int sdm_lua_get_thing(lua_State *state)
 int sdm_lua_do_action(lua_State *state)
 {
 	int nargs, res;
-	struct sdm_object *obj;
-	const char *action, *args = NULL;
-	struct sdm_thing *thing, *caller, *target = NULL;
+	const char *action;
+	struct sdm_thing *thing;
+	struct sdm_action_args args;
 
+	memset(&args, '\0', sizeof(struct sdm_action_args));
 	nargs = lua_gettop(state);
 	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
 	action = luaL_checkstring(state, 2);
 	if (nargs >= 3)
-		target = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 3));
+		args.target = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 3));
 	if (nargs >= 4)
-		args = luaL_checkstring(state, 4);
+		args.text = luaL_checkstring(state, 4);
+	else
+		args.text = "";
 
 	lua_getglobal(state, "caller");
-	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
+	args.caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
 
-	res = sdm_thing_do_action(thing, caller, action, target, args, &obj);
-	sdm_lua_convert_object(state, obj);
+	res = sdm_thing_do_action(thing, action, &args);
+	sdm_lua_convert_object(state, args.result);
 	lua_pushnumber(state, res);
 	return(2);
 }
@@ -248,7 +251,7 @@ int sdm_lua_tell(lua_State *state)
 	if (!thing || !caller)
 		res = -1;
 	else
-		res = sdm_thing_do_action(thing, caller, "tell", NULL, args, NULL);
+		res = sdm_thing_do_format_action(thing, caller, "tell", "%s", args);
 	lua_pushnumber(state, res);
 	return(1);
 }

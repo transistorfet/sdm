@@ -261,25 +261,15 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_a
 	return(sdm_hash_add(thing->actions, name, action));
 }
 
-int sdm_thing_do_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *name, struct sdm_thing *target, const char *text, struct sdm_object **result)
+int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_action_args *args)
 {
-	int ret;
 	struct sdm_thing *cur;
 	struct sdm_action *action;
-	struct sdm_action_args args;
 
-	memset(&args, '\0', sizeof(struct sdm_action_args));
-	args.caller = caller;
-	args.target = target;
-	args.text = text ? text : "";
-
+	args->result = NULL;
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
-		if ((action = sdm_hash_find(cur->actions, name))) {
-			ret = action->func(action, thing, &args);
-			if (result)
-				*result = args.result;
-			return(ret);
-		}
+		if ((action = sdm_hash_find(cur->actions, name)))
+			return(action->func(action, thing, args));
 	}
 	return(1);
 }
@@ -291,7 +281,7 @@ int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
 	//	expects things but is this correct generally?  if not, we'd just have to make a special
 	//	function that redirects the args to look
 	/** If the 'on_enter' action returns an error, then the object should not be added */
-	if (sdm_thing_do_action(thing, obj, "on_enter", NULL, "", NULL) < 0)
+	if (sdm_thing_do_nil_action(thing, obj, "on_enter") < 0)
 		return(-1);
 	// TODO we test for location *after* we do on_entre which means we could accidentally call on_enter
 	//	multiple times.  It saves us atm for when a new char is registered and you re-add the user
@@ -320,7 +310,7 @@ int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
 
 	// TODO is this correct?
 	/** If the 'on_exit' action returns an error, then the object should not be removed */
-	if (sdm_thing_do_action(thing, obj, "on_exit", NULL, "", NULL) < 0)
+	if (sdm_thing_do_nil_action(thing, obj, "on_exit") < 0)
 		return(-1);
 	for (prev = NULL, cur = thing->objects; cur; prev = cur, cur = cur->next) {
 		if (cur == obj) {

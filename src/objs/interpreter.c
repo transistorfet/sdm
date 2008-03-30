@@ -46,7 +46,6 @@ int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)
 int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user, char *input)
 {
 	int i, res;
-	struct sdm_thing *obj;
 
 	if (input[0] == '\0')
 		return(0);
@@ -62,11 +61,7 @@ int sdm_interpreter_process(struct sdm_interpreter *proc, struct sdm_user *user,
 	// TODO should you automatically grab the object from the args instead of passing null to do_action?
 	if (!strcmp(input, "quit"))
 		return(1);
-	else if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
-	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
-	    && ((obj = sdm_interpreter_get_thing(SDM_THING(user), &input[i], &i))))) {
-		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i], NULL);
-	}
+	res = sdm_interpreter_do_command(SDM_THING(user), input, &input[i]);
  	if (res == SDM_CMD_CLOSE)
 		return(1);
 	if (res > 0)
@@ -80,17 +75,24 @@ int sdm_interpreter_shutdown(struct sdm_interpreter *proc, struct sdm_user *user
 	return(0);
 }
 
-int sdm_interpreter_do_command(struct sdm_thing *thing, const char *input)
+int sdm_interpreter_do_command(struct sdm_thing *thing, const char *cmd, const char *input)
 {
-	// TODO how do you get the command?
-/*
-	if (((res = sdm_thing_do_action(SDM_THING(user), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
-	    && ((res = (sdm_thing_do_action(SDM_THING(SDM_THING(user)->location), SDM_THING(user), input, NULL, &input[i], NULL)) > 0)
-	    && ((obj = sdm_interpreter_get_thing(SDM_THING(user), &input[i], &i))))) {
-		res = sdm_thing_do_action(obj, SDM_THING(user), input, NULL, &input[i], NULL);
-	}
-*/
-	return(0);
+	int i = 0, res;
+	struct sdm_thing *obj;
+	struct sdm_action_args args;
+
+	memset(&args, '\0', sizeof(struct sdm_action_args));
+	args.caller = thing;
+	args.text = input ? input : "";
+
+	if ((res = sdm_thing_do_action(thing, cmd, &args)) <= 0)
+		return(res);
+	if ((res = sdm_thing_do_action(thing->location, cmd, &args)) <= 0)
+		return(res);
+	if (!(obj = sdm_interpreter_get_thing(thing, input, &i)))
+		return(-1);
+	args.obj = obj;
+	return(sdm_thing_do_action(obj, cmd, &args));
 }
 
 int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used)

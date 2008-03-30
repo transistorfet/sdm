@@ -118,7 +118,7 @@ int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *thing
 
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur != args->caller)
-			sdm_thing_do_action(cur, args->caller, "tell", NULL, args->text, NULL);
+			sdm_thing_do_format_action(cur, args->caller, "tell", "%s", args->text);
 	}
 	return(0);
 }
@@ -136,9 +136,9 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, str
 
 	if (*args->text == '\0')
 		return(-1);
-	sdm_thing_format_action(args->caller, args->caller, "tell", "You say \"%s\"\n", args->text);
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You say \"%s\"\n", args->text);
 	name = sdm_thing_get_string_property(args->caller, "name");
-	sdm_thing_format_action(thing, args->caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
+	sdm_thing_do_format_action(thing, args->caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
 	return(0);
 }
 
@@ -154,13 +154,13 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, st
 	if (!args->target && (*args->text != '\0')) {
 		args->target = sdm_interpreter_get_thing(args->caller, args->text, NULL);
 		if (!args->target) {
-			sdm_thing_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
+			sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
 			return(0);
 		}
 	}
 	if (!args->target)
 		args->target = thing;
-	sdm_thing_do_action(args->target, args->caller, "examine", NULL, "", NULL);
+	sdm_thing_do_nil_action(args->target, args->caller, "examine");
 	return(0);
 
 }
@@ -176,11 +176,12 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 {
 	const char *str;
 	struct sdm_thing *cur;
+	struct sdm_action_args viewargs;
 
 	if ((str = sdm_thing_get_string_property(thing, "name")))
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
 	if ((str = sdm_thing_get_string_property(thing, "description")))
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur == args->caller)
 			continue;
@@ -190,7 +191,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 			// TODO print properly
 		//}
 		//else
-			sdm_thing_format_action(args->caller, args->caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
+			sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
 	}
 	return(0);
 }
@@ -221,15 +222,15 @@ int sdm_basic_action_inventory(struct sdm_action *action, struct sdm_thing *thin
 	struct sdm_thing *cur;
 
 	if (!thing->objects) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>You aren't carrying anything.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>You aren't carrying anything.\n");
 		return(0);
 	}
 
-	sdm_thing_format_action(args->caller, args->caller, "tell", "<brightgreen>You are carrying:\n");
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>You are carrying:\n");
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (!(str = sdm_thing_get_string_property(cur, "name")))
 			continue;
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<brightblue>    %s.\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightblue>    %s.\n", str);
 	}
 	return(0);
 }
@@ -241,19 +242,19 @@ int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, str
 
 	if (!args->obj && ((*args->text == '\0')
 	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "You don't see that here.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see that here.\n");
 		return(-1);
 	}
 	if (args->obj->location == args->caller) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "You already have that.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You already have that.\n");
 		return(0);
 	}
 	// TODO call action on object to see if it is gettable
 	sdm_thing_add(args->caller, args->obj);
 	objname = sdm_thing_get_string_property(args->obj, "name");
-	sdm_thing_format_action(args->caller, args->caller, "tell", "You get %s.\n", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You get %s.\n", objname ? objname : "something");
 	name = sdm_thing_get_string_property(args->caller, "name");
-	sdm_thing_format_action(args->caller->location, args->caller, "announce", "%s gets %s.\n", name ? name : "something", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller->location, args->caller, "announce", "%s gets %s.\n", name ? name : "something", objname ? objname : "something");
 	return(0);
 }
 
@@ -265,16 +266,16 @@ int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, st
 	if (!args->obj && ((*args->text == '\0')
 	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i))
 	    || (args->obj->location != args->caller))) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "You aren't carrying that.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You aren't carrying that.\n");
 		return(-1);
 	}
 	// TODO call action on object to see if it is removable
 	// TODO call action on room to see if object can be dropped here
 	sdm_thing_add(args->caller->location, args->obj);
 	objname = sdm_thing_get_string_property(args->obj, "name");
-	sdm_thing_format_action(args->caller, args->caller, "tell", "You drop %s.\n", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You drop %s.\n", objname ? objname : "something");
 	name = sdm_thing_get_string_property(args->caller, "name");
-	sdm_thing_format_action(args->caller->location, args->caller, "announce", "%s drops %s.\n", name ? name : "something", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller->location, args->caller, "announce", "%s drops %s.\n", name ? name : "something", objname ? objname : "something");
 	return(0);
 }
 
@@ -293,31 +294,41 @@ int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *
 
 	if (!args->target && ((*args->text == '\0')
 	    || !(args->target = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<red>Unable to find the given parent.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Unable to find the given parent.\n");
 		return(-1);
 	}
 
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->target)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->target->id))))) {
-		sdm_thing_format_action(args->caller, args->caller, "tell", "<red>Error creating object.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating object.\n");
 		return(-1);
 	}
 
 	TRIM_WHITESPACE(args->text, i);
 	sdm_thing_set_string_property(obj, "name", &args->text[i]);
 	sdm_thing_add(args->caller, obj);
-	sdm_thing_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
 	args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
 int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
+	int i;
+	struct sdm_thing *obj;
 	struct sdm_thing *room;
 
 	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
 		return(-1);
+	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->target)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating room.\n");
+		return(-1);
+	}
 
-
+	TRIM_WHITESPACE(args->text, i);
+	sdm_thing_set_string_property(obj, "name", &args->text[i]);
+	sdm_thing_add(args->caller, obj);
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	args->result = SDM_OBJECT(obj);
 	return(0);
 }
 

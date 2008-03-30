@@ -50,41 +50,6 @@
 		<action type="basic" name="create_exit">
 			basic_create_exit
 		</action>
-<!--
-		<action type="lua" name="create_room"><![CDATA[
-			local dir, name = get_string(args);
-			local room = create_thing(get_thing(2, "room"));
-			set_property(room, "name", name);
-
-			local exit = create_thing(get_thing(2, "exit"));
-			set_property(exit, "name", dir);
-			set_property(exit, "target", room);
-			moveto(exit, get_location(caller));
-
-			tell(caller, "<green>Room #" .. room .. "created successfully.\n");
-		]]></action>
-		<action type="lua" name="create_exit"><![CDATA[
-			local dir, roomname = get_string(args);
-			local room = get_thing(caller, roomname)
-			local exit = create_thing(get_thing(2, "exit"));
-			set_property(exit, "name", dir);
-			set_property(exit, "target", room);
-			moveto(exit, get_location(caller));
-			tell(caller, "<green>Exit #" .. exit .. " created successfully.\n");
-		]]></action>
-		<action type="lua" name="describe"><![CDATA[
-			if target <= 0 then
-				local name;
-				name, args = get_string(args);
-				target = get_thing(caller, name);
-			end
-			if set_property(target, "description", args) then
-				tell(caller, "<green>Description set successfully\n");
-			else
-				tell(caller, "<red>Error setting description\n");
-			end
-		]]></action>
--->
 	</thing>
 	<thing>
 		<id>8</id>
@@ -122,6 +87,30 @@
 		]]></action>
 		<action type="lua" name="north"><![CDATA[
 			local exit = get_thing(caller, "north");
+			if exit > 0 then
+				do_action(exit, "move", -1, "");
+			else
+				tell(caller, "You can't go that way.");
+			end
+		]]></action>
+		<action type="lua" name="south"><![CDATA[
+			local exit = get_thing(caller, "south");
+			if exit > 0 then
+				do_action(exit, "move", -1, "");
+			else
+				tell(caller, "You can't go that way.");
+			end
+		]]></action>
+		<action type="lua" name="west"><![CDATA[
+			local exit = get_thing(caller, "west");
+			if exit > 0 then
+				do_action(exit, "move", -1, "");
+			else
+				tell(caller, "You can't go that way.");
+			end
+		]]></action>
+		<action type="lua" name="east"><![CDATA[
+			local exit = get_thing(caller, "east");
 			if exit > 0 then
 				do_action(exit, "move", -1, "");
 			else
