@@ -22,11 +22,10 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/mobile.h>
 #include <sdm/things/user.h>
 
 struct sdm_object_type sdm_user_obj_type = {
-	&sdm_mobile_obj_type,
+	&sdm_thing_obj_type,
 	"user",
 	sizeof(struct sdm_user),
 	NULL,
@@ -108,7 +107,7 @@ int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
 
-	if (sdm_mobile_init(SDM_MOBILE(user), nargs, va) < 0)
+	if (sdm_thing_init(SDM_THING(user), nargs, va) < 0)
 		return(-1);
 	if (sdm_user_exists(user->name)) {
 		sdm_user_read(user);
@@ -148,7 +147,7 @@ void sdm_user_release(struct sdm_user *user)
 	destroy_sdm_object(SDM_OBJECT(user->inter));
 
 	/** Release the superclass */
-	sdm_mobile_release(SDM_MOBILE(user));
+	sdm_thing_release(SDM_THING(user));
 }
 
 int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)

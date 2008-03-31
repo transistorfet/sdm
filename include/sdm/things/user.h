@@ -14,19 +14,19 @@
 #include <sdm/processors/processor.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/things/mobile.h>
+#include <sdm/things/thing.h>
 
 #define SDM_USER(ptr)		( (struct sdm_user *) (ptr) )
 
 struct sdm_user {
-	struct sdm_mobile mobile;
+	struct sdm_thing thing;
 	struct sdm_interface *inter;
 	struct sdm_processor *proc;
 	string_t name;
 
 };
 
-#define SDM_USER_ARGS(name, inter, id, parent)		(name), (inter), SDM_MOBILE_ARGS((id), (parent))
+#define SDM_USER_ARGS(name, inter, id, parent)		(name), (inter), SDM_THING_ARGS((id), (parent))
 
 extern struct sdm_object_type sdm_user_obj_type;
 

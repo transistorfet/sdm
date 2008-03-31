@@ -68,10 +68,6 @@ Refactoring:
 	* should "this" (thing) be in the action arguments struct or passed seperately like it is now?
 	* make all types use init functions of the form "init_sdm_<name>_type" or else convert string and
 	  number to *not* use that form
-	* should you change the name of processor to something shorter and less confusing?
-	* should you move processors and things to their own directory like interfaces/
-	* should all scripting be supported only through actions and if so, i guess we should rename modules/
-	  to be actions/ and put the action.c file in there just like we have for interfaces
 
 Structural Issues:
 

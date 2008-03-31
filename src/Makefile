@@ -32,7 +32,6 @@ OBJS =	data.o	\
 	processors/form.o	\
 	processors/interpreter.o	\
 	processors/processor.o	\
-	things/mobile.o	\
 	things/thing.o	\
 	things/user.o	\
 	things/world.o
@@ -80,8 +79,7 @@ main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/actions/lua/lua.h \
   ../include/sdm/misc.h ../include/sdm/things/user.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/processors/processor.h ../include/sdm/things/world.h
 
 misc.o: misc.c ../include/sdm/misc.h ../include/sdm/memory.h
 
@@ -100,9 +98,8 @@ actions/basic/basic.o: actions/basic/basic.c ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
   ../include/sdm/things/user.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/actions/action.h \
-  ../include/sdm/processors/interpreter.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/actions/action.h ../include/sdm/processors/interpreter.h \
   ../include/sdm/actions/basic/basic.h
 
 actions/lua/funcs.o: actions/lua/funcs.c ../include/sdm/objs/object.h \
@@ -110,9 +107,9 @@ actions/lua/funcs.o: actions/lua/funcs.c ../include/sdm/objs/object.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/number.h \
   ../include/sdm/things/user.h ../include/sdm/misc.h \
   ../include/sdm/interfaces/interface.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/actions/action.h ../include/sdm/processors/interpreter.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/actions/action.h \
+  ../include/sdm/processors/interpreter.h \
   ../include/sdm/actions/lua/funcs.h
 
 actions/lua/lua.o: actions/lua/lua.c ../include/sdm/misc.h \
@@ -120,9 +117,9 @@ actions/lua/lua.o: actions/lua/lua.c ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
   ../include/sdm/things/user.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/actions/action.h \
-  ../include/sdm/actions/lua/lua.h ../include/sdm/actions/lua/funcs.h
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/actions/action.h ../include/sdm/actions/lua/lua.h \
+  ../include/sdm/actions/lua/funcs.h
 
 interfaces/interface.o: interfaces/interface.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
@@ -145,9 +142,9 @@ interfaces/telnet/login.o: interfaces/telnet/login.c \
   ../include/sdm/data.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/interfaces/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/things/user.h ../include/sdm/processors/processor.h \
-  ../include/sdm/things/mobile.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h
+  ../include/sdm/things/thing.h ../include/sdm/hash.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h
 
 interfaces/telnet/register.o: interfaces/telnet/register.c \
   ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
@@ -155,20 +152,20 @@ interfaces/telnet/register.o: interfaces/telnet/register.c \
   ../include/sdm/data.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/interfaces/telnet.h ../include/sdm/objs/login.h \
   ../include/sdm/things/user.h ../include/sdm/processors/processor.h \
-  ../include/sdm/things/mobile.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h
+  ../include/sdm/things/thing.h ../include/sdm/hash.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h
 
 interfaces/telnet/telnet.o: interfaces/telnet/telnet.c \
   ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/memory.h \
   ../include/sdm/objs/login.h ../include/sdm/misc.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/things/user.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
-  interfaces/telnet/ansi.h interfaces/telnet/commands.h
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/telnet.h interfaces/telnet/ansi.h \
+  interfaces/telnet/commands.h
 
 objs/list.o: objs/list.c ../include/sdm/memory.h ../include/sdm/globals.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
@@ -196,10 +193,9 @@ processors/form.o: processors/form.c ../include/sdm/text.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/things/user.h \
   ../include/sdm/interfaces/interface.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
-  ../include/sdm/processors/interpreter.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/objs/number.h \
+  ../include/sdm/actions/action.h ../include/sdm/processors/interpreter.h \
   ../include/sdm/processors/form.h
 
 processors/interpreter.o: processors/interpreter.c ../include/sdm/text.h \
@@ -207,30 +203,22 @@ processors/interpreter.o: processors/interpreter.c ../include/sdm/text.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/things/user.h \
   ../include/sdm/misc.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/world.h ../include/sdm/processors/interpreter.h
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/objs/number.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/world.h \
+  ../include/sdm/processors/interpreter.h
 
 processors/processor.o: processors/processor.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/processors/processor.h
 
-things/mobile.o: things/mobile.c ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/mobile.h
-
 things/thing.o: things/thing.c ../include/sdm/hash.h \
   ../include/sdm/globals.h ../include/sdm/data.h ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/things/user.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/objs/object.h \
-  ../include/sdm/processors/processor.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/thing.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/world.h
 
 things/user.o: things/user.c ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/misc.h ../include/sdm/hash.h \
@@ -239,8 +227,7 @@ things/user.o: things/user.c ../include/sdm/data.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/processors/form.h \
   ../include/sdm/processors/processor.h \
   ../include/sdm/processors/interpreter.h ../include/sdm/things/thing.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/mobile.h \
-  ../include/sdm/things/user.h
+  ../include/sdm/actions/action.h ../include/sdm/things/user.h
 
 things/world.o: things/world.c ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/misc.h ../include/sdm/memory.h \
