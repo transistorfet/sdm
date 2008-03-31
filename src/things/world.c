@@ -11,8 +11,8 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
-#include <sdm/objs/world.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/world.h>
 
 struct sdm_object_type sdm_world_obj_type = {
 	&sdm_thing_obj_type,

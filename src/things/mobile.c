@@ -9,8 +9,8 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
-#include <sdm/objs/mobile.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/mobile.h>
 
 struct sdm_object_type sdm_mobile_obj_type = {
 	&sdm_thing_obj_type,

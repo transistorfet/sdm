@@ -11,7 +11,7 @@
 #include <sdm/hash.h>
 #include <sdm/misc.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/processor.h>
+#include <sdm/processors/processor.h>
 
 #define SDM_FORM(ptr)		( (struct sdm_form *) (ptr) )
 

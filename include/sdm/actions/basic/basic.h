@@ -7,9 +7,8 @@
 #define _SDM_MODULES_BASIC_H
 
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
+#include <sdm/things/thing.h>
 
 #define SDM_BASIC(ptr)		( (struct sdm_basic *) (ptr) )
 

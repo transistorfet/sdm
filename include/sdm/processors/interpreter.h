@@ -8,9 +8,9 @@
 
 #include <stdarg.h>
 
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/processor.h>
+#include <sdm/things/thing.h>
+#include <sdm/processors/processor.h>
 
 #define SDM_CMD_CLOSE		1337
 

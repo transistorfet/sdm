@@ -11,7 +11,7 @@
 #include <sdm/data.h>
 #include <sdm/misc.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
+#include <sdm/things/thing.h>
 
 #define SDM_WORLD(ptr)		( (struct sdm_world *) (ptr) )
 

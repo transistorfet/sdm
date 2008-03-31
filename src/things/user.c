@@ -13,17 +13,17 @@
 #include <sdm/hash.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
-#include <sdm/objs/form.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/processor.h>
-#include <sdm/objs/interpreter.h>
 #include <sdm/interfaces/interface.h>
+#include <sdm/processors/form.h>
+#include <sdm/processors/processor.h>
+#include <sdm/processors/interpreter.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
-#include <sdm/objs/mobile.h>
-#include <sdm/objs/user.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/mobile.h>
+#include <sdm/things/user.h>
 
 struct sdm_object_type sdm_user_obj_type = {
 	&sdm_mobile_obj_type,

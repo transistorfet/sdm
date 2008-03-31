@@ -11,14 +11,14 @@
 #include <sdm/misc.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/interpreter.h>
+#include <sdm/things/user.h>
 #include <sdm/interfaces/interface.h>
+#include <sdm/processors/interpreter.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/processor.h>
-#include <sdm/objs/form.h>
+#include <sdm/processors/processor.h>
+#include <sdm/processors/form.h>
 
 struct sdm_processor_type sdm_form_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,

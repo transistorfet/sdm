@@ -14,7 +14,7 @@
 #include <sdm/interfaces/telnet.h>
 
 #include <sdm/objs/login.h>
-#include <sdm/objs/user.h>
+#include <sdm/things/user.h>
 
 static int sdm_telnet_login_read_name(struct sdm_login *, struct sdm_telnet *);
 static int sdm_telnet_login_read_password(struct sdm_login *, struct sdm_telnet *);

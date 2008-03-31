@@ -10,13 +10,11 @@
 #include <sdm/misc.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
-#include <sdm/objs/world.h>
-#include <sdm/objs/number.h>
-#include <sdm/objs/string.h>
+#include <sdm/things/user.h>
+#include <sdm/things/world.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
+#include <sdm/things/thing.h>
 
 #define THING_INIT_PROPERTIES			5
 #define THING_INIT_ACTIONS			5

@@ -7,14 +7,14 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/number.h>
-#include <sdm/objs/interpreter.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+#include <sdm/processors/interpreter.h>
 
-#include <sdm/modules/lua/funcs.h>
+#include <sdm/actions/lua/funcs.h>
 
 int sdm_load_lua_library(lua_State *state)
 {

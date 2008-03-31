@@ -10,11 +10,11 @@
 #include <stdarg.h>
 
 #include <sdm/misc.h>
-#include <sdm/objs/processor.h>
 #include <sdm/interfaces/interface.h>
+#include <sdm/processors/processor.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/mobile.h>
+#include <sdm/things/mobile.h>
 
 #define SDM_USER(ptr)		( (struct sdm_user *) (ptr) )
 

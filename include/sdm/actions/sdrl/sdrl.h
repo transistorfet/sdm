@@ -9,11 +9,11 @@
 #include <sdrl/sdrl.h>
 
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
-#include <sdm/modules/sdrl/funcs.h>
-#include <sdm/modules/sdrl/object.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+#include <sdm/actions/sdrl/funcs.h>
+#include <sdm/actions/sdrl/object.h>
 
 #define SDM_SDRL(ptr)		( (struct sdm_sdrl *) (ptr) )
 

@@ -9,8 +9,8 @@
 #include <sdrl/sdrl.h>
 
 #include <sdm/globals.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
+#include <sdm/things/thing.h>
 
 #include <sdm/modules/sdrl/object.h>
 

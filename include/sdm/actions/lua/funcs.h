@@ -9,9 +9,7 @@
 #include <lua.h>
 
 #include <sdm/globals.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
-
 
 int sdm_load_lua_library(lua_State *);
 

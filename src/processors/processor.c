@@ -9,7 +9,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/processor.h>
+#include <sdm/processors/processor.h>
 
 struct sdm_processor_type sdm_processor_obj_type = { {
 	NULL,

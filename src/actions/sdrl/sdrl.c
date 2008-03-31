@@ -15,12 +15,13 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
-#include <sdm/modules/sdrl/sdrl.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+
+#include <sdm/actions/sdrl/sdrl.h>
 
 struct sdm_object_type sdm_sdrl_obj_type = {
 	&sdm_action_obj_type,

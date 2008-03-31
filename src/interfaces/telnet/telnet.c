@@ -7,8 +7,8 @@
 
 #include <sdm/hash.h>
 #include <sdm/memory.h>
-#include <sdm/objs/user.h>
 #include <sdm/objs/login.h>
+#include <sdm/things/user.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>

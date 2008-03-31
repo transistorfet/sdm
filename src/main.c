@@ -13,13 +13,13 @@
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
 
-#include <sdm/modules/basic/basic.h>
-#include <sdm/modules/lua/lua.h>
+#include <sdm/actions/basic/basic.h>
+#include <sdm/actions/lua/lua.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/world.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
+#include <sdm/things/user.h>
+#include <sdm/things/world.h>
 
 static int exit_flag = 1;
 

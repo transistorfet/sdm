@@ -10,10 +10,8 @@
 
 #include <sdm/misc.h>
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
-#include <sdm/modules/lua/funcs.h>
+#include <sdm/things/thing.h>
 
 #define SDM_LUA(ptr)		( (struct sdm_lua *) (ptr) )
 

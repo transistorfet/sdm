@@ -9,7 +9,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/action.h>
+#include <sdm/actions/action.h>
 
 struct sdm_object_type sdm_action_obj_type = {
 	NULL,

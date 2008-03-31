@@ -15,14 +15,14 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
 
-#include <sdm/modules/lua/lua.h>
-#include <sdm/modules/lua/funcs.h>
+#include <sdm/actions/lua/lua.h>
+#include <sdm/actions/lua/funcs.h>
 
 struct sdm_object_type sdm_lua_obj_type = {
 	&sdm_action_obj_type,

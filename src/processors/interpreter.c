@@ -10,14 +10,14 @@
 #include <sdm/text.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
-#include <sdm/objs/user.h>
-#include <sdm/objs/world.h>
 #include <sdm/objs/string.h>
+#include <sdm/things/user.h>
+#include <sdm/things/world.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/processor.h>
-#include <sdm/objs/interpreter.h>
+#include <sdm/processors/processor.h>
+#include <sdm/processors/interpreter.h>
 
 struct sdm_processor_type sdm_interpreter_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,

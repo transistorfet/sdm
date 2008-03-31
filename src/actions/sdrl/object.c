@@ -7,7 +7,7 @@
 #include <sdrl/sdrl.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/modules/sdrl/object.h>
+#include <sdm/actions/sdrl/object.h>
 
 struct sdrl_type *sdm_sdrl_make_object_type(struct sdrl_machine *mach)
 {

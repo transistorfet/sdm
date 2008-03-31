@@ -12,9 +12,9 @@
 #include <sdm/hash.h>
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/action.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
+#include <sdm/actions/action.h>
 
 #define SDM_NO_ID		-1
 #define SDM_NEW_ID		-2

@@ -9,7 +9,7 @@
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/thing.h>
+#include <sdm/things/thing.h>
 
 #define SDM_MOBILE(ptr)		( (struct sdm_mobile *) (ptr) )
 

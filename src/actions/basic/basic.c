@@ -13,14 +13,15 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/action.h>
-#include <sdm/objs/interpreter.h>
-#include <sdm/modules/basic/basic.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+#include <sdm/processors/interpreter.h>
+
+#include <sdm/actions/action.h>
+#include <sdm/actions/basic/basic.h>
 
 struct sdm_object_type sdm_basic_obj_type = {
 	&sdm_action_obj_type,

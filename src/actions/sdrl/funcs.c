@@ -5,14 +5,14 @@
 
 #include <sdrl/sdrl.h>
 
-#include <sdm/objs/user.h>
-#include <sdm/objs/thing.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/number.h>
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
 
-#include <sdm/modules/sdrl/funcs.h>
-#include <sdm/modules/sdrl/object.h>
+#include <sdm/actions/sdrl/funcs.h>
+#include <sdm/actions/sdrl/object.h>
 
 int sdm_load_sdrl_library(struct sdrl_machine *mach)
 {
