@@ -9,8 +9,8 @@
 #include <stdarg.h>
 
 #include <sdm/data.h>
+#include <sdm/misc.h>
 #include <sdm/hash.h>
-#include <sdm/string.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/form.h>
@@ -98,7 +98,7 @@ int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 
 	if (nargs > 2) {
 		name = va_arg(va, const char *);
-		if (!name || !sdm_user_valid_username(name) || !(user->name = create_string("%s", name)))
+		if (!name || !sdm_user_valid_username(name) || !(user->name = make_string("%s", name)))
 			return(-1);
 		inter = va_arg(va, struct sdm_interface *);
 		nargs -= 2;
@@ -112,12 +112,10 @@ int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 		return(-1);
 	if (sdm_user_exists(user->name)) {
 		sdm_user_read(user);
-		// TODO should this be specified and loaded from the file?
 		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0))))
 			return(-1);
 	}
 	else {
-		// TODO should there be another way to find out what form to use to register users?
 		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"))))
 			return(-1);
 		// TODO should you write the user to disk at this point?
@@ -146,7 +144,7 @@ void sdm_user_release(struct sdm_user *user)
 
 	/** Release the user's other resources */
 	sdm_hash_remove(user_list, user->name);
-	destroy_string(user->name);
+	memory_free(user->name);
 	destroy_sdm_object(SDM_OBJECT(user->inter));
 
 	/** Release the superclass */

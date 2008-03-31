@@ -13,7 +13,6 @@
 #define SDM_HBF_NO_REPLACE		0x0002			/** No entries can be replaced */
 #define SDM_HBF_NO_REMOVE		0x0004			/** No entries can be removed */
 #define SDM_HBF_CONSTANT		0x0006			/** No entries can be replaced or removed */
-#define SDM_HBF_CASE_INSENSITIVE	0x0008			/** Ignore case when looking up entries */
 
 struct sdm_hash_entry {
 	char *name;

@@ -8,6 +8,9 @@
 #include <stdarg.h>
 
 #include <sdm/misc.h>
+#include <sdm/memory.h>
+
+#define STRING_MAX_SIZE			1024
 
 int sdm_status(const char *fmt, ...)
 {
@@ -22,3 +25,34 @@ int sdm_status(const char *fmt, ...)
 }
 
 
+/**
+ * Allocate a string big enough to hold the given string after
+ * character expansion (using the given arguments) and return
+ * it or NULL on error.
+ */
+string_t make_string(char *fmt, ...)
+{
+	va_list va;
+	string_t str;
+	va_start(va, fmt);
+	char buffer[STRING_MAX_SIZE];
+
+	vsnprintf(buffer, STRING_MAX_SIZE, fmt, va);
+	if (!(str = memory_alloc(strlen(buffer) + 1)))
+		return(NULL);
+	strcpy(str, buffer);
+	return(str);
+}
+
+/**
+ * Allocate a string and copy the given string to it.
+ */
+string_t duplicate_string(string_t str)
+{
+	string_t dup;
+
+	if (!str || !(dup = memory_alloc(strlen(str) + 1)))
+		return(NULL);
+	strcpy(dup, str);
+	return(dup);
+}

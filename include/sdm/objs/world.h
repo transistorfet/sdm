@@ -9,7 +9,7 @@
 #include <stdarg.h>
 
 #include <sdm/data.h>
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
 

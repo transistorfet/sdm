@@ -39,7 +39,7 @@ int init_basic(void)
 {
 	if (basic_actions)
 		return(1);
-	if (!(basic_actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, NULL)))
+	if (!(basic_actions = create_sdm_hash(0, -1, NULL)))
 		return(-1);
 	if (sdm_object_register_type(&sdm_basic_obj_type) < 0)
 		return(-1);

@@ -8,7 +8,7 @@
 
 #include <stdarg.h>
 
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>

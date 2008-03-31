@@ -10,7 +10,6 @@
 #include <sdm/misc.h>
 #include <sdm/data.h>
 #include <sdm/hash.h>
-#include <sdm/string.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
@@ -36,7 +35,7 @@ int sdm_login_init(struct sdm_login *login, int nargs, va_list va)
 void sdm_login_release(struct sdm_login *login)
 {
 	if (login->name)
-		destroy_string(login->name);
+		memory_free(login->name);
 }
 
 
@@ -58,7 +57,7 @@ int sdm_login_read_data(struct sdm_login *login)
 				do {
 					if ((str = sdm_data_read_name(data)) && !strcmp(str, "password")) {
 						sdm_data_read_string_entry(data, buffer, STRING_SIZE);
-						login->password = create_string("%s", buffer);
+						login->password = make_string("%s", buffer);
 					}
 				} while (sdm_data_read_next(data));
 				sdm_data_read_parent(data);
@@ -99,8 +98,8 @@ int sdm_login_write_data(struct sdm_login *login)
 int sdm_login_set_name(struct sdm_login *login, const char *name)
 {
 	if (login->name)
-		destroy_string(login->name);
-	if (!(login->name = create_string("%s", name)))
+		memory_free(login->name);
+	if (!(login->name = make_string("%s", name)))
 		return(-1);
 	return(0);
 }
@@ -108,8 +107,8 @@ int sdm_login_set_name(struct sdm_login *login, const char *name)
 int sdm_login_set_password(struct sdm_login *login, const char *password)
 {
 	if (login->password)
-		destroy_string(login->password);
-	if (!(login->password = create_string("%s", password)))
+		memory_free(login->password);
+	if (!(login->password = make_string("%s", password)))
 		return(-1);
 	return(0);
 }

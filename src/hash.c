@@ -15,14 +15,10 @@
 #define SDM_HASH_LOAD_FACTOR		0.75
 #define SDM_HASH_GROWTH_FACTOR		1.75
 
-#define HASH_ENTRY_COMPARE(env, str1, str2) \
-	( ((env)->bitflags & SDM_HBF_CASE_INSENSITIVE) ? !sdm_stricmp((str1), (str2)) : !strcmp((str1), (str2)) )
-
 #define LOWERCASE(ch) \
 	( (ch >= 0x41 && ch <= 0x5a) ? ch + 0x20 : ch )
 
 static inline int sdm_entries_rehash(struct sdm_hash *, int);
-static int sdm_stricmp(const char *, const char *);
 static inline unsigned int sdm_hash_func(const char *);
 
 /**
@@ -88,7 +84,7 @@ int sdm_hash_add(struct sdm_hash *env, const char *name, void *data)
 	/** Search for an existing entry */
 	hash = sdm_hash_func(name) % env->size;
 	for (entry = env->table[hash]; entry; entry = entry->next) {
-		if (HASH_ENTRY_COMPARE(env, name, entry->name))
+		if (!strcasecmp(name, entry->name))
 			return(-1);
 	}
 
@@ -119,7 +115,7 @@ int sdm_hash_replace(struct sdm_hash *env, const char *name, void *data)
 
 	hash = sdm_hash_func(name) % env->size;
 	for (cur = env->table[hash % env->size]; cur; cur = cur->next) {
-		if (HASH_ENTRY_COMPARE(env, name, cur->name)) {
+		if (!strcasecmp(name, cur->name)) {
 			if (env->destroy)
 				env->destroy(cur->data);
 			cur->data = data;
@@ -143,7 +139,7 @@ int sdm_hash_remove(struct sdm_hash *env, const char *name)
 	prev = NULL;
 	cur = env->table[hash];
 	while (cur) {
-		if (HASH_ENTRY_COMPARE(env, name, cur->name)) {
+		if (!strcasecmp(name, cur->name)) {
 			if (env->traverse_next == cur)
 				sdm_hash_traverse_next(env);
 			if (prev)
@@ -172,7 +168,7 @@ struct sdm_hash_entry *sdm_hash_find_entry(struct sdm_hash *env, const char *nam
 
 	hash = sdm_hash_func(name) % env->size;
 	for (cur = env->table[hash % env->size]; cur; cur = cur->next) {
-		if (HASH_ENTRY_COMPARE(env, name, cur->name))
+		if (!strcasecmp(name, cur->name))
 			return(cur);
 	}
 	return(NULL);
@@ -231,18 +227,6 @@ static inline int sdm_entries_rehash(struct sdm_hash *env, int newsize)
 	}
 	memory_free(env->table);
 	env->table = newtable;
-	return(0);
-}
-
-static int sdm_stricmp(const char *str1, const char *str2)
-{
-	int i = 0;
-
-	while ((str1[i] != '\0') && (str2[i] != '\0')) {
-		if (LOWERCASE(str1[i]) != LOWERCASE(str2[i]))
-			return(1);
-		i++;
-	}
 	return(0);
 }
 

@@ -9,7 +9,7 @@
 #include <libxml/xmlwriter.h>
 
 #include <sdm/data.h>
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/memory.h>
 
 #define IS_WHITESPACE(ch)	\
@@ -42,8 +42,8 @@ void release_data(void)
 int sdm_set_data_path(const char *path)
 {
 	if (data_path)
-		destroy_string(data_path);
-	if (!(data_path = create_string("%s/", path)))
+		memory_free(data_path);
+	if (!(data_path = make_string("%s/", path)))
 		return(-1);
 	return(0);
 }
@@ -72,7 +72,7 @@ struct sdm_data_file *sdm_data_open(const char *file, int mode, const char *root
 	if (!(data = (struct sdm_data_file *) memory_alloc(sizeof(struct sdm_data_file))))
 		return(NULL);
 	memset(data, '\0', sizeof(struct sdm_data_file));
-	if (!(data->filename = create_string("%s%s", data_path, file))) {
+	if (!(data->filename = make_string("%s%s", data_path, file))) {
 		sdm_data_close(data);
 		return(NULL);
 	}
@@ -116,7 +116,7 @@ void sdm_data_close(struct sdm_data_file *data)
 		xmlBufferFree(data->buffer);
 	}
 	if (data->filename)
-		destroy_string(data->filename);
+		memory_free(data->filename);
 	if (data->doc)
 		xmlFreeDoc(data->doc);
 	memory_free(data);

@@ -8,8 +8,8 @@
 #include <stdarg.h>
 
 #include <sdm/text.h>
+#include <sdm/misc.h>
 #include <sdm/memory.h>
-#include <sdm/string.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
 #include <sdm/objs/string.h>
@@ -41,7 +41,7 @@ int sdm_form_init(struct sdm_form *form, int nargs, va_list va)
 	if (nargs <= 0)
 		return(0);
 	filename = va_arg(va, const char *);
-	if (!(form->filename = create_string("%s", filename)))
+	if (!(form->filename = make_string("%s", filename)))
 		return(-1);
 	return(0);
 }
@@ -49,7 +49,7 @@ int sdm_form_init(struct sdm_form *form, int nargs, va_list va)
 void sdm_form_release(struct sdm_form *form)
 {
 	if (form->filename)
-		destroy_string(form->filename);
+		memory_free(form->filename);
 }
 
 

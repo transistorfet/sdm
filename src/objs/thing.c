@@ -64,12 +64,12 @@ void release_thing(void)
 
 int sdm_thing_init(struct sdm_thing *thing, int nargs, va_list va)
 {
-	if (!(thing->properties = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
+	if (!(thing->properties = create_sdm_hash(0, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
 		return(-1);
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(thing->actions = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, THING_INIT_ACTIONS, (destroy_t) destroy_sdm_object)))
+	if (!(thing->actions = create_sdm_hash(0, THING_INIT_ACTIONS, (destroy_t) destroy_sdm_object)))
 		return(-1);
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.

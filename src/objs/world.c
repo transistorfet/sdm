@@ -6,7 +6,7 @@
 #include <stdarg.h>
 
 #include <sdm/data.h>
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
@@ -31,8 +31,8 @@ int init_world(void)
 {
 	if (root_world)
 		return(1);
-	/** Create the world object with ID = 0, and parent ID = -1 since the world has no parent */
-	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type, 3, SDM_WORLD_ARGS("maps/world.xml", 0, -1))))
+	/** Create the world object with ID = 1, and parent ID = -1 since the world has no parent */
+	if (!(root_world = (struct sdm_world *) create_sdm_object(&sdm_world_obj_type, 3, SDM_WORLD_ARGS("maps/world.xml", 1, -1))))
 		return(-1);
 	if (sdm_object_register_type(&sdm_world_obj_type) < 0)
 		return(-1);
@@ -43,7 +43,7 @@ void release_world(void)
 {
 	if (!root_world)
 		return;
-	// TODO activate when you are ready to write the world
+	/** Write the world to disk */
 	sdm_world_write(root_world, NULL);
 	destroy_sdm_object(SDM_OBJECT(root_world));
 	sdm_object_deregister_type(&sdm_world_obj_type);
@@ -55,7 +55,7 @@ int sdm_world_init(struct sdm_world *world, int nargs, va_list va)
 
 	if (nargs > 0) {
 		filename = va_arg(va, const char *);
-		if (!(world->filename = create_string("%s", filename)))
+		if (!(world->filename = make_string("%s", filename)))
 			return(-1);
 		nargs--;
 	}
@@ -71,7 +71,7 @@ void sdm_world_release(struct sdm_world *world)
 	    don't want to write each world twice so if for some reason a world is being destroyed without
 	    the root world being destroyed, it must be written manually */
 	if (world->filename)
-		destroy_string(world->filename);
+		memory_free(world->filename);
 	sdm_thing_release(SDM_THING(world));
 }
 

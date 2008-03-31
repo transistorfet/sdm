@@ -13,7 +13,6 @@
 #include <sdm/hash.h>
 #include <sdm/data.h>
 #include <sdm/memory.h>
-#include <sdm/string.h>
 #include <sdm/globals.h>
 
 #include <sdm/objs/user.h>
@@ -68,7 +67,7 @@ void release_lua(void)
 void sdm_lua_release(struct sdm_lua *action)
 {
 	if (action->code)
-		destroy_string(action->code);
+		memory_free(action->code);
 }
 
 int sdm_lua_read_entry(struct sdm_lua *action, const char *name, struct sdm_data_file *data)
@@ -78,7 +77,7 @@ int sdm_lua_read_entry(struct sdm_lua *action, const char *name, struct sdm_data
 
 	if ((res = sdm_data_read_raw_string(data, buffer, LARGE_STRING_SIZE)) < 0)
 		return(-1);
-	if (!(action->code = create_string("%s", buffer)))
+	if (!(action->code = make_string("%s", buffer)))
 		return(-1);
 	SDM_ACTION(action)->func = (sdm_action_t) sdm_lua_action;
 	return(SDM_HANDLED_ALL);

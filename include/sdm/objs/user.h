@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/objs/processor.h>
 #include <sdm/interfaces/interface.h>
 

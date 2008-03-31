@@ -22,7 +22,7 @@ int init_object(void)
 {
 	if (object_type_list)
 		return(1);
-	if (!(object_type_list = create_sdm_hash(SDM_HBF_CASE_INSENSITIVE, -1, NULL)))
+	if (!(object_type_list = create_sdm_hash(0, -1, NULL)))
 		return(-1);
 	return(0);
 }

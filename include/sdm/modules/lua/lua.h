@@ -8,7 +8,7 @@
 
 #include <lua.h>
 
-#include <sdm/string.h>
+#include <sdm/misc.h>
 #include <sdm/globals.h>
 #include <sdm/objs/user.h>
 #include <sdm/objs/thing.h>
