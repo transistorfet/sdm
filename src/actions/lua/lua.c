@@ -103,7 +103,7 @@ int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *thing, struct sdm_a
 	lua_pushstring(global_state, args->text);
 	lua_setglobal(global_state, "args");
 
-	if (luaL_loadbuffer(global_state, action->code, strlen(action->code), "action")
+	if (luaL_loadbuffer(global_state, action->code, strlen(action->code), args->action)
 	    || lua_pcall(global_state, 0, 1, 0)) {
 		if ((error = lua_tostring(global_state, -1)))
 			sdm_status("LUA: %s", error);

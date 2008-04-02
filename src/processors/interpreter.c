@@ -13,6 +13,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
+#include <sdm/actions/action.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
@@ -95,6 +96,29 @@ int sdm_interpreter_do_command(struct sdm_thing *thing, const char *cmd, const c
 	return(sdm_thing_do_action(obj, cmd, &args));
 }
 
+int sdm_interpreter_parse_args(struct sdm_action_args *args, int nobjs)
+{
+	int i = 0;
+
+	if (!args->text)
+		return(-1);
+	if ((nobjs >= 1) && !args->obj && (args->text[i] != '\0')) {
+		if (!(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i)))
+			return(-1);
+	}
+	/** Make the text point to the start of the second argument in case we fail to find it */
+	args->text = &args->text[i];
+	i = 0;
+
+	if ((nobjs >= 2) && !args->target && (args->text[i] != '\0')) {
+		if (!(args->target = sdm_interpreter_get_thing(args->caller, &args->text[i], &i)))
+			return(-2);
+	}
+	args->text = &args->text[i];
+	return(0);
+}
+
+
 int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used)
 {
 	int i, j = 0;
@@ -107,6 +131,7 @@ int sdm_interpreter_get_string(const char *str, char *buffer, int max, int *used
 		for (i = 0; (i < max) && (str[i] != ' ') && (str[i] != '\0'); i++)
 			buffer[j++] = str[i];
 	buffer[j] = '\0';
+	TRIM_WHITESPACE(str, i);
 	if (used)
 		*used += i;
 	return(j);

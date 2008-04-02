@@ -96,7 +96,7 @@ static int sdm_telnet_login_read_password(struct sdm_login *login, struct sdm_te
 			destroy_sdm_object(SDM_OBJECT(inter));
 			return(-1);
 		}
-		else if (!(user = create_sdm_user(login->name, SDM_INTERFACE(inter)))) {
+		else if (!(user = create_sdm_user(login->name))) {
 			sdm_telnet_write(inter, SDM_TXT_OUT_OF_MEMORY);
 			destroy_sdm_object(SDM_OBJECT(inter));
 			return(-1);

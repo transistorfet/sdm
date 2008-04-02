@@ -8,6 +8,10 @@
 		<action type="basic" name="examine">
 			basic_examine
 		</action>
+		<action type="lua" name="tell_view"><![CDATA[
+			local name = get_property(this, "name");
+			if name then tell(caller, "<brightblue>You see " .. name .. " here.\n"); end
+		]]></action>
 	</thing>
 	<thing>
 		<id>6</id>
@@ -125,6 +129,10 @@
 		<action type="basic" name="move">
 			basic_move
 		</action>
+		<action type="lua" name="tell_view"><![CDATA[
+			local name = get_property(this, "name");
+			if name then tell(caller, "<brightmagenta>You can go " .. name .. "\n"); end
+		]]></action>
 	</thing>
 
 </world>

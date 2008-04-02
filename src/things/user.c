@@ -54,9 +54,8 @@ int init_user(void)
 	do {
 		if ((str = sdm_data_read_name(data)) && !strcmp(str, "user")) {
 			sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-			// TODO make sure the user is in it's proper disconnected state of being in
-			//	the cryolocker.  A NULL interface should cause disconnect to be called on load
-			create_sdm_user(buffer, NULL);
+			// TODO make sure the user is in it's proper disconnected state (in the cryolocker)
+			create_sdm_user(buffer);
 		}
 	} while (sdm_data_read_next(data));
 	sdm_data_close(data);
@@ -79,28 +78,25 @@ void release_user(void)
 	user_list = NULL;
 }
 
-struct sdm_user *create_sdm_user(const char *name, struct sdm_interface *inter)
+struct sdm_user *create_sdm_user(const char *name)
 {
 	struct sdm_user *user;
 
-	if ((user = sdm_hash_find(user_list, name))) {
-		sdm_user_connect(user, inter);
-		return(user);
-	}
-	return((struct sdm_user *) create_sdm_object(&sdm_user_obj_type, 4, SDM_USER_ARGS(name, inter, SDM_NO_ID, 0)));
+	if (!(user = sdm_hash_find(user_list, name))
+	    && !(user = (struct sdm_user *) create_sdm_object(&sdm_user_obj_type, 3, SDM_USER_ARGS(name, SDM_NO_ID, 0))))
+		return(NULL);
+	return(user);
 }
 
 int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 {
 	const char *name;
-	struct sdm_interface *inter;
 
-	if (nargs > 2) {
+	if (nargs > 1) {
 		name = va_arg(va, const char *);
 		if (!name || !sdm_user_valid_username(name) || !(user->name = make_string("%s", name)))
 			return(-1);
-		inter = va_arg(va, struct sdm_interface *);
-		nargs -= 2;
+		nargs--;
 	}
 
 	/** If there is already a user with that name then fail */
@@ -109,23 +105,7 @@ int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 
 	if (sdm_thing_init(SDM_THING(user), nargs, va) < 0)
 		return(-1);
-	if (sdm_user_exists(user->name)) {
-		sdm_user_read(user);
-		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0))))
-			return(-1);
-	}
-	else {
-		if (!(user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"))))
-			return(-1);
-		// TODO should you write the user to disk at this point?
-	}
-
-	/** Put the user in the connected state if we were given an interface connection, otherwise make
-	    sure the user is in the disconnected state (in the cryolocker). */
-	if (inter)
-		sdm_user_connect(user, inter);
-	else
-		sdm_user_disconnect(user);
+	sdm_user_read(user);
 	return(0);
 }
 
@@ -133,13 +113,6 @@ void sdm_user_release(struct sdm_user *user)
 {
 	/** Save the user information to the user's file, and disconnect */
 	sdm_user_disconnect(user);
-
-	/** Shutdown the input processor */
-	// TODO we shouldn't shut down the processor here since it's shutdown in telnet.  If we are
-	//	destroying the user without destroying the connection to initiate it, we are doing it wrong
-	//	(possibly the server is dying with users logged in, thus we don't need to shutdown).
-	//sdm_processor_shutdown(user->proc, user);
-	destroy_sdm_object(SDM_OBJECT(user->proc));
 
 	/** Release the user's other resources */
 	sdm_hash_remove(user_list, user->name);
@@ -159,6 +132,11 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 		destroy_sdm_object(SDM_OBJECT(user->inter));
 	user->inter = inter;
 
+	if (SDM_THING(user)->parent > 0)
+		user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0));
+	else
+		user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"));
+
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
 	    && (location = sdm_thing_lookup_id(number->num)))
@@ -167,12 +145,20 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 		// TODO you should do this some othe way
 		sdm_thing_add(sdm_thing_lookup_id(50), SDM_THING(user));
 		//sdm_thing_add(sdm_interpreter_find_object(NULL, "/lost+found"), SDM_THING(user));
+
+	if (!user->proc)
+		return(-1);
+	sdm_processor_startup(user->proc, user);
 	return(0);
 }
 
 void sdm_user_disconnect(struct sdm_user *user)
 {
 	struct sdm_number *number;
+
+	/** Shutdown the input processor */
+	sdm_processor_shutdown(user->proc, user);
+	destroy_sdm_object(SDM_OBJECT(user->proc));
 
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
 	    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {

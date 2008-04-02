@@ -33,6 +33,8 @@ int init_mud(void)
 		return(-1);
 	sdm_set_data_path("data");
 
+	if (init_object() < 0)
+		return(-1);
 	if (init_timer() < 0)
 		return(-1);
 	if (init_interface() < 0)
@@ -40,8 +42,6 @@ int init_mud(void)
 	if (init_telnet() < 0)
 		return(-1);
 
-	if (init_object() < 0)
-		return(-1);
 	if (init_sdm_number_type() < 0)
 		return(-1);
 	if (init_sdm_string_type() < 0)
@@ -74,11 +74,11 @@ void release_mud(void)
 
 	release_sdm_string_type();
 	release_sdm_number_type();
-	release_object();
 
 	release_telnet();
 	release_interface();
 	release_timer();
+	release_object();
 
 	release_data();
 }

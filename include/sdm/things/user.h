@@ -26,14 +26,14 @@ struct sdm_user {
 
 };
 
-#define SDM_USER_ARGS(name, inter, id, parent)		(name), (inter), SDM_THING_ARGS((id), (parent))
+#define SDM_USER_ARGS(name, id, parent)		(name), SDM_THING_ARGS((id), (parent))
 
 extern struct sdm_object_type sdm_user_obj_type;
 
 int init_user(void);
 void release_user(void);
 
-struct sdm_user *create_sdm_user(const char *, struct sdm_interface *);
+struct sdm_user *create_sdm_user(const char *);
 
 int sdm_user_init(struct sdm_user *, int, va_list);
 void sdm_user_release(struct sdm_user *);

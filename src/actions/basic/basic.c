@@ -152,16 +152,13 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, str
  */
 int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	if (!args->target && (*args->text != '\0')) {
-		args->target = sdm_interpreter_get_thing(args->caller, args->text, NULL);
-		if (!args->target) {
-			sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
-			return(0);
-		}
+	if (*args->text == '\0')
+		args->obj = thing;
+	else if (sdm_interpreter_parse_args(args, 1) < 0) {
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
+		return(0);
 	}
-	if (!args->target)
-		args->target = thing;
-	sdm_thing_do_nil_action(args->target, args->caller, "examine");
+	sdm_thing_do_nil_action(args->obj, args->caller, "examine");
 	return(0);
 
 }
@@ -186,6 +183,9 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur == args->caller)
 			continue;
+		sdm_thing_do_nil_action(cur, args->caller, "tell_view");
+
+/*
 		if (!(str = sdm_thing_get_string_property(cur, "name")))
 			continue;
 		//if (sdm_thing_is_a(cur, exit)) {
@@ -193,6 +193,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 		//}
 		//else
 			sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
+*/
 	}
 	return(0);
 }
@@ -241,10 +242,11 @@ int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, str
 	int i = 0;
 	const char *name, *objname;
 
-	if (!args->obj && ((*args->text == '\0')
-	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see that here.\n");
-		return(-1);
+	int res;
+
+	if (sdm_interpreter_parse_args(args, 2) < 0) {
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see %s here\n", args->text);
+		return(0);
 	}
 	if (args->obj->location == args->caller) {
 		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You already have that.\n");
@@ -290,25 +292,22 @@ int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, st
  */
 int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	int i = 0;
 	struct sdm_thing *obj;
 
-	if (!args->target && ((*args->text == '\0')
-	    || !(args->target = sdm_interpreter_get_thing(args->caller, args->text, &i)))) {
+	if (sdm_interpreter_parse_args(args, 1) < 0) {
 		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Unable to find the given parent.\n");
-		return(-1);
+		return(0);
 	}
 
-	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->target)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->target->id))))) {
+	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->obj)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->obj->id))))) {
 		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating object.\n");
 		return(-1);
 	}
 
-	TRIM_WHITESPACE(args->text, i);
-	sdm_thing_set_string_property(obj, "name", &args->text[i]);
+	sdm_thing_set_string_property(obj, "name", args->text);
 	sdm_thing_add(args->caller, obj);
 	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
-	args->result = SDM_OBJECT(obj);
+	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
@@ -320,22 +319,38 @@ int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *th
 
 	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
 		return(-1);
-	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->target)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
+	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(room)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
 		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating room.\n");
 		return(-1);
 	}
 
-	TRIM_WHITESPACE(args->text, i);
-	sdm_thing_set_string_property(obj, "name", &args->text[i]);
-	sdm_thing_add(args->caller, obj);
+	sdm_thing_set_string_property(obj, "name", args->text);
+	// TODO this is a dangerous dereference
+	sdm_thing_add(args->caller->location->location, obj);
 	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
-	args->result = SDM_OBJECT(obj);
+	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
 int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
+	int i;
+	struct sdm_thing *obj;
+	struct sdm_thing *exit;
 
+	if (!(exit = sdm_interpreter_find_thing(NULL, "/core/exit")))
+		return(-1);
+	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(exit)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, exit->id))))) {
+		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating exit.\n");
+		return(-1);
+	}
+
+	sdm_thing_set_string_property(obj, "name", args->text);
+	// TODO this is a somewhat dangerous dereference
+	sdm_thing_add(args->caller->location, obj);
+	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	//args->result = SDM_OBJECT(obj);
+	return(0);
 	return(0);
 }
 

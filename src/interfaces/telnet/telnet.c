@@ -73,11 +73,8 @@ void sdm_telnet_release(struct sdm_telnet *inter)
 
 	callback = sdm_interface_get_callback(SDM_INTERFACE(inter));
 	if ((obj = SDM_OBJECT(callback.ptr))) {
-		if (sdm_object_is_a(obj, &sdm_user_obj_type)) {
-			if (SDM_USER(obj)->proc)
-				sdm_processor_shutdown(SDM_USER(obj)->proc, SDM_USER(obj));
+		if (sdm_object_is_a(obj, &sdm_user_obj_type))
 			sdm_user_disconnect(SDM_USER(obj));
-		}
 		else
 			destroy_sdm_object(obj);
 	}
@@ -220,7 +217,7 @@ void sdm_telnet_encrypt_password(const char *salt, char *buffer, int max)
 
 int sdm_telnet_run(struct sdm_telnet *inter, struct sdm_user *user)
 {
-	sdm_processor_startup(user->proc, user);
+	sdm_user_connect(user, SDM_INTERFACE(inter));
 	sdm_interface_set_callback(SDM_INTERFACE(inter), IO_COND_READ, (callback_t) sdm_telnet_handle_read, user);
 	return(0);
 }
@@ -246,7 +243,7 @@ static int sdm_telnet_handle_read(struct sdm_user *user, struct sdm_telnet *inte
 		return(-1);
 	}
 
-	if (sdm_processor_process(user->proc, user, buffer) != 0) {
+	if (!user->proc || (sdm_processor_process(user->proc, user, buffer) != 0)) {
 		destroy_sdm_object(SDM_OBJECT(inter));
 		return(1);
 	}

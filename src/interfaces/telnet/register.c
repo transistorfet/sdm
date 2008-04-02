@@ -105,7 +105,7 @@ static int sdm_telnet_register_verify_password(struct sdm_login *login, struct s
 	sdm_telnet_encrypt_password(login->name, buffer, STRING_SIZE);
 	if (sdm_login_authenticate(login, buffer)) {
 		sdm_telnet_echo(inter, 1);
-		if (!(user = create_sdm_user(login->name, SDM_INTERFACE(inter)))) {
+		if (!(user = create_sdm_user(login->name))) {
 			sdm_telnet_write(inter, SDM_TXT_OUT_OF_MEMORY);
 			destroy_sdm_object(SDM_OBJECT(inter));
 			return(-1);
@@ -115,9 +115,6 @@ static int sdm_telnet_register_verify_password(struct sdm_login *login, struct s
 			sdm_user_write(user);
 			destroy_sdm_object(SDM_OBJECT(login));
 			sdm_telnet_write(inter, "\n");
-			// TODO invoke the game character generation object scripty stuff or else put that
-			// invokation in telnet_run() such that if something happens, and the user logs back
-			// in without finishing the character generation, it will continue or start over.
 			sdm_telnet_run(inter, user);
 		}
 	}

@@ -1,4 +1,21 @@
 
+	* on_enter/on_exit should be called on the object entering or exiting
+	* on_add/on_remove should be called on the container the object is entering or leaving
+	* change tell to notify
+	* you can have macros/inlines in a header to replace direct action calls to make it easier to
+	  implement stuff in basic and also as a guide for function to have in lua
+
+	* decide on a small list of do_action functions
+	* implement the do_action functions in lua such that it's easy to write lua
+	* clean up/add parsing functions to lua to make it easy to parse the args
+	* either make the parse_args function handle more arg cases or make the other functions easier
+	  to use
+
+	* should a list use the object itself to hold the next pointer (part of object) which means that
+	  exact object can only be in one list at a time?
+	* should objects have a pointer to the list they are contained in so that they can be removed from
+	  that list when they are destroyed?
+
 	* remove the calls to on_exit and on_enter from the thing_add and thing_remove functions and make
 	  them be called manually
 	* implement binary tree
@@ -81,6 +98,17 @@ Structural Issues:
 	  question if the answer to a previous question was a certain answer)?
 	* in lua, how do you tell if the result of an action is a number or a thing id?
 
+	* should it be assumed that an interface subclass will always be used for a different type of
+	  connection (like the telnet class that inherits from tcp instead of using a tcp object seperately)
+	  in which case we can instead of using callback with a stored pointer, either just have the function
+	  and passed the condition that occurred and the interface pointer or even specifically a virtual
+	  function of the same type common for the whole class.  The extra data associated with that class
+	  (like the user object for a telnet connection) can be stored in the subclass.  Having a single
+	  handler per class would mean you would need to multiplex functions as they are now or else have
+	  another function pointer that you call in telnet for doing the whole login process.  If we still
+	  have the callback per object but just no ptr value, it just wouldn't be as easy to use an interface
+	  for "some other" connection but we shouldn't have a need for that and if we do, we can make a
+	  general subclass if we really need.
 	* is the way we call the callbacks in sdm_interface_select right in that we call each callback
 	  once *for each condition* so the same function is called with the same interface for each
 	  condition that it's registered for.  How does the callback tell the difference?  should there

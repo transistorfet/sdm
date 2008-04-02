@@ -10,6 +10,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
+#include <sdm/actions/action.h>
 #include <sdm/processors/processor.h>
 
 #define SDM_CMD_CLOSE		1337
@@ -30,6 +31,8 @@ int sdm_interpreter_process(struct sdm_interpreter *, struct sdm_user *, char *)
 int sdm_interpreter_shutdown(struct sdm_interpreter *, struct sdm_user *);
 
 int sdm_interpreter_do_command(struct sdm_thing *, const char *, const char *);
+int sdm_interpreter_parse_args(struct sdm_action_args *, int);
+
 int sdm_interpreter_get_string(const char *, char *, int, int *);
 struct sdm_thing *sdm_interpreter_get_thing(struct sdm_thing *, const char *, int *);
 struct sdm_thing *sdm_interpreter_find_thing(struct sdm_thing *, const char *);
