@@ -6,6 +6,7 @@
 #include <stdarg.h>
 
 #include <sdm/hash.h>
+#include <sdm/tree.h>
 #include <sdm/data.h>
 #include <sdm/misc.h>
 #include <sdm/memory.h>
@@ -67,7 +68,7 @@ int sdm_thing_init(struct sdm_thing *thing, int nargs, va_list va)
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(thing->actions = create_sdm_hash(0, THING_INIT_ACTIONS, (destroy_t) destroy_sdm_object)))
+	if (!(thing->actions = create_sdm_tree(0, (destroy_t) destroy_sdm_object)))
 		return(-1);
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
@@ -96,7 +97,7 @@ void sdm_thing_release(struct sdm_thing *thing)
 	if (thing->properties)
 		destroy_sdm_hash(thing->properties);
 	if (thing->actions)
-		destroy_sdm_hash(thing->actions);
+		destroy_sdm_tree(thing->actions);
 	if ((thing->id >= 0) && (thing->id < sdm_thing_table_size))
 		sdm_thing_table[thing->id] = NULL;
 
@@ -173,7 +174,8 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 {
 	struct sdm_thing *cur;
-	struct sdm_hash_entry *entry;
+	struct sdm_hash_entry *hentry;
+	struct sdm_tree_entry *tentry;
 
 	sdm_data_write_integer_entry(data, "id", thing->id);
 	if (thing->parent >= 0)
@@ -183,21 +185,21 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 
 	/** Write the properties to the file */
 	sdm_hash_traverse_reset(thing->properties);
-	while ((entry = sdm_hash_traverse_next_entry(thing->properties))) {
+	while ((hentry = sdm_hash_traverse_next_entry(thing->properties))) {
 		sdm_data_write_begin_entry(data, "property");
-		sdm_data_write_attrib(data, "type", SDM_OBJECT(entry->data)->type->name);
-		sdm_data_write_attrib(data, "name", entry->name);
-		sdm_object_write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_attrib(data, "type", SDM_OBJECT(hentry->data)->type->name);
+		sdm_data_write_attrib(data, "name", hentry->name);
+		sdm_object_write_data(SDM_OBJECT(hentry->data), data);
 		sdm_data_write_end_entry(data);
 	}
 
 	/** Write the actions to the file */
-	sdm_hash_traverse_reset(thing->actions);
-	while ((entry = sdm_hash_traverse_next_entry(thing->actions))) {
+	sdm_tree_traverse_reset(thing->actions);
+	while ((tentry = sdm_tree_traverse_next_entry(thing->actions))) {
 		sdm_data_write_begin_entry(data, "action");
-		sdm_data_write_attrib(data, "name", entry->name);
-		sdm_data_write_attrib(data, "type", SDM_OBJECT(entry->data)->type->name);
-		sdm_object_write_data(SDM_OBJECT(entry->data), data);
+		sdm_data_write_attrib(data, "name", tentry->name);
+		sdm_data_write_attrib(data, "type", SDM_OBJECT(tentry->data)->type->name);
+		sdm_object_write_data(SDM_OBJECT(tentry->data), data);
 		sdm_data_write_end_entry(data);
 	}
 
@@ -253,10 +255,10 @@ int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_a
 		return(-1);
 	/** If the action is NULL, remove the entry from the table */
 	if (!action)
-		return(sdm_hash_remove(thing->actions, name));
-	if (sdm_hash_find(thing->actions, name))
-		return(sdm_hash_replace(thing->actions, name, action));
-	return(sdm_hash_add(thing->actions, name, action));
+		return(sdm_tree_remove(thing->actions, name));
+	if (sdm_tree_find(thing->actions, name))
+		return(sdm_tree_replace(thing->actions, name, action));
+	return(sdm_tree_add(thing->actions, name, action));
 }
 
 int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_action_args *args)
@@ -267,7 +269,7 @@ int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_ac
 	args->action = name;
 	args->result = NULL;
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
-		if ((action = sdm_hash_find(cur->actions, name)))
+		if ((action = sdm_tree_find(cur->actions, name)))
 			return(action->func(action, thing, args));
 	}
 	return(1);
