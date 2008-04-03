@@ -15,6 +15,7 @@
 #include <sdm/globals.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
+#include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/processors/form.h>
 #include <sdm/processors/processor.h>
@@ -102,7 +103,6 @@ int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
 	/** If there is already a user with that name then fail */
 	if (sdm_hash_add(user_list, name, user))
 		return(-1);
-
 	if (sdm_thing_init(SDM_THING(user), nargs, va) < 0)
 		return(-1);
 	sdm_user_read(user);
@@ -140,11 +140,11 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
 	    && (location = sdm_thing_lookup_id(number->num)))
-		sdm_thing_add(location, SDM_THING(user));
+		sdm_moveto(SDM_THING(user), location, NULL);
 	else
 		// TODO you should do this some othe way
-		sdm_thing_add(sdm_thing_lookup_id(50), SDM_THING(user));
-		//sdm_thing_add(sdm_interpreter_find_object(NULL, "/lost+found"), SDM_THING(user));
+		sdm_moveto(SDM_THING(user), sdm_thing_lookup_id(50), NULL);
+		//sdm_moveto(SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
 
 	if (!user->proc)
 		return(-1);

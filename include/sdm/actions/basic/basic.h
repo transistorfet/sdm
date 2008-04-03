@@ -27,7 +27,7 @@ void release_basic(void);
 int sdm_basic_read_entry(struct sdm_basic *, const char *, struct sdm_data_file *);
 int sdm_basic_write_data(struct sdm_basic *, struct sdm_data_file *);
 
-int sdm_basic_action_tell_user(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_basic_action_notify_user(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_announce(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_say(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_basic_action_look(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);

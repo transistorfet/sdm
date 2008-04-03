@@ -278,15 +278,6 @@ int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_ac
 
 int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
 {
-	// TODO is this right?  we are passing the obj as the caller because that is how basic_look
-	//	expects things but is this correct generally?  if not, we'd just have to make a special
-	//	function that redirects the args to look
-	/** If the 'on_enter' action returns an error, then the object should not be added */
-	if (sdm_thing_do_nil_action(thing, obj, "on_enter") < 0)
-		return(-1);
-	// TODO we test for location *after* we do on_entre which means we could accidentally call on_enter
-	//	multiple times.  It saves us atm for when a new char is registered and you re-add the user
-	//	to the same room and that causes the "look" action to be performed
 	if (obj->location == thing)
 		return(0);
 	/** If this object is in another object and it can't be removed, then we don't add it */
@@ -309,10 +300,6 @@ int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
 {
 	struct sdm_thing *cur, *prev;
 
-	// TODO is this correct?
-	/** If the 'on_exit' action returns an error, then the object should not be removed */
-	if (sdm_thing_do_nil_action(thing, obj, "on_exit") < 0)
-		return(-1);
 	for (prev = NULL, cur = thing->objects; cur; prev = cur, cur = cur->next) {
 		if (cur == obj) {
 			if (prev)
@@ -325,7 +312,7 @@ int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
 			return(0);
 		}
 	}
-	return(-1);
+	return(1);
 }
 
 

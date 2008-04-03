@@ -10,6 +10,7 @@
 #include <sdm/objs/number.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/utils.h>
 
 #include <sdm/actions/sdrl/funcs.h>
 #include <sdm/actions/sdrl/object.h>
@@ -172,6 +173,7 @@ int sdm_sdrl_add_thing(struct sdrl_machine *mach, struct sdrl_value *args)
 	int res;
 	struct sdm_thing *thing, *container;
 
+	// TODO this should become moveto
 	container = sdm_sdrl_get_object(&args, &sdm_thing_obj_type);
 	thing = SDM_THING(sdm_sdrl_get_object(&args, &sdm_thing_obj_type));
 	if (!container || !thing)

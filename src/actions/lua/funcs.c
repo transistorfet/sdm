@@ -12,6 +12,7 @@
 #include <sdm/objs/number.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/utils.h>
 #include <sdm/processors/interpreter.h>
 
 #include <sdm/actions/lua/funcs.h>
@@ -30,7 +31,7 @@ int sdm_load_lua_library(lua_State *state)
 	lua_register(state, "set_property", sdm_lua_set_property);
 
 	lua_register(state, "moveto", sdm_lua_moveto);
-	lua_register(state, "tell", sdm_lua_tell);
+	lua_register(state, "notify", sdm_lua_notify);
 	return(0);
 }
 
@@ -225,19 +226,20 @@ int sdm_lua_moveto(lua_State *state)
 
 	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
 	container = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 2));
+	// TODO add the "via" parameter
 
 	if (!thing || !container)
 		lua_pushnumber(state, -1);
 	else
-		lua_pushnumber(state, sdm_thing_add(container, thing));
+		lua_pushnumber(state, sdm_moveto(thing, container, NULL));
 	return(1);
 }
 
 /**
  * Args:	<thing>, <text>
- * Description:	Simpler function for doing the "tell" action on an object
+ * Description:	Simpler function for doing the "notify" action on an object
  */
-int sdm_lua_tell(lua_State *state)
+int sdm_lua_notify(lua_State *state)
 {
 	int res;
 	const char *args;
@@ -251,7 +253,7 @@ int sdm_lua_tell(lua_State *state)
 	if (!thing || !caller)
 		res = -1;
 	else
-		res = sdm_thing_do_format_action(thing, caller, "tell", "%s", args);
+		res = sdm_thing_do_format_action(thing, caller, "notify", "%s", args);
 	lua_pushnumber(state, res);
 	return(1);
 }

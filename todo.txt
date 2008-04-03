@@ -1,9 +1,9 @@
 
 	* change the header guard names
 
+	* maybe instead of "on_enter" it could be "do_enter" which sounds a bit more tightly coupled
 	* on_enter/on_exit should be called on the object entering or exiting
 	* on_add/on_remove should be called on the container the object is entering or leaving
-	* change tell to notify
 	* you can have macros/inlines in a header to replace direct action calls to make it easier to
 	  implement stuff in basic and also as a guide for function to have in lua
 
@@ -18,19 +18,14 @@
 	* should objects have a pointer to the list they are contained in so that they can be removed from
 	  that list when they are destroyed?
 
-	* remove the calls to on_exit and on_enter from the thing_add and thing_remove functions and make
-	  them be called manually
 	* make thing do partial command lookups (but so that only what was typed in looked up partially)
 
 	* make object name matching match part of a work like if the name is "The Thing" somehow match "thing"
 	* make functions for the various possible do_action functions and possibly make do_action itself
 	  take the args struct and have static inline functions that make that call nice
-	* make a list object type that can be used as a property
 	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
 	  matching of the string given.
 	* implement a permissions system for object modification
-	* make the interpreter have an "evaluate" function that can be called with a const str to evaluate
-	  a command directly without being part of a process call 
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* make a system so that arguments can be preprocessed for an action (?)
 

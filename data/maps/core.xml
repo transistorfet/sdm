@@ -10,15 +10,15 @@
 		</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
-			if name then tell(caller, "<brightblue>You see " .. name .. " here.\n"); end
+			if name then notify(caller, "<brightblue>You see " .. name .. " here.\n"); end
 		]]></action>
 	</thing>
 	<thing>
 		<id>6</id>
 		<parent>5</parent>
 		<property type="string" name="name">user</property>
-		<action type="basic" name="tell">
-			basic_tell_user
+		<action type="basic" name="notify">
+			basic_notify_user
 		</action>
 		<action type="basic" name="inventory">
 			basic_inventory
@@ -31,9 +31,9 @@
 		</action>
 		<action type="lua" name="description"><![CDATA[
 			if set_property(caller, "description", args) then
-				tell(caller, "<green>Description set successfully\n");
+				notify(caller, "<green>Description set successfully\n");
 			else
-				tell(caller, "<red>Error setting description\n");
+				notify(caller, "<red>Error setting description\n");
 			end
 		]]></action>
 	</thing>
@@ -86,7 +86,7 @@
 		</action>
 		<action type="lua" name="emote"><![CDATA[
 			local str = get_property(caller, "name") .. " " .. args .. "\n";
-			tell(caller, str);
+			notify(caller, str);
 			do_action(get_location(caller), "announce", -1, "\n" .. str);
 		]]></action>
 		<action type="lua" name="north"><![CDATA[
@@ -94,7 +94,7 @@
 			if exit > 0 then
 				do_action(exit, "move", -1, "");
 			else
-				tell(caller, "You can't go that way.");
+				notify(caller, "You can't go that way.");
 			end
 		]]></action>
 		<action type="lua" name="south"><![CDATA[
@@ -102,7 +102,7 @@
 			if exit > 0 then
 				do_action(exit, "move", -1, "");
 			else
-				tell(caller, "You can't go that way.");
+				notify(caller, "You can't go that way.");
 			end
 		]]></action>
 		<action type="lua" name="west"><![CDATA[
@@ -110,7 +110,7 @@
 			if exit > 0 then
 				do_action(exit, "move", -1, "");
 			else
-				tell(caller, "You can't go that way.");
+				notify(caller, "You can't go that way.");
 			end
 		]]></action>
 		<action type="lua" name="east"><![CDATA[
@@ -118,7 +118,7 @@
 			if exit > 0 then
 				do_action(exit, "move", -1, "");
 			else
-				tell(caller, "You can't go that way.");
+				notify(caller, "You can't go that way.");
 			end
 		]]></action>
 	</thing>
@@ -131,7 +131,7 @@
 		</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
-			if name then tell(caller, "<brightmagenta>You can go " .. name .. "\n"); end
+			if name then notify(caller, "<brightmagenta>You can go " .. name .. "\n"); end
 		]]></action>
 	</thing>
 

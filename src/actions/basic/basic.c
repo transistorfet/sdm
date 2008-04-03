@@ -18,6 +18,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/utils.h>
 #include <sdm/processors/interpreter.h>
 
 #include <sdm/actions/action.h>
@@ -45,7 +46,7 @@ int init_basic(void)
 	if (sdm_object_register_type(&sdm_basic_obj_type) < 0)
 		return(-1);
 
-	sdm_hash_add(basic_actions, "basic_tell_user", sdm_basic_action_tell_user);
+	sdm_hash_add(basic_actions, "basic_notify_user", sdm_basic_action_notify_user);
 	sdm_hash_add(basic_actions, "basic_announce", sdm_basic_action_announce);
 	sdm_hash_add(basic_actions, "basic_say", sdm_basic_action_say);
 	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
@@ -94,12 +95,12 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
 
 /**
  * Send a message to a user's output device.
- *	caller:		object that is telling the user something
- *	thing:		the user to tell
+ *	caller:		object that is notifying the user something
+ *	thing:		the user to notify
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_tell_user(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_basic_action_notify_user(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
@@ -119,7 +120,7 @@ int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *thing
 
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur != args->caller)
-			sdm_thing_do_format_action(cur, args->caller, "tell", "%s", args->text);
+			sdm_thing_do_format_action(cur, args->caller, "notify", "%s", args->text);
 	}
 	return(0);
 }
@@ -137,7 +138,7 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, str
 
 	if (*args->text == '\0')
 		return(-1);
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You say \"%s\"\n", args->text);
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "You say \"%s\"\n", args->text);
 	name = sdm_thing_get_string_property(args->caller, "name");
 	sdm_thing_do_format_action(thing, args->caller, "announce", "\n%s says \"%s\"\n", name ? name : "something", args);
 	return(0);
@@ -155,7 +156,7 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, st
 	if (*args->text == '\0')
 		args->obj = thing;
 	else if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see a %s here\n", args->text);
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "You don't see a %s here\n", args->text);
 		return(0);
 	}
 	sdm_thing_do_nil_action(args->obj, args->caller, "examine");
@@ -174,12 +175,11 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 {
 	const char *str;
 	struct sdm_thing *cur;
-	struct sdm_action_args viewargs;
 
 	if ((str = sdm_thing_get_string_property(thing, "name")))
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightyellow>%s</brightyellow>\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightyellow>%s</brightyellow>\n", str);
 	if ((str = sdm_thing_get_string_property(thing, "description")))
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>%s</brightgreen>\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightgreen>%s</brightgreen>\n", str);
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur == args->caller)
 			continue;
@@ -192,7 +192,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
 			// TODO print properly
 		//}
 		//else
-			sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightblue>You see %s here.</brightblue>\n", str);
+			sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightblue>You see %s here.</brightblue>\n", str);
 */
 	}
 	return(0);
@@ -213,7 +213,7 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, st
 	if (((num = sdm_thing_get_number_property(thing, "target")) <= 0)
 	    || !(location = sdm_thing_lookup_id((sdm_id_t) num)))
 		return(-1);
-	sdm_thing_add(location, args->caller);
+	sdm_moveto(args->caller, location, NULL);
 	return(0);
 }
 
@@ -224,38 +224,35 @@ int sdm_basic_action_inventory(struct sdm_action *action, struct sdm_thing *thin
 	struct sdm_thing *cur;
 
 	if (!thing->objects) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>You aren't carrying anything.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightgreen>You aren't carrying anything.\n");
 		return(0);
 	}
 
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightgreen>You are carrying:\n");
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightgreen>You are carrying:\n");
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (!(str = sdm_thing_get_string_property(cur, "name")))
 			continue;
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<brightblue>    %s.\n", str);
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<brightblue>    %s.\n", str);
 	}
 	return(0);
 }
 
 int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	int i = 0;
 	const char *name, *objname;
 
-	int res;
-
 	if (sdm_interpreter_parse_args(args, 2) < 0) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You don't see %s here\n", args->text);
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "You don't see %s here\n", args->text);
 		return(0);
 	}
 	if (args->obj->location == args->caller) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You already have that.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "You already have that.\n");
 		return(0);
 	}
 	// TODO call action on object to see if it is gettable
-	sdm_thing_add(args->caller, args->obj);
+	sdm_moveto(args->obj, args->caller, NULL);
 	objname = sdm_thing_get_string_property(args->obj, "name");
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You get %s.\n", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "You get %s.\n", objname ? objname : "something");
 	name = sdm_thing_get_string_property(args->caller, "name");
 	sdm_thing_do_format_action(args->caller->location, args->caller, "announce", "%s gets %s.\n", name ? name : "something", objname ? objname : "something");
 	return(0);
@@ -269,14 +266,14 @@ int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, st
 	if (!args->obj && ((*args->text == '\0')
 	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i))
 	    || (args->obj->location != args->caller))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "You aren't carrying that.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "You aren't carrying that.\n");
 		return(-1);
 	}
 	// TODO call action on object to see if it is removable
 	// TODO call action on room to see if object can be dropped here
-	sdm_thing_add(args->caller->location, args->obj);
+	sdm_moveto(args->obj, args->caller->location, NULL);
 	objname = sdm_thing_get_string_property(args->obj, "name");
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "You drop %s.\n", objname ? objname : "something");
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "You drop %s.\n", objname ? objname : "something");
 	name = sdm_thing_get_string_property(args->caller, "name");
 	sdm_thing_do_format_action(args->caller->location, args->caller, "announce", "%s drops %s.\n", name ? name : "something", objname ? objname : "something");
 	return(0);
@@ -295,62 +292,59 @@ int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *
 	struct sdm_thing *obj;
 
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Unable to find the given parent.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Unable to find the given parent.\n");
 		return(0);
 	}
 
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->obj)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->obj->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating object.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating object.\n");
 		return(-1);
 	}
 
 	sdm_thing_set_string_property(obj, "name", args->text);
-	sdm_thing_add(args->caller, obj);
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	sdm_moveto(obj, args->caller, NULL);
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
 int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	int i;
 	struct sdm_thing *obj;
 	struct sdm_thing *room;
 
 	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
 		return(-1);
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(room)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating room.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating room.\n");
 		return(-1);
 	}
 
 	sdm_thing_set_string_property(obj, "name", args->text);
 	// TODO this is a dangerous dereference
-	sdm_thing_add(args->caller->location->location, obj);
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	sdm_moveto(obj, args->caller->location->location, NULL);
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
 int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	int i;
 	struct sdm_thing *obj;
 	struct sdm_thing *exit;
 
 	if (!(exit = sdm_interpreter_find_thing(NULL, "/core/exit")))
 		return(-1);
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(exit)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, exit->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "tell", "<red>Error creating exit.\n");
+		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating exit.\n");
 		return(-1);
 	}
 
 	sdm_thing_set_string_property(obj, "name", args->text);
 	// TODO this is a somewhat dangerous dereference
-	sdm_thing_add(args->caller->location, obj);
-	sdm_thing_do_format_action(args->caller, args->caller, "tell", "<green>Object #%d created successfully.\n", obj->id);
+	sdm_moveto(obj, args->caller->location, NULL);
+	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
-	return(0);
 	return(0);
 }
 

@@ -13,6 +13,8 @@
 #include <sdm/globals.h>
 #include <sdm/objs/string.h>
 #include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/processors/interpreter.h>
 
@@ -65,7 +67,7 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 	// TODO hack, remove when you get a chargen process that can set the location
 	SDM_THING(user)->parent = 6;
 	if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
-		sdm_thing_add(SDM_THING(obj), SDM_THING(user));
+		sdm_moveto(SDM_THING(user), SDM_THING(obj), NULL);
 
 	/** Replace this processor with an interpreter */
 	destroy_sdm_object(SDM_OBJECT(user->proc));

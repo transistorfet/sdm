@@ -25,7 +25,7 @@ int sdm_lua_get_property(lua_State *);
 int sdm_lua_set_property(lua_State *);
 
 int sdm_lua_moveto(lua_State *);
-int sdm_lua_tell(lua_State *);
+int sdm_lua_notify(lua_State *);
 
 
 int sdm_lua_convert_object(lua_State *, struct sdm_object *);

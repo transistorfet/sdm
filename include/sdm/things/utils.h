@@ -13,11 +13,12 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/things/things.h>
+#include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
 
 /*** Thing Property Functions ***/
 
+/*
 static inline double sdm_thing_get_number_property(struct sdm_thing *thing, const char *name) {
 	struct sdm_number *number;
 
@@ -49,10 +50,11 @@ static inline int sdm_thing_set_string_property(struct sdm_thing *thing, const c
 		return(-1);
 	return(sdm_thing_set_property(thing, name, SDM_OBJECT(string)));
 }
-
+*/
 
 /*** Thing Action Functions ***/
 
+/*
 static inline int sdm_thing_do_nil_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action) {
 	struct sdm_action_args args;
 
@@ -107,16 +109,29 @@ static inline struct sdm_object *sdm_thing_do_object_action(struct sdm_thing *th
 		return(NULL);
 	return(args.result);
 }
+*/
 
 /*** Various? ***/
 
 static inline int sdm_notify(struct sdm_thing *thing, const char *fmt, ...) {
 	// TODO this should replace 'tell'
+	return(0);
 }
 
 static inline int sdm_moveto(struct sdm_thing *thing, struct sdm_thing *to, struct sdm_thing *via) {
 	// TODO move the given thing to the given thing via the given exit.
 	//	if 'via' is null then treat it like a teleportation
+
+	/** If the 'on_exit' action returns an error, then the object should not be removed */
+	if (sdm_thing_do_nil_action(thing->location, thing, "on_exit") < 0)
+		return(-1);
+	if (sdm_thing_add(to, thing) < 0)
+		return(-1);
+	// TODO if the add fails, should we do 'on_enter' on the original location?
+	/** If the 'on_enter' action returns an error, then the object should not be added */
+	if (sdm_thing_do_nil_action(to, thing, "on_enter") < 0)
+		return(-1);
+	return(0);
 }
 
 #endif

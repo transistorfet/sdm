@@ -2,9 +2,9 @@
 <user>
  <id>100</id>
  <parent>7</parent>
- <property type="string" name="description">You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</property>
  <property type="string" name="name">transistor</property>
+ <property type="string" name="description">You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</property>
  <property type="number" name="last_location">50.000000</property>
  <name>transistor</name>
- <lastseen>1207197730</lastseen>
+ <lastseen>1207240099</lastseen>
 </user>
