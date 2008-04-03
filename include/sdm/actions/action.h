@@ -3,8 +3,8 @@
  * Description:	Action Base Object
  */
 
-#ifndef _SDM_OBJS_ACTION_H
-#define _SDM_OBJS_ACTION_H
+#ifndef _SDM_ACTIONS_ACTION_H
+#define _SDM_ACTIONS_ACTION_H
 
 #include <stdarg.h>
 

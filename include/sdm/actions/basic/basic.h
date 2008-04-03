@@ -3,8 +3,8 @@
  * Description:	Basic Stuff Header
  */
 
-#ifndef _SDM_MODULES_BASIC_H
-#define _SDM_MODULES_BASIC_H
+#ifndef _SDM_ACTIONS_BASIC_BASIC_H
+#define _SDM_ACTIONS_BASIC_BASIC_H
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>

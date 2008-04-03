@@ -3,8 +3,8 @@
  * Description:	Lua Functions Header
  */
 
-#ifndef _SDM_MODULES_LUA_FUNCS_H
-#define _SDM_MODULES_LUA_FUNCS_H
+#ifndef _SDM_ACTIONS_LUA_FUNCS_H
+#define _SDM_ACTIONS_LUA_FUNCS_H
 
 #include <lua.h>
 

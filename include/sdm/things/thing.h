@@ -3,8 +3,8 @@
  * Description:	Base Game Object
  */
 
-#ifndef _SDM_OBJS_THING_H
-#define _SDM_OBJS_THING_H
+#ifndef _SDM_THINGS_THING_H
+#define _SDM_THINGS_THING_H
 
 #include <stdio.h>
 #include <stdarg.h>

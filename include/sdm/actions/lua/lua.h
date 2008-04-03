@@ -3,8 +3,8 @@
  * Description:	Lua Scripting Module Header
  */
 
-#ifndef _SDM_MODULES_LUA_LUA_H
-#define _SDM_MODULES_LUA_LUA_H
+#ifndef _SDM_ACTIONS_LUA_LUA_H
+#define _SDM_ACTIONS_LUA_LUA_H
 
 #include <lua.h>
 

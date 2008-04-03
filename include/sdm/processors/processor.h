@@ -3,8 +3,8 @@
  * Description:	Input Processor Object
  */
 
-#ifndef _SDM_OBJS_PROCESSOR_H
-#define _SDM_OBJS_PROCESSOR_H
+#ifndef _SDM_PROCESSORS_PROCESSOR_H
+#define _SDM_PROCESSORS_PROCESSOR_H
 
 #include <stdarg.h>
 

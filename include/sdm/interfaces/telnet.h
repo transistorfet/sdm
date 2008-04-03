@@ -3,8 +3,8 @@
  * Description:	Telnet Protocol Interface Manager Header
  */
 
-#ifndef _SDM_INTERFACE_TELNET_H
-#define _SDM_INTERFACE_TELNET_H
+#ifndef _SDM_INTERFACES_TELNET_H
+#define _SDM_INTERFACES_TELNET_H
 
 #include <sdm/globals.h>
 

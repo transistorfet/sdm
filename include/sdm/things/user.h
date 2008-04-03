@@ -3,8 +3,8 @@
  * Description:	User Object
  */
 
-#ifndef _SDM_OBJS_USER_H
-#define _SDM_OBJS_USER_H
+#ifndef _SDM_THINGS_USER_H
+#define _SDM_THINGS_USER_H
 
 #include <stdio.h>
 #include <stdarg.h>

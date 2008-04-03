@@ -3,8 +3,8 @@
  * Description:	Root World Object
  */
 
-#ifndef _SDM_OBJS_WORLD_H
-#define _SDM_OBJS_WORLD_H
+#ifndef _SDM_THINGS_WORLD_H
+#define _SDM_THINGS_WORLD_H
 
 #include <stdarg.h>
 

@@ -3,8 +3,8 @@
  * Description:	Interface Header
  */
 
-#ifndef _SDM_INTERFACE_INTERFACE_H
-#define _SDM_INTERFACE_INTERFACE_H
+#ifndef _SDM_INTERFACES_INTERFACE_H
+#define _SDM_INTERFACES_INTERFACE_H
 
 #include <stdarg.h>
 

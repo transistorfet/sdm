@@ -3,8 +3,8 @@
  * Description:	TCP Network Interface Manager Header
  */
 
-#ifndef _SDM_INTERFACE_TCP_H
-#define _SDM_INTERFACE_TCP_H
+#ifndef _SDM_INTERFACES_TCP_H
+#define _SDM_INTERFACES_TCP_H
 
 #include <stdarg.h>
 

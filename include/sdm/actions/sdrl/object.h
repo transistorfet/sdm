@@ -3,8 +3,8 @@
  * Description:	SDM Object Type Header
  */
 
-#ifndef _SDM_MODULES_SDRL_OBJECT_H
-#define _SDM_MODULES_SDRL_OBJECT_H
+#ifndef _SDM_ACTIONS_SDRL_OBJECT_H
+#define _SDM_ACTIONS_SDRL_OBJECT_H
 
 #include <sdrl/sdrl.h>
 

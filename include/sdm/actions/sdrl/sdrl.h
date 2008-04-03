@@ -3,8 +3,8 @@
  * Description:	SDRL Scripting Module Header
  */
 
-#ifndef _SDM_MODULES_SDRL_SDRL_H
-#define _SDM_MODULES_SDRL_SDRL_H
+#ifndef _SDM_ACTIONS_SDRL_SDRL_H
+#define _SDM_ACTIONS_SDRL_SDRL_H
 
 #include <sdrl/sdrl.h>
 

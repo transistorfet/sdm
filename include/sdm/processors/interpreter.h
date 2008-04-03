@@ -3,8 +3,8 @@
  * Description:	Command Interpreter Object
  */
 
-#ifndef _SDM_OBJS_INTERPRETER_H
-#define _SDM_OBJS_INTERPRETER_H
+#ifndef _SDM_PROCESSORS_INTERPRETER_H
+#define _SDM_PROCESSORS_INTERPRETER_H
 
 #include <stdarg.h>
 
