@@ -1,6 +1,4 @@
 
-	* break up basic.c
-
 	* maybe instead of "on_enter" it could be "do_enter" which sounds a bit more tightly coupled
 	* on_enter/on_exit should be called on the object entering or exiting
 	* on_add/on_remove should be called on the container the object is entering or leaving

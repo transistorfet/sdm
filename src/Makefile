@@ -232,7 +232,8 @@ processors/interpreter.o: processors/interpreter.c ../include/sdm/text.h \
   ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
   ../include/sdm/hash.h ../include/sdm/tree.h \
   ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/world.h ../include/sdm/processors/interpreter.h
+  ../include/sdm/things/world.h ../include/sdm/things/utils.h \
+  ../include/sdm/processors/interpreter.h
 
 processors/processor.o: processors/processor.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \

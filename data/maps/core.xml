@@ -5,8 +5,8 @@
 		<id>5</id>
 		<parent>0</parent>
 		<property type="string" name="name">thing</property>
-		<action type="basic" name="examine">
-			basic_examine
+		<action type="builtin" name="examine">
+			builtin_examine
 		</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
@@ -17,17 +17,17 @@
 		<id>6</id>
 		<parent>5</parent>
 		<property type="string" name="name">user</property>
-		<action type="basic" name="notify">
-			basic_notify
+		<action type="builtin" name="notify">
+			builtin_notify
 		</action>
-		<action type="basic" name="inventory">
-			basic_inventory
+		<action type="builtin" name="inventory">
+			builtin_inventory
 		</action>
-		<action type="basic" name="get">
-			basic_get
+		<action type="builtin" name="get">
+			builtin_get
 		</action>
-		<action type="basic" name="drop">
-			basic_drop
+		<action type="builtin" name="drop">
+			builtin_drop
 		</action>
 		<action type="lua" name="description"><![CDATA[
 			if set_property(caller, "description", args) then
@@ -45,14 +45,14 @@
 			local room = get_thing(caller, args);
 			moveto(caller, room);
 		]]></action>
-		<action type="basic" name="create_object">
-			basic_create_object
+		<action type="builtin" name="create_object">
+			builtin_create_object
 		</action>
-		<action type="basic" name="create_room">
-			basic_create_room
+		<action type="builtin" name="create_room">
+			builtin_create_room
 		</action>
-		<action type="basic" name="create_exit">
-			basic_create_exit
+		<action type="builtin" name="create_exit">
+			builtin_create_exit
 		</action>
 	</thing>
 	<thing>
@@ -75,14 +75,14 @@
 			local name = get_property(caller, "name");
 			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " leaves.\n"); end
 		]]></action>
-		<action type="basic" name="look">
-			basic_look
+		<action type="builtin" name="look">
+			builtin_look
 		</action>
-		<action type="basic" name="say">
-			basic_say
+		<action type="builtin" name="say">
+			builtin_say
 		</action>
-		<action type="basic" name="announce">
-			basic_announce
+		<action type="builtin" name="announce">
+			builtin_announce
 		</action>
 		<action type="lua" name="emote"><![CDATA[
 			local str = get_property(caller, "name") .. " " .. args .. "\n";
@@ -126,8 +126,8 @@
 		<id>11</id>
 		<parent>5</parent>
 		<property type="string" name="name">exit</property>
-		<action type="basic" name="move">
-			basic_move
+		<action type="builtin" name="move">
+			builtin_move
 		</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");

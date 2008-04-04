@@ -18,7 +18,6 @@
 
 /*** Thing Property Functions ***/
 
-/*
 static inline double sdm_thing_get_number_property(struct sdm_thing *thing, const char *name) {
 	struct sdm_number *number;
 
@@ -50,11 +49,9 @@ static inline int sdm_thing_set_string_property(struct sdm_thing *thing, const c
 		return(-1);
 	return(sdm_thing_set_property(thing, name, SDM_OBJECT(string)));
 }
-*/
 
 /*** Thing Action Functions ***/
 
-/*
 static inline int sdm_thing_do_nil_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action) {
 	struct sdm_action_args args;
 
@@ -109,7 +106,6 @@ static inline struct sdm_object *sdm_thing_do_object_action(struct sdm_thing *th
 		return(NULL);
 	return(args.result);
 }
-*/
 
 /*** Various? ***/
 

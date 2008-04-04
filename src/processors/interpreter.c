@@ -13,6 +13,8 @@
 #include <sdm/objs/string.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/utils.h>
 #include <sdm/actions/action.h>
 #include <sdm/interfaces/interface.h>
 
