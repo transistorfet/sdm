@@ -13,8 +13,8 @@
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
 
-#include <sdm/actions/basic/basic.h>
 #include <sdm/actions/lua/lua.h>
+#include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
@@ -47,7 +47,7 @@ int init_mud(void)
 	if (init_sdm_string_type() < 0)
 		return(-1);
 
-	if (init_basic() < 0)
+	if (init_builtin() < 0)
 		return(-1);
 	if (init_lua() < 0)
 		return(-1);
@@ -70,7 +70,7 @@ void release_mud(void)
 	release_thing();
 
 	release_lua();
-	release_basic();
+	release_builtin();
 
 	release_sdm_string_type();
 	release_sdm_number_type();

@@ -15,7 +15,9 @@ OBJS =	data.o	\
 	timer.o	\
 	tree.o	\
 	actions/action.o	\
-	actions/basic/basic.o	\
+	actions/builtin/basics.o	\
+	actions/builtin/builder.o	\
+	actions/builtin/builtin.o	\
 	actions/lua/funcs.o	\
 	actions/lua/lua.o	\
 	interfaces/interface.o	\
@@ -74,13 +76,13 @@ hash.o: hash.c ../include/sdm/hash.h ../include/sdm/globals.h \
 main.o: main.c ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/timer.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/object.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/telnet.h ../include/sdm/actions/basic/basic.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/tree.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
-  ../include/sdm/actions/lua/lua.h ../include/sdm/misc.h \
-  ../include/sdm/things/user.h ../include/sdm/processors/processor.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/interfaces/telnet.h ../include/sdm/actions/lua/lua.h \
+  ../include/sdm/misc.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/builtin.h ../include/sdm/things/user.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/world.h
 
 misc.o: misc.c ../include/sdm/misc.h ../include/sdm/memory.h
 
@@ -94,7 +96,7 @@ actions/action.o: actions/action.c ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/actions/action.h
 
-actions/basic/basic.o: actions/basic/basic.c ../include/sdm/misc.h \
+actions/builtin/basics.o: actions/builtin/basics.c ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
   ../include/sdm/memory.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
@@ -102,7 +104,27 @@ actions/basic/basic.o: actions/basic/basic.c ../include/sdm/misc.h \
   ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/actions/action.h \
   ../include/sdm/things/utils.h ../include/sdm/processors/interpreter.h \
-  ../include/sdm/actions/basic/basic.h
+  ../include/sdm/actions/builtin/basics.h
+
+actions/builtin/builder.o: actions/builtin/builder.c \
+  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/globals.h \
+  ../include/sdm/memory.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
+  ../include/sdm/interfaces/interface.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/utils.h ../include/sdm/processors/interpreter.h \
+  ../include/sdm/actions/builtin/builder.h
+
+actions/builtin/builtin.o: actions/builtin/builtin.c \
+  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/globals.h \
+  ../include/sdm/data.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/basics.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builder.h \
+  ../include/sdm/actions/builtin/builtin.h
 
 actions/lua/funcs.o: actions/lua/funcs.c ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/globals.h \

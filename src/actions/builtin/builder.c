@@ -16,26 +16,24 @@
 #include <sdm/things/utils.h>
 #include <sdm/processors/interpreter.h>
 
-int sdm_basic_action_create_object(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_basic_action_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_basic_action_create_exit(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+#include <sdm/actions/builtin/builder.h>
 
-int sdm_basic_load_builder(struct sdm_hash *actions)
+int sdm_builtin_load_builder(struct sdm_hash *actions)
 {
-	sdm_hash_add(actions, "basic_create_object", sdm_basic_action_create_object);
-	sdm_hash_add(actions, "basic_create_room", sdm_basic_action_create_room);
-	sdm_hash_add(actions, "basic_create_exit", sdm_basic_action_create_exit);
+	sdm_hash_add(actions, "builtin_create_object", sdm_builtin_action_create_object);
+	sdm_hash_add(actions, "builtin_create_room", sdm_builtin_action_create_room);
+	sdm_hash_add(actions, "builtin_create_exit", sdm_builtin_action_create_exit);
 	return(0);
 }
 
 /**
- * Create a basic object given a parent object and an optional name
+ * Create a builtin object given a parent object and an optional name
  *	caller:		creator of the object
  *	thing:		not used
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 
@@ -56,7 +54,7 @@ int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *
 	return(0);
 }
 
-int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 	struct sdm_thing *room;
@@ -76,7 +74,7 @@ int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *th
 	return(0);
 }
 
-int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 	struct sdm_thing *exit;

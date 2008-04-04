@@ -1,6 +1,6 @@
 /*
- * Name:	basic.c
- * Description:	Basic Stuff...
+ * Name:	basics.c
+ * Description:	Basic Actions
  */
 
 #include <stdio.h>
@@ -22,73 +22,23 @@
 #include <sdm/processors/interpreter.h>
 
 #include <sdm/actions/action.h>
-#include <sdm/actions/basic/basic.h>
+#include <sdm/actions/builtin/basics.h>
 
-struct sdm_object_type sdm_basic_obj_type = {
-	&sdm_action_obj_type,
-	"basic",
-	sizeof(struct sdm_basic),
-	NULL,
-	(sdm_object_init_t) NULL,
-	(sdm_object_release_t) NULL,
-	(sdm_object_read_entry_t) sdm_basic_read_entry,
-	(sdm_object_write_data_t) sdm_basic_write_data
-};
-
-static struct sdm_hash *basic_actions = NULL;
-
-int init_basic(void)
+int sdm_builtin_load_basics(struct sdm_hash *actions)
 {
-	if (basic_actions)
-		return(1);
-	if (!(basic_actions = create_sdm_hash(0, -1, NULL)))
-		return(-1);
-	if (sdm_object_register_type(&sdm_basic_obj_type) < 0)
-		return(-1);
+	sdm_hash_add(actions, "builtin_notify", sdm_builtin_action_notify);
+	sdm_hash_add(actions, "builtin_announce", sdm_builtin_action_announce);
+	sdm_hash_add(actions, "builtin_say", sdm_builtin_action_say);
+	sdm_hash_add(actions, "builtin_look", sdm_builtin_action_look);
+	sdm_hash_add(actions, "builtin_examine", sdm_builtin_action_examine);
+	sdm_hash_add(actions, "builtin_move", sdm_builtin_action_move);
 
-	sdm_hash_add(basic_actions, "basic_notify", sdm_basic_action_notify);
-	sdm_hash_add(basic_actions, "basic_announce", sdm_basic_action_announce);
-	sdm_hash_add(basic_actions, "basic_say", sdm_basic_action_say);
-	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
-	sdm_hash_add(basic_actions, "basic_examine", sdm_basic_action_examine);
-	sdm_hash_add(basic_actions, "basic_move", sdm_basic_action_move);
-
-	sdm_hash_add(basic_actions, "basic_inventory", sdm_basic_action_inventory);
-	sdm_hash_add(basic_actions, "basic_get", sdm_basic_action_get);
-	sdm_hash_add(basic_actions, "basic_drop", sdm_basic_action_drop);
-
+	sdm_hash_add(actions, "builtin_inventory", sdm_builtin_action_inventory);
+	sdm_hash_add(actions, "builtin_get", sdm_builtin_action_get);
+	sdm_hash_add(actions, "builtin_drop", sdm_builtin_action_drop);
 	return(0);
 }
 
-void release_basic(void)
-{
-	if (!basic_actions)
-		return;
-	destroy_sdm_hash(basic_actions);
-	basic_actions = NULL;
-	sdm_object_deregister_type(&sdm_basic_obj_type);
-}
-
-
-int sdm_basic_read_entry(struct sdm_basic *basic, const char *name, struct sdm_data_file *data)
-{
-	char buffer[STRING_SIZE];
-
-	if (sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
-		return(-1);
-	if (!(basic->entry = sdm_hash_find_entry(basic_actions, buffer)))
-		return(-1);
-	SDM_ACTION(basic)->func = (sdm_action_t) basic->entry->data;
-	return(SDM_HANDLED_ALL);
-}
-
-int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
-{
-	sdm_data_write_raw_string(data, basic->entry->name);
-	return(0);
-}
-
-/*** Action Functions ***/
 
 /**
  * Send a message to a user's output device.
@@ -97,7 +47,7 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_notify(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_notify(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
@@ -111,7 +61,7 @@ int sdm_basic_action_notify(struct sdm_action *action, struct sdm_thing *thing, 
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_announce(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *cur;
 
@@ -129,7 +79,7 @@ int sdm_basic_action_announce(struct sdm_action *action, struct sdm_thing *thing
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_say(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *name;
 
@@ -148,7 +98,7 @@ int sdm_basic_action_say(struct sdm_action *action, struct sdm_thing *thing, str
  *	target:		the object being looked at
  *	args:		the name of the object being looked at if target is NULL, unused otherwise
  */
-int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_look(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (*args->text == '\0')
 		args->obj = thing;
@@ -167,7 +117,7 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, st
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_examine(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *str;
 	struct sdm_thing *cur;
@@ -201,7 +151,7 @@ int sdm_basic_action_examine(struct sdm_action *action, struct sdm_thing *thing,
  *	target:		not used
  *	args:		not used
  */
-int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_move(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	double num;
 	struct sdm_thing *location;
@@ -214,7 +164,7 @@ int sdm_basic_action_move(struct sdm_action *action, struct sdm_thing *thing, st
 }
 
 
-int sdm_basic_action_inventory(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *str;
 	struct sdm_thing *cur;
@@ -233,7 +183,7 @@ int sdm_basic_action_inventory(struct sdm_action *action, struct sdm_thing *thin
 	return(0);
 }
 
-int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *name, *objname;
 
@@ -254,7 +204,7 @@ int sdm_basic_action_get(struct sdm_action *action, struct sdm_thing *thing, str
 	return(0);
 }
 
-int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	int i = 0;
 	const char *name, *objname;
