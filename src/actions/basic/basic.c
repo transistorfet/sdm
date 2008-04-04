@@ -46,7 +46,7 @@ int init_basic(void)
 	if (sdm_object_register_type(&sdm_basic_obj_type) < 0)
 		return(-1);
 
-	sdm_hash_add(basic_actions, "basic_notify_user", sdm_basic_action_notify_user);
+	sdm_hash_add(basic_actions, "basic_notify", sdm_basic_action_notify);
 	sdm_hash_add(basic_actions, "basic_announce", sdm_basic_action_announce);
 	sdm_hash_add(basic_actions, "basic_say", sdm_basic_action_say);
 	sdm_hash_add(basic_actions, "basic_look", sdm_basic_action_look);
@@ -57,9 +57,6 @@ int init_basic(void)
 	sdm_hash_add(basic_actions, "basic_get", sdm_basic_action_get);
 	sdm_hash_add(basic_actions, "basic_drop", sdm_basic_action_drop);
 
-	sdm_hash_add(basic_actions, "basic_create_object", sdm_basic_action_create_object);
-	sdm_hash_add(basic_actions, "basic_create_room", sdm_basic_action_create_room);
-	sdm_hash_add(basic_actions, "basic_create_exit", sdm_basic_action_create_exit);
 	return(0);
 }
 
@@ -100,7 +97,7 @@ int sdm_basic_write_data(struct sdm_basic *basic, struct sdm_data_file *data)
  *	target:		not used
  *	args:		the text to output
  */
-int sdm_basic_action_notify_user(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_basic_action_notify(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	if (!sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) || !SDM_USER(thing)->inter)
 		return(-1);
@@ -161,7 +158,6 @@ int sdm_basic_action_look(struct sdm_action *action, struct sdm_thing *thing, st
 	}
 	sdm_thing_do_nil_action(args->obj, args->caller, "examine");
 	return(0);
-
 }
 
 /**
@@ -279,72 +275,4 @@ int sdm_basic_action_drop(struct sdm_action *action, struct sdm_thing *thing, st
 	return(0);
 }
 
-
-/**
- * Create a basic object given a parent object and an optional name
- *	caller:		creator of the object
- *	thing:		not used
- *	target:		not used
- *	args:		not used
- */
-int sdm_basic_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
-{
-	struct sdm_thing *obj;
-
-	if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Unable to find the given parent.\n");
-		return(0);
-	}
-
-	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->obj)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->obj->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating object.\n");
-		return(-1);
-	}
-
-	sdm_thing_set_string_property(obj, "name", args->text);
-	sdm_moveto(obj, args->caller, NULL);
-	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
-	//args->result = SDM_OBJECT(obj);
-	return(0);
-}
-
-int sdm_basic_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
-{
-	struct sdm_thing *obj;
-	struct sdm_thing *room;
-
-	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
-		return(-1);
-	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(room)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating room.\n");
-		return(-1);
-	}
-
-	sdm_thing_set_string_property(obj, "name", args->text);
-	// TODO this is a dangerous dereference
-	sdm_moveto(obj, args->caller->location->location, NULL);
-	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
-	//args->result = SDM_OBJECT(obj);
-	return(0);
-}
-
-int sdm_basic_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
-{
-	struct sdm_thing *obj;
-	struct sdm_thing *exit;
-
-	if (!(exit = sdm_interpreter_find_thing(NULL, "/core/exit")))
-		return(-1);
-	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(exit)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, exit->id))))) {
-		sdm_thing_do_format_action(args->caller, args->caller, "notify", "<red>Error creating exit.\n");
-		return(-1);
-	}
-
-	sdm_thing_set_string_property(obj, "name", args->text);
-	// TODO this is a somewhat dangerous dereference
-	sdm_moveto(obj, args->caller->location, NULL);
-	sdm_thing_do_format_action(args->caller, args->caller, "notify", "<green>Object #%d created successfully.\n", obj->id);
-	//args->result = SDM_OBJECT(obj);
-	return(0);
-}
 
