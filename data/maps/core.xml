@@ -2,33 +2,33 @@
 	<id>2</id>
 	<property type="string" name="name">core</property>
 	<thing>
-		<id>5</id>
-		<parent>0</parent>
+		<id>3</id>
+		<parent>1</parent>
 		<property type="string" name="name">thing</property>
-		<action type="builtin" name="examine">
-			builtin_examine
-		</action>
+		<action type="builtin" name="examine">builtin_examine</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
 			if name then notify(caller, "<brightblue>You see " .. name .. " here.\n"); end
 		]]></action>
 	</thing>
 	<thing>
+		<id>4</id>
+		<parent>3</parent>
+		<property type="string" name="name">container</property>
+	</thing>
+	<thing>
+		<id>5</id>
+		<parent>4</parent>
+		<property type="string" name="name">mobile</property>
+	</thing>
+	<thing>
 		<id>6</id>
 		<parent>5</parent>
 		<property type="string" name="name">user</property>
-		<action type="builtin" name="notify">
-			builtin_notify
-		</action>
-		<action type="builtin" name="inventory">
-			builtin_inventory
-		</action>
-		<action type="builtin" name="get">
-			builtin_get
-		</action>
-		<action type="builtin" name="drop">
-			builtin_drop
-		</action>
+		<action type="builtin" name="notify">builtin_notify</action>
+		<action type="builtin" name="inventory">builtin_inventory</action>
+		<action type="builtin" name="get">builtin_get</action>
+		<action type="builtin" name="drop">builtin_drop</action>
 		<action type="lua" name="description"><![CDATA[
 			if set_property(caller, "description", args) then
 				notify(caller, "<green>Description set successfully\n");
@@ -45,90 +45,51 @@
 			local room = get_thing(caller, args);
 			moveto(caller, room);
 		]]></action>
-		<action type="builtin" name="create_object">
-			builtin_create_object
-		</action>
-		<action type="builtin" name="create_room">
-			builtin_create_room
-		</action>
-		<action type="builtin" name="create_exit">
-			builtin_create_exit
-		</action>
+		<action type="builtin" name="create_object">builtin_create_object</action>
+		<action type="builtin" name="create_room">builtin_create_room</action>
+		<action type="builtin" name="create_exit">builtin_create_exit</action>
 	</thing>
 	<thing>
 		<id>8</id>
-		<parent>5</parent>
+		<parent>3</parent>
 		<property type="string" name="name">item</property>
 
 	</thing>
 
 	<thing>
 		<id>10</id>
-		<parent>5</parent>
+		<parent>4</parent>
 		<property type="string" name="name">room</property>
-		<action type="lua" name="on_enter"><![CDATA[
+		<action type="builtin" name="north">builtin_direction</action>
+		<action type="builtin" name="south">builtin_direction</action>
+		<action type="builtin" name="east">builtin_direction</action>
+		<action type="builtin" name="west">builtin_direction</action>
+		<action type="builtin" name="up">builtin_direction</action>
+		<action type="builtin" name="down">builtin_direction</action>
+		<action type="builtin" name="look">builtin_look</action>
+		<action type="builtin" name="say">builtin_say</action>
+		<action type="builtin" name="announce">builtin_announce</action>
+		<action type="lua" name="do_enter"><![CDATA[
 			local name = get_property(caller, "name");
 			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " enters the room.\n"); end
 			do_action(this, "look");
 		]]></action>
-		<action type="lua" name="on_exit"><![CDATA[
+		<action type="lua" name="do_leave"><![CDATA[
 			local name = get_property(caller, "name");
 			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " leaves.\n"); end
 		]]></action>
-		<action type="builtin" name="look">
-			builtin_look
-		</action>
-		<action type="builtin" name="say">
-			builtin_say
-		</action>
-		<action type="builtin" name="announce">
-			builtin_announce
-		</action>
 		<action type="lua" name="emote"><![CDATA[
 			local str = get_property(caller, "name") .. " " .. args .. "\n";
 			notify(caller, str);
 			do_action(get_location(caller), "announce", -1, "\n" .. str);
 		]]></action>
-		<action type="lua" name="north"><![CDATA[
-			local exit = get_thing(caller, "north");
-			if exit > 0 then
-				do_action(exit, "move", -1, "");
-			else
-				notify(caller, "You can't go that way.");
-			end
-		]]></action>
-		<action type="lua" name="south"><![CDATA[
-			local exit = get_thing(caller, "south");
-			if exit > 0 then
-				do_action(exit, "move", -1, "");
-			else
-				notify(caller, "You can't go that way.");
-			end
-		]]></action>
-		<action type="lua" name="west"><![CDATA[
-			local exit = get_thing(caller, "west");
-			if exit > 0 then
-				do_action(exit, "move", -1, "");
-			else
-				notify(caller, "You can't go that way.");
-			end
-		]]></action>
-		<action type="lua" name="east"><![CDATA[
-			local exit = get_thing(caller, "east");
-			if exit > 0 then
-				do_action(exit, "move", -1, "");
-			else
-				notify(caller, "You can't go that way.");
-			end
-		]]></action>
 	</thing>
 	<thing>
 		<id>11</id>
-		<parent>5</parent>
+		<parent>3</parent>
 		<property type="string" name="name">exit</property>
-		<action type="builtin" name="move">
-			builtin_move
-		</action>
+		<action type="builtin" name="go">builtin_go</action>
+		<action type="builtin" name="move">builtin_go</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
 			if name then notify(caller, "<brightmagenta>You can go " .. name .. "\n"); end

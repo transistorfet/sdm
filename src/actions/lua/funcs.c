@@ -253,7 +253,7 @@ int sdm_lua_notify(lua_State *state)
 	if (!thing || !caller)
 		res = -1;
 	else
-		res = sdm_thing_do_format_action(thing, caller, "notify", "%s", args);
+		res = sdm_notify(thing, caller, "%s", args);
 	lua_pushnumber(state, res);
 	return(1);
 }

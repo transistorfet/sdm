@@ -125,7 +125,7 @@ void sdm_user_release(struct sdm_user *user)
 
 int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 {
-	struct sdm_number *number;
+	double room;
 	struct sdm_thing *location;
 
 	if (user->inter)
@@ -138,8 +138,8 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 		user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"));
 
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
-	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
-	    && (location = sdm_thing_lookup_id(number->num)))
+	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
+	    && (location = sdm_thing_lookup_id(room)))
 		sdm_moveto(SDM_THING(user), location, NULL);
 	else
 		// TODO you should do this some othe way

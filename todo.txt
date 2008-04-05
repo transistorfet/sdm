@@ -1,10 +1,7 @@
 
-	* maybe instead of "on_enter" it could be "do_enter" which sounds a bit more tightly coupled
-	* on_enter/on_exit should be called on the object entering or exiting
-	* on_add/on_remove should be called on the container the object is entering or leaving
-	* you can have macros/inlines in a header to replace direct action calls to make it easier to
-	  implement stuff in basic and also as a guide for function to have in lua
-
+	* implement design changes
+	* implement functions in utils
+	* fix the issue with sdm_thing_is_a (do you pass the id or the pointer or what?)
 	* decide on a small list of do_action functions
 	* implement the do_action functions in lua such that it's easy to write lua
 	* clean up/add parsing functions to lua to make it easy to parse the args
@@ -18,6 +15,8 @@
 
 	* make thing do partial command lookups (but so that only what was typed in looked up partially)
 
+	* how do you prevent a user from directly calling actions that he shouldn't call directly on the
+	  command line
 	* make object name matching match part of a work like if the name is "The Thing" somehow match "thing"
 	* make functions for the various possible do_action functions and possibly make do_action itself
 	  take the args struct and have static inline functions that make that call nice

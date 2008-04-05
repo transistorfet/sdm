@@ -18,7 +18,8 @@ int sdm_builtin_action_announce(struct sdm_action *, struct sdm_thing *, struct 
 int sdm_builtin_action_say(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_look(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_examine(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_move(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_builtin_action_go(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_builtin_action_direction(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 
 int sdm_builtin_action_inventory(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_get(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);

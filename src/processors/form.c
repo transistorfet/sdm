@@ -61,8 +61,7 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 
 	// TODO process the file instead or at least make it run a script to do this
 	sdm_thing_assign_new_id(SDM_THING(user));
-	if ((obj = SDM_OBJECT(create_sdm_string(user->name))))
-		sdm_thing_set_property(SDM_THING(user), "name", obj);
+	sdm_set_string_property(SDM_THING(user), "name", user->name);
 
 	// TODO hack, remove when you get a chargen process that can set the location
 	SDM_THING(user)->parent = 6;

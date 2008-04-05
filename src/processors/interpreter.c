@@ -184,7 +184,7 @@ struct sdm_thing *sdm_interpreter_find_thing(struct sdm_thing *thing, const char
 		else
 			len = strlen(name);
 		for (cur = thing->objects; cur; cur = cur->next) {
-			if (!(str = sdm_thing_get_string_property(cur, "name")))
+			if (!(str = sdm_get_string_property(cur, "name")))
 				continue;
 			if (!strncasecmp(str, name, len)) {
 				if (name[len] == '\0')

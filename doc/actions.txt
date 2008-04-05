@@ -1,0 +1,100 @@
+
+This document describes the core actions on objects, what they do, and the actions on other objects they
+call in order to get done what needs to get done.
+
+
+THING(3) --- CONTAINER(4) --- ROOM(10)
+  |              |
+  |              +--- MOBILE(5) --- USER(6) --- WIZARD(7)
+  |
+  +--- EXIT(11)
+  |
+  +--- ITEM(8)
+
+
+
+container:addobj(obj, exit)
+	obj.location:can_leave(obj) -> to make sure the object can leave it's location
+	room:can_enter(obj) -> to make sure the object can enter this room
+	obj.location:do_leave(obj, exit) -> to print a message about the object's departure
+	- add the object to the room
+	container:do_enter(obj, exit) -> to print a message about the object's arrival
+
+room:<north|south|east|west|...>()
+	- finds the appropriately named exit
+	exit:go(caller) -> to do the actual move
+
+exit:go(mobile)
+	- checks that the exit is usable by the mobile
+	exit.target:addobj(mobile, exit) -> to do the actual move
+
+user:teleport(room)
+	room:addobj(user, nil) -> to move the user with checks
+
+user:get(obj, container)
+	- find the object in the container
+	user:addobj(obj, nil) -> to move the object to the user's inventory with checks
+
+user:drop(obj)
+	user.location:addobj(obj, nil) -> to move the object to the room with checks
+
+user:put(obj, container)
+	container:addobj(obj, nil) -> to move the object to the container with checks
+
+user:give(obj, mobile)
+	mobile:addobj(obj, nil)
+
+
+room:can_enter(obj)
+	- check that the room is not locked
+	- if the thing is an object, make sure you can drop stuff here
+
+room:can_leave(obj)
+	(nothing so far)
+
+room:do_enter(obj, exit)
+	- if the thing is a mobile, print a message about it arriving
+	- if the thing is an item, print a message about the caller dropping it
+	room:look() -> if it's a mobile
+
+room:do_leave(obj, exit)
+	- if the thing is a mobile, print a message about it leaving
+	- if the thing is an item, print a message about the caller picking it up
+
+(are there can_enter/can_leave, do_enter/do_leave functions for containers?)
+
+
+room:look(obj)
+	if !obj then obj = room
+	obj:look_self() -> to print the actual look message
+
+thing:look_self()
+	- print the room name
+	- print the description
+	thing:tell_contents() -> to list the contents of the object
+
+room:tell_contents()
+	- print a brief list of exits
+	- print a list of objects in the room
+
+room:exits()
+	- print exits and their names
+
+room:say(text)
+	- check that the room isn't silent
+	caller:notify(formatted text) -> to print to the user
+	room:announce(formatted text) -> to print to all the users in the room
+
+room:announce(text)
+	- foreach object in the room do....
+	user:notify(text) -> to print to the user
+
+user:notify(text)
+	- send the text to the user
+
+
+tell
+whisper
+ooc
+
+
