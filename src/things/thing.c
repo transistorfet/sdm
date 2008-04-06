@@ -266,6 +266,8 @@ int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_ac
 	struct sdm_thing *cur;
 	struct sdm_action *action;
 
+	if (!args->thing)
+		args->thing = thing;
 	args->action = name;
 	args->result = NULL;
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
@@ -280,6 +282,8 @@ int sdm_thing_do_abbreved_action(struct sdm_thing *thing, const char *name, stru
 	struct sdm_thing *cur;
 	struct sdm_action *action;
 
+	if (!args->thing)
+		args->thing = thing;
 	args->action = name;
 	args->result = NULL;
 	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {

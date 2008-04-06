@@ -22,7 +22,7 @@
 		<parent>10</parent>
 		<property type="string" name="name">The Lounge</property>
 		<property type="string" name="description">You are in some kind of lounge area.  There is an old couch against
-			one wall with a fridge, microwave and countertop on the opposite wall</property>
+			one wall with a fridge, microwave and countertop on the opposite wall.</property>
 		<thing>
 			<id>56</id>
 			<parent>11</parent>

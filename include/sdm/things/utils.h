@@ -75,24 +75,14 @@ static inline int sdm_do_nil_action(struct sdm_thing *thing, struct sdm_thing *c
 	return(sdm_thing_do_action(thing, action, &args));
 }
 
-static inline int sdm_do_format_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, const char *fmt, ...)
+static inline int sdm_do_text_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, const char *str)
 {
-	int i;
-	va_list va;
-	char buffer[STRING_SIZE];
 	struct sdm_action_args args;
 
 	memset(&args, '\0', sizeof(struct sdm_action_args));
 	args.caller = caller;
-	args.text = buffer;
-
-	va_start(va, fmt);
-	if ((i = vsnprintf(buffer, STRING_SIZE - 1, fmt, va)) < 0)
-		return(-1);
-	if (i >= STRING_SIZE - 1)
-		buffer[STRING_SIZE - 1] = '\0';
-	sdm_thing_do_action(thing, action, &args);
-	return(0);
+	args.text = str;
+	return(sdm_thing_do_action(thing, action, &args));
 }
 
 static inline int sdm_do_object_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, struct sdm_thing *obj, struct sdm_thing *target)
@@ -150,6 +140,14 @@ static inline int sdm_moveto(struct sdm_thing *caller, struct sdm_thing *thing, 
 	return(0);
 }
 
+
+int sdm_do_format_action(struct sdm_thing *, struct sdm_thing *, const char *, const char *, ...);
+
+int sdm_util_expand_str(char *, int, struct sdm_action_args *, const char *);
+int sdm_util_expand_reference(char *, int, struct sdm_action_args *, const char *, int *);
+int sdm_util_resolve_reference(char *, int, struct sdm_action_args *, const char *);
+int sdm_util_escape_char(const char *, char *);
+int sdm_util_atoi(const char *, int);
 
 #endif
 

@@ -22,6 +22,7 @@ typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_
 struct sdm_action_args {
 	const char *action;
 	struct sdm_object *result;
+	struct sdm_thing *thing;
 	struct sdm_thing *caller;
 	struct sdm_thing *obj;
 	struct sdm_thing *target;

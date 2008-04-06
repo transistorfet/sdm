@@ -91,7 +91,11 @@ int sdm_builtin_action_say(struct sdm_action *action, struct sdm_thing *thing, s
 		return(-1);
 	sdm_notify(args->caller, args->caller, "You say \"%s\"\n", args->text);
 	name = sdm_get_string_property(args->caller, "name");
-	sdm_announce(thing, args->caller, "\n%s says \"%s\"\n", name ? name : "something", args);
+	sdm_announce(thing, args->caller, "\n%s says \"%s\"\n", name ? name : "something", args->text);
+
+	// TODO this is an example of using the new string expander.  It requires that the default name
+	//	be found (/core/thing.name = "something" and all objs override it)
+	//sdm_announce(thing, args->caller, args, "\n$caller.name says \"$text\"\n");
 	return(0);
 }
 
@@ -130,6 +134,15 @@ int sdm_builtin_action_examine(struct sdm_action *action, struct sdm_thing *thin
 		sdm_notify(args->caller, args->caller, "<brightyellow>%s</brightyellow>\n", str);
 	if ((str = sdm_get_string_property(thing, "description")))
 		sdm_notify(args->caller, args->caller, "<brightgreen>%s</brightgreen>\n", str);
+/*
+	{
+		char buffer[STRING_SIZE];
+
+		sdm_util_expand_str(buffer, STRING_SIZE, args, "<brightyellow>$thing.name</brightyellow>\n<brightgreen>$thing.description</brightgreen>\n");
+		sdm_do_text_action(args->caller, args->caller, "notify", buffer);
+	}
+*/
+
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur == args->caller)
 			continue;
@@ -206,8 +219,8 @@ int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *th
 
 int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	// TODO this is incorrect
-	if (sdm_interpreter_parse_args(args, 2) < 0) {
+	// TODO this just gets one arg for now because parsing is broken
+	if (sdm_interpreter_parse_args(args, 1) < 0) {
 		sdm_notify(args->caller, args->caller, "You don't see %s here\n", args->text);
 		return(0);
 	}

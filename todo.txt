@@ -1,8 +1,7 @@
 
-	* should you make the action be passed as the first argument to the util action functions
+	* should you change the position of the caller argument in all of the do_action util functions?
 	* target in action_args should be named something else
-	* make a few more do_action functions in utils.h
-
+	* add a do_action function that uses the expand_str function
 
 	* implement design changes
 	* fix the 'get' action to actually use the second arg properly
@@ -17,8 +16,7 @@
 	  seem to print a proper error)
 	* can we somehow have a value stored in the object that specifies to add a "the" or "a" or something
 	  before the name to make it proper english without having it in the name or anythnig
-	* can/should we have a special function that automatically substitutes properties into a string
-	  such as "$this.name is looking pretty good" rather than using just the snprintf function
+	* add functions to lua for util_expand_ref stuff
 
 	* should a list use the object itself to hold the next pointer (part of object) which means that
 	  exact object can only be in one list at a time?
@@ -35,6 +33,8 @@
 	* implement a permissions system for object modification
 	* add command shortcuts like lambdamoo's \" for say and : for emote
 	* make a system so that arguments can be preprocessed for an action (?)
+	* add the ability for sdm_util_resolve_reference() to call actions on objects and to handle multiple
+	  references such as $thing.location.name and such
 
 	* have the telnet module more closely control the printing of the command prompt such that after
 	  output has been generated, a command prompt in printed (will be hard to know when output is over).
@@ -84,7 +84,7 @@
 
 Refactoring:
 
-	* should "this" (thing) be in the action arguments struct or passed seperately like it is now?
+	* should "this" (thing) be passed seperately like it is now or just using the one in the args?
 	* should you not use the ARGS macros?
 	* make all types use init functions of the form "init_sdm_<name>_type" or else convert string and
 	  number to *not* use that form

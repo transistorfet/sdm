@@ -36,6 +36,7 @@ OBJS =	data.o	\
 	processors/processor.o	\
 	things/thing.o	\
 	things/user.o	\
+	things/utils.o	\
 	things/world.o
 
 LIBS =	-lcrypt	\
@@ -254,9 +255,20 @@ things/user.o: things/user.c ../include/sdm/data.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
   ../include/sdm/things/utils.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/processors/form.h \
+  ../include/sdm/processors/interpreter.h \
   ../include/sdm/processors/processor.h \
-  ../include/sdm/processors/interpreter.h ../include/sdm/things/user.h
+  ../include/sdm/interfaces/interface.h ../include/sdm/processors/form.h \
+  ../include/sdm/things/user.h
+
+things/utils.o: things/utils.c ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
+  ../include/sdm/misc.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
+  ../include/sdm/processors/interpreter.h
 
 things/world.o: things/world.c ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/misc.h ../include/sdm/memory.h \

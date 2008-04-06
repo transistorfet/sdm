@@ -39,7 +39,7 @@ int sdm_builtin_action_create(struct sdm_action *action, struct sdm_thing *thing
 	struct sdm_thing *obj;
 
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_do_format_action(args->caller, args->caller, "notify", "<red>Unable to find the given parent.\n");
+		sdm_notify(args->caller, args->caller, "<red>Unable to find the given parent.\n");
 		return(0);
 	}
 
