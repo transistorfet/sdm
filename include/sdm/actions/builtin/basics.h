@@ -25,5 +25,8 @@ int sdm_builtin_action_inventory(struct sdm_action *, struct sdm_thing *, struct
 int sdm_builtin_action_get(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_drop(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 
+int sdm_builtin_action_room_do_enter(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_builtin_action_room_do_leave(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+
 #endif
 

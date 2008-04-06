@@ -1,19 +1,29 @@
 
+	* should you make the action be passed as the first argument to the util action functions
+	* target in action_args should be named something else
+	* make a few more do_action functions in utils.h
+
+
 	* implement design changes
-	* implement functions in utils
-	* fix the issue with sdm_thing_is_a (do you pass the id or the pointer or what?)
-	* decide on a small list of do_action functions
-	* implement the do_action functions in lua such that it's easy to write lua
+	* fix the 'get' action to actually use the second arg properly
 	* clean up/add parsing functions to lua to make it easy to parse the args
 	* either make the parse_args function handle more arg cases or make the other functions easier
-	  to use
+	  to use.  Make parse_args work properly/nicely with the get/put/drop commands?
+	* make @destroy command
+	* add a @write_world command
+	* i don't like the parsing functions available
+	* i don't like the way commands are parsed particularily the fact tha firstly, you can specify a
+	  partial name and secondly that things like "get the thing" doesn't work at all (and doesn't even
+	  seem to print a proper error)
+	* can we somehow have a value stored in the object that specifies to add a "the" or "a" or something
+	  before the name to make it proper english without having it in the name or anythnig
+	* can/should we have a special function that automatically substitutes properties into a string
+	  such as "$this.name is looking pretty good" rather than using just the snprintf function
 
 	* should a list use the object itself to hold the next pointer (part of object) which means that
 	  exact object can only be in one list at a time?
 	* should objects have a pointer to the list they are contained in so that they can be removed from
 	  that list when they are destroyed?
-
-	* make thing do partial command lookups (but so that only what was typed in looked up partially)
 
 	* how do you prevent a user from directly calling actions that he shouldn't call directly on the
 	  command line
@@ -54,7 +64,6 @@
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* make the lua error print to the user (or at least optionally)
 	* you *HAVE* to make this fucking lua stuff easier!
-	* add is_user and is_mobile lua functions
 
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
@@ -75,13 +84,18 @@
 
 Refactoring:
 
-	* should you not use the ARGS macros?
 	* should "this" (thing) be in the action arguments struct or passed seperately like it is now?
+	* should you not use the ARGS macros?
 	* make all types use init functions of the form "init_sdm_<name>_type" or else convert string and
 	  number to *not* use that form
 
 Structural Issues:
 
+	* i don't like the sdm_moveto function in that the action it calls must guess what the hell is
+	  supposed to be happening based on what the arguments are.  For example, if i steal an object from
+	  another user, it would be moveto(me, obj, me, NULL) but that looks exactly like picking up an
+	  object or getting an object out of a container.  It's only because the container is not owned by
+	  me that it's stealing.
 	* can/should there be a way of doing an overridden action? (knowingly passing an object to an action
 	  on a parent of that object to avoid an overloaded action? (to change it's overt behaviour without
 	  reimplementing the functionality) (eg. override the say command to prevent talking while asleep)

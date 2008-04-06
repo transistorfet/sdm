@@ -30,8 +30,13 @@ int sdm_load_lua_library(lua_State *state)
 	lua_register(state, "get_property", sdm_lua_get_property);
 	lua_register(state, "set_property", sdm_lua_set_property);
 
-	lua_register(state, "moveto", sdm_lua_moveto);
 	lua_register(state, "notify", sdm_lua_notify);
+	lua_register(state, "announce", sdm_lua_announce);
+	lua_register(state, "is_user", sdm_lua_is_user);
+	lua_register(state, "is_mobile", sdm_lua_is_mobile);
+	lua_register(state, "is_exit", sdm_lua_is_exit);
+	lua_register(state, "is_room", sdm_lua_is_room);
+	lua_register(state, "moveto", sdm_lua_moveto);
 	return(0);
 }
 
@@ -217,25 +222,6 @@ int sdm_lua_set_property(lua_State *state)
 
 
 /**
- * Args:	<thing>, <container>
- * Description:	Moves the given object to the given container
- */
-int sdm_lua_moveto(lua_State *state)
-{
-	struct sdm_thing *thing, *container;
-
-	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
-	container = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 2));
-	// TODO add the "via" parameter
-
-	if (!thing || !container)
-		lua_pushnumber(state, -1);
-	else
-		lua_pushnumber(state, sdm_moveto(thing, container, NULL));
-	return(1);
-}
-
-/**
  * Args:	<thing>, <text>
  * Description:	Simpler function for doing the "notify" action on an object
  */
@@ -255,6 +241,119 @@ int sdm_lua_notify(lua_State *state)
 	else
 		res = sdm_notify(thing, caller, "%s", args);
 	lua_pushnumber(state, res);
+	return(1);
+}
+
+/**
+ * Args:	<thing>, <text>
+ * Description:	Simpler function for doing the "announce" action on an object
+ */
+int sdm_lua_announce(lua_State *state)
+{
+	int res;
+	const char *args;
+	struct sdm_thing *thing, *caller;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	args = luaL_checkstring(state, 2);
+	lua_getglobal(state, "caller");
+	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
+
+	if (!thing || !caller)
+		res = -1;
+	else
+		res = sdm_announce(thing, caller, "%s", args);
+	lua_pushnumber(state, res);
+	return(1);
+}
+
+/**
+ * Args:	<thing>
+ * Description:	Returns true if the given object is a user object
+ */
+int sdm_lua_is_user(lua_State *state)
+{
+	struct sdm_thing *thing;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	if (!thing || !sdm_is_user(thing))
+		lua_pushboolean(state, 0);
+	else
+		lua_pushboolean(state, 1);
+	return(1);
+}
+
+/**
+ * Args:	<thing>
+ * Description:	Returns true if the given object is a mobile
+ */
+int sdm_lua_is_mobile(lua_State *state)
+{
+	struct sdm_thing *thing;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	if (!thing || !sdm_is_mobile(thing))
+		lua_pushboolean(state, 0);
+	else
+		lua_pushboolean(state, 1);
+	return(1);
+}
+
+/**
+ * Args:	<thing>
+ * Description:	Returns true if the given object is an exit
+ */
+int sdm_lua_is_exit(lua_State *state)
+{
+	struct sdm_thing *thing;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	if (!thing || !sdm_is_exit(thing))
+		lua_pushboolean(state, 0);
+	else
+		lua_pushboolean(state, 1);
+	return(1);
+}
+
+/**
+ * Args:	<thing>
+ * Description:	Returns true if the given object is a room
+ */
+int sdm_lua_is_room(lua_State *state)
+{
+	struct sdm_thing *thing;
+
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	if (!thing || !sdm_is_room(thing))
+		lua_pushboolean(state, 0);
+	else
+		lua_pushboolean(state, 1);
+	return(1);
+}
+
+/**
+ * Args:	<thing>, <container>
+ * Description:	Moves the given object to the given container
+ */
+int sdm_lua_moveto(lua_State *state)
+{
+	int nargs;
+	struct sdm_thing *via = NULL;
+	struct sdm_thing *thing, *container, *caller;
+
+	nargs = lua_gettop(state);
+	thing = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 1));
+	container = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 2));
+	if (nargs >= 3)
+		via = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, 3));
+
+	lua_getglobal(state, "caller");
+	caller = sdm_thing_lookup_id((sdm_id_t) luaL_checknumber(state, -1));
+
+	if (!thing || !container || !caller)
+		lua_pushnumber(state, -1);
+	else
+		lua_pushnumber(state, sdm_moveto(caller, thing, container, via));
 	return(1);
 }
 

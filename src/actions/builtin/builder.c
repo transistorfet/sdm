@@ -20,9 +20,10 @@
 
 int sdm_builtin_load_builder(struct sdm_hash *actions)
 {
-	sdm_hash_add(actions, "builtin_create_object", sdm_builtin_action_create_object);
+	sdm_hash_add(actions, "builtin_create", sdm_builtin_action_create);
 	sdm_hash_add(actions, "builtin_create_room", sdm_builtin_action_create_room);
 	sdm_hash_add(actions, "builtin_create_exit", sdm_builtin_action_create_exit);
+	sdm_hash_add(actions, "builtin_set", sdm_builtin_action_set);
 	return(0);
 }
 
@@ -33,7 +34,7 @@ int sdm_builtin_load_builder(struct sdm_hash *actions)
  *	target:		not used
  *	args:		not used
  */
-int sdm_builtin_action_create_object(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_create(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 
@@ -48,7 +49,7 @@ int sdm_builtin_action_create_object(struct sdm_action *action, struct sdm_thing
 	}
 
 	sdm_set_string_property(obj, "name", args->text);
-	sdm_moveto(obj, args->caller, NULL);
+	sdm_moveto(args->caller, obj, args->caller, NULL);
 	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
@@ -68,7 +69,7 @@ int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *
 
 	sdm_set_string_property(obj, "name", args->text);
 	// TODO this is a dangerous dereference
-	sdm_moveto(obj, args->caller->location->location, NULL);
+	sdm_moveto(args->caller, obj, args->caller->location->location, NULL);
 	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
@@ -76,8 +77,9 @@ int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *
 
 int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	struct sdm_thing *obj;
-	struct sdm_thing *exit;
+	int i = 0;
+	char buffer[STRING_SIZE];
+	struct sdm_thing *obj, *exit, *target;
 
 	if (!(exit = sdm_interpreter_find_thing(NULL, "/core/exit")))
 		return(-1);
@@ -86,12 +88,21 @@ int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *
 		return(-1);
 	}
 
-	sdm_set_string_property(obj, "name", args->text);
+	sdm_interpreter_get_string(args->text, buffer, STRING_SIZE, &i);
+	sdm_set_string_property(obj, "name", buffer);
+	if ((target = sdm_interpreter_get_thing(args->caller, &args->text[i], &i)))
+		sdm_set_number_property(obj, "target", target->id);
+
 	// TODO this is a somewhat dangerous dereference
-	sdm_moveto(obj, args->caller->location, NULL);
+	sdm_moveto(args->caller, obj, args->caller->location, NULL);
 	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
+}
+
+int sdm_builtin_action_set(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	
 }
 
 

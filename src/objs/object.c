@@ -94,14 +94,15 @@ void destroy_sdm_object(struct sdm_object *obj)
 
 int sdm_object_read_file(struct sdm_object *obj, const char *file, const char *type)
 {
+	int res;
 	struct sdm_data_file *data;
 
 	sdm_status("Reading %s data from file \"%s\".", type, file);
 	if (!(sdm_data_file_exists(file)) || !(data = sdm_data_open(file, SDM_DATA_READ, type)))
 		return(-1);
-	sdm_object_read_data(obj, data);
+	res = sdm_object_read_data(obj, data);
 	sdm_data_close(data);
-	return(0);
+	return(res);
 }
 
 int sdm_object_write_file(struct sdm_object *obj, const char *file, const char *type)

@@ -37,6 +37,9 @@ int sdm_builtin_load_basics(struct sdm_hash *actions)
 	sdm_hash_add(actions, "builtin_inventory", sdm_builtin_action_inventory);
 	sdm_hash_add(actions, "builtin_get", sdm_builtin_action_get);
 	sdm_hash_add(actions, "builtin_drop", sdm_builtin_action_drop);
+
+	sdm_hash_add(actions, "builtin_room_do_enter", sdm_builtin_action_room_do_enter);
+	sdm_hash_add(actions, "builtin_room_do_leave", sdm_builtin_action_room_do_leave);
 	return(0);
 }
 
@@ -107,7 +110,7 @@ int sdm_builtin_action_look(struct sdm_action *action, struct sdm_thing *thing, 
 		sdm_notify(args->caller, args->caller, "You don't see a %s here\n", args->text);
 		return(0);
 	}
-	sdm_do_nil_action(args->obj, args->caller, "examine");
+	sdm_do_nil_action(args->obj, args->caller, "look_self");
 	return(0);
 }
 
@@ -161,7 +164,7 @@ int sdm_builtin_action_go(struct sdm_action *action, struct sdm_thing *thing, st
 	if (((num = sdm_get_number_property(thing, "target")) <= 0)
 	    || !(location = sdm_thing_lookup_id((sdm_id_t) num)))
 		return(-1);
-	sdm_moveto(args->caller, location, NULL);
+	sdm_moveto(args->caller, args->caller, location, thing);
 	return(0);
 }
 
@@ -203,8 +206,7 @@ int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *th
 
 int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	const char *name, *objname;
-
+	// TODO this is incorrect
 	if (sdm_interpreter_parse_args(args, 2) < 0) {
 		sdm_notify(args->caller, args->caller, "You don't see %s here\n", args->text);
 		return(0);
@@ -213,19 +215,13 @@ int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, s
 		sdm_notify(args->caller, args->caller, "You already have that.\n");
 		return(0);
 	}
-	// TODO call action on object to see if it is gettable
-	sdm_moveto(args->obj, args->caller, NULL);
-	objname = sdm_get_string_property(args->obj, "name");
-	sdm_notify(args->caller, args->caller, "You get %s.\n", objname ? objname : "something");
-	name = sdm_get_string_property(args->caller, "name");
-	sdm_announce(args->caller->location, args->caller, "%s gets %s.\n", name ? name : "something", objname ? objname : "something");
+	sdm_moveto(args->caller, args->obj, args->caller, NULL);
 	return(0);
 }
 
 int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	int i = 0;
-	const char *name, *objname;
 
 	if (!args->obj && ((*args->text == '\0')
 	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i))
@@ -233,14 +229,71 @@ int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, 
 		sdm_notify(args->caller, args->caller, "You aren't carrying that.\n");
 		return(-1);
 	}
-	// TODO call action on object to see if it is removable
-	// TODO call action on room to see if object can be dropped here
-	sdm_moveto(args->obj, args->caller->location, NULL);
-	objname = sdm_get_string_property(args->obj, "name");
-	sdm_notify(args->caller, args->caller, "You drop %s.\n", objname ? objname : "something");
-	name = sdm_get_string_property(args->caller, "name");
-	sdm_announce(args->caller->location, args->caller, "%s drops %s.\n", name ? name : "something", objname ? objname : "something");
+	sdm_moveto(args->caller, args->obj, args->caller->location, NULL);
 	return(0);
 }
 
+
+int sdm_builtin_action_room_do_enter(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	const char *name, *exitname, *username;
+
+	if (!args->obj)
+		return(0);
+	if (!(name = sdm_get_string_property(args->obj, "name")))
+		name = "someone";
+	if (sdm_is_mobile(args->obj)) {
+		/** A mobile is entering the room */
+		if (args->target) {
+			/** The mobile is entering through an exit */
+			if (!(exitname = sdm_get_string_property(args->target, "name"))
+			    || (sdm_get_number_property(args->target, "hidden") > 0))
+				exitname = "somewhere";
+			sdm_announce(thing, args->caller, "<brightgreen>%s enters from %s.\n", name, exitname);
+		}
+		else
+			/** The mobile is teleporting here */
+			sdm_announce(thing, args->caller, "<brightgreen>%s appears in a shower of sparks.\n", name);
+		sdm_do_nil_action(thing, args->caller, "look_self");
+	}
+	else {
+		/** Assume the object is being dropped by the caller */
+		if (!(username = sdm_get_string_property(args->caller, "name")))
+			username = "someone";
+		sdm_announce(thing, args->caller, "%s drops %s here.\n", username, name);
+		sdm_notify(args->caller, args->caller, "You drop %s here.\n", name);
+	}
+	return(0);
+}
+
+int sdm_builtin_action_room_do_leave(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+{
+	const char *name, *exitname, *username;
+
+	if (!args->obj)
+		return(0);
+	if (!(name = sdm_get_string_property(args->obj, "name")))
+		name = "someone";
+	if (sdm_is_mobile(args->obj)) {
+		/** A mobile is leaving the room */
+		if (args->target) {
+			/** The mobile is leaving through an exit */
+			if (!(exitname = sdm_get_string_property(args->target, "name"))
+			    || (sdm_get_number_property(args->target, "hidden") > 0))
+				exitname = "somewhere";
+			sdm_announce(thing, args->caller, "<brightgreen>%s leaves %s.\n", name, exitname);
+		}
+		else
+			/** The mobile is teleporting away */
+			sdm_announce(thing, args->caller, "<brightgreen>%s vanishes in a puff of smoke.\n", name);
+	}
+	else {
+		/** Assume the object is being picked up by the caller */
+		if (!(username = sdm_get_string_property(args->caller, "name")))
+			username = "someone";
+		sdm_announce(thing, args->caller, "%s gets %s.\n", username, name);
+		sdm_notify(args->caller, args->caller, "You get %s.\n", name);
+	}
+	return(0);
+}
 

@@ -140,11 +140,11 @@ int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
 	    && (location = sdm_thing_lookup_id(room)))
-		sdm_moveto(SDM_THING(user), location, NULL);
+		sdm_moveto(SDM_THING(user), SDM_THING(user), location, NULL);
 	else
 		// TODO you should do this some othe way
-		sdm_moveto(SDM_THING(user), sdm_thing_lookup_id(50), NULL);
-		//sdm_moveto(SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
+		sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_thing_lookup_id(50), NULL);
+		//sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
 
 	if (!user->proc)
 		return(-1);

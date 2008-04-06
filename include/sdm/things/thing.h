@@ -54,6 +54,7 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, stru
 
 int sdm_thing_set_action(struct sdm_thing *, const char *, struct sdm_action *);
 int sdm_thing_do_action(struct sdm_thing *, const char *, struct sdm_action_args *);
+int sdm_thing_do_abbreved_action(struct sdm_thing *, const char *, struct sdm_action_args *);
 
 int sdm_thing_add(struct sdm_thing *, struct sdm_thing *);
 int sdm_thing_remove(struct sdm_thing *, struct sdm_thing *);

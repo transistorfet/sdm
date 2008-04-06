@@ -5,7 +5,7 @@
 		<id>3</id>
 		<parent>1</parent>
 		<property type="string" name="name">thing</property>
-		<action type="builtin" name="examine">builtin_examine</action>
+		<action type="builtin" name="look_self">builtin_examine</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
 			if name then notify(caller, "<brightblue>You see " .. name .. " here.\n"); end
@@ -26,15 +26,18 @@
 		<parent>5</parent>
 		<property type="string" name="name">user</property>
 		<action type="builtin" name="notify">builtin_notify</action>
-		<action type="builtin" name="inventory">builtin_inventory</action>
+		<action type="builtin" name="inv">builtin_inventory</action>
 		<action type="builtin" name="get">builtin_get</action>
 		<action type="builtin" name="drop">builtin_drop</action>
-		<action type="lua" name="description"><![CDATA[
-			if set_property(caller, "description", args) then
+		<action type="lua" name="describe"><![CDATA[
+			if set_property(caller, "description", text) then
 				notify(caller, "<green>Description set successfully\n");
 			else
 				notify(caller, "<red>Error setting description\n");
 			end
+		]]></action>
+		<action type="lua" name="whereami"><![CDATA[
+			notify(caller, "You are in #" .. get_location(caller) .. "\n")
 		]]></action>
 	</thing>
 	<thing>
@@ -42,12 +45,13 @@
 		<parent>6</parent>
 		<property type="string" name="name">wizard</property>
 		<action type="lua" name="teleport"><![CDATA[
-			local room = get_thing(caller, args);
+			local room = get_thing(caller, text);
 			moveto(caller, room);
 		]]></action>
-		<action type="builtin" name="create_object">builtin_create_object</action>
-		<action type="builtin" name="create_room">builtin_create_room</action>
-		<action type="builtin" name="create_exit">builtin_create_exit</action>
+		<action type="builtin" name="@create">builtin_create</action>
+		<action type="builtin" name="@create_room">builtin_create_room</action>
+		<action type="builtin" name="@create_exit">builtin_create_exit</action>
+		<action type="builtin" name="@set">builtin_set</action>
 	</thing>
 	<thing>
 		<id>8</id>
@@ -60,26 +64,19 @@
 		<id>10</id>
 		<parent>4</parent>
 		<property type="string" name="name">room</property>
-		<action type="builtin" name="north">builtin_direction</action>
-		<action type="builtin" name="south">builtin_direction</action>
-		<action type="builtin" name="east">builtin_direction</action>
-		<action type="builtin" name="west">builtin_direction</action>
-		<action type="builtin" name="up">builtin_direction</action>
-		<action type="builtin" name="down">builtin_direction</action>
+		<action type="builtin" name="n">builtin_direction</action>
+		<action type="builtin" name="s">builtin_direction</action>
+		<action type="builtin" name="e">builtin_direction</action>
+		<action type="builtin" name="w">builtin_direction</action>
+		<action type="builtin" name="u">builtin_direction</action>
+		<action type="builtin" name="d">builtin_direction</action>
 		<action type="builtin" name="look">builtin_look</action>
 		<action type="builtin" name="say">builtin_say</action>
 		<action type="builtin" name="announce">builtin_announce</action>
-		<action type="lua" name="do_enter"><![CDATA[
-			local name = get_property(caller, "name");
-			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " enters the room.\n"); end
-			do_action(this, "look");
-		]]></action>
-		<action type="lua" name="do_leave"><![CDATA[
-			local name = get_property(caller, "name");
-			if (name) then do_action(this, "announce", -1, "<brightgreen>" .. name .. " leaves.\n"); end
-		]]></action>
+		<action type="builtin" name="do_enter">builtin_room_do_enter</action>
+		<action type="builtin" name="do_leave">builtin_room_do_leave</action>
 		<action type="lua" name="emote"><![CDATA[
-			local str = get_property(caller, "name") .. " " .. args .. "\n";
+			local str = get_property(caller, "name") .. " " .. text .. "\n";
 			notify(caller, str);
 			do_action(get_location(caller), "announce", -1, "\n" .. str);
 		]]></action>

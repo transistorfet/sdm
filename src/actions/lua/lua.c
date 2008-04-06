@@ -98,10 +98,12 @@ int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *thing, struct sdm_a
 	lua_setglobal(global_state, "caller");
 	lua_pushnumber(global_state, thing ? thing->id : -1);
 	lua_setglobal(global_state, "this");
+	lua_pushnumber(global_state, args->obj ? args->obj->id : -1);
+	lua_setglobal(global_state, "obj");
 	lua_pushnumber(global_state, args->target ? args->target->id : -1);
 	lua_setglobal(global_state, "target");
 	lua_pushstring(global_state, args->text);
-	lua_setglobal(global_state, "args");
+	lua_setglobal(global_state, "text");
 
 	if (luaL_loadbuffer(global_state, action->code, strlen(action->code), args->action)
 	    || lua_pcall(global_state, 0, 1, 0)) {

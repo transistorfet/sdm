@@ -24,8 +24,13 @@ int sdm_lua_get_location(lua_State *);
 int sdm_lua_get_property(lua_State *);
 int sdm_lua_set_property(lua_State *);
 
-int sdm_lua_moveto(lua_State *);
 int sdm_lua_notify(lua_State *);
+int sdm_lua_announce(lua_State *);
+int sdm_lua_is_user(lua_State *);
+int sdm_lua_is_mobile(lua_State *);
+int sdm_lua_is_exit(lua_State *);
+int sdm_lua_is_room(lua_State *);
+int sdm_lua_moveto(lua_State *);
 
 
 int sdm_lua_convert_object(lua_State *, struct sdm_object *);

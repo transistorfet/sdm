@@ -15,6 +15,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
+#include <sdm/processors/interpreter.h>
 
 
 /*** Thing Property Functions ***/
@@ -94,41 +95,57 @@ static inline int sdm_do_format_action(struct sdm_thing *thing, struct sdm_thing
 	return(0);
 }
 
+static inline int sdm_do_object_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, struct sdm_thing *obj, struct sdm_thing *target)
+{
+	struct sdm_action_args args;
+
+	memset(&args, '\0', sizeof(struct sdm_action_args));
+	args.caller = caller;
+	args.obj = obj;
+	args.target = target;
+	args.text = "";
+	return(sdm_thing_do_action(thing, action, &args));
+}
+
 /*** Various? ***/
 
 #define sdm_is_user(thing)	\
 	( sdm_object_is_a(SDM_OBJECT(thing), &sdm_user_obj_type) )
 
-// TODO this is wrong, sdm_thing_is_a requires the id, not a pointer
+#define sdm_is_mobile(thing)	\
+	( sdm_named_is_a(SDM_THING(thing), "/core/mobile") )
+
 #define sdm_is_exit(thing)	\
-	( sdm_thing_is_a(SDM_THING(thing), sdm_interpreter_find_thing(NULL, "/core/exit")) )
+	( sdm_named_is_a(SDM_THING(thing), "/core/exit") )
 
-static inline int sdm_is_mobile(struct sdm_thing *thing)
+#define sdm_is_room(thing)	\
+	( sdm_named_is_a(SDM_THING(thing), "/core/room") )
+
+static inline int sdm_named_is_a(struct sdm_thing *thing, const char *name)
 {
+	struct sdm_thing *parent;
 
-	return(0);
+	if (!(parent = sdm_interpreter_find_thing(NULL, name)))
+		return(0);
+	return(sdm_thing_is_a(thing, parent->id));
 }
 
-static inline int sdm_is_room(struct sdm_thing *thing)
-{
 
-	return(0);
-}
-
-
-static inline int sdm_moveto(struct sdm_thing *thing, struct sdm_thing *to, struct sdm_thing *via)
+static inline int sdm_moveto(struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *to, struct sdm_thing *via)
 {
 	// TODO move the given thing to the given thing via the given exit.
 	//	if 'via' is null then treat it like a teleportation
 
+	// TODO should this take and pass the caller as a seperate value or at the very least pass
+	//	the object moving as the obj instead of the caller
 	/** If the 'on_exit' action returns an error, then the object should not be removed */
-	if (sdm_do_nil_action(thing->location, thing, "do_leave") < 0)
+	if (sdm_do_object_action(thing->location, caller, "do_leave", thing, via) < 0)
 		return(-1);
 	if (sdm_thing_add(to, thing) < 0)
 		return(-1);
 	// TODO if the add fails, should we do 'on_enter' on the original location?
 	/** If the 'on_enter' action returns an error, then the object should not be added */
-	if (sdm_do_nil_action(to, thing, "do_enter") < 0)
+	if (sdm_do_object_action(to, caller, "do_enter", thing, via) < 0)
 		return(-1);
 	return(0);
 }

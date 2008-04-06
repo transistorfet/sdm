@@ -57,7 +57,7 @@ void sdm_form_release(struct sdm_form *form)
 
 int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 {
-	struct sdm_object *obj;
+	struct sdm_thing *room;
 
 	// TODO process the file instead or at least make it run a script to do this
 	sdm_thing_assign_new_id(SDM_THING(user));
@@ -65,8 +65,8 @@ int sdm_form_startup(struct sdm_form *proc, struct sdm_user *user)
 
 	// TODO hack, remove when you get a chargen process that can set the location
 	SDM_THING(user)->parent = 6;
-	if ((obj = SDM_OBJECT(sdm_thing_lookup_id(50))))
-		sdm_moveto(SDM_THING(user), SDM_THING(obj), NULL);
+	if ((room = sdm_thing_lookup_id(50)))
+		sdm_moveto(SDM_THING(user), SDM_THING(user), room, NULL);
 
 	/** Replace this processor with an interpreter */
 	destroy_sdm_object(SDM_OBJECT(user->proc));

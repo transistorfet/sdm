@@ -13,9 +13,10 @@
 
 int sdm_builtin_load_builder(struct sdm_hash *);
 
-int sdm_builtin_action_create_object(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_builtin_action_create(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 int sdm_builtin_action_create_exit(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int sdm_builtin_action_set(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 
 #endif
 

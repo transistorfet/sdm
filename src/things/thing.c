@@ -275,6 +275,20 @@ int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_ac
 	return(1);
 }
 
+int sdm_thing_do_abbreved_action(struct sdm_thing *thing, const char *name, struct sdm_action_args *args)
+{
+	struct sdm_thing *cur;
+	struct sdm_action *action;
+
+	args->action = name;
+	args->result = NULL;
+	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
+		if ((action = sdm_tree_find_partial(cur->actions, name)))
+			return(action->func(action, thing, args));
+	}
+	return(1);
+}
+
 
 int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
 {
