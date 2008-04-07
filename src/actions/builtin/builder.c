@@ -102,7 +102,24 @@ int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *
 
 int sdm_builtin_action_set(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	
+	int i = 0;
+	char prop[STRING_SIZE];
+	struct sdm_string *string;
+
+	if (sdm_interpreter_get_string(args->text, prop, STRING_SIZE, &i) <= 0) {
+		sdm_notify(args->caller, args->caller, "<red>Invalid property.\n");
+		return(-1);
+	}
+	if (!args->obj && !(args->obj = sdm_interpreter_get_thing(args->caller, &args->text[i], &i))) {
+		sdm_notify(args->caller, args->caller, "<red>Object not found.\n");
+		return(-1);
+	}
+
+	if (!(string = create_sdm_string(&args->text[i])) || (sdm_thing_set_property(args->obj, prop, SDM_OBJECT(string)) >= 0))
+		sdm_notify(args->caller, args->caller, "<green>Property set successfully.\n");
+	else
+		sdm_notify(args->caller, args->caller, "<red>Error setting property.\n");
+	return(0);
 }
 
 

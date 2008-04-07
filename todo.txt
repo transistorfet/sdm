@@ -3,36 +3,40 @@
 	* target in action_args should be named something else
 	* add a do_action function that uses the expand_str function
 
-	* implement design changes
-	* fix the 'get' action to actually use the second arg properly
-	* clean up/add parsing functions to lua to make it easy to parse the args
-	* either make the parse_args function handle more arg cases or make the other functions easier
-	  to use.  Make parse_args work properly/nicely with the get/put/drop commands?
 	* make @destroy command
 	* add a @write_world command
+	* add functions to lua for util_expand_ref stuff
+	* should you make the announce action add a "\n" before each output to the user in order to prevent
+	  interrupting the current line being typed instead of putting it in all the places that generate
+	  output sent to the announce action?
+	* make the code use the "title" property instead of the "name" property for displaying the name
+	  of an object
+
+	* either make the parse_args function handle more arg cases or make the other functions easier
+	  to use.  Make parse_args work properly/nicely with the get/put/drop commands?
+	* clean up/add parsing functions to lua to make it easy to parse the args
 	* i don't like the parsing functions available
 	* i don't like the way commands are parsed particularily the fact tha firstly, you can specify a
 	  partial name and secondly that things like "get the thing" doesn't work at all (and doesn't even
 	  seem to print a proper error)
 	* can we somehow have a value stored in the object that specifies to add a "the" or "a" or something
 	  before the name to make it proper english without having it in the name or anythnig
-	* add functions to lua for util_expand_ref stuff
+	* make object name matching match part of a word like if the name is "The Thing" somehow match "thing"
+	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
+	  matching of the string given.
+	* can you make object lookup in the interpreter try to match the whole command line and whatever
+	  matches the best is used as the object name and the rest is passed as the args string?
 
 	* should a list use the object itself to hold the next pointer (part of object) which means that
 	  exact object can only be in one list at a time?
 	* should objects have a pointer to the list they are contained in so that they can be removed from
 	  that list when they are destroyed?
 
+	* fix the 'get' action to actually use the second arg properly
 	* how do you prevent a user from directly calling actions that he shouldn't call directly on the
 	  command line
-	* make object name matching match part of a work like if the name is "The Thing" somehow match "thing"
-	* make functions for the various possible do_action functions and possibly make do_action itself
-	  take the args struct and have static inline functions that make that call nice
-	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
-	  matching of the string given.
 	* implement a permissions system for object modification
 	* add command shortcuts like lambdamoo's \" for say and : for emote
-	* make a system so that arguments can be preprocessed for an action (?)
 	* add the ability for sdm_util_resolve_reference() to call actions on objects and to handle multiple
 	  references such as $thing.location.name and such
 
@@ -40,12 +44,10 @@
 	  output has been generated, a command prompt in printed (will be hard to know when output is over).
 	  You could have a special check in the main server loop that checks a flag set when output has been
 	  sent and if output was sent, print the command prompt?? (complex and lots of border cases)
-	* can you make object lookup in the interpreter try to match the whole command line and whatever
-	  matches the best is used as the object name and the rest is passed as the args string?
 	* we'll have to add reference counting of objects at some point
 
-	* make the "examine" (rename to look_self?) action tailor the description to the type of object it
-	  is describing (ie. don't list the items a person is carrying)
+	* make the look_self action tailor the description to the type of object it is describing (ie. don't
+	  list the items a person is carrying)
 	* how do you decide what things to print in the list of contents since you don't want to print all
 	  objects such as exits and stuff (perhaps by calling a function on the object that makes it describe
 	  itself)
@@ -55,32 +57,15 @@
 	* make an "exits" command that prints the list of obvious exits and their descriptions
 	* print the equipment, weapons, armour, etc seperately and/or provide commands that print only
 	  one type
-	* you need a way to get the direction from which a user has arrived or left a room.
 
-	* should you make the announce action add a "\n" before each output to the user in order to prevent
-	  interrupting the current line being typed instead of putting it in all the places that generate
-	  output sent to the announce action?
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
 	* make the lua error print to the user (or at least optionally)
-	* you *HAVE* to make this fucking lua stuff easier!
 
 	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
 	  restrictions and objects to use will be there
 	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
 	  be done?
-
-	* make various commands use the extra text passed in a command as a text modifier.  For example you
-	  could say "give apple to trans carefully" and it will interpret the command like normal and the
-	  'carefully' at the end would be tacked onto the output as "Wizard gives an apple to trans carefully"
-
-	* write and implement details on converting input received (in the server core format document)
-	* tidy up the xml formatting in telnet and add theme tags (tags that indirectly refer to format)
-	* add the ability for telnet to read user specific configuration data from the user data file
-	* implement proper handling of telnet commands
-	* have a linked list of processors in the user object with a pointer to the currently active one
-	  and read/write the processor's data to the user file.  There should be a function for code to select
-	  or create a new processor in the user as well as remove one.  The "next" pointer wolud be in proce..
 
 Refactoring:
 
@@ -151,6 +136,11 @@ Structural Issues:
 	  directly ontop of the code that accepts the xml client essentially
 
 Gerenal:
+
+	* write and implement details on converting input received (in the server core format document)
+	* tidy up the xml formatting in telnet and add theme tags (tags that indirectly refer to format)
+	* add the ability for telnet to read user specific configuration data from the user data file
+	* implement proper handling of telnet commands
 
 	* make the login track invalid attempts and terminate the connection after a while
 	* add a way to automatically timeout login attempts

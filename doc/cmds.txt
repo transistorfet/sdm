@@ -1,0 +1,262 @@
+
+help <topic>
+password		// interactive?
+who [<player>]
+time
+date
+where <player>
+idea <text>		// send idea/feature request to me
+
+north
+south
+east
+west
+up
+down
+look [<object>]
+examine <object>		// should this just be a synonym for look?
+exits
+glance [<object>]		// basic info with description
+go <direction>			// SYN: move
+
+say <text>
+emote <text>
+occ <text>
+mode <mode>		// this could be a way of making all text go to a certain channel
+whisper <player> <text>
+tell <player> <text> ???
+think <text>
+yell <text>		// SYN: shout
+hug <object>
+kiss <object>
+
+open door
+open <object>
+close <object>
+lock <object>
+unlock <object>
+knock <object>		// SYN: rap;  prints knocking message on other side of door (target)
+
+get <object>		// SYN: take
+get <object> [in] <object>
+put <object> [in] <object>
+drop <object>
+give <object> [to] <object>
+inventory
+
+push <object>
+pull <object>
+rip <object>
+shove <object> [direction]		// shove someone out of a room or just shove like an emote
+drag <object> [direction]		// drag someone of the room with you (if they are stunned in battle)
+use <object>
+touch <object>
+
+drink <object>
+fill <object>
+eat <object>
+equip <object>		// SYN: hold?, wear
+hold <object>
+
+rest
+sleep
+wake
+sit
+stand
+
+kill <player>
+cast <spell> <target>
+flee
+practice <skill>
+repair <object>
+sacrifice <object>
+skills
+
+follow <player>
+unfollow [<player>]		// SYN: split
+
+score
+xp
+level
+
+buy <something>
+sell <somthing> ??
+rent <something>
+steal <object> [[from] <object]
+list <object>		// list things for sale by that object
+
+create_room <name>
+create_exit <dir> <target>
+create_object <parent> <name>
+create_mobile <parent> <name>
+describe <object> <text>
+name <object> <text>
+destroy <object>
+teleport <object>
+list_contents <object>
+
+boards
+post		// interactive?
+boardlist <board>
+read <note>
+
+
+
+- store commands (buy, sell, rent) could be tied to a room perhaps with a check for a certain mobile present
+  (but what if you want to sell stuff as a user??)
+
+- look should be tied to a room to allow for things like room darkness to be taken into account.  Look would
+  then call an action on the object to make it describe itself but this action should not be directly
+  accessable somehow
+
+- perhaps the on_enter/on_exit functions should not be called directly by the add/remove functions but rather
+  by other functions which can then also pass in information on what exit the action is being performed on.
+- exits could instead of targetting a room, target another exit in another room out of which the user comes
+  from like a wormhole kinda but that means you always have the opposite exit name
+
+- physical actions (say, move, hug, etc) should involve the room somehow to do checks on physical restrictions
+- non-physical actions (occ, tell(page), etc) should not involve the room and may involve an external
+  object if more than one other user/object is involved
+
+
+help <topic>
+password		// interactive?
+who [<player>]
+time
+date
+where <player>
+idea <text>		// send idea/feature request to me
+
+
+
+north, south, east, west, up, down
+	On the room which finds the exit with that name and calls the "move" action on the exit.
+	When doing the actual move, the on_enter and on_exit functions would also be called to perform an
+	additional check which catches all join/quit rather than just directed join/quit
+	// TODO how do you know what direction a player came in from or left to when printing join/quit to
+	//	the room?
+
+go|move <direction>
+	On the exit object.  The direction is the exit name and must be found before the action is invoked
+	for it to work.  The action on_exit is called on the room being left and the action on_enter is called
+	on entering the targetted room.  If either one fails, the user will be left in the first room.
+
+"on_enter", "on_exit" (pass exit)
+	Check to see if the player/object can move (is awake and not immobilized) and prints messages to the
+	rooms.
+	this = object the things is being put in/taken out of
+	caller = object doing the moving
+	object = things being moved
+	exit = method of the moving
+
+look|examine [<object>], glance [<object>]
+	On the room to allow for checks for light and check the user for sleeping, etc.  Calls the
+	"is_concious" action on itself and if true, the "look_self" action on the actual object (room if none
+	given) is called to print the actual description.
+
+exits
+	On the room.  Calls "is_concious" on itself and if true, calls the "obvious_desc" action on the exit
+	to get a description (which may be different depending on the player's state.  If the exit is not
+	obvious, the description is not returned.
+
+
+say <text>, emote <text>, think <text>
+	On the room. Checks user for sleeping or a no-talking room and sends text to each user via the "tell?"
+	action.  Ignore lists would be implemented on the player object through the "tell" action.
+
+occ <text>, yell|shout <text>
+	On the player object. Calls an action on a special object identified by name or number that broadcasts
+	to everyone else in the occ channel
+
+mode <mode>		// this could be a way of making all text go to a certain channel
+	On the player.  Mode is a text string.
+
+whisper <player> <text>
+tell <player> <text> ???
+
+hug <object>, kiss <object>
+
+
+open <object>, close <object>, lock <object>, unlock <object>, knock|rap <object>
+	All on the object itself and requires the object to be found first.
+
+get|take <object> [<object>], put|give <object> <object>, drop <object>
+	On object. calls "is_concious" to make sure the user can manipulate the object.  "on_enter" and
+	"on_exit" would be called to see if the object is allowed to be picked up or dropped or removed
+	from the container it's in.  This action itself will check to make sure the user is able to pick it
+	up.
+
+
+push <object>
+pull <object>
+rip <object>
+shove <object> [direction]		// shove someone out of a room or just shove like an emote
+drag <object> [direction]		// drag someone of the room with you (if they are stunned in battle)
+use <object>
+touch <object>
+
+drink <object>, fill <object>, eat <object>, equip|hold|wear <object>, hold <object>
+	On the object.  The "is_concious" action is called on the room to make sure the user can do what is
+	needed.
+
+rest, sleep, wake, sit, stand
+	On the user.  Modifies the user's state
+
+kill <player>, flee
+
+
+cast <spell> <target>
+practice <skill>
+repair <object>
+sacrifice <object>
+skills
+
+follow <player>
+unfollow|split [<player>]
+
+score, xp, level, inventory
+	On the user.  Just displays user information.
+
+buy <something>
+sell <somthing> ??
+rent <something>
+steal <object> [[from] <object]
+list <object>		// list things for sale by that object
+
+create_room <name>
+create_exit <dir> <target>
+create_object <parent> <name>
+create_mobile <parent> <name>
+describe <object> <text>
+name <object> <text>
+destroy <object>
+teleport <object>
+list_contents <object>
+
+boards
+post		// interactive?
+boardlist <board>
+read <note>
+
+
+
+
+
+Items:
+    get <object> [<container>]
+	- are you able to pick up object (encumberance check) <on object>
+	- are you able to get the object out of the container (locked container check) <on container>
+	- (on_enter) adjust player encumbrance <on object>
+
+    drop <object>, put <object> <container>, give <object> <mobile>
+	- can the container (mobile, room) accept the item <on container (mobile, room)>
+	- (on_exit) adjust player encumbrance <on object>
+
+    examine <object>
+	- object prints information
+	- if this object contains other objects, get those objects to print their appearance
+
+    equip, use, (throw, drink, eat)?
+
+
+

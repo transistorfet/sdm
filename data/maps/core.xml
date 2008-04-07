@@ -5,6 +5,7 @@
 		<id>3</id>
 		<parent>1</parent>
 		<property type="string" name="name">thing</property>
+		<property type="string" name="title">something</property>
 		<action type="builtin" name="look_self">builtin_examine</action>
 		<action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
@@ -20,11 +21,13 @@
 		<id>5</id>
 		<parent>4</parent>
 		<property type="string" name="name">mobile</property>
+		<property type="string" name="title">a creature</property>
 	</thing>
 	<thing>
 		<id>6</id>
 		<parent>5</parent>
 		<property type="string" name="name">user</property>
+		<property type="string" name="title">someone</property>
 		<action type="builtin" name="notify">builtin_notify</action>
 		<action type="builtin" name="inv">builtin_inventory</action>
 		<action type="builtin" name="get">builtin_get</action>
@@ -44,6 +47,7 @@
 		<id>7</id>
 		<parent>6</parent>
 		<property type="string" name="name">wizard</property>
+		<property type="string" name="title">a powerful wizard</property>
 		<action type="lua" name="teleport"><![CDATA[
 			local room = get_thing(caller, text);
 			moveto(caller, room);
@@ -57,13 +61,13 @@
 		<id>8</id>
 		<parent>3</parent>
 		<property type="string" name="name">item</property>
-
 	</thing>
 
 	<thing>
 		<id>10</id>
 		<parent>4</parent>
 		<property type="string" name="name">room</property>
+		<property type="string" name="title">someplace</property>
 		<action type="builtin" name="n">builtin_direction</action>
 		<action type="builtin" name="s">builtin_direction</action>
 		<action type="builtin" name="e">builtin_direction</action>
@@ -85,6 +89,7 @@
 		<id>11</id>
 		<parent>3</parent>
 		<property type="string" name="name">exit</property>
+		<property type="string" name="title">an exit</property>
 		<action type="builtin" name="go">builtin_go</action>
 		<action type="builtin" name="move">builtin_go</action>
 		<action type="lua" name="tell_view"><![CDATA[
