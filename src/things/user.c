@@ -157,8 +157,11 @@ void sdm_user_disconnect(struct sdm_user *user)
 	struct sdm_number *number;
 
 	/** Shutdown the input processor */
-	sdm_processor_shutdown(user->proc, user);
-	destroy_sdm_object(SDM_OBJECT(user->proc));
+	if (user->proc) {
+		sdm_processor_shutdown(user->proc, user);
+		destroy_sdm_object(SDM_OBJECT(user->proc));
+		user->proc = NULL;
+	}
 
 	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
 	    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {

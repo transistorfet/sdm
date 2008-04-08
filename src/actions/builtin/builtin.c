@@ -69,7 +69,7 @@ int sdm_builtin_read_entry(struct sdm_builtin *builtin, const char *name, struct
 
 int sdm_builtin_write_data(struct sdm_builtin *builtin, struct sdm_data_file *data)
 {
-	sdm_data_write_raw_string(data, builtin->entry->name);
+	sdm_data_write_string(data, builtin->entry->name);
 	return(0);
 }
 

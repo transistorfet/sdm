@@ -11,16 +11,24 @@
 	  output sent to the announce action?
 	* make the code use the "title" property instead of the "name" property for displaying the name
 	  of an object
+	* change the name of tell_view
 
+	* a thing you really should think about but that is hard to know the effects since you don't really
+	  do too much of it now is calling actions from within other actions without using a string that gets
+	  parsed.  Whatever parsing solution must somehow work with both methods of invocation but we don't
+	  have a clear idea of when the 2 different methods would be used nor how we'll handling limiting
+	  what actions can be called from the command line.  It is possible that we could end up just
+	  having actions that are always called from command line and actions always called from other actions
+	* either way i would very much be in favour of a central parser and argument checker which would
+	  make the commands themselves simpler not having to do all the parsing themselves
+	* can you use regexes to do parsing? or would that be waaaay too slow and painful?
 	* either make the parse_args function handle more arg cases or make the other functions easier
 	  to use.  Make parse_args work properly/nicely with the get/put/drop commands?
 	* clean up/add parsing functions to lua to make it easy to parse the args
 	* i don't like the parsing functions available
-	* i don't like the way commands are parsed particularily the fact tha firstly, you can specify a
+	* i don't like the way commands are parsed particularily the fact tha firstly, you can't specify a
 	  partial name and secondly that things like "get the thing" doesn't work at all (and doesn't even
 	  seem to print a proper error)
-	* can we somehow have a value stored in the object that specifies to add a "the" or "a" or something
-	  before the name to make it proper english without having it in the name or anythnig
 	* make object name matching match part of a word like if the name is "The Thing" somehow match "thing"
 	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
 	  matching of the string given.
@@ -57,6 +65,8 @@
 	* make an "exits" command that prints the list of obvious exits and their descriptions
 	* print the equipment, weapons, armour, etc seperately and/or provide commands that print only
 	  one type
+	* try to remove the direct references to sdm_user the the args of the processor virtual functions
+	* try to make thing not directly reference user and world in it's load/save functions
 
 	* should you add a flag to objects somewhere that specifies that the object should be written to a
 	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?

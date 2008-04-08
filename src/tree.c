@@ -33,7 +33,8 @@ struct sdm_tree *create_sdm_tree(short bitflags, destroy_t destroy)
  */
 void destroy_sdm_tree(struct sdm_tree *env)
 {
-	sdm_tree_destroy_subtree(env, env->root);
+	if (env->root)
+		sdm_tree_destroy_subtree(env, env->root);
 	memory_free(env);
 }
 
@@ -199,7 +200,7 @@ void sdm_tree_traverse_reset(struct sdm_tree *env)
 
 struct sdm_tree_entry *sdm_tree_traverse_next_entry(struct sdm_tree *env)
 {
-	struct sdm_tree_entry *entry;
+	struct sdm_tree_entry *entry, *cur, *prev;
 
 	if (!env->traverse_next)
 		return(NULL);
@@ -209,9 +210,9 @@ struct sdm_tree_entry *sdm_tree_traverse_next_entry(struct sdm_tree *env)
 	else if (env->traverse_next->right)
 		env->traverse_next = env->traverse_next->right;
 	else {
-		for (; env->traverse_next->parent; env->traverse_next = env->traverse_next->parent) {
-			if (env->traverse_next->parent->left == env->traverse_next) {
-				env->traverse_next = env->traverse_next->parent->right;
+		for (prev = env->traverse_next, cur = env->traverse_next->parent; cur; prev = cur, cur = cur->parent) {
+			if ((cur->left == prev) && cur->right) {
+				env->traverse_next = cur->right;
 				return(entry);
 			}
 		}

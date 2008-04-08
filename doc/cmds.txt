@@ -223,15 +223,16 @@ rent <something>
 steal <object> [[from] <object]
 list <object>		// list things for sale by that object
 
-create_room <name>
-create_exit <dir> <target>
-create_object <parent> <name>
-create_mobile <parent> <name>
-describe <object> <text>
-name <object> <text>
-destroy <object>
+@create_room <name>
+@create_exit <name> <target>
+@create <parent> <name>
+@create_mobile <parent> <name>
+@describe <object> <text>
+@name <object> <text>
+@destroy <object>
 teleport <object>
-list_contents <object>
+@list_contents <object>
+@set <propname> <object> <string>
 
 boards
 post		// interactive?

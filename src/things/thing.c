@@ -197,8 +197,8 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 	sdm_tree_traverse_reset(thing->actions);
 	while ((tentry = sdm_tree_traverse_next_entry(thing->actions))) {
 		sdm_data_write_begin_entry(data, "action");
-		sdm_data_write_attrib(data, "name", tentry->name);
 		sdm_data_write_attrib(data, "type", SDM_OBJECT(tentry->data)->type->name);
+		sdm_data_write_attrib(data, "name", tentry->name);
 		sdm_object_write_data(SDM_OBJECT(tentry->data), data);
 		sdm_data_write_end_entry(data);
 	}

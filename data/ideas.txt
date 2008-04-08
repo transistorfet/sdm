@@ -1,4 +1,9 @@
 
+- you could have a clearing or something with a white rabbit that if you follow the rabbit, it takes you to
+  a room that you can't get into any other way that leads down the rabbit hole into wonderland.  In order to
+  get out, (if this is possible) you can "wake up" and you will be teleported back to the clearing where it
+  will announce something like "$name, who you didn't notice sleeping in the tree, wakes up here."
+
 - hp, mana, and movement points (fatigue?)
 
 - the great hall can be called "The Banquet Hall of Gobbles The Great".  Gobbles can be a god most likely
@@ -38,8 +43,8 @@
   stealing
 
 - a secret area that is like a mini town/secret layer for a secret cult society place populated mostly by
-  mobiles and they only way to get in is by abandoning certain rights or privillages and if you violate them,
-  the npcs will kill you or something.
+  mobiles and the only way to get in is by abandoning certain rights or privillages and if you violate them,
+  the npcs will kill you or something.  Basically it's a crazy cult that is hard to infultrate
 
 - societies (secret societies)
 - a world inside of an orb (special orb object that teleports you when you
@@ -55,8 +60,8 @@
   keepers questions where the first 2 are always the person's name and quest while the last is randomly
   selected from an expanded list of obscure questions most of which are hard but occationally you'll get the
   easy, favorite colour question and sometimes you'll get the airspeed velocity question which if you answer
-  with the proper response question, the bridgekeeper is thrown into the gorge of eternal peril instead (but
-  after a certain time, he's regenerated).
+  with the proper response question, the bridgekeeper is thrown into the gorge of eternal peril instead and
+  then anyone can pass without being tested (but after a certain time, he's regenerated).
 
 14/03/2008: ^^^
 
