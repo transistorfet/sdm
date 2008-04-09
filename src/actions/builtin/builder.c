@@ -22,7 +22,7 @@ int sdm_builtin_load_builder(struct sdm_hash *actions)
 {
 	sdm_hash_add(actions, "builtin_create", sdm_builtin_action_create);
 	sdm_hash_add(actions, "builtin_create_room", sdm_builtin_action_create_room);
-	sdm_hash_add(actions, "builtin_create_exit", sdm_builtin_action_create_exit);
+	sdm_hash_add(actions, "builtin_add_exit", sdm_builtin_action_add_exit);
 	sdm_hash_add(actions, "builtin_set", sdm_builtin_action_set);
 	return(0);
 }
@@ -39,18 +39,18 @@ int sdm_builtin_action_create(struct sdm_action *action, struct sdm_thing *thing
 	struct sdm_thing *obj;
 
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_notify(args->caller, args->caller, "<red>Unable to find the given parent.\n");
+		sdm_notify(args->caller, args, "<red>Unable to find the given parent.\n");
 		return(0);
 	}
 
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(args->obj)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, args->obj->id))))) {
-		sdm_notify(args->caller, args->caller, "<red>Error creating object.\n");
+		sdm_notify(args->caller, args, "<red>Error creating object.\n");
 		return(-1);
 	}
 
 	sdm_set_string_property(obj, "name", args->text);
 	sdm_moveto(args->caller, obj, args->caller, NULL);
-	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
+	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
@@ -63,19 +63,19 @@ int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *
 	if (!(room = sdm_interpreter_find_thing(NULL, "/core/room")))
 		return(-1);
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(room)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, room->id))))) {
-		sdm_notify(args->caller, args->caller, "<red>Error creating room.\n");
+		sdm_notify(args->caller, args, "<red>Error creating room.\n");
 		return(-1);
 	}
 
 	sdm_set_string_property(obj, "name", args->text);
 	// TODO this is a dangerous dereference
 	sdm_moveto(args->caller, obj, args->caller->location->location, NULL);
-	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
+	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
 
-int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int sdm_builtin_action_add_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	int i = 0;
 	char buffer[STRING_SIZE];
@@ -84,7 +84,7 @@ int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *
 	if (!(exit = sdm_interpreter_find_thing(NULL, "/core/exit")))
 		return(-1);
 	if (!(obj = SDM_THING(create_sdm_object(SDM_OBJECT(exit)->type, 2, SDM_THING_ARGS(SDM_NEW_ID, exit->id))))) {
-		sdm_notify(args->caller, args->caller, "<red>Error creating exit.\n");
+		sdm_notify(args->caller, args, "<red>Error creating exit.\n");
 		return(-1);
 	}
 
@@ -95,7 +95,7 @@ int sdm_builtin_action_create_exit(struct sdm_action *action, struct sdm_thing *
 
 	// TODO this is a somewhat dangerous dereference
 	sdm_moveto(args->caller, obj, args->caller->location, NULL);
-	sdm_notify(args->caller, args->caller, "<green>Object #%d created successfully.\n", obj->id);
+	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 	return(0);
 }
@@ -107,18 +107,18 @@ int sdm_builtin_action_set(struct sdm_action *action, struct sdm_thing *thing, s
 	struct sdm_string *string;
 
 	if (sdm_interpreter_get_string(args->text, prop, STRING_SIZE, &i) <= 0) {
-		sdm_notify(args->caller, args->caller, "<red>Invalid property.\n");
+		sdm_notify(args->caller, args, "<red>Invalid property.\n");
 		return(-1);
 	}
 	if (!args->obj && !(args->obj = sdm_interpreter_get_thing(args->caller, &args->text[i], &i))) {
-		sdm_notify(args->caller, args->caller, "<red>Object not found.\n");
+		sdm_notify(args->caller, args, "<red>Object not found.\n");
 		return(-1);
 	}
 
 	if (!(string = create_sdm_string(&args->text[i])) || (sdm_thing_set_property(args->obj, prop, SDM_OBJECT(string)) >= 0))
-		sdm_notify(args->caller, args->caller, "<green>Property set successfully.\n");
+		sdm_notify(args->caller, args, "<green>Property set successfully.\n");
 	else
-		sdm_notify(args->caller, args->caller, "<red>Error setting property.\n");
+		sdm_notify(args->caller, args, "<red>Error setting property.\n");
 	return(0);
 }
 

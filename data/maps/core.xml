@@ -54,7 +54,7 @@
 		]]></action>
 		<action type="builtin" name="@create">builtin_create</action>
 		<action type="builtin" name="@create_room">builtin_create_room</action>
-		<action type="builtin" name="@create_exit">builtin_create_exit</action>
+		<action type="builtin" name="@add_exit">builtin_add_exit</action>
 		<action type="builtin" name="@set">builtin_set</action>
 	</thing>
 	<thing>

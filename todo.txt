@@ -1,7 +1,6 @@
 
 	* should you change the position of the caller argument in all of the do_action util functions?
 	* target in action_args should be named something else
-	* add a do_action function that uses the expand_str function
 
 	* make @destroy command
 	* add a @write_world command
@@ -13,6 +12,16 @@
 	  of an object
 	* change the name of tell_view
 
+	* parser format:   command[/modifier] [-flags] [object [preposition indirect-object]
+
+	* the biggest problem with any parsing format will be for the get <object> from <container> command
+	  specifically.  The object must be searched for in the container which is not normally searched
+	  as a location for the direct object.  Either object searching can include an object specified in
+	  the command, or wehre to search can be specified in the action definition, or just a string can
+	  be passed and it will be up to the action code to resolve the string.
+	* one alternative is to send an array of object pointers to the action using an args string or
+	  or something but this means you have allocate everything and then deal with the complexity in
+	  the actions themselves still
 	* a thing you really should think about but that is hard to know the effects since you don't really
 	  do too much of it now is calling actions from within other actions without using a string that gets
 	  parsed.  Whatever parsing solution must somehow work with both methods of invocation but we don't
@@ -54,6 +63,8 @@
 	  sent and if output was sent, print the command prompt?? (complex and lots of border cases)
 	* we'll have to add reference counting of objects at some point
 
+	* perhaps you can add colour theming through the user properties and the expand string notify by
+	  having <$caller.error> and so on type tags in string being printed using notify
 	* make the look_self action tailor the description to the type of object it is describing (ie. don't
 	  list the items a person is carrying)
 	* how do you decide what things to print in the list of contents since you don't want to print all

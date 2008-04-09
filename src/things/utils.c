@@ -44,6 +44,30 @@ int sdm_do_format_action(struct sdm_thing *thing, struct sdm_thing *caller, cons
 	return(sdm_thing_do_action(thing, action, &args));
 }
 
+int sdm_do_expand_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action, struct sdm_action_args *args, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[STRING_SIZE];
+	struct sdm_action_args newargs;
+
+	memset(&newargs, '\0', sizeof(struct sdm_action_args));
+	newargs.caller = caller;
+	newargs.text = buffer;
+
+	va_start(va, fmt);
+	{
+		int i;
+		char tmp[STRING_SIZE];
+
+		if ((i = vsnprintf(tmp, STRING_SIZE - 1, fmt, va)) < 0)
+			return(-1);
+		if (i >= STRING_SIZE - 1)
+			buffer[STRING_SIZE - 1] = '\0';
+		sdm_util_expand_str(buffer, STRING_SIZE - 1, args, tmp);
+	}
+	va_end(va);
+	return(sdm_thing_do_action(thing, action, &newargs));
+}
 
 /**
  * Format a string using the given fmt string and place the resulting

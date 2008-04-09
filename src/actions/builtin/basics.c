@@ -71,7 +71,7 @@ int sdm_builtin_action_announce(struct sdm_action *action, struct sdm_thing *thi
 
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur != args->caller)
-			sdm_notify(cur, args->caller, "%s", args->text);
+			sdm_notify(cur, args, "%s", args->text);
 	}
 	return(0);
 }
@@ -85,17 +85,10 @@ int sdm_builtin_action_announce(struct sdm_action *action, struct sdm_thing *thi
  */
 int sdm_builtin_action_say(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	const char *name;
-
 	if (*args->text == '\0')
 		return(-1);
-	sdm_notify(args->caller, args->caller, "You say \"%s\"\n", args->text);
-	name = sdm_get_string_property(args->caller, "name");
-	sdm_announce(thing, args->caller, "\n%s says \"%s\"\n", name ? name : "something", args->text);
-
-	// TODO this is an example of using the new string expander.  It requires that the default name
-	//	be found (/core/thing.name = "something" and all objs override it)
-	//sdm_announce(thing, args->caller, args, "\n$caller.name says \"$text\"\n");
+	sdm_notify(args->caller, args, "You say \"$text\"\n");
+	sdm_announce(thing, args, "\n$caller.name says \"$text\"\n");
 	return(0);
 }
 
@@ -111,7 +104,7 @@ int sdm_builtin_action_look(struct sdm_action *action, struct sdm_thing *thing, 
 	if (*args->text == '\0')
 		args->obj = thing;
 	else if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_notify(args->caller, args->caller, "You don't see a %s here\n", args->text);
+		sdm_notify(args->caller, args, "You don't see that here.\n");
 		return(0);
 	}
 	sdm_do_nil_action(args->obj, args->caller, "look_self");
@@ -127,36 +120,14 @@ int sdm_builtin_action_look(struct sdm_action *action, struct sdm_thing *thing, 
  */
 int sdm_builtin_action_examine(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	const char *str;
 	struct sdm_thing *cur;
 
-	if ((str = sdm_get_string_property(thing, "name")))
-		sdm_notify(args->caller, args->caller, "<brightyellow>%s</brightyellow>\n", str);
-	if ((str = sdm_get_string_property(thing, "description")))
-		sdm_notify(args->caller, args->caller, "<brightgreen>%s</brightgreen>\n", str);
-/*
-	{
-		char buffer[STRING_SIZE];
-
-		sdm_util_expand_str(buffer, STRING_SIZE, args, "<brightyellow>$thing.name</brightyellow>\n<brightgreen>$thing.description</brightgreen>\n");
-		sdm_do_text_action(args->caller, args->caller, "notify", buffer);
-	}
-*/
-
+	sdm_notify(args->caller, args, "<brightyellow>$thing.name</brightyellow>\n");
+	sdm_notify(args->caller, args, "<brightgreen>$thing.description</brightgreen>\n");
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (cur == args->caller)
 			continue;
 		sdm_do_nil_action(cur, args->caller, "tell_view");
-
-/*
-		if (!(str = sdm_get_string_property(cur, "name")))
-			continue;
-		//if (sdm_thing_is_a(cur, exit)) {
-			// TODO print properly
-		//}
-		//else
-			sdm_do_format_action(args->caller, args->caller, "notify", "<brightblue>You see %s here.</brightblue>\n", str);
-*/
 	}
 	return(0);
 }
@@ -191,7 +162,7 @@ int sdm_builtin_action_direction(struct sdm_action *action, struct sdm_thing *th
 	struct sdm_thing *exit;
 
 	if (!(exit = sdm_interpreter_find_thing(thing, args->action))) {
-		sdm_notify(args->caller, args->caller, "You can't go in that direction.\n");
+		sdm_notify(args->caller, args, "You can't go in that direction.\n");
 		return(0);
 	}
 	sdm_do_nil_action(exit, args->caller, "go");
@@ -204,15 +175,15 @@ int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *th
 	struct sdm_thing *cur;
 
 	if (!thing->objects) {
-		sdm_notify(args->caller, args->caller, "<brightgreen>You aren't carrying anything.\n");
+		sdm_notify(args->caller, args, "<brightgreen>You aren't carrying anything.\n");
 		return(0);
 	}
 
-	sdm_notify(args->caller, args->caller, "<brightgreen>You are carrying:\n");
+	sdm_notify(args->caller, args, "<brightgreen>You are carrying:\n");
 	for (cur = thing->objects; cur; cur = cur->next) {
 		if (!(str = sdm_get_string_property(cur, "name")))
 			continue;
-		sdm_notify(args->caller, args->caller, "<brightblue>    %s.\n", str);
+		sdm_notify(args->caller, args, "<brightblue>    %s.\n", str);
 	}
 	return(0);
 }
@@ -221,11 +192,11 @@ int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, s
 {
 	// TODO this just gets one arg for now because parsing is broken
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_notify(args->caller, args->caller, "You don't see %s here\n", args->text);
+		sdm_notify(args->caller, args, "You don't see that here.\n");
 		return(0);
 	}
 	if (args->obj->location == args->caller) {
-		sdm_notify(args->caller, args->caller, "You already have that.\n");
+		sdm_notify(args->caller, args, "You already have that.\n");
 		return(0);
 	}
 	sdm_moveto(args->caller, args->obj, args->caller, NULL);
@@ -239,7 +210,7 @@ int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, 
 	if (!args->obj && ((*args->text == '\0')
 	    || !(args->obj = sdm_interpreter_get_thing(args->caller, args->text, &i))
 	    || (args->obj->location != args->caller))) {
-		sdm_notify(args->caller, args->caller, "You aren't carrying that.\n");
+		sdm_notify(args->caller, args, "You aren't carrying that.\n");
 		return(-1);
 	}
 	sdm_moveto(args->caller, args->obj, args->caller->location, NULL);
@@ -249,12 +220,10 @@ int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, 
 
 int sdm_builtin_action_room_do_enter(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	const char *name, *exitname, *username;
+	const char *exitname;
 
 	if (!args->obj)
 		return(0);
-	if (!(name = sdm_get_string_property(args->obj, "name")))
-		name = "someone";
 	if (sdm_is_mobile(args->obj)) {
 		/** A mobile is entering the room */
 		if (args->target) {
@@ -262,31 +231,27 @@ int sdm_builtin_action_room_do_enter(struct sdm_action *action, struct sdm_thing
 			if (!(exitname = sdm_get_string_property(args->target, "name"))
 			    || (sdm_get_number_property(args->target, "hidden") > 0))
 				exitname = "somewhere";
-			sdm_announce(thing, args->caller, "<brightgreen>%s enters from %s.\n", name, exitname);
+			sdm_announce(thing, args, "<brightgreen>$obj.name enters from %s.\n", exitname);
 		}
 		else
 			/** The mobile is teleporting here */
-			sdm_announce(thing, args->caller, "<brightgreen>%s appears in a shower of sparks.\n", name);
+			sdm_announce(thing, args, "<brightgreen>$obj.name appears in a shower of sparks.\n");
 		sdm_do_nil_action(thing, args->caller, "look_self");
 	}
 	else {
 		/** Assume the object is being dropped by the caller */
-		if (!(username = sdm_get_string_property(args->caller, "name")))
-			username = "someone";
-		sdm_announce(thing, args->caller, "%s drops %s here.\n", username, name);
-		sdm_notify(args->caller, args->caller, "You drop %s here.\n", name);
+		sdm_announce(thing, args, "$caller.name drops $obj.name here.\n");
+		sdm_notify(args->caller, args, "You drop $obj.name here.\n");
 	}
 	return(0);
 }
 
 int sdm_builtin_action_room_do_leave(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
-	const char *name, *exitname, *username;
+	const char *exitname;
 
 	if (!args->obj)
 		return(0);
-	if (!(name = sdm_get_string_property(args->obj, "name")))
-		name = "someone";
 	if (sdm_is_mobile(args->obj)) {
 		/** A mobile is leaving the room */
 		if (args->target) {
@@ -294,19 +259,19 @@ int sdm_builtin_action_room_do_leave(struct sdm_action *action, struct sdm_thing
 			if (!(exitname = sdm_get_string_property(args->target, "name"))
 			    || (sdm_get_number_property(args->target, "hidden") > 0))
 				exitname = "somewhere";
-			sdm_announce(thing, args->caller, "<brightgreen>%s leaves %s.\n", name, exitname);
+			sdm_announce(thing, args, "<brightgreen>$obj.name leaves %s.\n", exitname);
 		}
 		else
 			/** The mobile is teleporting away */
-			sdm_announce(thing, args->caller, "<brightgreen>%s vanishes in a puff of smoke.\n", name);
+			sdm_announce(thing, args, "<brightgreen>$obj.name vanishes in a puff of smoke.\n");
 	}
 	else {
 		/** Assume the object is being picked up by the caller */
-		if (!(username = sdm_get_string_property(args->caller, "name")))
-			username = "someone";
-		sdm_announce(thing, args->caller, "%s gets %s.\n", username, name);
-		sdm_notify(args->caller, args->caller, "You get %s.\n", name);
+		sdm_announce(thing, args, "$caller.name gets $obj.name.\n");
+		sdm_notify(args->caller, args, "You get $obj.name.\n");
 	}
 	return(0);
 }
+
+
 

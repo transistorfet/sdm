@@ -239,7 +239,7 @@ int sdm_lua_notify(lua_State *state)
 	if (!thing || !caller)
 		res = -1;
 	else
-		res = sdm_notify(thing, caller, "%s", args);
+		res = sdm_do_format_action(thing, caller, "notify", "%s", args);
 	lua_pushnumber(state, res);
 	return(1);
 }
@@ -262,7 +262,7 @@ int sdm_lua_announce(lua_State *state)
 	if (!thing || !caller)
 		res = -1;
 	else
-		res = sdm_announce(thing, caller, "%s", args);
+		res = sdm_do_format_action(thing, caller, "announce", "%s", args);
 	lua_pushnumber(state, res);
 	return(1);
 }

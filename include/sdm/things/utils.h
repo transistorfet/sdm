@@ -58,11 +58,11 @@ static inline int sdm_set_string_property(struct sdm_thing *thing, const char *n
 
 /*** Thing Action Functions ***/
 
-#define sdm_notify(thing, caller, ...)	\
-	( sdm_do_format_action((thing), (caller), "notify", __VA_ARGS__) )
+#define sdm_notify(thing, args, ...)	\
+	( sdm_do_expand_action((thing), (args)->caller, "notify", (args), __VA_ARGS__) )
 
-#define sdm_announce(room, caller, ...)	\
-	( sdm_do_format_action((room), (caller), "announce", __VA_ARGS__) )
+#define sdm_announce(room, args, ...)	\
+	( sdm_do_expand_action((room), (args)->caller, "announce", (args), __VA_ARGS__) )
 
 static inline int sdm_do_nil_action(struct sdm_thing *thing, struct sdm_thing *caller, const char *action)
 {
@@ -142,6 +142,7 @@ static inline int sdm_moveto(struct sdm_thing *caller, struct sdm_thing *thing, 
 
 
 int sdm_do_format_action(struct sdm_thing *, struct sdm_thing *, const char *, const char *, ...);
+int sdm_do_expand_action(struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_action_args *, const char *, ...);
 
 int sdm_util_expand_str(char *, int, struct sdm_action_args *, const char *);
 int sdm_util_expand_reference(char *, int, struct sdm_action_args *, const char *, int *);
