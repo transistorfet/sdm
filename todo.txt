@@ -4,6 +4,7 @@
 
 	* make @destroy command
 	* add a @write_world command
+	* add a @get command for returning the raw property values
 	* add functions to lua for util_expand_ref stuff
 	* should you make the announce action add a "\n" before each output to the user in order to prevent
 	  interrupting the current line being typed instead of putting it in all the places that generate
@@ -63,6 +64,8 @@
 	  sent and if output was sent, print the command prompt?? (complex and lots of border cases)
 	* we'll have to add reference counting of objects at some point
 
+	* add a jump_ok property and maybe even a distant_look_ok or something that allows looking at an
+	  object without being nearby
 	* perhaps you can add colour theming through the user properties and the expand string notify by
 	  having <$caller.error> and so on type tags in string being printed using notify
 	* make the look_self action tailor the description to the type of object it is describing (ie. don't

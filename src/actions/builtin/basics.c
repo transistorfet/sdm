@@ -101,6 +101,8 @@ int sdm_builtin_action_say(struct sdm_action *action, struct sdm_thing *thing, s
  */
 int sdm_builtin_action_look(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
+	// TODO should this be limited to only looking at objects that are near the user (right now, you
+	//	can specify an object number and get the view there without being in that room)
 	if (*args->text == '\0')
 		args->obj = thing;
 	else if (sdm_interpreter_parse_args(args, 1) < 0) {

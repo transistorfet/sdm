@@ -166,6 +166,7 @@ int sdm_util_resolve_reference(char *buffer, int max, struct sdm_action_args *ar
 	struct sdm_thing *thing;
 	struct sdm_object *result;
 
+	max--;
 	if ((name = strchr(ref, '.'))) {
 		i = name - ref;
 		name++;
@@ -176,10 +177,12 @@ int sdm_util_resolve_reference(char *buffer, int max, struct sdm_action_args *ar
 	if (!strncmp(ref, "text", i)) {
 		// TODO we are ignoring the rest of the reference for now ($text.prop <=> $text)
 		strncpy(buffer, args->text, max);
+		buffer[max] = '\0';
 		return(strlen(args->text));
 	}
 	else if (!strncmp(ref, "action", i)) {
 		strncpy(buffer, args->action, max);
+		buffer[max] = '\0';
 		return(strlen(args->action));
 	}
 	else if (!strncmp(ref, "thing", i))
@@ -192,6 +195,7 @@ int sdm_util_resolve_reference(char *buffer, int max, struct sdm_action_args *ar
 		thing = args->target;
 	// TODO allow direct references ( like #123.name and /core/thing.name )
 
+	buffer[0] = '\0';
 	if (!name || !(result = sdm_thing_get_property(thing, name, NULL)))
 		return(0);
 	if (sdm_object_is_a(result, &sdm_string_obj_type)) {
@@ -201,6 +205,7 @@ int sdm_util_resolve_reference(char *buffer, int max, struct sdm_action_args *ar
 	else if (sdm_object_is_a(result, &sdm_number_obj_type)) {
 		if ((i = snprintf(buffer, max, "%f", SDM_NUMBER(result)->num)) < 0)
 			return(0);
+		buffer[i] = '\0';
 		return(i);
 	}
 	return(0);
