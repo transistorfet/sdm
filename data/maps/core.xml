@@ -52,10 +52,10 @@
 			local room = get_thing(caller, text);
 			moveto(caller, room);
 		]]></action>
-		<action type="builtin" name="@create">builtin_create</action>
-		<action type="builtin" name="@create_room">builtin_create_room</action>
-		<action type="builtin" name="@add_exit">builtin_add_exit</action>
-		<action type="builtin" name="@set">builtin_set</action>
+		<action type="builtin" name="@create">builder_create</action>
+		<action type="builtin" name="@create_room">builder_create_room</action>
+		<action type="builtin" name="@add_exit">builder_add_exit</action>
+		<action type="builtin" name="@set">builder_set</action>
 	</thing>
 	<thing>
 		<id>8</id>
@@ -68,17 +68,17 @@
 		<parent>4</parent>
 		<property type="string" name="name">room</property>
 		<property type="string" name="title">someplace</property>
-		<action type="builtin" name="n">builtin_direction</action>
-		<action type="builtin" name="s">builtin_direction</action>
-		<action type="builtin" name="e">builtin_direction</action>
-		<action type="builtin" name="w">builtin_direction</action>
-		<action type="builtin" name="u">builtin_direction</action>
-		<action type="builtin" name="d">builtin_direction</action>
-		<action type="builtin" name="look">builtin_look</action>
-		<action type="builtin" name="say">builtin_say</action>
-		<action type="builtin" name="announce">builtin_announce</action>
-		<action type="builtin" name="do_enter">builtin_room_do_enter</action>
-		<action type="builtin" name="do_leave">builtin_room_do_leave</action>
+		<action type="builtin" name="n">room_direction</action>
+		<action type="builtin" name="s">room_direction</action>
+		<action type="builtin" name="e">room_direction</action>
+		<action type="builtin" name="w">room_direction</action>
+		<action type="builtin" name="u">room_direction</action>
+		<action type="builtin" name="d">room_direction</action>
+		<action type="builtin" name="look">room_look</action>
+		<action type="builtin" name="say">room_say</action>
+		<action type="builtin" name="announce">room_announce</action>
+		<action type="builtin" name="do_enter">room_do_enter</action>
+		<action type="builtin" name="do_leave">room_do_leave</action>
 		<action type="lua" name="emote"><![CDATA[
 			local str = get_property(caller, "name") .. " " .. text .. "\n";
 			notify(caller, str);

@@ -18,6 +18,7 @@ OBJS =	data.o	\
 	actions/builtin/basics.o	\
 	actions/builtin/builder.o	\
 	actions/builtin/builtin.o	\
+	actions/builtin/room.o	\
 	actions/lua/funcs.o	\
 	actions/lua/lua.o	\
 	interfaces/interface.o	\
@@ -115,8 +116,7 @@ actions/builtin/builder.o: actions/builtin/builder.c \
   ../include/sdm/interfaces/interface.h \
   ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/utils.h ../include/sdm/processors/interpreter.h \
-  ../include/sdm/actions/builtin/builder.h
+  ../include/sdm/things/utils.h ../include/sdm/processors/interpreter.h
 
 actions/builtin/builtin.o: actions/builtin/builtin.c \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/globals.h \
@@ -124,8 +124,16 @@ actions/builtin/builtin.o: actions/builtin/builtin.c \
   ../include/sdm/objs/object.h ../include/sdm/actions/action.h \
   ../include/sdm/actions/builtin/basics.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builder.h \
-  ../include/sdm/actions/builtin/builtin.h
+  ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builtin.h
+
+actions/builtin/room.o: actions/builtin/room.c ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/globals.h ../include/sdm/data.h \
+  ../include/sdm/memory.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
+  ../include/sdm/things/user.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/processors/processor.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/utils.h ../include/sdm/processors/interpreter.h
 
 actions/lua/funcs.o: actions/lua/funcs.c ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/globals.h \

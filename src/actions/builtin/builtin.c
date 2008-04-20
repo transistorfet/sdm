@@ -16,7 +16,6 @@
 
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/basics.h>
-#include <sdm/actions/builtin/builder.h>
 #include <sdm/actions/builtin/builtin.h>
 
 struct sdm_object_type sdm_builtin_obj_type = {
@@ -32,6 +31,9 @@ struct sdm_object_type sdm_builtin_obj_type = {
 
 static struct sdm_hash *builtin_actions = NULL;
 
+extern int sdm_builtin_load_builder(struct sdm_hash *);
+extern int sdm_builtin_load_room_actions(struct sdm_hash *);
+
 int init_builtin(void)
 {
 	if (builtin_actions)
@@ -42,6 +44,7 @@ int init_builtin(void)
 		return(-1);
 	sdm_builtin_load_basics(builtin_actions);
 	sdm_builtin_load_builder(builtin_actions);
+	sdm_builtin_load_room_actions(builtin_actions);
 	return(0);
 }
 

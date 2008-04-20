@@ -123,9 +123,6 @@ static inline int sdm_named_is_a(struct sdm_thing *thing, const char *name)
 
 static inline int sdm_moveto(struct sdm_thing *caller, struct sdm_thing *thing, struct sdm_thing *to, struct sdm_thing *via)
 {
-	// TODO move the given thing to the given thing via the given exit.
-	//	if 'via' is null then treat it like a teleportation
-
 	// TODO should this take and pass the caller as a seperate value or at the very least pass
 	//	the object moving as the obj instead of the caller
 	/** If the 'on_exit' action returns an error, then the object should not be removed */

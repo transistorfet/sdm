@@ -16,14 +16,17 @@
 #include <sdm/things/utils.h>
 #include <sdm/processors/interpreter.h>
 
-#include <sdm/actions/builtin/builder.h>
+static int builder_create(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+static int builder_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+static int builder_add_exit(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+static int builder_set(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 
 int sdm_builtin_load_builder(struct sdm_hash *actions)
 {
-	sdm_hash_add(actions, "builtin_create", sdm_builtin_action_create);
-	sdm_hash_add(actions, "builtin_create_room", sdm_builtin_action_create_room);
-	sdm_hash_add(actions, "builtin_add_exit", sdm_builtin_action_add_exit);
-	sdm_hash_add(actions, "builtin_set", sdm_builtin_action_set);
+	sdm_hash_add(actions, "builder_create", builder_create);
+	sdm_hash_add(actions, "builder_create_room", builder_create_room);
+	sdm_hash_add(actions, "builder_add_exit", builder_add_exit);
+	sdm_hash_add(actions, "builder_set", builder_set);
 	return(0);
 }
 
@@ -34,7 +37,7 @@ int sdm_builtin_load_builder(struct sdm_hash *actions)
  *	target:		not used
  *	args:		not used
  */
-int sdm_builtin_action_create(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_create(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 
@@ -55,7 +58,7 @@ int sdm_builtin_action_create(struct sdm_action *action, struct sdm_thing *thing
 	return(0);
 }
 
-int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	struct sdm_thing *obj;
 	struct sdm_thing *room;
@@ -75,7 +78,7 @@ int sdm_builtin_action_create_room(struct sdm_action *action, struct sdm_thing *
 	return(0);
 }
 
-int sdm_builtin_action_add_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_add_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	int i = 0;
 	char buffer[STRING_SIZE];
@@ -100,7 +103,7 @@ int sdm_builtin_action_add_exit(struct sdm_action *action, struct sdm_thing *thi
 	return(0);
 }
 
-int sdm_builtin_action_set(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_set(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	int i = 0;
 	char prop[STRING_SIZE];
