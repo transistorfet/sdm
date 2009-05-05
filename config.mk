@@ -1,11 +1,13 @@
 
+SDRL = ~/sdrl
+
 ARFLAGS = rc
-#CFLAGS = -O3 -Wall -I$(ROOT)/include -L$(ROOT)/lib
-#LDFLAGS = -L$(ROOT)/lib
-#CFLAGS = -pg -O3 -Wall -I$(ROOT)/include
-#LDFLAGS = -pg -L$(ROOT)/lib
-CFLAGS = -g3 -DDEBUG -Wall -I$(ROOT)/include
-LDFLAGS = -L$(ROOT)/lib
+#CFLAGS = -O3 -Wall -I$(SDRL)/include -L$(SDRL)/lib
+#LDFLAGS = -L$(SDRL)/lib
+#CFLAGS = -pg -O3 -Wall -I$(SDRL)/include
+#LDFLAGS = -pg -L$(SDRL)/lib
+CFLAGS = -g3 -DDEBUG -Wall -I$(SDRL)/include
+LDFLAGS = -L$(SDRL)/lib
 
 CC	= gcc
 CXX	= g++
