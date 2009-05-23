@@ -1,4 +1,10 @@
 
+	* make an array object like SDRL
+	* make sdm able to use python and SDRL (and possibly lua) simultaneously but there is no need to
+	  make it capable of supporting more than this.  Making it capable of *only* python would not be
+	  terrible either because that's likely the only language worth using.
+	* python would be like room.action("look") to run an action, room.get("desc") to get property, etc
+
 	* should you change the position of the caller argument in all of the do_action util functions?
 	* target in action_args should be named something else
 
@@ -196,4 +202,17 @@ Features:
 	  be offloaded to the clients to boost server-side performance?)
 	* an irc client interface that is an irc bot that you pm through your irc client with to play the game.
 	* an ssh interface
+
+	* you could have extra data in the xml map file for things like sound, graphics, etc. and have a
+	  special client or clients (sdmc, written in C, maybe a flash/web based interface).  These clients
+	  could connect using a different interface and processor but get into the same core and interact in
+	  the same sort of way.  (interface -> processor -*-> API, where -*-> means many different calls).
+	  The client could maybe have predownloaded the data or could pre-cache it automagically from the
+	  server.  Maybe map data would be on the fly and tiles and sounds are precached.
+	* Each room could have it's own tiled map and going out a room "exit" like a door would be the same
+	  as in the text game, transporting you to another room.  Things would still operate on a room
+	  basis, so fighting and picking up items and stuff doesn't change based on where you are in the
+	  tiled room.  Maybe you might not even be able to move (such as if it's a web-based one).  On the
+	  bottom part of the screen would be a console that prints a lot of the text that you would normally
+	  see.
 
