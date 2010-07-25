@@ -35,19 +35,19 @@ void release_object(void)
 	object_type_list = NULL;
 }
 
-int sdm_object_register_type(struct sdm_object_type *type)
+int moo_object_register_type(MooObjectType *type)
 {
 	return(sdm_hash_add(object_type_list, type->name, type));
 }
 
-int sdm_object_deregister_type(struct sdm_object_type *type)
+int moo_object_deregister_type(MooObjectType *type)
 {
 	return(sdm_hash_remove(object_type_list, type->name));
 }
 
-struct sdm_object_type *sdm_object_find_type(const char *name, struct sdm_object_type *base)
+MooObjectType *moo_object_find_type(const char *name, MooObjectType *base)
 {
-	struct sdm_object_type *type, *cur;
+	MooObjectType *type, *cur;
 
 	if (!(type = sdm_hash_find(object_type_list, name)))
 		return(NULL);
@@ -92,32 +92,32 @@ void destroy_sdm_object(struct sdm_object *obj)
 	memory_free(obj);
 }
 
-int sdm_object_read_file(struct sdm_object *obj, const char *file, const char *type)
+int MooObject::read_file(const char *file, const char *type)
 {
 	int res;
-	struct sdm_data_file *data;
+	MooDataFile *data;
 
 	sdm_status("Reading %s data from file \"%s\".", type, file);
-	if (!(sdm_data_file_exists(file)) || !(data = sdm_data_open(file, SDM_DATA_READ, type)))
+	if (!(sdm_data_file_exists(file)))
 		return(-1);
-	res = sdm_object_read_data(obj, data);
-	sdm_data_close(data);
+	data = new MooDataFile(file, SDM_DATA_READ, type);
+	res = obj->read_data(data);
+	delete data;
 	return(res);
 }
 
-int sdm_object_write_file(struct sdm_object *obj, const char *file, const char *type)
+int MooObject::write_file(const char *file, const char *type)
 {
-	struct sdm_data_file *data;
+	MooDataFile *data;
 
 	sdm_status("Writing %s data to file \"%s\".", type, file);
-	if (!(data = sdm_data_open(file, SDM_DATA_WRITE, type)))
-		return(-1);
-	sdm_object_write_data(obj, data);
-	sdm_data_close(data);
+	data = new MooDataFile(file, SDM_DATA_WRITE, type);
+	data->write_data(data);
+	delete data;
 	return(0);
 }
 
-int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
+int MooObject::read_data(MooDataFile *data)
 {
 	int res;
 	int error = 0;
@@ -125,7 +125,7 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 	struct sdm_object_type *cur;
 
 	do {
-		if (!(type = sdm_data_read_name(data)))
+		if (!(type = data->read_name()))
 			break;
 		for (cur = obj->type; cur; cur = cur->parent) {
 			if (cur->read_entry) {
@@ -139,12 +139,12 @@ int sdm_object_read_data(struct sdm_object *obj, struct sdm_data_file *data)
 					return(0);
 			}
 		}
-	} while (sdm_data_read_next(data));
+	} while (data->read_next());
 	/** We return if the file loaded incorrectly but we don't stop trying to load the file */
 	return(error);
 }
 
-int sdm_object_write_data(struct sdm_object *obj, struct sdm_data_file *data)
+int MooObject::write_data(MooDataFile *data)
 {
 	int i;
 	int error = 0;

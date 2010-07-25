@@ -42,9 +42,9 @@ int init_mud(void)
 	if (init_telnet() < 0)
 		return(-1);
 
-	if (init_sdm_number_type() < 0)
+	if (init_moo_number_type() < 0)
 		return(-1);
-	if (init_sdm_string_type() < 0)
+	if (init_moo_string_type() < 0)
 		return(-1);
 
 	if (init_builtin() < 0)
@@ -72,8 +72,8 @@ void release_mud(void)
 	release_lua();
 	release_builtin();
 
-	release_sdm_string_type();
-	release_sdm_number_type();
+	release_moo_string_type();
+	release_moo_number_type();
 
 	release_telnet();
 	release_interface();

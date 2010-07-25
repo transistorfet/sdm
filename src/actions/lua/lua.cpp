@@ -24,6 +24,21 @@
 #include <sdm/actions/lua/lua.h>
 #include <sdm/actions/lua/funcs.h>
 
+
+LuaAction::LuaAction()
+{
+
+
+}
+
+int LuaAction::do_action(Thing *thing, Args *args)
+{
+
+}
+
+
+
+
 struct sdm_object_type sdm_lua_obj_type = {
 	&sdm_action_obj_type,
 	"lua",
@@ -93,6 +108,12 @@ int sdm_lua_write_data(struct sdm_lua *action, struct sdm_data_file *data)
 int sdm_lua_action(struct sdm_lua *action, struct sdm_thing *thing, struct sdm_action_args *args)
 {
 	const char *error;
+
+/*
+ * You could maybe make every object a table with the meta table set to a lua table for 'thing' and the id set
+ * to the thing's id.  That wont make calling actions easier though...  But at least you could call the thing
+ * objects through the type =/
+ */
 
 	lua_pushnumber(global_state, args->caller ? args->caller->id : -1);
 	lua_setglobal(global_state, "caller");

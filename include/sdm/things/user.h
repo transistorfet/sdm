@@ -28,7 +28,7 @@ struct sdm_user {
 
 #define SDM_USER_ARGS(name, id, parent)		(name), SDM_THING_ARGS((id), (parent))
 
-extern struct sdm_object_type sdm_user_obj_type;
+extern MooObjectType moo_user_obj_type;
 
 int init_user(void);
 void release_user(void);

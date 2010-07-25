@@ -1,5 +1,5 @@
 /*
- * Object Name:	user.c
+ * Object Name:	user.cpp
  * Description:	User Object
  */
 
@@ -25,15 +25,10 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/user.h>
 
-struct sdm_object_type sdm_user_obj_type = {
+MooObjectType moo_user_obj_type = {
 	&sdm_thing_obj_type,
 	"user",
-	sizeof(struct sdm_user),
-	NULL,
-	(sdm_object_init_t) sdm_user_init,
-	(sdm_object_release_t) sdm_user_release,
-	(sdm_object_read_entry_t) sdm_user_read_entry,
-	(sdm_object_write_data_t) sdm_user_write_data
+	(moo_type_create_t) moo_user_create,
 };
 
 static struct sdm_hash *user_list = NULL;

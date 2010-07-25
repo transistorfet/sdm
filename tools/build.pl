@@ -185,12 +185,13 @@ sub get_source_files {
 
 	# TODO we assume we only get dir sources for now and just add all .c files
 	my @files = ();
+	my $exts = "\." . join("|\.", keys(%object_mappings));
 	foreach my $source (@sources) {
 		$source = make_filename($base, $source);
 		if (-d $source) {
 			opendir(DIR, $source) or (print "Unable to open directory $source\n" and exit(-1));
 			while (my $file = readdir(DIR)) {
-				if ($file =~ /\.c$/) {
+				if ($file =~ /($exts)$/) {
 					$file = "$source/$file";
 					$file =~ s/^\Q$base\/\E//;
 					$file =~ s/^\.\///;

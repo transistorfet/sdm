@@ -29,24 +29,17 @@ struct sdm_interface_list {
 
 static struct sdm_interface_list interface_list;
 
-struct sdm_interface_type sdm_interface_obj_type = { {
+MooObjectType moo_interface_obj_type = {
 	NULL,
 	"interface",
-	sizeof(struct sdm_interface),
-	NULL,
-	(sdm_object_init_t) sdm_interface_init,
-	(sdm_object_release_t) sdm_interface_release,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL	},
-	(sdm_int_read_t) NULL,
-	(sdm_int_write_t) NULL
+	(sdm_object_init_t) sdm_interface_init
 };
 
 int init_interface(void)
 {
 	interface_list.size = INTERFACE_INIT_SIZE;
 	interface_list.next_space = 0;
-	if (!(interface_list.table = (struct sdm_interface **) memory_alloc(interface_list.size * sizeof(struct sdm_interface *))))
+	if (!(interface_list.table = (struct sdm_interface **) memory_alloc(interface_list.size * sizeof(MooInterface *))))
 		return(-1);
 	memset(interface_list.table, '\0', interface_list.size * sizeof(struct sdm_interface *));
 	return(0);
@@ -61,6 +54,11 @@ void release_interface(void)
 			destroy_sdm_object(SDM_OBJECT(interface_list.table[i]));
 	}
 	memory_free(interface_list.table);
+}
+
+MooObject *moo_interface_create(void)
+{
+	return(new MooInterface());
 }
 
 int sdm_interface_init(struct sdm_interface *inter, int nargs, va_list va)
@@ -110,32 +108,12 @@ void sdm_interface_release(struct sdm_interface *inter)
 
 
 /**
- * Sets the callback that occurs under the given condition for the given
- * descriptior.
- */
-void sdm_interface_set_callback(struct sdm_interface *inter, int condition, callback_t func, void *ptr)
-{
-	inter->condition = condition;
-	inter->callback.func = func;
-	inter->callback.ptr = ptr;
-}
-
-/**
- * Returns the callback for the given interface.
- */
-struct callback_s sdm_interface_get_callback(struct sdm_interface *inter)
-{
-	return(inter->callback);
-}
-
-
-/**
  * Check for activity on all interfaces for up to a maximum of t seconds.
  * If new activity is available, the appropriate callback is called using the
  * interface as the parameter.  The number of interfaces that were serviced is
  * returned or -1 if an error occurred.
  */
-int sdm_interface_select(float t)
+int moo_interface_select(float t)
 {
 	int i;
 	int max, ret = 0;

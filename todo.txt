@@ -1,9 +1,27 @@
 
+    New Focus:
+	* make irc client-like interface, c/w full line editing, status bar stuff maybe, smart autocomplete, and
+	  make it so that what you type is said directly, but a special command prefix means it's a command (/get)
+	* make it able/focus on chatting as if it's just like an irc channel like #philosophy, but it has objects which
+	  the chatters can interact with and with eachother with actual effect, play games, etc
+	* possibly make an IRC-like protocol (maybe even IRC protocol itself so that you can use irc clients to connect)
+	* make it possible, one way or another, for bots (external programs) to connect and act like players (npcs)
+	* focus on the objects and object interaction rather than rooms, maps, or a story
+	* include a fully functional editor/construction kit, which could even save the word automatically
+
+	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
+	  MooObjects.  I'm not entirely sure of the point of this and so on.
+	* make processes a bit more like generic processes/tasks/etc
+
+
+
+
 	* make an array object like SDRL
 	* make sdm able to use python and SDRL (and possibly lua) simultaneously but there is no need to
 	  make it capable of supporting more than this.  Making it capable of *only* python would not be
 	  terrible either because that's likely the only language worth using.
 	* python would be like room.action("look") to run an action, room.get("desc") to get property, etc
+	* the downside of python is it's manditory whitespace; perl would be nicer
 
 	* should you change the position of the caller argument in all of the do_action util functions?
 	* target in action_args should be named something else
@@ -189,6 +207,8 @@ Gerenal:
 
 Features:
 
+	* make the server multithreaded.  Perhaps "processors" (input handlers) could be threads.  You'd
+	  need some kind of semaphore lock on the objects so that calling an action locks the object
 	* multiple scripting languages: sdrl, lua
 	* multiserver somehow (loadbalancing) (perhaps using xml-rpc or something)
 	* an irc server interface (such that you enter a channel #world or something and the server

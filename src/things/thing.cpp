@@ -9,6 +9,7 @@
 #include <sdm/tree.h>
 #include <sdm/data.h>
 #include <sdm/misc.h>
+#include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/things/user.h>
@@ -25,113 +26,114 @@
 /** This is to prevent us from making giant table accidentally */
 #define THING_MAX_TABLE_SIZE			65536
 
-struct sdm_object_type sdm_thing_obj_type = {
+MooObjectType moo_thing_obj_type = {
 	NULL,
 	"thing",
-	sizeof(struct sdm_thing),
-	NULL,
-	(sdm_object_init_t) sdm_thing_init,
-	(sdm_object_release_t) sdm_thing_release,
-	(sdm_object_read_entry_t) sdm_thing_read_entry,
-	(sdm_object_write_data_t) sdm_thing_write_data
+	(moo_type_create_t) moo_thing_create
 };
 
-static sdm_id_t next_id = 1;
-int sdm_thing_table_size = 0;
-struct sdm_thing **sdm_thing_table = NULL;
+static moo_id_t next_id = 1;
+int moo_thing_table_size = 0;
+//MooThing **moo_thing_table = NULL;
+MooArray<MooThing> *moo_thing_table = NULL;
 
 int init_thing(void)
 {
-	if (sdm_thing_table)
+	if (moo_thing_table)
 		return(1);
-	if (sdm_object_register_type(&sdm_thing_obj_type) < 0)
+	if (moo_object_register_type(&moo_thing_obj_type) < 0)
 		return(-1);
-	if (!(sdm_thing_table = (struct sdm_thing **) memory_alloc(sizeof(struct sdm_thing *) * THING_TABLE_INIT_SIZE)))
+	// TODO convert this to new/delet
+	if (!(moo_thing_table = (MooThing **) memory_alloc(sizeof(MooThing *) * THING_TABLE_INIT_SIZE)))
 		return(-1);
-	sdm_thing_table_size = THING_TABLE_INIT_SIZE;
-	memset(sdm_thing_table, '\0', sizeof(struct sdm_thing *) * sdm_thing_table_size);
+	moo_thing_table_size = THING_TABLE_INIT_SIZE;
+	memset(moo_thing_table, '\0', sizeof(MooThing *) * moo_thing_table_size);
 	return(0);
 }
 
 void release_thing(void)
 {
 	// TODO free all things in the table???
-	if (sdm_thing_table)
-		memory_free(sdm_thing_table);
-	sdm_object_deregister_type(&sdm_thing_obj_type);
+	if (moo_thing_table)
+		memory_free(moo_thing_table);
+	sdm_object_deregister_type(&moo_thing_obj_type);
 }
 
-int sdm_thing_init(struct sdm_thing *thing, int nargs, va_list va)
+MooObject *moo_thing_create(void)
 {
-	if (!(thing->properties = create_sdm_hash(0, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
-		return(-1);
+	return(new MooThing());
+}
+
+MooThing::MooThing()
+{
+	MooThing::MooThing(-1, 0);
+}
+
+MooThing::MooThing(moo_id_t id, moo_id_t parent)
+{
+	if (!(this->properties = create_sdm_hash(0, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
+		throw -1;
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(thing->actions = create_sdm_tree(0, (destroy_t) destroy_sdm_object)))
-		return(-1);
+	if (!(this->actions = create_sdm_tree(0, (destroy_t) destroy_sdm_object)))
+		throw -1;
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
 	    If the id = SDM_NEW_ID then assign the next available id */
-	if (nargs < 2) {
-		thing->id = -1;
-		thing->parent = 0;
-	}
-	else {
-		thing->id = va_arg(va, int);
-		if (thing->id >= 0)
-			sdm_thing_assign_id(thing, thing->id);
-		else if (thing->id == SDM_NEW_ID)
-			sdm_thing_assign_new_id(thing);
-		thing->parent = va_arg(va, sdm_id_t);
-	}
+	this->id = id;
+	if (this->id >= 0)
+		moo_thing_assign_id(this, this->id);
+	else if (this->id == SDM_NEW_ID)
+		moo_thing_assign_new_id(this);
+	this->parent = parent;
 	return(0);
 }
 
-void sdm_thing_release(struct sdm_thing *thing)
+MooThing::~MooThing()
 {
-	struct sdm_thing *cur, *tmp;
+	MooThing *cur, *tmp;
 
-	if (thing->location)
-		sdm_thing_remove(thing->location, thing);
-	if (thing->properties)
-		destroy_sdm_hash(thing->properties);
-	if (thing->actions)
-		destroy_sdm_tree(thing->actions);
-	if ((thing->id >= 0) && (thing->id < sdm_thing_table_size))
-		sdm_thing_table[thing->id] = NULL;
+	if (this->location)
+		this->location->remove(this);
+	if (this->properties)
+		destroy_sdm_hash(this->properties);
+	if (this->actions)
+		destroy_sdm_tree(this->actions);
+	if ((this->id >= 0) && (this->id < moo_thing_table_size))
+		moo_thing_table[this->id] = NULL;
 
-	for (cur = thing->objects; cur; cur = tmp) {
+	for (cur = this->objects; cur; cur = tmp) {
 		tmp = cur->next;
-		destroy_sdm_object(SDM_OBJECT(cur));
+		delete cur;
 	}
 }
 
-int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_data_file *data)
+int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
-	sdm_id_t id;
+	moo_id_t id;
 	char buffer[STRING_SIZE];
-	struct sdm_object *obj = NULL;
-	struct sdm_object_type *objtype;
+	MooObject *obj = NULL;
+	MooObjectType *objtype;
 
 	if (!strcmp(type, "property")) {
-		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
-		if (!(objtype = sdm_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
+		data->read_attrib("type", buffer, STRING_SIZE);
+		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
 			return(-1);
-		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+		data->read_attrib("name", buffer, STRING_SIZE);
 		if (!(obj = create_sdm_object(objtype, 0)))
 			return(-1);
-		sdm_data_read_children(data);
-		res = sdm_object_read_data(obj, data);
-		sdm_data_read_parent(data);
+		data->read_children();
+		res = obj->read_data(data);
+		data->read_parent();
 		if ((res < 0) || (sdm_thing_set_property(thing, buffer, obj) < 0)) {
 			destroy_sdm_object(obj);
 			return(-1);
 		}
 	}
 	else if (!strcmp(type, "thing")) {
-		if (!(obj = create_sdm_object(&sdm_thing_obj_type, 2, SDM_THING_ARGS(SDM_NO_ID, 0))))
+		if (!(obj = create_sdm_object(&moo_thing_obj_type, 2, SDM_THING_ARGS(SDM_NO_ID, 0))))
 			return(-1);
 		sdm_data_read_children(data);
 		sdm_object_read_data(obj, data);
@@ -155,11 +157,11 @@ int sdm_thing_read_entry(struct sdm_thing *thing, const char *type, struct sdm_d
 	}
 	else if (!strcmp(type, "id")) {
 		id = sdm_data_read_integer_entry(data);
-		sdm_thing_assign_id(thing, id);
+		moo_thing_assign_id(thing, id);
 	}
 	else if (!strcmp(type, "location")) {
 		id = sdm_data_read_integer_entry(data);
-		if ((obj = SDM_OBJECT(sdm_thing_lookup_id(id))))
+		if ((obj = SDM_OBJECT(moo_thing_lookup_id(id))))
 			sdm_thing_add(SDM_THING(obj), thing);
 	}
 	else if (!strcmp(type, "parent")) {
@@ -222,25 +224,25 @@ int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
 }
 
 
-int sdm_thing_set_property(struct sdm_thing *thing, const char *name, struct sdm_object *obj)
+int MooThing::set_property(const char *name, MooObject *obj)
 {
 	if (!name || (*name == '\0'))
 		return(-1);
 	/** If the object is NULL, remove the entry from the table */
 	if (!obj)
-		return(sdm_hash_remove(thing->properties, name));
-	if (sdm_hash_find(thing->properties, name))
-		return(sdm_hash_replace(thing->properties, name, obj));
-	return(sdm_hash_add(thing->properties, name, obj));
+		return(sdm_hash_remove(this->properties, name));
+	if (sdm_hash_find(this->properties, name))
+		return(sdm_hash_replace(this->properties, name, obj));
+	return(sdm_hash_add(this->properties, name, obj));
 }
 
-struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *name, struct sdm_object_type *type)
+MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 {
-	struct sdm_thing *cur;
-	struct sdm_object *obj;
+	MooThing *cur;
+	MooObject *obj;
 
-	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
-		if (!(obj = sdm_hash_find(thing->properties, name)))
+	for (cur = this; cur; cur = moo_thing_lookup_id(cur->parent)) {
+		if (!(obj = sdm_hash_find(this->properties, name)))
 			continue;
 		if (!type || sdm_object_is_a(obj, type))
 			return(obj);
@@ -249,83 +251,83 @@ struct sdm_object *sdm_thing_get_property(struct sdm_thing *thing, const char *n
 }
 
 
-int sdm_thing_set_action(struct sdm_thing *thing, const char *name, struct sdm_action *action)
+int MooThing::set_action(const char *name, MooAction *action)
 {
 	if (!name || (*name == '\0'))
 		return(-1);
 	/** If the action is NULL, remove the entry from the table */
 	if (!action)
-		return(sdm_tree_remove(thing->actions, name));
-	if (sdm_tree_find(thing->actions, name))
-		return(sdm_tree_replace(thing->actions, name, action));
-	return(sdm_tree_add(thing->actions, name, action));
+		return(sdm_tree_remove(this->actions, name));
+	if (sdm_tree_find(this->actions, name))
+		return(sdm_tree_replace(this->actions, name, action));
+	return(sdm_tree_add(this->actions, name, action));
 }
 
-int sdm_thing_do_action(struct sdm_thing *thing, const char *name, struct sdm_action_args *args)
+int MooThing::do_action(const char *name, MooArgs *args)
 {
-	struct sdm_thing *cur;
-	struct sdm_action *action;
+	MooThing *cur;
+	MooAction *action;
 
 	if (!args->thing)
-		args->thing = thing;
+		args->thing = this;
 	args->action = name;
 	args->result = NULL;
-	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
+	for (cur = this; cur; cur = moo_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_tree_find(cur->actions, name)))
-			return(action->func(action, thing, args));
+			return(action->do_action(this, args));
 	}
 	return(1);
 }
 
-int sdm_thing_do_abbreved_action(struct sdm_thing *thing, const char *name, struct sdm_action_args *args)
+int MooThing::do_abbreved_action(const char *name, MooActionArgs *args)
 {
-	struct sdm_thing *cur;
-	struct sdm_action *action;
+	MooThing *cur;
+	MooAction *action;
 
 	if (!args->thing)
-		args->thing = thing;
+		args->thing = this;
 	args->action = name;
 	args->result = NULL;
-	for (cur = thing; cur; cur = sdm_thing_lookup_id(cur->parent)) {
+	for (cur = this; cur; cur = moo_thing_lookup_id(cur->parent)) {
 		if ((action = sdm_tree_find_partial(cur->actions, name)))
-			return(action->func(action, thing, args));
+			return(action->do_action(this, args));
 	}
 	return(1);
 }
 
 
-int sdm_thing_add(struct sdm_thing *thing, struct sdm_thing *obj)
+int MooThing::add(MooThing *obj)
 {
-	if (obj->location == thing)
+	if (obj->location == this)
 		return(0);
 	/** If this object is in another object and it can't be removed, then we don't add it */
-	if (obj->location && sdm_thing_remove(obj->location, obj))
+	if (obj->location && obj->location->remove(obj))
 		return(-1);
-	obj->location = thing;
+	obj->location = this;
 	obj->next = NULL;
-	if (thing->end_objects) {
-		thing->end_objects->next = obj;
-		thing->end_objects = obj;
+	if (this->end_objects) {
+		this->end_objects->next = obj;
+		this->end_objects = obj;
 	}
 	else {
-		thing->objects = obj;
-		thing->end_objects = obj;
+		this->objects = obj;
+		this->end_objects = obj;
 	}
 	return(0);
 }
 
-int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
+int MooThing::remove(MooThing *obj)
 {
-	struct sdm_thing *cur, *prev;
+	MooThing *cur, *prev;
 
-	for (prev = NULL, cur = thing->objects; cur; prev = cur, cur = cur->next) {
+	for (prev = NULL, cur = this->objects; cur; prev = cur, cur = cur->next) {
 		if (cur == obj) {
 			if (prev)
 				prev->next = cur->next;
 			else
-				thing->objects = cur->next;
-			if (thing->end_objects == cur)
-				thing->end_objects = prev;
+				this->objects = cur->next;
+			if (this->end_objects == cur)
+				this->end_objects = prev;
 			cur->location = NULL;
 			return(0);
 		}
@@ -334,14 +336,15 @@ int sdm_thing_remove(struct sdm_thing *thing, struct sdm_thing *obj)
 }
 
 
-int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
+
+int moo_thing_assign_id(MooThing *thing, moo_id_t id)
 {
-	struct sdm_thing **tmp;
+	MooThing **tmp;
 
 	/** If the thing already has a valid id, remove it's existing entry in the table.  If an error
 	    happens in this function, the thing's id will be -1 in case the caller doesn't check */
-	if ((thing->id > 0) && (thing->id < sdm_thing_table_size)) {
-		sdm_thing_table[thing->id] = NULL;
+	if ((thing->id > 0) && (thing->id < moo_thing_table_size)) {
+		moo_thing_table[thing->id] = NULL;
 		thing->id = -1;
 	}
 
@@ -350,23 +353,24 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 	if ((id < 0) || (id >= THING_MAX_TABLE_SIZE))
 		return(-1);
 
+	// TODO convert this to use new/delete?
 	/** Increase the size of the table if id is too big to have a spot in the table */
-	if (id >= sdm_thing_table_size) {
-		if (!(tmp = (struct sdm_thing **) memory_realloc(sdm_thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
+	if (id >= moo_thing_table_size) {
+		if (!(tmp = (MooThing **) memory_realloc(moo_thing_table, sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE))))
 			return(-1);
-		sdm_thing_table = tmp;
-		memset(sdm_thing_table + sdm_thing_table_size, '\0', sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE - sdm_thing_table_size));
-		sdm_thing_table_size = id + THING_TABLE_EXTRA_SIZE;
+		moo_thing_table = tmp;
+		memset(moo_thing_table + moo_thing_table_size, '\0', sizeof(struct sdm_thing *) * (id + THING_TABLE_EXTRA_SIZE - moo_thing_table_size));
+		moo_thing_table_size = id + THING_TABLE_EXTRA_SIZE;
 	}
 
 	// TODO should we destroy the object or prevent the new object from taking that ID?
-	//if (sdm_thing_table[id])
-	//	destroy_sdm_object(SDM_OBJECT(sdm_thing_table[id]));
+	//if (moo_thing_table[id])
+	//	destroy_sdm_object(SDM_OBJECT(moo_thing_table[id]));
 	/** If there is already a thing with the same id, then don't make the assignmet */
-	if (sdm_thing_table[id])
+	if (moo_thing_table[id])
 		return(-1);
 	thing->id = id;
-	sdm_thing_table[id] = thing;
+	moo_thing_table[id] = thing;
 
 	// TODO for now we always make the next id the largest unassign id
 	if (next_id <= id)
@@ -374,12 +378,12 @@ int sdm_thing_assign_id(struct sdm_thing *thing, sdm_id_t id)
 	return(0);
 }
 
-int sdm_thing_assign_new_id(struct sdm_thing *thing)
+int moo_thing_assign_new_id(struct sdm_thing *thing)
 {
 	// TODO for now we will not assign the ids of holes in the table
 	/** Keep in mind that as it stands, the id of the parent of an object must be smaller than the id
 	    of that object itself or the loading of the object will fail. */
-	return(sdm_thing_assign_id(thing, next_id++));
+	return(moo_thing_assign_id(thing, next_id++));
 }
 
 

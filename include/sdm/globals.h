@@ -18,14 +18,16 @@ typedef void (*destroy_t)(void *);
 typedef int (*compare_t)(void *, void *);
 typedef int (*callback_t)(void *, void *);
 
-struct callback_s {
+// TODO This should be completely changed to be more intergrated and OOPy, but for now, this makes the conversion more straightforward
+class MooCallback {
+    protected:
 	callback_t func;
 	void *ptr;
-};
+    public:
+	MooCallback(callback_t func, void *ptr) { this->func = func; this->ptr = ptr; }
 
-#define EXECUTE_CALLBACK(callback, arg)	\
-	if ((callback).func)			\
-		((callback).func)((callback).ptr, arg)
+	int call(void *arg) { if (this->func) return(this->func(this->ptr, arg)); }
+};
 
 #define DECLARE_UNUSED(arg)	((void) arg)
 

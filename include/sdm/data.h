@@ -3,16 +3,61 @@
  * Description:	Data Reader/Writer Header
  */
 
-#ifndef _SDM_DATA_H
-#define _SDM_DATA_H
+#ifndef _MOO_DATA_H
+#define _MOO_DATA_H
 
 #include <sdm/globals.h>
+#include <sdm/misc.h>
+#include <libxml/tree.h>
+#include <libxml/xmlwriter.h>
 
-#define SDM_DATA_READ		0x01
-#define SDM_DATA_WRITE		0x02
-#define SDM_DATA_READ_WRITE	0x03
+#define MOO_DATA_READ		0x01
+#define MOO_DATA_WRITE		0x02
+#define MOO_DATA_READ_WRITE	0x03
 
-struct sdm_data_file;
+class MooDataFile {
+    private:
+	string_t filename;
+	xmlDoc *doc;
+	xmlNode *root;
+	xmlNode *current;
+	xmlTextWriterPtr writer;
+	xmlBufferPtr buffer;
+
+    public:
+	MooDataFile(const char *file, int mode, const char *rootname);
+	~MooDataFile();
+
+	int read_rewind();
+	int read_next();
+	int read_children();
+	int read_parent();
+
+	const char *read_name();
+	int read_attrib(const char *name, char *buffer, int max);
+	long int read_integer();
+	double read_float();
+	int read_string(char *buffer, int max);
+	int read_raw_string(char *buffer, int max);
+
+	long int read_integer_entry();
+	double read_float_entry();
+	int read_string_entry(char *buffer, int max);
+	int read_raw_string_entry(char *buffer, int max);
+
+	int write_begin_entry(const char *name);
+	int write_attrib(const char *name, const char *value);
+	int write_integer(long int value);
+	int write_float(double value);
+	int write_string(const char *value);
+	int write_raw_string(const char *value);
+	int write_end_entry();
+	int write_current();
+
+	int write_integer_entry(const char *name, long int value);
+	int write_float_entry(const char *name, double value);
+	int write_string_entry(const char *name, const char *value);
+};
 
 int init_data(void);
 void release_data(void);
@@ -22,36 +67,6 @@ int sdm_data_file_exists(const char *);
 
 struct sdm_data_file *sdm_data_open(const char *, int, const char *);
 void sdm_data_close(struct sdm_data_file *);
-
-int sdm_data_read_rewind(struct sdm_data_file *);
-int sdm_data_read_next(struct sdm_data_file *);
-int sdm_data_read_children(struct sdm_data_file *);
-int sdm_data_read_parent(struct sdm_data_file *);
-
-const char *sdm_data_read_name(struct sdm_data_file *);
-int sdm_data_read_attrib(struct sdm_data_file *, const char *, char *, int);
-long int sdm_data_read_integer(struct sdm_data_file *);
-double sdm_data_read_float(struct sdm_data_file *);
-int sdm_data_read_string(struct sdm_data_file *, char *, int);
-int sdm_data_read_raw_string(struct sdm_data_file *, char *, int);
-
-long int sdm_data_read_integer_entry(struct sdm_data_file *);
-double sdm_data_read_float_entry(struct sdm_data_file *);
-int sdm_data_read_string_entry(struct sdm_data_file *, char *, int);
-int sdm_data_read_raw_string_entry(struct sdm_data_file *, char *, int);
-
-int sdm_data_write_begin_entry(struct sdm_data_file *, const char *);
-int sdm_data_write_attrib(struct sdm_data_file *, const char *, const char *);
-int sdm_data_write_integer(struct sdm_data_file *, long int);
-int sdm_data_write_float(struct sdm_data_file *, double);
-int sdm_data_write_string(struct sdm_data_file *, const char *);
-int sdm_data_write_raw_string(struct sdm_data_file *, const char *);
-int sdm_data_write_end_entry(struct sdm_data_file *);
-int sdm_data_write_current(struct sdm_data_file *);
-
-int sdm_data_write_integer_entry(struct sdm_data_file *, const char *, long int);
-int sdm_data_write_float_entry(struct sdm_data_file *, const char *, double);
-int sdm_data_write_string_entry(struct sdm_data_file *, const char *, const char *);
 
 #endif
 

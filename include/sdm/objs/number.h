@@ -10,27 +10,23 @@
 
 #include <sdm/objs/object.h>
 
-typedef double sdm_number_t;
+typedef double moo_number_t;
 
-#define SDM_NUMBER(ptr)		( (struct sdm_number *) (ptr) )
+class MooNumber : public MooObject {
+    public:
+	moo_number_t num;
 
-struct sdm_number {
-	struct sdm_object object;
-	sdm_number_t num;
+	MooNumber(moo_number_t num) { this->num = num; }
+
+	virtual int read_entry(const char *type, MooDataFile *);
+	virtual int write_data(MooDataFile *);
 };
 
-extern struct sdm_object_type sdm_number_obj_type;
+extern MooObjectType moo_number_obj_type;
 
-#define create_sdm_number(num)	\
-	( SDM_NUMBER(create_sdm_object(&sdm_number_obj_type, 1, (num))) )
-
-int init_sdm_number_type(void);
-void release_sdm_number_type(void);
-
-int sdm_number_init(struct sdm_number *, int, va_list);
-void sdm_number_release(struct sdm_number *);
-int sdm_number_read_entry(struct sdm_number *, const char *, struct sdm_data_file *);
-int sdm_number_write_data(struct sdm_number *, struct sdm_data_file *);
+int init_moo_number_type(void);
+void release_moo_number_type(void);
+MooObject *moo_number_create(void);
 
 #endif
 

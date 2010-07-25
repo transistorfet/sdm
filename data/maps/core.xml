@@ -1,101 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <world>
-	<id>2</id>
-	<property type="string" name="name">core</property>
-	<thing>
-		<id>3</id>
-		<parent>1</parent>
-		<property type="string" name="name">thing</property>
-		<property type="string" name="title">something</property>
-		<action type="builtin" name="look_self">builtin_examine</action>
-		<action type="lua" name="tell_view"><![CDATA[
+ <id>2</id>
+ <parent>0</parent>
+ <location>1</location>
+ <property type="string" name="name">core</property>
+ <thing>
+  <id>3</id>
+  <parent>1</parent>
+  <location>2</location>
+  <property type="string" name="title">something</property>
+  <property type="string" name="name">thing</property>
+  <!-- <action type="builtin" name="look_self">builtin_examine</action> -->
+
+  <action type="lua" name="look_self">core:look_self</action>  <!-- Or could you even make this not be required -->
+  <action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
 			if name then notify(caller, "<brightblue>You see " .. name .. " here.\n"); end
 		]]></action>
-	</thing>
-	<thing>
-		<id>4</id>
-		<parent>3</parent>
-		<property type="string" name="name">container</property>
-	</thing>
-	<thing>
-		<id>5</id>
-		<parent>4</parent>
-		<property type="string" name="name">mobile</property>
-		<property type="string" name="title">a creature</property>
-	</thing>
-	<thing>
-		<id>6</id>
-		<parent>5</parent>
-		<property type="string" name="name">user</property>
-		<property type="string" name="title">someone</property>
-		<action type="builtin" name="notify">builtin_notify</action>
-		<action type="builtin" name="inv">builtin_inventory</action>
-		<action type="builtin" name="get">builtin_get</action>
-		<action type="builtin" name="drop">builtin_drop</action>
-		<action type="lua" name="describe"><![CDATA[
+ </thing>
+ <thing>
+  <id>4</id>
+  <parent>3</parent>
+  <location>2</location>
+  <property type="string" name="name">container</property>
+ </thing>
+ <thing>
+  <id>5</id>
+  <parent>4</parent>
+  <location>2</location>
+  <property type="string" name="title">a creature</property>
+  <property type="string" name="name">mobile</property>
+ </thing>
+ <thing>
+  <id>6</id>
+  <parent>5</parent>
+  <location>2</location>
+  <property type="string" name="title">someone</property>
+  <property type="string" name="name">user</property>
+  <action type="builtin" name="notify">builtin_notify</action>
+  <action type="builtin" name="inv">builtin_inventory</action>
+  <action type="builtin" name="get">builtin_get</action>
+  <action type="builtin" name="drop">builtin_drop</action>
+  <action type="lua" name="describe"><![CDATA[
 			if set_property(caller, "description", text) then
 				notify(caller, "<green>Description set successfully\n");
 			else
 				notify(caller, "<red>Error setting description\n");
 			end
 		]]></action>
-		<action type="lua" name="whereami"><![CDATA[
+  <action type="lua" name="whereami"><![CDATA[
 			notify(caller, "You are in #" .. get_location(caller) .. "\n")
 		]]></action>
-	</thing>
-	<thing>
-		<id>7</id>
-		<parent>6</parent>
-		<property type="string" name="name">wizard</property>
-		<property type="string" name="title">a powerful wizard</property>
-		<action type="lua" name="teleport"><![CDATA[
+ </thing>
+ <thing>
+  <id>7</id>
+  <parent>6</parent>
+  <location>2</location>
+  <property type="string" name="title">a powerful wizard</property>
+  <property type="string" name="name">wizard</property>
+  <action type="lua" name="teleport"><![CDATA[
 			local room = get_thing(caller, text);
 			moveto(caller, room);
 		]]></action>
-		<action type="builtin" name="@create">builder_create</action>
-		<action type="builtin" name="@create_room">builder_create_room</action>
-		<action type="builtin" name="@add_exit">builder_add_exit</action>
-		<action type="builtin" name="@set">builder_set</action>
-	</thing>
-	<thing>
-		<id>8</id>
-		<parent>3</parent>
-		<property type="string" name="name">item</property>
-	</thing>
-
-	<thing>
-		<id>10</id>
-		<parent>4</parent>
-		<property type="string" name="name">room</property>
-		<property type="string" name="title">someplace</property>
-		<action type="builtin" name="n">room_direction</action>
-		<action type="builtin" name="s">room_direction</action>
-		<action type="builtin" name="e">room_direction</action>
-		<action type="builtin" name="w">room_direction</action>
-		<action type="builtin" name="u">room_direction</action>
-		<action type="builtin" name="d">room_direction</action>
-		<action type="builtin" name="look">room_look</action>
-		<action type="builtin" name="say">room_say</action>
-		<action type="builtin" name="announce">room_announce</action>
-		<action type="builtin" name="do_enter">room_do_enter</action>
-		<action type="builtin" name="do_leave">room_do_leave</action>
-		<action type="lua" name="emote"><![CDATA[
+  <action type="builtin" name="@create">builder_create</action>
+  <action type="builtin" name="@add_exit">builder_add_exit</action>
+  <action type="builtin" name="@create_room">builder_create_room</action>
+  <action type="builtin" name="@set">builder_set</action>
+ </thing>
+ <thing>
+  <id>8</id>
+  <parent>3</parent>
+  <location>2</location>
+  <property type="string" name="name">item</property>
+ </thing>
+ <thing>
+  <id>10</id>
+  <parent>4</parent>
+  <location>2</location>
+  <property type="string" name="title">someplace</property>
+  <property type="string" name="name">room</property>
+  <action type="builtin" name="n">room_direction</action>
+  <action type="builtin" name="e">room_direction</action>
+  <action type="builtin" name="d">room_direction</action>
+  <action type="builtin" name="announce">room_announce</action>
+  <action type="builtin" name="do_enter">room_do_enter</action>
+  <action type="builtin" name="do_leave">room_do_leave</action>
+  <action type="builtin" name="look">room_look</action>
+  <action type="lua" name="emote"><![CDATA[
 			local str = get_property(caller, "name") .. " " .. text .. "\n";
 			notify(caller, str);
 			do_action(get_location(caller), "announce", -1, "\n" .. str);
 		]]></action>
-	</thing>
-	<thing>
-		<id>11</id>
-		<parent>3</parent>
-		<property type="string" name="name">exit</property>
-		<property type="string" name="title">an exit</property>
-		<action type="builtin" name="go">builtin_go</action>
-		<action type="builtin" name="move">builtin_go</action>
-		<action type="lua" name="tell_view"><![CDATA[
+  <action type="builtin" name="s">room_direction</action>
+  <action type="builtin" name="w">room_direction</action>
+  <action type="builtin" name="u">room_direction</action>
+  <action type="builtin" name="say">room_say</action>
+ </thing>
+ <thing>
+  <id>11</id>
+  <parent>3</parent>
+  <location>2</location>
+  <property type="string" name="title">an exit</property>
+  <property type="string" name="name">exit</property>
+  <action type="builtin" name="go">builtin_go</action>
+  <action type="builtin" name="move">builtin_go</action>
+  <action type="lua" name="tell_view"><![CDATA[
 			local name = get_property(this, "name");
 			if name then notify(caller, "<brightmagenta>You can go " .. name .. "\n"); end
 		]]></action>
-	</thing>
-
+ </thing>
 </world>

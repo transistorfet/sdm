@@ -20,62 +20,80 @@
 #define SDM_NO_ID		-1
 #define SDM_NEW_ID		-2
 
-typedef int sdm_id_t;
+typedef int moo_id_t;
 
-#define SDM_THING(ptr)	( (struct sdm_thing *) (ptr) )
+class MooThing : public MooObject {
+    protected:
+	moo_id_t id;
+	moo_id_t parent;
+	MooThing *location;
+	struct sdm_hash *properties;		// MooHash<GameObject> *properties;
+	struct sdm_tree *actions;		// MooTree<GameObject> *actions;
 
-struct sdm_thing {
-	struct sdm_object object;
-	sdm_id_t id;
-	sdm_id_t parent;
-	struct sdm_thing *location;
-	struct sdm_hash *properties;
-	struct sdm_tree *actions;
+	MooThing *next;
+	MooThing *objects;
+	MooThing *end_objects;
+    public:
+	MooThing();
+	MooThing(moo_id_t id, moo_id_t parent);
+	virtual ~MooThing();
 
-	struct sdm_thing *next;
-	struct sdm_thing *objects;
-	struct sdm_thing *end_objects;
+	moo_id_t id() { return(this->id); }
+	moo_id_t parent() { return(this->parent); }
+
+	int init(/*TODO anything?*/);
+	void release();
+	virtual int read_entry(const char *type, MooDataFile *);
+	virtual int write_data(MooDataFile *);
+
+	int set_property(const char *name, MooObject *obj);
+	MooObject *get_property(const char *name, MooObjectType *type);
+
+	int set_action(const char *name, MooAction *action);
+	int do_action(const char *name, MooArgs *args);
+	int do_abbreved_action(const char *name, MooArgs *args);
+
+	int add(MooThing *thing);
+	int remove(MooThing *thing);
 };
+
+/*
+class MooThingType : public MooObjectType {
+    public:
+	MooThingType(const char *name) { this->name = name; }
+	virtual MooObject *create() { return new MooThing(); }
+};
+
+MooThingType moo_thing_type("thing");
+*/
 
 #define SDM_THING_ARGS(id, parent)		(id), (parent)
 
-extern struct sdm_object_type sdm_thing_obj_type;
+extern MooObjectType moo_thing_obj_type;
 
 int init_thing(void);
 void release_thing(void);
+MooObject *moo_thing_create(void);
 
-int sdm_thing_init(struct sdm_thing *, int, va_list);
-void sdm_thing_release(struct sdm_thing *);
-int sdm_thing_read_entry(struct sdm_thing *, const char *, struct sdm_data_file *);
-int sdm_thing_write_data(struct sdm_thing *, struct sdm_data_file *);
-
-int sdm_thing_set_property(struct sdm_thing *, const char *, struct sdm_object *);
-struct sdm_object *sdm_thing_get_property(struct sdm_thing *, const char *, struct sdm_object_type *);
-
-int sdm_thing_set_action(struct sdm_thing *, const char *, struct sdm_action *);
-int sdm_thing_do_action(struct sdm_thing *, const char *, struct sdm_action_args *);
-int sdm_thing_do_abbreved_action(struct sdm_thing *, const char *, struct sdm_action_args *);
-
-int sdm_thing_add(struct sdm_thing *, struct sdm_thing *);
-int sdm_thing_remove(struct sdm_thing *, struct sdm_thing *);
-
-int sdm_thing_assign_id(struct sdm_thing *, sdm_id_t);
-int sdm_thing_assign_new_id(struct sdm_thing *);
-
+// TODO should these be methods?
+int moo_thing_assign_id(MooThing *thing, moo_id_t);
+int moo_thing_assign_new_id(MooThing *thing);
 
 /*** Thing ID Functions ***/
 
-extern int sdm_thing_table_size;
-extern struct sdm_thing **sdm_thing_table;
+// TODO this needs to be changed (possibly class for table management, maybe put moo_thing_is_a as a method of MooThing)
 
-static inline struct sdm_thing *sdm_thing_lookup_id(sdm_id_t id) {
-	if ((id >= 0) && (id < sdm_thing_table_size))
-		return(sdm_thing_table[id]);
+extern int moo_thing_table_size;
+extern MooThing **moo_thing_table;
+
+static inline MooThing *moo_thing_lookup_id(moo_id_t id) {
+	if ((id >= 0) && (id < moo_thing_table_size))
+		return(moo_thing_table[id]);
 	return(NULL);
 }
 
-static inline int sdm_thing_is_a(struct sdm_thing *thing, sdm_id_t id) {
-	for (; thing; thing = sdm_thing_lookup_id(thing->parent)) {
+static inline int moo_thing_is_a(MooThing *thing, moo_id_t id) {
+	for (; thing; thing = moo_thing_lookup_id(thing->parent)) {
 		if (thing->id == id)
 			return(1);
 	}

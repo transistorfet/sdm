@@ -15,6 +15,14 @@
 
 #define SDM_LUA(ptr)		( (struct sdm_lua *) (ptr) )
 
+class LuaAction : public MooAction {
+	string_t code;
+    public:
+	LuaAction();
+
+	virtual int do_action(MooThing *thing, MooArgs *args);
+};
+
 struct sdm_lua {
 	struct sdm_action action;
 	string_t code;

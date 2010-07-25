@@ -9,37 +9,32 @@
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/things/thing.h>
 
-#define SDM_ACTION(ptr)		( (struct sdm_action *) (ptr) )
+typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *);
 
-struct sdm_thing;
-struct sdm_action;
-struct sdm_action_args;
-
-//typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_thing *, struct sdm_thing *, const char *, struct sdm_object **);
-typedef int (*sdm_action_t)(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-
-struct sdm_action_args {
+class MooArgs {
+    public:
 	const char *action;
-	struct sdm_object *result;
-	struct sdm_thing *thing;
-	struct sdm_thing *caller;
-	struct sdm_thing *obj;
-	struct sdm_thing *target;
+	MooObject *result;
+	MooThing *thing;
+	MooThing *caller;
+	MooThing *obj;
+	MooThing *target;
 	const char *text;
 };
 
-struct sdm_action {
-	struct sdm_object object;
-	sdm_action_t func;
+class MooAction : public MooObject {
+	moo_action_t func;
+    public:
+	MooAction(moo_action_t func = NULL);
+	virtual ~MooAction() { }
+
+	virtual int do_action(MooThing *thing, MooArgs *args);
+
 };
 
-extern struct sdm_object_type sdm_action_obj_type;
-
-#define SDM_ACTION_ARGS(action)			(action)
-
-int sdm_action_init(struct sdm_action *, int, va_list);
-void sdm_action_release(struct sdm_action *);
+extern MooObjectType moo_action_obj_type;
 
 #endif
 
