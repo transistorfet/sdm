@@ -24,9 +24,10 @@ class MooCallback {
 	callback_t func;
 	void *ptr;
     public:
+	MooCallback() { this->func = NULL; this->ptr = NULL; }
 	MooCallback(callback_t func, void *ptr) { this->func = func; this->ptr = ptr; }
 
-	int call(void *arg) { if (this->func) return(this->func(this->ptr, arg)); }
+	int call(void *arg) { if (this->func) return(this->func(this->ptr, arg)); return(0); }
 };
 
 #define DECLARE_UNUSED(arg)	((void) arg)

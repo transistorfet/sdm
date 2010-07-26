@@ -56,12 +56,12 @@ MooWorld *moo_get_root_world(void)
 
 MooWorld::MooWorld()
 {
-	this->filename = NULL;
+	m_filename = NULL;
 }
 
 MooWorld::MooWorld(const char *file, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
-	this->filename = new std::string(file);
+	m_filename = new std::string(file);
 	world->read_file(world->filename, "world");
 }
 
@@ -70,8 +70,8 @@ MooWorld::~MooWorld()
 	/** We don't write the world here because we assume the root world is being destroyed and we
 	    don't want to write each world twice so if for some reason a world is being destroyed without
 	    the root world being destroyed, it must be written manually */
-	if (this->filename)
-		delete this->filename;
+	if (m_filename)
+		delete m_filename;
 }
 
 int MooWorld::read_entry(const char *type, MooDataFile *data)
@@ -100,7 +100,7 @@ int MooWorld::write_data(MooDataFile *data)
 	res = this->write();
 	if (data) {
 		data->write_begin_entry("load");
-		data->write_attrib("ref", this->filename);
+		data->write_attrib("ref", m_filename);
 		data->write_end_entry();
 	}
 	return(res);
@@ -108,7 +108,7 @@ int MooWorld::write_data(MooDataFile *data)
 
 int MooWorld::write()
 {
-	return(this->write_file(this->filename, "world"));
+	return(this->write_file(m_filename, "world"));
 }
 
 

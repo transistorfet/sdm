@@ -19,7 +19,7 @@ MooObjectType moo_action_obj_type = {
 
 int MooAction::MooAction(moo_action_t func)
 {
-	this->func = func;
+	m_func = func;
 }
 
 int MooAction::do_action(MooThing *thing, MooArgs *args)

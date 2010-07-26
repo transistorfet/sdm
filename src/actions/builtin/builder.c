@@ -14,7 +14,7 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/interpreter.h>
 
 static int builder_create(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
 static int builder_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);

@@ -34,18 +34,17 @@
 #define TCP_LISTEN_QUEUE		5
 #endif
 
-struct sdm_interface_type sdm_tcp_obj_type = { {
+MooObjectType moo_tcp_obj_type = {
 	NULL,
 	"tcp",
-	sizeof(struct sdm_tcp),
-	NULL,
-	(sdm_object_init_t) sdm_tcp_init,
-	(sdm_object_release_t) sdm_tcp_release,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL	},
-	(sdm_int_read_t) sdm_tcp_read,
-	(sdm_int_write_t) sdm_tcp_write
+	(moo_type_create_t) moo_tcp_create
 };
+
+MooObject *moo_tcp_create(void)
+{
+	return(new MooTCP());
+}
+
 
 static int tcp_connect(struct sdm_tcp *, const char *, int);
 static int tcp_listen(struct sdm_tcp *, int);
@@ -90,28 +89,27 @@ int sdm_tcp_init(struct sdm_tcp *inter, int nargs, va_list va)
 	return(-1);
 }
 
-void sdm_tcp_release(struct sdm_tcp *inter)
+MooTCP::~MooTCP()
 {
-	shutdown(SDM_INTERFACE(inter)->read, 2);
-	close(SDM_INTERFACE(inter)->read);
-	SDM_INTERFACE(inter)->read = 0;
-	sdm_interface_release(SDM_INTERFACE(inter));
+	shutdown(m_rfd, 2);
+	close(m_rfd);
+	this->rfd = -1;
 }
 
 
-int sdm_tcp_read(struct sdm_tcp *inter, char *str, int max)
+int MooTCP::read(char *data, int len)
 {
 	int res;
 
-	if ((res = sdm_tcp_receive(inter, str, max - 1)) < 0)
+	if ((res = this->receive(data, len - 1)) < 0)
 		return(res);
-	str[res] = '\0';
+	data[res] = '\0';
 	return(res);
 }
 
-int sdm_tcp_write(struct sdm_tcp *inter, const char *str)
+int MooTCP::write(const char *data)
 {
-	return(sdm_tcp_send(inter, str, strlen(str)));
+	return(this->send(data, strlen(data)));
 }
 
 
@@ -119,33 +117,30 @@ int sdm_tcp_write(struct sdm_tcp *inter, const char *str)
  * Receive the given number of bytes, store them in the given buffer
  * and return the number of bytes read or -1 on error or disconnect.
  */ 
-int sdm_tcp_receive(struct sdm_tcp *inter, char *buffer, int size)
+int MooTCP::receive(char *data, int len)
 {
 	int i, j;
 	fd_set rd;
 	struct timeval timeout = { 0, 0 };
 
-	if (!inter)
-		return(-1);
-	SDM_INTERFACE_SET_NOT_READY_READ(inter);
-
+	this->set_not_ready();
 	for (i = 0;i < size;i++) {
-		if (inter->read_pos >= inter->read_length)
+		if (m_read_pos >= m_read_length)
 			break;
-		buffer[i] = inter->read_buffer[inter->read_pos++];
+		buffer[i] = m_read_buffer[m_read_pos++];
 	}
 
 	if (i < size) {
 		FD_ZERO(&rd);
-		FD_SET(SDM_INTERFACE(inter)->read, &rd);
-		if (select(SDM_INTERFACE(inter)->read + 1, &rd, NULL, NULL, &timeout)
-		    && ((j = recv(SDM_INTERFACE(inter)->read, &buffer[i], size - i, 0)) > 0))
+		FD_SET(m_rfd, &rd);
+		if (select(m_rfd + 1, &rd, NULL, NULL, &timeout)
+		    && ((j = recv(m_rfd, &buffer[i], size - i, 0)) > 0))
 			i += j;
 		if (j <= 0)
 			return(-1);
 	}
-	if (inter->read_pos < inter->read_length)
-		SDM_INTERFACE_SET_READY_READ(inter);
+	if (m_read_pos < m_read_length)
+		this->set_ready();
 	return(i);
 }
 
@@ -153,14 +148,12 @@ int sdm_tcp_receive(struct sdm_tcp *inter, char *buffer, int size)
  * Send the string of length size to the given network connection and
  * return the number of bytes written or -1 on error.
  */
-int sdm_tcp_send(struct sdm_tcp *inter, const char *msg, int size)
+int MooTCP::send(const char *msg, int size)
 {
 	int sent, count = 0;
 
-	if (!inter)
-		return(0);
 	do {
-		if ((sent = send(SDM_INTERFACE(inter)->read, (void *) msg, size, 0)) < 0)
+		if ((sent = send(m_rfd, (void *) msg, size, 0)) < 0)
 			return(-1);
 		else if (!sent)
 			return(0);

@@ -15,15 +15,15 @@
 #include <sdm/things/thing.h>
 
 class MooWorld : public MooThing {
-	std::string filename;
+	std::string m_filename;
     public:
 	MooWorld();
 	MooWorld(const char *file);
 	MooWorld(const char *file, moo_id_t id, moo_id_t parent);
 	virtual ~MooWorld();
 
-	virtual int read_entry(const char *type, MooDataFile *);
-	virtual int write_data(MooDataFile *);
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 
 	int write();
 };

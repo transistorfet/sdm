@@ -15,7 +15,7 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/interpreter.h>
 
 #define IS_NUMBER_CHAR(ch)	\
 	( ((ch) >= 0x30) && ((ch) <= 0x39) )

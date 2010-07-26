@@ -1,6 +1,6 @@
 /*
  * Object Name:	login.c
- * Description:	Login Object
+ * Description:	Login Process
  */
 
 #include <stdio.h>
@@ -16,26 +16,31 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/login.h>
 
-struct sdm_object_type sdm_login_obj_type = {
-	NULL,
+MooObjectType moo_login_obj_type = {
+	&moo_process_obj_type,
 	"login",
-	sizeof(struct sdm_login),
-	NULL,
-	(sdm_object_init_t) sdm_login_init,
-	(sdm_object_release_t) sdm_login_release,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL
+	(moo_type_create_t) moo_login_create
 };
 
-int sdm_login_init(struct sdm_login *login, int nargs, va_list va)
+MooObject *moo_login_create(void)
 {
-	return(0);
+	return(new MooLogin());
 }
 
-void sdm_login_release(struct sdm_login *login)
+MooLogin::MooLogin()
 {
-	if (login->name)
-		memory_free(login->name);
+
+}
+
+MooLogin::~MooLogin()
+{
+	if (m_name)
+		delete m_name;
+}
+
+int MooLogin::handle(MooInterface *inter)
+{
+	// TODO handle all read/write operations on the interface
 }
 
 

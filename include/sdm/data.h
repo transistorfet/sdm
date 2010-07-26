@@ -62,11 +62,8 @@ class MooDataFile {
 int init_data(void);
 void release_data(void);
 
-int sdm_set_data_path(const char *);
-int sdm_data_file_exists(const char *);
-
-struct sdm_data_file *sdm_data_open(const char *, int, const char *);
-void sdm_data_close(struct sdm_data_file *);
+int moo_set_data_path(const char *);
+int moo_data_file_exists(const char *);
 
 #endif
 

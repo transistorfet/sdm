@@ -19,7 +19,7 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/interpreter.h>
 
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/basics.h>

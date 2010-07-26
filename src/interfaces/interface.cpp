@@ -12,98 +12,52 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
+#include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
-#define INTERFACE_INIT_SIZE		4
-#define INTERFACE_GROWTH_FACTOR		2
-
-struct sdm_interface_list {
-	int size;
-	int next_space;
-	struct sdm_interface **table;
-};
-
-static struct sdm_interface_list interface_list;
+static MooArray<MooInterface *> *interface_list = NULL;
 
 MooObjectType moo_interface_obj_type = {
 	NULL,
 	"interface",
-	(sdm_object_init_t) sdm_interface_init
+	(moo_type_create_t) NULL
 };
 
 int init_interface(void)
 {
-	interface_list.size = INTERFACE_INIT_SIZE;
-	interface_list.next_space = 0;
-	if (!(interface_list.table = (struct sdm_interface **) memory_alloc(interface_list.size * sizeof(MooInterface *))))
-		return(-1);
-	memset(interface_list.table, '\0', interface_list.size * sizeof(struct sdm_interface *));
+	if (!interface_list)
+		interface_list = new MooArray<MooInterface *>();
 	return(0);
 }
 
 void release_interface(void)
 {
-	int i;
-
-	for (i = 0;i < interface_list.size;i++) {
-		if (interface_list.table[i])
-			destroy_sdm_object(SDM_OBJECT(interface_list.table[i]));
-	}
-	memory_free(interface_list.table);
+	delete interface_list;
+	interface_list = NULL;
 }
 
-MooObject *moo_interface_create(void)
+MooInterface::MooInterface()
 {
-	return(new MooInterface());
+	m_rfd = -1;
+	m_wfd = -1;
+	m_efd = -1;
+
+	interface_list->add(this);
 }
 
-int sdm_interface_init(struct sdm_interface *inter, int nargs, va_list va)
+MooInterface::~MooInterface()
 {
-	int newsize;
-	struct sdm_interface **newtable;
-
-	inter->read = -1;
-	inter->write = -1;
-	inter->error = -1;
-
-	if (interface_list.next_space == interface_list.size) {
-		newsize = interface_list.size * INTERFACE_GROWTH_FACTOR;
-		if (!(newtable = (struct sdm_interface **) memory_realloc(interface_list.table, newsize * sizeof(struct sdm_interface *))))
-			return(-1);
-		interface_list.table = newtable;
-		memset(&interface_list.table[interface_list.size], '\0', (newsize - interface_list.size) * sizeof(struct sdm_interface *));
-		interface_list.next_space = interface_list.size;
-		interface_list.size = newsize;
-	}
-	interface_list.table[interface_list.next_space] = inter;
-	for (;interface_list.next_space < interface_list.size;interface_list.next_space++) {
-		if (!interface_list.table[interface_list.next_space])
-			break;
-	}
-	return(0);
-}
-
-void sdm_interface_release(struct sdm_interface *inter)
-{
-	int i;
-
-	for (i = 0;i < interface_list.size;i++) {
-		if (interface_list.table[i] == inter) {
-			interface_list.table[i] = NULL;
-			if (i < interface_list.next_space)
-				interface_list.next_space = i;
-		}
-	}
-	if (inter->read > 0)
-		close(inter->read);
-	if ((inter->write > 0) && (inter->write != inter->read))
-		close(inter->write);
-	if ((inter->error > 0) && (inter->error != inter->read) && (inter->error != inter->write))
-		close(inter->error);
+	interface_list->remove(this);
+	if (m_rfd > 0)
+		close(m_rfd);
+	if ((m_wfd > 0) && (m_wfd != m_rfd))
+		close(m_wfd);
+	if ((m_efd > 0) && (m_efd != m_rfd) && (m_efd != m_wfd))
+		close(m_efd);
 }
 
 
@@ -113,36 +67,37 @@ void sdm_interface_release(struct sdm_interface *inter)
  * interface as the parameter.  The number of interfaces that were serviced is
  * returned or -1 if an error occurred.
  */
-int moo_interface_select(float t)
+int MooInterface::wait(float t)
 {
 	int i;
 	int max, ret = 0;
+	MooInterface *cur;
 	fd_set rd, wr, err;
 	struct timeval timeout;
 
 	/** Check the buffer of each connection to see if any data is waiting
 	    and return when each connection gets a chance to read data so that
 	    we can check other events and remain responsive */
-	for (i = 0;i < interface_list.size;i++) {
-		if (!interface_list.table[i])
+	for (i = 0; i < interface_list->size(); i++) {
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_READ)
-		  && (interface_list.table[i]->bitflags & IO_READY_READ)) {
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_READ)
+		  && (cur->m_bitflags & IO_READY_READ)) {
+			cur->m_proc->handle(cur);
 			ret++;
 		}
-		if (!interface_list.table[i])
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_WRITE)
-		  && (interface_list.table[i]->bitflags & IO_READY_WRITE)) {
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_WRITE)
+		  && (cur->m_bitflags & IO_READY_WRITE)) {
+			cur->m_proc->handle(cur);
 			ret++;
 		}
-		if (!interface_list.table[i])
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_ERROR)
-		  && (interface_list.table[i]->bitflags & IO_READY_ERROR)) {
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_ERROR)
+		  && (cur->m_bitflags & IO_READY_ERROR)) {
+			cur->m_proc->handle(cur);
 			ret++;
 		}
 	}
@@ -157,23 +112,23 @@ int moo_interface_select(float t)
 	FD_ZERO(&wr);
 	FD_ZERO(&err);
 	max = 0;
-	for (i = 0;i < interface_list.size;i++) {
-		if (!interface_list.table[i])
+	for (i = 0;i < interface_list->size();i++) {
+		if (!(cur = interface_list->get(i)))
 			continue;
-		if (interface_list.table[i]->read != -1) {
-			FD_SET(interface_list.table[i]->read, &rd);
-			if (interface_list.table[i]->read > max)
-				max = interface_list.table[i]->read;
+		if (cur->m_rfd != -1) {
+			FD_SET(cur->m_rfd, &rd);
+			if (cur->m_rfd > max)
+				max = cur->m_rfd;
 		}
-		if (interface_list.table[i]->write != -1) {
-			FD_SET(interface_list.table[i]->write, &wr);
-			if (interface_list.table[i]->write > max)
-				max = interface_list.table[i]->write;
+		if (cur->m_wfd != -1) {
+			FD_SET(cur->m_wfd, &wr);
+			if (cur->m_wfd > max)
+				max = cur->m_wfd;
 		}
-		if (interface_list.table[i]->error != -1) {
-			FD_SET(interface_list.table[i]->error, &err);
-			if (interface_list.table[i]->error > max)
-				max = interface_list.table[i]->error;
+		if (cur->m_efd != -1) {
+			FD_SET(cur->m_efd, &err);
+			if (cur->m_efd > max)
+				max = cur->m_efd;
 		}
 	}
 
@@ -182,26 +137,26 @@ int moo_interface_select(float t)
 		return(-1);
 	}
 
-	for (i = 0;i < interface_list.size;i++) {
+	for (i = 0;i < interface_list->size();i++) {
 		/** We check that the interface is not NULL before each condition in case the previous
 		    callback destroyed the interface */
-		if (!interface_list.table[i])
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_READ)
-		    && ((interface_list.table[i]->read != -1) && FD_ISSET(interface_list.table[i]->read, &rd)))
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_READ)
+		    && ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd)))
+			cur->m_proc->handle(cur);
 
-		if (!interface_list.table[i])
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_WRITE)
-		    && ((interface_list.table[i]->write != -1) && FD_ISSET(interface_list.table[i]->write, &wr)))
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_WRITE)
+		    && ((cur->m_wfd != -1) && FD_ISSET(cur->m_wfd, &wr)))
+			cur->m_proc->handle(cur);
 
-		if (!interface_list.table[i])
+		if (!(cur = interface_list->get(i)) || !cur->m_proc)
 			continue;
-		if ((interface_list.table[i]->condition & IO_COND_ERROR)
-		    && ((interface_list.table[i]->error != -1) && FD_ISSET(interface_list.table[i]->error, &err)))
-			EXECUTE_CALLBACK(interface_list.table[i]->callback, interface_list.table[i]);
+		if ((cur->m_condition & IO_COND_ERROR)
+		    && ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err)))
+			cur->m_proc->handle(cur);
 	}
 	return(ret);
 }

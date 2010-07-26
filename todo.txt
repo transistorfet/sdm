@@ -13,6 +13,24 @@
 	  MooObjects.  I'm not entirely sure of the point of this and so on.
 	* make processes a bit more like generic processes/tasks/etc
 
+	* there should be like a process that listens for connections and automatically breaks them off to a sperate
+	  "process" which "handles" the connection via launching subprocesses (it's very similar to somthing inetd
+	  and launching a shell process for each connection which then runs sub programs
+	* the user object should have actions called on itself most of the time, so that the user can reprogram his/her
+	  own object to customize and extend their own interface and command set
+	* there must be a process table and any time a process does stuff, it is set to the current process.  Any processes
+	  that are created by that process will use that as their parent process.  Each interface will have a reference to the
+	  process that owns it.
+	* Each listening socket will have it's own listening process which it calls when it receives a connection (or wait
+	  does this even need to be a process of it's own).  It will create a specific interface (based on the listening
+	  interface which since there is one per listener, each listening process will only launch one specific interface type
+	  thus why we might not need a listening process).  A standard login process will be started to handle the interface
+	  further.  That login process will create an appropriate handling process (either a char gen/account creation process
+	  or an interpreter process, or something, perhaps even something specific to the interface type)  This can all be
+	  handled via config data of some kind (like a property in the user thing which would be created by the login process)
+	* add some code somewhere to launch the initial listening process(es) or whatever  for each port through a <process>
+	  block in the main config file.  This would tell it which process to use and all that
+
 
 
 

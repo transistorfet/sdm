@@ -10,17 +10,26 @@
 
 #include <sdm/objs/object.h>
 
-class MooProcess : public MooObject {
-    public:
-	MooProcess() { }
-	virtual ~MooProcess() { }
+typedef int moo_pid_t;
 
-	virtual int initialize(MooUser *user) = 0;
-	virtual int loop(MooUser *user, char *buffer) = 0;
-	virtual int release(MooUser *user) = 0;
+class MooInterface;
+
+class MooProcess : public MooObject {
+	moo_pid_t m_pid;
+	moo_pid_t m_parent_pid;
+
+    public:
+	MooProcess();
+	virtual ~MooProcess();
+
+	virtual int initialize() = 0;
+	virtual int idle() = 0;
+	virtual int handle(MooInterface *inter) = 0;
+	virtual int release() = 0;
 };
 
-
+int init_process(void);
+void release_process(void);
 extern MooObjectType moo_process_obj_type;
 
 MooObject *moo_process_create(void);

@@ -16,11 +16,11 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/interpreter.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/processors/processor.h>
-#include <sdm/processors/form.h>
+#include <sdm/processes/process.h>
+#include <sdm/processes/form.h>
 
 struct sdm_processor_type sdm_form_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,

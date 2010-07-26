@@ -19,21 +19,13 @@
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/processors/processor.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/process.h>
+#include <sdm/processes/interpreter.h>
 
-struct sdm_processor_type sdm_interpreter_obj_type = { {
-	(struct sdm_object_type *) &sdm_processor_obj_type,
+MooObjectType moo_interpreter_obj_type = {
+	&moo_processor_obj_type,
 	"interpreter",
-	sizeof(struct sdm_interpreter),
-	NULL,
-	(sdm_object_init_t) NULL,
-	(sdm_object_release_t) NULL,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL	},
-	(sdm_processor_startup_t) sdm_interpreter_startup,
-	(sdm_processor_process_t) sdm_interpreter_process,
-	(sdm_processor_shutdown_t) sdm_interpreter_shutdown
+	(moo_type_create_t) moo_interpreter_create
 };
 
 int sdm_interpreter_startup(struct sdm_interpreter *proc, struct sdm_user *user)

@@ -22,29 +22,26 @@
 
 typedef int moo_id_t;
 
+extern MooArray<MooThing *> *moo_thing_table;
+
 class MooThing : public MooObject {
     protected:
-	moo_id_t id;
-	moo_id_t parent;
-	MooThing *location;
-	struct sdm_hash *properties;		// MooHash<GameObject> *properties;
-	struct sdm_tree *actions;		// MooTree<GameObject> *actions;
+	moo_id_t m_id;
+	moo_id_t m_parent;
+	MooThing *m_location;
+	struct sdm_hash *m_properties;		// MooHash<GameObject> *properties;
+	struct sdm_tree *m_actions;		// MooTree<GameObject> *actions;
 
-	MooThing *next;
-	MooThing *objects;
-	MooThing *end_objects;
+	MooThing *m_next;
+	MooThing *m_objects;
+	MooThing *m_end_objects;
     public:
 	MooThing();
 	MooThing(moo_id_t id, moo_id_t parent);
 	virtual ~MooThing();
 
-	moo_id_t id() { return(this->id); }
-	moo_id_t parent() { return(this->parent); }
-
-	int init(/*TODO anything?*/);
-	void release();
-	virtual int read_entry(const char *type, MooDataFile *);
-	virtual int write_data(MooDataFile *);
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 
 	int set_property(const char *name, MooObject *obj);
 	MooObject *get_property(const char *name, MooObjectType *type);
@@ -55,6 +52,19 @@ class MooThing : public MooObject {
 
 	int add(MooThing *thing);
 	int remove(MooThing *thing);
+
+	inline moo_id_t id() { return(m_id); }
+	inline moo_id_t parent() { return(m_parent); }
+
+	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
+
+	inline int is_a_thing(moo_id_t id) {
+		for (MooThing *cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+			if (cur->m_id == id)
+				return(1);
+		}
+		return(0);
+	}
 };
 
 /*
@@ -67,38 +77,11 @@ class MooThingType : public MooObjectType {
 MooThingType moo_thing_type("thing");
 */
 
-#define SDM_THING_ARGS(id, parent)		(id), (parent)
-
 extern MooObjectType moo_thing_obj_type;
 
 int init_thing(void);
 void release_thing(void);
 MooObject *moo_thing_create(void);
-
-// TODO should these be methods?
-int moo_thing_assign_id(MooThing *thing, moo_id_t);
-int moo_thing_assign_new_id(MooThing *thing);
-
-/*** Thing ID Functions ***/
-
-// TODO this needs to be changed (possibly class for table management, maybe put moo_thing_is_a as a method of MooThing)
-
-extern int moo_thing_table_size;
-extern MooThing **moo_thing_table;
-
-static inline MooThing *moo_thing_lookup_id(moo_id_t id) {
-	if ((id >= 0) && (id < moo_thing_table_size))
-		return(moo_thing_table[id]);
-	return(NULL);
-}
-
-static inline int moo_thing_is_a(MooThing *thing, moo_id_t id) {
-	for (; thing; thing = moo_thing_lookup_id(thing->parent)) {
-		if (thing->id == id)
-			return(1);
-	}
-	return(0);
-}
 
 #endif
 

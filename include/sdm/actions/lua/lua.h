@@ -16,7 +16,7 @@
 #define SDM_LUA(ptr)		( (struct sdm_lua *) (ptr) )
 
 class LuaAction : public MooAction {
-	string_t code;
+	string_t m_code;
     public:
 	LuaAction();
 

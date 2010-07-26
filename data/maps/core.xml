@@ -11,6 +11,7 @@
   <property type="string" name="title">something</property>
   <property type="string" name="name">thing</property>
   <!-- <action type="builtin" name="look_self">builtin_examine</action> -->
+  <!-- <script ref="core.lua"> -->
 
   <action type="lua" name="look_self">core:look_self</action>  <!-- Or could you even make this not be required -->
   <action type="lua" name="tell_view"><![CDATA[

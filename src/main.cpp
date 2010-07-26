@@ -27,7 +27,7 @@ int serverloop(void);
 
 static void handle_sigint(int);
 
-int init_mud(void)
+int init_moo(void)
 {
 	if (init_data() < 0)
 		return(-1);
@@ -63,7 +63,7 @@ int init_mud(void)
 	return(0);
 }
 
-void release_mud(void)
+void release_moo(void)
 {
 	release_user();
 	release_world();
@@ -88,22 +88,22 @@ void release_mud(void)
  */
 int main(int argc, char **argv)
 {
-	if (init_mud()) {
+	if (init_moo()) {
 		printf("Failed to initialize mud\n");
-		release_mud();
+		release_moo();
 		return(0);
 	}
 
 	serverloop();
 
-	release_mud();
+	release_moo();
 	return(0);
 }
 
 int serverloop(void)
 {
 	while (exit_flag) {
-		sdm_interface_select(1);
+		MooInterface->wait(1);
 		sdm_timer_check();
 	}
 	return(0);

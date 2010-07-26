@@ -6,61 +6,44 @@
 #ifndef _SDM_THINGS_USER_H
 #define _SDM_THINGS_USER_H
 
+#include <string>
 #include <stdio.h>
 #include <stdarg.h>
 
 #include <sdm/misc.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processors/processor.h>
+#include <sdm/processes/process.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 
-#define SDM_USER(ptr)		( (struct sdm_user *) (ptr) )
+class MooUser : public MooThing {
+	MooInterface *m_inter;
+	MooProcess *m_proc;
+	string_t m_name;
+    public:
+	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);
+	virtual ~MooUser();
 
-struct sdm_user {
-	struct sdm_thing thing;
-	struct sdm_interface *inter;
-	struct sdm_processor *proc;
-	string_t name;
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 
+	int connect(MooInterface *inter);
+	void disconnect();
+
+	int read_file();
+	int write_file();
 };
-
-#define SDM_USER_ARGS(name, id, parent)		(name), SDM_THING_ARGS((id), (parent))
 
 extern MooObjectType moo_user_obj_type;
 
 int init_user(void);
 void release_user(void);
+MooObject *moo_user_create(void);
 
-struct sdm_user *create_sdm_user(const char *);
-
-int sdm_user_init(struct sdm_user *, int, va_list);
-void sdm_user_release(struct sdm_user *);
-
-int sdm_user_connect(struct sdm_user *, struct sdm_interface *);
-void sdm_user_disconnect(struct sdm_user *);
-
-int sdm_user_read_entry(struct sdm_user *, const char *, struct sdm_data_file *);
-int sdm_user_write_data(struct sdm_user *, struct sdm_data_file *);
-
-int sdm_user_exists(const char *);
-int sdm_user_logged_in(const char *);
-int sdm_user_valid_username(const char *);
-
-static inline int sdm_user_read(struct sdm_user *user) {
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
-	return(sdm_object_read_file(SDM_OBJECT(user), buffer, "user"));
-}
-
-static inline int sdm_user_write(struct sdm_user *user) {
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", user->name);
-	return(sdm_object_write_file(SDM_OBJECT(user), buffer, "user"));
-}
+int moo_user_exists(const char *);
+int moo_user_logged_in(const char *);
+int moo_user_valid_username(const char *);
 
 #endif
 

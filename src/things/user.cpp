@@ -17,9 +17,9 @@
 #include <sdm/objs/string.h>
 #include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processors/form.h>
-#include <sdm/processors/processor.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/form.h>
+#include <sdm/processes/process.h>
+#include <sdm/processes/interpreter.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
@@ -28,7 +28,7 @@
 MooObjectType moo_user_obj_type = {
 	&sdm_thing_obj_type,
 	"user",
-	(moo_type_create_t) moo_user_create,
+	(moo_type_create_t) moo_user_create
 };
 
 static struct sdm_hash *user_list = NULL;
@@ -45,109 +45,93 @@ int init_user(void)
 		return(-1);
 
 	/** Load all the users into memory in a disconnected state */
-	if (!(data = sdm_data_open("etc/passwd.xml", SDM_DATA_READ, "passwd")))
-		return(-1);
+	data = new MooDataFile("etc/passwd.xml", SDM_DATA_READ, "passwd");
 	do {
-		if ((str = sdm_data_read_name(data)) && !strcmp(str, "user")) {
-			sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
+		if ((str = data->read_name()) && !strcmp(str, "user")) {
+			data->read_attrib("name", buffer, STRING_SIZE);
 			// TODO make sure the user is in it's proper disconnected state (in the cryolocker)
 			create_sdm_user(buffer);
 		}
-	} while (sdm_data_read_next(data));
-	sdm_data_close(data);
+	} while (data->read_next());
+	delete data;
 	return(0);
 }
 
 void release_user(void)
 {
-	struct sdm_user *user;
+	MooUser *user;
 
 	if (user_list) {
 		sdm_hash_traverse_reset(user_list);
 		while ((user = sdm_hash_traverse_next(user_list))) {
-			if (user->inter)
-				destroy_sdm_object(SDM_OBJECT(user->inter));
-			destroy_sdm_object(SDM_OBJECT(user));
+			if (user->m_inter)
+				delete user->m_inter
+			delete user;
 		}
 		destroy_sdm_hash(user_list);
 	}
 	user_list = NULL;
 }
 
-struct sdm_user *create_sdm_user(const char *name)
+MooObject *moo_user_create(void)
 {
-	struct sdm_user *user;
-
-	if (!(user = sdm_hash_find(user_list, name))
-	    && !(user = (struct sdm_user *) create_sdm_object(&sdm_user_obj_type, 3, SDM_USER_ARGS(name, SDM_NO_ID, 0))))
-		return(NULL);
-	return(user);
+	return(new MooUser());
 }
 
-int sdm_user_init(struct sdm_user *user, int nargs, va_list va)
-{
-	const char *name;
 
-	if (nargs > 1) {
-		name = va_arg(va, const char *);
-		if (!name || !sdm_user_valid_username(name) || !(user->name = make_string("%s", name)))
-			return(-1);
-		nargs--;
-	}
+MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
+{
+	if (!name || !moo_user_valid_username(name) || !(m_name = make_string("%s", name)))
+		throw -1;
 
 	/** If there is already a user with that name then fail */
-	if (sdm_hash_add(user_list, name, user))
+	if (sdm_hash_add(user_list, name, this))
 		return(-1);
-	if (sdm_thing_init(SDM_THING(user), nargs, va) < 0)
-		return(-1);
-	sdm_user_read(user);
+	sdm_user_read(this);
 	return(0);
 }
 
-void sdm_user_release(struct sdm_user *user)
+MooUser::~MooUser()
 {
 	/** Save the user information to the user's file, and disconnect */
-	sdm_user_disconnect(user);
+	this->disconnect();
 
 	/** Release the user's other resources */
-	sdm_hash_remove(user_list, user->name);
-	memory_free(user->name);
-	destroy_sdm_object(SDM_OBJECT(user->inter));
-
-	/** Release the superclass */
-	sdm_thing_release(SDM_THING(user));
+	sdm_hash_remove(user_list, m_name);
+	memory_free(m_name);
+	delete m_inter;
 }
 
-int sdm_user_connect(struct sdm_user *user, struct sdm_interface *inter)
+int MooUser::connect(MooInterface *inter)
 {
 	double room;
-	struct sdm_thing *location;
+	MooThing *location;
 
-	if (user->inter)
-		destroy_sdm_object(SDM_OBJECT(user->inter));
-	user->inter = inter;
+	if (m_inter)
+		delete m_inter;
+	m_inter = inter;
 
-	if (SDM_THING(user)->parent > 0)
-		user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_interpreter_obj_type), 0));
+	if (m_parent > 0)
+		m_proc = new MooInterpreter();
 	else
-		user->proc = SDM_PROCESSOR(create_sdm_object(SDM_OBJECT_TYPE(&sdm_form_obj_type), 1, "etc/register.xml"));
+		m_proc = new MooForm("etc/register.xml");
 
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
-	    && (location = sdm_thing_lookup_id(room)))
+	    && (location = moo_thing_lookup_id(room)))
 		sdm_moveto(SDM_THING(user), SDM_THING(user), location, NULL);
 	else
 		// TODO you should do this some othe way
 		sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_thing_lookup_id(50), NULL);
 		//sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
 
-	if (!user->proc)
+	if (!user->m_proc)
 		return(-1);
-	sdm_processor_startup(user->proc, user);
+	user->m_proc->initialize(user);
 	return(0);
 }
 
-void sdm_user_disconnect(struct sdm_user *user)
+MooUser::~MooUser()
 {
 	struct sdm_number *number;
 
@@ -173,7 +157,7 @@ void sdm_user_disconnect(struct sdm_user *user)
 }
 
 
-int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data_file *data)
+int MooUser::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "name")) {
 		// TODO this should already have been set but maybe we can generate an error if it doesn't match
@@ -185,34 +169,50 @@ int sdm_user_read_entry(struct sdm_user *user, const char *type, struct sdm_data
 	return(SDM_HANDLED);
 }
 
-int sdm_user_write_data(struct sdm_user *user, struct sdm_data_file *data)
+int MooUser::write_data(MooDataFile *data)
 {
-	sdm_data_write_string_entry(data, "name", user->name);
-	sdm_data_write_integer_entry(data, "lastseen", time(NULL));
+	data->write_string_entry("name", m_name);
+	data->write_integer_entry("lastseen", time(NULL));
 	// TODO write telnet/interface settings
 	// TODO write processor settings and types
 	return(0);
 }
 
+int MooUser::read_file(void)
+{
+	char buffer[STRING_SIZE];
 
-int sdm_user_exists(const char *name)
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
+	return(sdm_object_read_file(SDM_OBJECT(user), buffer, "user"));
+}
+
+int MooUser::write_file(void)
+{
+	char buffer[STRING_SIZE];
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
+	return(sdm_object_write_file(SDM_OBJECT(user), buffer, "user"));
+}
+
+
+int moo_user_exists(const char *name)
 {
 	char buffer[STRING_SIZE];
 
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", name);
-	return(sdm_data_file_exists(buffer));
+	return(moo_data_file_exists(buffer));
 }
 
-int sdm_user_logged_in(const char *name)
+int moo_user_logged_in(const char *name)
 {
-	struct sdm_user *user;
+	MooUser *user;
 
-	if ((user = sdm_hash_find(user_list, name)) && user->inter)
+	if ((user = sdm_hash_find(user_list, name)) && user->m_inter)
 		return(1);
 	return(0);
 }
 
-int sdm_user_valid_username(const char *name)
+int moo_user_valid_username(const char *name)
 {
 	int i;
 

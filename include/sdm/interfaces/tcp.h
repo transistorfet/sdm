@@ -21,25 +21,28 @@
 #define TCP_READ_BUFFER		512
 #endif
 
-#define SDM_TCP(ptr)		( (struct sdm_tcp *) (ptr) )
+class MooTCP : public MooInterface {
+	int m_read_pos;
+	int m_read_length;
+	unsigned char m_read_buffer[TCP_READ_BUFFER];
+    public:
+	MooTCP();
+	virtual ~MooTCP();
 
-struct sdm_tcp {
-	struct sdm_interface interface;
-	int read_pos;
-	int read_length;
-	unsigned char read_buffer[TCP_READ_BUFFER];
+	int connect(const char *server, const char *port = NULL);
+	int accept();
+	void disconnect();
+
+	virtual int read(char *data, int len);
+	virtual int write(const char *data);
+
+	int receive(char *buffer, int size);
+	int send(const char *msg, int size);
 };
 
-extern struct sdm_interface_type sdm_tcp_ob_type;
+extern MooObjectType moo_tcp_obj_type;
 
-#define sdm_tcp_connect(server, port)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), 3, SDM_TCP_CONNECT, (server), (port)) )
-
-#define sdm_tcp_listen(port)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_tcp_obj_type), 2, SDM_TCP_LISTEN, (port)) )
-
-#define sdm_tcp_accept(type, inter)	\
-	( (struct sdm_tcp *) create_sdm_object(SDM_OBJECT_TYPE(type), 2, SDM_TCP_ACCEPT, (inter)) )
+MooObject *moo_tcp_create(void);
 
 int sdm_tcp_init(struct sdm_tcp *, int, va_list);
 void sdm_tcp_release(struct sdm_tcp *);

@@ -7,8 +7,8 @@
 
 #include <sdm/hash.h>
 #include <sdm/memory.h>
-#include <sdm/objs/login.h>
 #include <sdm/things/user.h>
+#include <sdm/process/login.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
@@ -25,17 +25,10 @@
 #define IS_WHITESPACE(ch)	\
 	( ((ch) == ' ') || ((ch) == '\t') )
 
-struct sdm_interface_type sdm_telnet_obj_type = { {
-	NULL,
+MooObjectType moo_telnet_obj_type = {
+	&moo_tcp_obj_type,
 	"telnet",
-	sizeof(struct sdm_telnet),
-	NULL,
-	(sdm_object_init_t) sdm_tcp_init,
-	(sdm_object_release_t) sdm_telnet_release,
-	(sdm_object_read_entry_t) NULL,
-	(sdm_object_write_data_t) NULL	},
-	(sdm_int_read_t) sdm_telnet_read,
-	(sdm_int_write_t) sdm_telnet_write
+	(moo_type_create_t) moo_telnet_create
 };
 
 static struct sdm_telnet *telnet_server = NULL;
@@ -48,11 +41,13 @@ int init_telnet(void)
 {
 	if (telnet_server)
 		return(1);
-	if (!(telnet_server = (struct sdm_telnet *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_telnet_obj_type), 2, SDM_TCP_LISTEN, TELNET_PORT)))
-		return(-1);
+	// TODO this should be moved somewhere else, possibly into a process or something
+	//if (!(telnet_server = (struct sdm_telnet *) create_sdm_object(SDM_OBJECT_TYPE(&sdm_telnet_obj_type), 2, SDM_TCP_LISTEN, TELNET_PORT)))
+	//	return(-1);
+	//sdm_interface_set_callback(SDM_INTERFACE(telnet_server), IO_COND_READ, (callback_t) sdm_telnet_accept_connection, NULL);
+
 	if (init_telnet_ansi() < 0)
 		return(-1);
-	sdm_interface_set_callback(SDM_INTERFACE(telnet_server), IO_COND_READ, (callback_t) sdm_telnet_accept_connection, NULL);
 	return(0);
 }
 
@@ -65,11 +60,16 @@ void release_telnet(void)
 	telnet_server = NULL;
 }
 
-
-void sdm_telnet_release(struct sdm_telnet *inter)
+MooObject *moo_telnet_create(void)
 {
-	struct sdm_object *obj;
-	struct callback_s callback;
+	return(new MooTelnet());
+}
+
+
+MooTelnet::~MooTelnet()
+{
+	MooObject *obj;
+	MooCallback callback;
 
 	callback = sdm_interface_get_callback(SDM_INTERFACE(inter));
 	if ((obj = SDM_OBJECT(callback.ptr))) {
@@ -78,10 +78,9 @@ void sdm_telnet_release(struct sdm_telnet *inter)
 		else
 			destroy_sdm_object(obj);
 	}
-	sdm_tcp_release(SDM_TCP(inter));
 }
 
-int sdm_telnet_read(struct sdm_telnet *inter, char *buffer, int max)
+int MooTelnet::read(char *data, int len)
 {
 	int j = 0;
 	int i, res;
@@ -117,7 +116,7 @@ int sdm_telnet_read(struct sdm_telnet *inter, char *buffer, int max)
 	return(0);
 }
 
-int sdm_telnet_write(struct sdm_telnet *inter, const char *str)
+int MooTelnet::write(const char *data)
 {
 	int res;
 	int i, j, k;
@@ -226,6 +225,7 @@ int sdm_telnet_run(struct sdm_telnet *inter, struct sdm_user *user)
 
 static int sdm_telnet_accept_connection(void *ptr, struct sdm_telnet *server)
 {
+	// TODO this would be moved to the listening process or whatever
 	struct sdm_telnet *inter;
 	if (!(inter = SDM_TELNET(sdm_tcp_accept(&sdm_telnet_obj_type, server))))
 		return(0);

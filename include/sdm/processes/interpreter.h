@@ -11,14 +11,18 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
-#include <sdm/processors/processor.h>
+#include <sdm/processes/process.h>
 
 #define SDM_CMD_CLOSE		1337
 
 #define SDM_INTERPRETER(ptr)		( (struct sdm_interpreter *) (ptr) )
 
-struct sdm_interpreter {
-	struct sdm_processor processor;
+class MooInterpreter : public MooProcess {
+    public:
+	MooInterpreter();
+	virtual ~MooInterpreter();
+
+
 };
 
 extern struct sdm_processor_type sdm_interpreter_obj_type;

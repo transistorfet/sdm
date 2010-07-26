@@ -25,7 +25,7 @@ class MooArgs {
 };
 
 class MooAction : public MooObject {
-	moo_action_t func;
+	moo_action_t m_func;
     public:
 	MooAction(moo_action_t func = NULL);
 	virtual ~MooAction() { }

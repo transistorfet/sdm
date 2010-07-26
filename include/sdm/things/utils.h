@@ -15,7 +15,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
-#include <sdm/processors/interpreter.h>
+#include <sdm/processes/interpreter.h>
 
 
 /*** Thing Property Functions ***/

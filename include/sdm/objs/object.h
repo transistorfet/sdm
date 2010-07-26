@@ -33,15 +33,15 @@ typedef struct MooObjectType {
 
 class MooObject {
     protected:
-	MooObjectType *type;
-	int bitflags;
+	MooObjectType *m_type;
+	int m_bitflags;
     public:
 	MooObject();
 	virtual ~MooObject();
 
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
-	int read_data(MooDataFile *);
+	int read_data(MooDataFile *data);
 
 	/** Read an entry from the given open data handle and load the information into the object.  The name of
 	    the current entry is given to avoid another call to MooDataFile::read_name().  If an error occurs, a
@@ -49,16 +49,16 @@ class MooObject {
 	    the entry type is not loadable/recognized by the object, 0 should be returned and the caller shall
 	    call the read function of the parent in order to read the entry.  This function should not recursively
 	    call the corresponding function of it's parent object */
-	virtual int read_entry(const char *, MooDataFile *);
+	virtual int read_entry(const char *name, MooDataFile *data);
 	/** Write all data for the object to the given open data handle.  Only data for the immediate object will
 	    be written and not data for the object's parent.  The caller shall call the write function for the
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
-	virtual int write_data(MooDataFile *);
+	virtual int write_data(MooDataFile *data);
 
 	inline int is_a(MooObjectType *type) {
 		MooObjectType *cur;
 
-		for (cur = this->type; cur; cur = cur->parent) {
+		for (cur = m_type; cur; cur = cur->parent) {
 			if (cur == type)
 				return(1);
 		}
