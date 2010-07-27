@@ -165,12 +165,13 @@ int MooUser::read_entry(const char *type, MooDataFile *data)
 	// TODO read processor type and settings
 	// TODO read telnet/interface settings if we are going to do that
 	else
-		return(SDM_NOT_HANDLED);
-	return(SDM_HANDLED);
+		return(MooThing::read_entry(type, data));
+	return(0);
 }
 
 int MooUser::write_data(MooDataFile *data)
 {
+	MooThing::write_data(data);
 	data->write_string_entry("name", m_name);
 	data->write_integer_entry("lastseen", time(NULL));
 	// TODO write telnet/interface settings

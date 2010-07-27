@@ -88,8 +88,8 @@ int MooWorld::read_entry(const char *type, MooDataFile *data)
 		}
 	}
 	else
-		return(SDM_NOT_HANDLED);
-	return(SDM_HANDLED);
+		return(MooThing::read_entry(type, data));
+	return(0);
 }
 
 
@@ -98,6 +98,7 @@ int MooWorld::write_data(MooDataFile *data)
 	int res;
 
 	res = this->write();
+	// TODO should you have a call to MooThing::write_data(data) here?
 	if (data) {
 		data->write_begin_entry("load");
 		data->write_attrib("ref", m_filename);

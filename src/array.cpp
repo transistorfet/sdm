@@ -12,8 +12,9 @@
 #include <sdm/array.h>
 
 template<typename T>
-MooArray<T>::MooArray(int size, int max)
+MooArray<T>::MooArray(int size, int max, int bits)
 {
+	m_bits = bits;
 	m_size = size;
 	m_max = max;
 	m_next_space = 0;
@@ -26,9 +27,11 @@ MooArray<T>::~MooArray()
 {
 	int i;
 
-	for (i = 0; i < m_size; i++) {
-		if (m_data[i])
-			delete m_data[i];
+	if (bits & MOO_ABF_DELETEALL) {
+		for (i = 0; i < m_size; i++) {
+			if (m_data[i])
+				delete m_data[i];
+		}
 	}
 	memory_free(m_data);
 }
@@ -50,11 +53,19 @@ T MooArray<T>::get(int index)
 template<typename T>
 T MooArray<T>::set(int index, T value)
 {
-	if (index > m_size)
-		return(NULL);
-	/** For now, if there is already something in that position, do not replace or delet it */
-	if (m_data[index])
-		return(NULL);
+	if (index > m_size) {
+		if ((m_bits & MOO_ABF_RESIZE) && (m_max == -1 || index < m_max))
+			this->resize(index + 1);
+		else
+			return(NULL);
+	}
+
+	if (m_data[index]) {
+		if (!(m_bits & MOO_ABF_REPLACE))
+			return(NULL);
+		if (m_bits & MOO_ABF_DELETE)
+			delete m_data[index];
+	}
 	m_data[index] = value;
 
 	/** Update the next_space value accordingly */
@@ -76,7 +87,7 @@ int MooArray<T>::add(T value)
 {
 	int space = m_next_space;
 
-	if (space >= m_size)
+	if (space >= m_size && m_bits & MOO_ABF_RESIZE)
 		this->resize(m_size * MOO_ARRAY_GROWTH_FACTOR);
 	if (this->set(space, value))
 		return(space);
@@ -90,6 +101,8 @@ int MooArray<T>::remove(T value)
 
 	for (i = 0; i < m_size; i++) {
 		if (m_data[i] == value) {
+			if (m_bits & MOO_ABF_DELETE)
+				delete m_data[i];
 			m_data[i] = NULL;
 			if (i < m_next_space)
 				m_next_space = i;

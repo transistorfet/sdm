@@ -35,6 +35,8 @@ class MooThing : public MooObject {
 	MooThing *m_next;
 	MooThing *m_objects;
 	MooThing *m_end_objects;
+
+	int assign_id(moo_id_t id);
     public:
 	MooThing();
 	MooThing(moo_id_t id, moo_id_t parent);

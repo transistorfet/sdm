@@ -104,7 +104,6 @@ MooThing::~MooThing()
 int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
-	moo_id_t id;
 	char buffer[STRING_SIZE];
 	MooObject *obj = NULL;
 	MooObjectType *objtype;
@@ -114,103 +113,102 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
 			return(-1);
 		data->read_attrib("name", buffer, STRING_SIZE);
-		if (!(obj = create_sdm_object(objtype, 0)))
+		if (!(obj = moo_make_object(objtype)))
 			return(-1);
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
-		if ((res < 0) || (sdm_thing_set_property(thing, buffer, obj) < 0)) {
-			destroy_sdm_object(obj);
+		if ((res < 0) || (this->set_property(buffer, obj) < 0)) {
+			delete obj;
 			return(-1);
 		}
 	}
 	else if (!strcmp(type, "thing")) {
-		if (!(obj = create_sdm_object(&moo_thing_obj_type, 2, SDM_THING_ARGS(SDM_NO_ID, 0))))
-			return(-1);
-		sdm_data_read_children(data);
-		sdm_object_read_data(obj, data);
-		sdm_data_read_parent(data);
-		sdm_thing_add(thing, SDM_THING(obj));
+		MooThing *thing = new MooThing();
+		data->read_children();
+		thing->read_data(data);
+		data->read_parent();
+		this->add(thing);
 	}
 	else if (!strcmp(type, "action")) {
-		sdm_data_read_attrib(data, "type", buffer, STRING_SIZE);
-		if (!(objtype = sdm_object_find_type(buffer, &sdm_action_obj_type))
-		    || !(obj = create_sdm_object(objtype, 0)))
+		data->read_attrib("type", buffer, STRING_SIZE);
+		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
+		    || !(obj = moo_make_object(objtype)))
 			return(-1);
-		sdm_data_read_attrib(data, "name", buffer, STRING_SIZE);
-		sdm_data_read_children(data);
-		res = sdm_object_read_data(obj, data);
-		sdm_data_read_parent(data);
-		if ((res < 0) || (sdm_thing_set_action(thing, buffer, SDM_ACTION(obj)) < 0)) {
+		data->read_attrib("name", buffer, STRING_SIZE);
+		data->read_children();
+		res = obj->read_data(data);
+		data->read_parent();
+		if ((res < 0) || (this->set_action(buffer, (MooAction *) obj) < 0)) {
 			sdm_status("Error loading action, %s.", buffer);
-			destroy_sdm_object(obj);
+			delete obj;
 			return(-1);
 		}
 	}
 	else if (!strcmp(type, "id")) {
-		id = sdm_data_read_integer_entry(data);
-		moo_thing_assign_id(thing, id);
+		moo_id_t id = data->read_integer_entry();
+		this->assign_id(id);
 	}
 	else if (!strcmp(type, "location")) {
-		id = sdm_data_read_integer_entry(data);
-		if ((obj = SDM_OBJECT(moo_thing_lookup_id(id))))
-			sdm_thing_add(SDM_THING(obj), thing);
+		moo_id_t id = data->read_integer_entry();
+		MooThing *thing = MooThing::lookup(id);
+		if (thing)
+			thing->add(this);
 	}
 	else if (!strcmp(type, "parent")) {
-		id = sdm_data_read_integer_entry(data);
-		thing->parent = id;
+		moo_id_t id = data->read_integer_entry();
+		m_parent = id;
 	}
 	else
-		return(SDM_NOT_HANDLED);
-	return(SDM_HANDLED);
+		return(MOO_NOT_HANDLED);
+	return(MOO_HANDLED);
 }
 
-int sdm_thing_write_data(struct sdm_thing *thing, struct sdm_data_file *data)
+int MooThing::write_data(MooDataFile *data)
 {
-	struct sdm_thing *cur;
 	struct sdm_hash_entry *hentry;
 	struct sdm_tree_entry *tentry;
 
-	sdm_data_write_integer_entry(data, "id", thing->id);
-	if (thing->parent >= 0)
-		sdm_data_write_integer_entry(data, "parent", thing->parent);
-	if (thing->location)
-		sdm_data_write_integer_entry(data, "location", SDM_THING(thing->location)->id);
+	data->write_integer_entry("id", m_id);
+	if (m_parent >= 0)
+		data->write_integer_entry("parent", m_parent);
+	if (m_location)
+		data->write_integer_entry("location", m_location->m_id);
 
 	/** Write the properties to the file */
-	sdm_hash_traverse_reset(thing->properties);
-	while ((hentry = sdm_hash_traverse_next_entry(thing->properties))) {
-		sdm_data_write_begin_entry(data, "property");
-		sdm_data_write_attrib(data, "type", SDM_OBJECT(hentry->data)->type->name);
-		sdm_data_write_attrib(data, "name", hentry->name);
-		sdm_object_write_data(SDM_OBJECT(hentry->data), data);
-		sdm_data_write_end_entry(data);
+	sdm_hash_traverse_reset(m_properties);
+	while ((hentry = sdm_hash_traverse_next_entry(m_properties))) {
+		data->write_begin_entry("property");
+		data->write_attrib("type", ((MooObject *) hentry->data)->m_type->m_name);
+		data->write_attrib("name", hentry->name);
+		((MooObject *) hentry->data)->write_data(data);
+		data->write_end_entry();
 	}
 
 	/** Write the actions to the file */
-	sdm_tree_traverse_reset(thing->actions);
-	while ((tentry = sdm_tree_traverse_next_entry(thing->actions))) {
-		sdm_data_write_begin_entry(data, "action");
-		sdm_data_write_attrib(data, "type", SDM_OBJECT(tentry->data)->type->name);
-		sdm_data_write_attrib(data, "name", tentry->name);
-		sdm_object_write_data(SDM_OBJECT(tentry->data), data);
-		sdm_data_write_end_entry(data);
+	sdm_tree_traverse_reset(m_actions);
+	while ((tentry = sdm_tree_traverse_next_entry(m_actions))) {
+		data->write_begin_entry("action");
+		data->write_attrib("type", ((MooObject *) tentry->data)->m_type->m_name);
+		data->write_attrib("name", tentry->name);
+		((MooObject *) tentry->data)->write_data(data);
+		data->write_end_entry();
 	}
 
 	/** Write the things we contain to the file */
-	for (cur = thing->objects; cur; cur = cur->next) {
-		if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_user_obj_type))
+	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {
+		if (cur->is_a(&moo_user_obj_type))
 			continue;
-		else if (sdm_object_is_a(SDM_OBJECT(cur), &sdm_world_obj_type)) {
-			sdm_world_write(SDM_WORLD(cur), data);
-			/** If we don't continue here, the world will be written to this file which we don't
+		else if (cur->is_a(&moo_world_obj_type)) {
+			cur->write(data);
+			/** If we don't continue here, the world will be written to this file which we don't want
 			    because the world object is a reference only and is written to it's own file */
 			continue;
 		}
 		else
-			sdm_data_write_begin_entry(data, "thing");
-		sdm_object_write_data(SDM_OBJECT(cur), data);
-		sdm_data_write_end_entry(data);
+			data->write_begin_entry("thing");
+		cur->write_data(data);
+		data->write_end_entry();
 	}
 	return(0);
 }
@@ -327,5 +325,15 @@ int MooThing::remove(MooThing *obj)
 	return(1);
 }
 
-
+int MooThing::assign_id(moo_id_t id)
+{
+	/** If the thing already has an ID, then remove it from the table */
+	if (this->m_id >= 0)
+		moo_thing_table->set(m_id, NULL);
+	/** Assign the thing to the appropriate index in the table and set the ID if it succeeded */
+	if (moo_thing_table->set(id, this))
+		m_id = id;
+	else
+		m_id = -1;
+}
 

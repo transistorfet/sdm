@@ -9,26 +9,18 @@
 #include <stdarg.h>
 #include <sdm/data.h>
 
-#define SDM_NOT_HANDLED		0
-#define SDM_HANDLED		1
-#define SDM_HANDLED_ALL		2
+#define MOO_NOT_HANDLED		0
+#define MOO_HANDLED		1
+#define MOO_HANDLED_ALL		2
 
 #define SDM_OBF_RELEASING	0x1000
-
-/** Initialize the preallocade object using the given variable args.  The object will be zero'd before
-    the initialization function is called.  If a negative number is returned, the object will destroyed
-    and the release function for that object will be called. */
-typedef int (*sdm_object_init_t)(struct sdm_object *, int, va_list);
-/** Release the resources freed by the object */
-typedef void (*sdm_object_release_t)(struct sdm_object *);
-
 
 typedef class MooObject *(*moo_type_create_t)(void);
 
 typedef struct MooObjectType {
-	MooObjectType *parent;
-	char *name;
-	moo_type_create_t create;
+	MooObjectType *m_parent;
+	char *m_name;
+	moo_type_create_t m_create;
 } MooObjectType;
 
 class MooObject {
@@ -49,16 +41,16 @@ class MooObject {
 	    the entry type is not loadable/recognized by the object, 0 should be returned and the caller shall
 	    call the read function of the parent in order to read the entry.  This function should not recursively
 	    call the corresponding function of it's parent object */
-	virtual int read_entry(const char *name, MooDataFile *data);
+	virtual int read_entry(const char *name, MooDataFile *data) = 0;
 	/** Write all data for the object to the given open data handle.  Only data for the immediate object will
 	    be written and not data for the object's parent.  The caller shall call the write function for the
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
-	virtual int write_data(MooDataFile *data);
+	virtual int write_data(MooDataFile *data) = 0;
 
 	inline int is_a(MooObjectType *type) {
 		MooObjectType *cur;
 
-		for (cur = m_type; cur; cur = cur->parent) {
+		for (cur = m_type; cur; cur = cur->m_parent) {
 			if (cur == type)
 				return(1);
 		}
@@ -80,12 +72,11 @@ class MooObjectType {
 int init_object(void);
 void release_object(void);
 
-int moo_object_register_type(MooObjectType *);
-int moo_object_deregister_type(MooObjectType *);
-MooObjectType *moo_object_find_type(const char *, MooObjectType *);
+int moo_object_register_type(MooObjectType *type);
+int moo_object_deregister_type(MooObjectType *type);
+MooObjectType *moo_object_find_type(const char *name, MooObjectType *base);
 
-MooObject *create_moo_object(MooObjectType *, int, ...);
-void destroy_sdm_object(MooObject *);
+MooObject *moo_make_object(MooObjectType *type);
 
 #endif
 

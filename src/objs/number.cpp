@@ -38,7 +38,7 @@ MooObject *moo_number_create(void)
 int MooNumber::read_entry(const char *type, MooDataFile *data)
 {
 	this->num = data->read_float();
-	return(SDM_HANDLED_ALL);
+	return(MOO_HANDLED_ALL);
 }
 
 int MooNumber::write_data(MooDataFile *data)

@@ -55,7 +55,7 @@ int MooString::read_entry(const char *type, MooDataFile *data)
 
 	data->read_string(buffer, STRING_SIZE);
 	this->set(buffer);
-	return(SDM_HANDLED_ALL);
+	return(MOO_HANDLED_ALL);
 }
 
 int MooString::write_data(MooDataFile *data)
