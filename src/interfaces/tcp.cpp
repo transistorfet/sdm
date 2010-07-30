@@ -46,54 +46,91 @@ MooObject *moo_tcp_create(void)
 }
 
 
-static int tcp_connect(struct sdm_tcp *, const char *, int);
-static int tcp_listen(struct sdm_tcp *, int);
-static int tcp_accept(struct sdm_tcp *, struct sdm_tcp *);
-
-int sdm_tcp_init(struct sdm_tcp *inter, int nargs, va_list va)
+MooTCP::MooTCP()
 {
-	int type;
-
-	if (sdm_interface_init(SDM_INTERFACE(inter), 0, va) < 0)
-		return(-1);
-	inter->read_pos = 0;
-	inter->read_length = 0;
-	memset(inter->read_buffer, '\0', TCP_READ_BUFFER);
-
-	type = va_arg(va, int);
-	switch (type) {
-		case SDM_TCP_CONNECT: {
-			const char *server;
-			int port;
-
-			server = va_arg(va, const char *);
-			port = va_arg(va, int);
-			return(tcp_connect(inter, server, port));
-		}
-		case SDM_TCP_LISTEN: {
-			int port;
-
-			port = va_arg(va, int);
-			return(tcp_listen(inter, port));
-		}
-		case SDM_TCP_ACCEPT: {
-			struct sdm_tcp *listener;
-
-			listener = va_arg(va, struct sdm_tcp *);
-			return(tcp_accept(inter, listener));
-			break;
-		}
-		default:
-			break;
-	}
-	return(-1);
+	m_read_pos = 0;
+	m_read_length = 0;
+	memset(m_read_buffer, '\0', TCP_READ_BUFFER);
 }
 
 MooTCP::~MooTCP()
 {
+	this->disconnect();
+}
+
+
+int MooTCP::connect(const char *addr, int port)
+{
+	int i, j;
+	struct hostent *host;
+	struct sockaddr_in saddr;
+
+	if (!(host = gethostbyname(addr)))
+		return(-1);
+	memset(&saddr, '\0', sizeof(struct sockaddr_in));
+	saddr.sin_family = AF_INET;
+	saddr.sin_port = htons(port);
+
+	if ((m_rfd = socket(PF_INET, SOCK_STREAM, 0)) >= 0) {
+		for (j = 0;host->h_addr_list[j];j++) {
+			saddr.sin_addr = *((struct in_addr *) host->h_addr_list[j]);
+			for (i = 0;i < TCP_CONNECT_ATTEMPTS;i++) {
+				if (connect(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
+					return(0);
+			}
+		}
+	}
+	return(-1);
+}
+
+int MooTCP::listen(int port)
+{
+	struct sockaddr_in saddr;
+
+	memset(&saddr, '\0', sizeof(struct sockaddr_in));
+	saddr.sin_family = AF_INET;
+	saddr.sin_addr.s_addr = INADDR_ANY;
+	saddr.sin_port = htons(port);
+
+	if (((m_rfd = socket(PF_INET, SOCK_STREAM, 0)) >= 0)
+	    && (bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
+	    && (listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
+		return(0);
+	}
+	return(-1);
+}
+
+int accept(MooTCP *inter)
+{
+	int size;
+	fd_set rd;
+	struct sockaddr_in saddr;
+	struct timeval timeout = { 0, 0 };
+
+	this->disconnect();
+
+	/** Make sure there is a connection waiting */
+	FD_ZERO(&rd);
+	FD_SET(m_rfd, &rd);
+	if (select(m_rfd + 1, &rd, NULL, NULL, &timeout) <= 0)
+		return(-1);
+
+	size = sizeof(struct sockaddr_in);
+	if ((m_rfd = accept(m_rfd, (struct sockaddr *) &saddr, &size))) {
+		sdm_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
+		// TODO do anything you might want with the saddr
+		return(0);
+	}
+	return(-1);
+}
+
+int MooTCP::disconnect()
+{
+	if (m_rfd <= 0)
+		return;
 	shutdown(m_rfd, 2);
 	close(m_rfd);
-	this->rfd = -1;
+	m_rfd = -1;
 }
 
 
@@ -167,42 +204,42 @@ int MooTCP::send(const char *msg, int size)
  * Receive data directly into the read buffer and return the number of bytes
  * read or -1 on error or disconnect.
  */ 
-int sdm_tcp_read_to_buffer(struct sdm_tcp *inter)
+int MooTCP::recv_to_buffer()
 {
 	int res;
 	fd_set rd;
 	struct timeval timeout = { 0, 0 };
 
 	FD_ZERO(&rd);
-	FD_SET(SDM_INTERFACE(inter)->read, &rd);
-	if ((res = select(SDM_INTERFACE(inter)->read + 1, &rd, NULL, NULL, &timeout)) < 0)
+	FD_SET(m_rfd, &rd);
+	if ((res = select(m_rfd + 1, &rd, NULL, NULL, &timeout)) < 0)
 		return(-1);
 	else if (res == 0)
-		return(inter->read_length - inter->read_pos);
+		return(m_read_length - m_read_pos);
 
-	if ((res = recv(SDM_INTERFACE(inter)->read, &inter->read_buffer[inter->read_length], TCP_READ_BUFFER - inter->read_length - 1, 0)) <= 0)
+	if ((res = recv(m_rfd, &m_read_buffer[m_read_length], TCP_READ_BUFFER - m_read_length - 1, 0)) <= 0)
 		return(-1);
-	res += inter->read_length;
-	inter->read_length = res;
-	inter->read_buffer[res] = '\0';
-	SDM_INTERFACE_SET_READY_READ(inter);
-	return(res - inter->read_pos);
+	res += m_read_length;
+	m_read_length = res;
+	m_read_buffer[res] = '\0';
+	this->set_ready();
+	return(res - m_read_pos);
 }
 
 /**
  * Set the read buffer to contain the given data.
  */
-int sdm_tcp_set_read_buffer(struct sdm_tcp *inter, const char *buffer, int len)
+int MooTCP::load_buffer(const char *data, int len)
 {
 	if (len > TCP_READ_BUFFER)
 		len = TCP_READ_BUFFER;
-	strncpy(inter->read_buffer, buffer, len);
-	inter->read_length = len;
-	inter->read_pos = 0;
+	strncpy(m_read_buffer, data, len);
+	m_read_length = len;
+	m_read_pos = 0;
 	if (len)
-		SDM_INTERFACE_SET_READY_READ(inter);
+		this->set_ready();
 	else
-		SDM_INTERFACE_SET_NOT_READY_READ(inter);
+		this->set_not_ready();
 	return(len);
 }
 
@@ -211,94 +248,29 @@ int sdm_tcp_set_read_buffer(struct sdm_tcp *inter, const char *buffer, int len)
  * if the position is greater than or equal to the length of the read buffer,
  * clear the read buffer.  The position of the read pointer is returned.
  */
-int sdm_tcp_advance_read_position(struct sdm_tcp *inter, int pos)
+int MooTCP::read_pos(int pos)
 {
-	if (pos >= inter->read_length) {
-		SDM_INTERFACE_SET_NOT_READY_READ(inter);
-		inter->read_pos = 0;
-		inter->read_length = 0;
+	if (pos >= m_read_length) {
+		this->set_not_ready();
+		m_read_pos = 0;
+		m_read_length = 0;
 	}
 	else {
-		SDM_INTERFACE_SET_READY_READ(inter);
-		inter->read_pos = pos;
+		this->set_ready();
+		m_read_pos = pos;
 	}
-	return(inter->read_pos);
+	return(m_read_pos);
 }
 
 /**
  * Clear the read buffer.
  */
-void sdm_tcp_clear_buffer(struct sdm_tcp *inter)
+void MooTCP::clear_buffer()
 {
-	SDM_INTERFACE_SET_NOT_READY_READ(inter);
-	inter->read_pos = 0;
-	inter->read_length = 0;
+	this->set_not_ready();
+	m_read_pos = 0;
+	m_read_length = 0;
 }
 
-
-/*** Local Functions ***/
-
-static int tcp_connect(struct sdm_tcp *inter, const char *server, int port)
-{
-	int i, j;
-	struct hostent *host;
-	struct sockaddr_in saddr;
-
-	if (!(host = gethostbyname(server)))
-		return(-1);
-	memset(&saddr, '\0', sizeof(struct sockaddr_in));
-	saddr.sin_family = AF_INET;
-	saddr.sin_port = htons(port);
-
-	if ((SDM_INTERFACE(inter)->read = socket(PF_INET, SOCK_STREAM, 0)) >= 0) {
-		for (j = 0;host->h_addr_list[j];j++) {
-			saddr.sin_addr = *((struct in_addr *) host->h_addr_list[j]);
-			for (i = 0;i < TCP_CONNECT_ATTEMPTS;i++) {
-				if (connect(SDM_INTERFACE(inter)->read, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
-					return(0);
-			}
-		}
-	}
-	return(-1);
-}
-
-static int tcp_listen(struct sdm_tcp *inter, int port)
-{
-	struct sockaddr_in saddr;
-
-	memset(&saddr, '\0', sizeof(struct sockaddr_in));
-	saddr.sin_family = AF_INET;
-	saddr.sin_addr.s_addr = INADDR_ANY;
-	saddr.sin_port = htons(port);
-
-	if (((SDM_INTERFACE(inter)->read = socket(PF_INET, SOCK_STREAM, 0)) >= 0)
-	    && (bind(SDM_INTERFACE(inter)->read, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
-	    && (listen(SDM_INTERFACE(inter)->read, TCP_LISTEN_QUEUE) >= 0)) {
-		return(0);
-	}
-	return(-1);
-}
-
-static int tcp_accept(struct sdm_tcp *inter, struct sdm_tcp *listener)
-{
-	int size;
-	fd_set rd;
-	struct sockaddr_in saddr;
-	struct timeval timeout = { 0, 0 };
-
-	/** Make sure there is a connection waiting */
-	FD_ZERO(&rd);
-	FD_SET(SDM_INTERFACE(listener)->read, &rd);
-	if (select(SDM_INTERFACE(listener)->read + 1, &rd, NULL, NULL, &timeout) <= 0)
-		return(-1);
-
-	size = sizeof(struct sockaddr_in);
-	if ((SDM_INTERFACE(inter)->read = accept(SDM_INTERFACE(listener)->read, (struct sockaddr *) &saddr, &size))) {
-		sdm_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
-		// TODO do anything you might want with the saddr
-		return(0);
-	}
-	return(-1);
-}
 
 

@@ -29,8 +29,8 @@ class MooThing : public MooObject {
 	moo_id_t m_id;
 	moo_id_t m_parent;
 	MooThing *m_location;
-	struct sdm_hash *m_properties;		// MooHash<GameObject> *properties;
-	struct sdm_tree *m_actions;		// MooTree<GameObject> *actions;
+	MooHash<MooObject *> *m_properties;
+	MooTree<MooAction *> *m_actions;
 
 	MooThing *m_next;
 	MooThing *m_objects;

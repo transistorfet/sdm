@@ -30,10 +30,22 @@
 	  handled via config data of some kind (like a property in the user thing which would be created by the login process)
 	* add some code somewhere to launch the initial listening process(es) or whatever  for each port through a <process>
 	  block in the main config file.  This would tell it which process to use and all that
+	* is it possible to have something like sshd automatically run a certain program upon connection (to a specific port) such
+	  that this program either directly transfers data to the MOO (running in a seperate process) or handles the basic I/O and
+	  such, communicating with the MOO core via a raw protocol of some kind?  This would move most of the communications code
+	  out of the core and allow you to use sshd of course (i don't think this is possible because sshd is too specfic for shells)
+	* perhaps you should focus on the raw format and have a completely seperate process of some kind that does the actual detailed
+	  handling of I/O, acting as an intermediate client
+
+    Covnersion TODO:
+	* you need to modify the handle()/wait() function system to either pass an indicator of what type or event is ready (r/w/e)
+	  and/or a flag of what conditions to call the handle() function on.  You then need to make the handle() function only get
+	  called once per check (rather than 3 checks/3 calls)
 
 
 
 
+    Old Stuff:
 	* make an array object like SDRL
 	* make sdm able to use python and SDRL (and possibly lua) simultaneously but there is no need to
 	  make it capable of supporting more than this.  Making it capable of *only* python would not be

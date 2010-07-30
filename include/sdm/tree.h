@@ -9,63 +9,44 @@
 
 #include <sdm/globals.h>
 
-#define SDM_TBF_NO_ADD			0x0001			/** No entries can be added */
-#define SDM_TBF_NO_REPLACE		0x0002			/** No entries can be replaced */
-#define SDM_TBF_NO_REMOVE		0x0004			/** No entries can be removed */
-#define SDM_TBF_CONSTANT		0x0006			/** No entries can be replaced or removed */
+#define MOO_TBF_NO_ADD			0x0001		// No entries can be added
+#define MOO_TBF_REPLACE			0x0002		// Allow new elements to replace existing elements at the same index
+#define MOO_TBF_REMOVE			0x0004		// Allow entries to be removed
+#define MOO_TBF_DELETE			0x0010		// Delete elements when removed from list
+#define MOO_TBF_DELETEALL		0x0020		// Delete all elements when list is destroyed
 
-struct sdm_tree_entry {
-	char *name;
-	void *data;
-	struct sdm_tree_entry *parent;
-	struct sdm_tree_entry *left;
-	struct sdm_tree_entry *right;
+template<typename T>
+class MooTreeEntry {
+    public:
+	char *m_key;
+	T m_data;
+	MooTreeEntry<T> *parent;
+	MooTreeEntry<T> *left;
+	MooTreeEntry<T> *right;
 };
 
-struct sdm_tree {
-	int bitflags;
-	destroy_t destroy;
-	struct sdm_tree_entry *traverse_next;
-	struct sdm_tree_entry *root;
+template<typename T>
+class MooTree {
+    protected:
+	int m_bitflags;
+	MooTreeEntry<T> *m_traverse_next;
+	MooTreeEntry<T> *m_root;
+    public:
+	MooTree(int bits);
+	~MooTree();
+
+	int set(const char *key, T data);
+	int remove(const char *key);
+
+	MooTreeEntry<T> *get_entry(const char *key);
+	MooTreeEntry<T> *get_entry_partial(const char *key);
+	T get(const char *key);
+	T get_partial(const char *key);
+
+	void reset();
+	MooTreeEntry<T> *next_entry();
+	T next();
 };
-
-struct sdm_tree *create_sdm_tree(short, destroy_t);
-void destroy_sdm_tree(struct sdm_tree *);
-
-int sdm_tree_add(struct sdm_tree *, const char *, void *);
-int sdm_tree_replace(struct sdm_tree *, const char *, void *);
-int sdm_tree_remove(struct sdm_tree *, const char *);
-
-struct sdm_tree_entry *sdm_tree_find_entry(struct sdm_tree *, const char *);
-struct sdm_tree_entry *sdm_tree_find_entry_partial(struct sdm_tree *, const char *);
-
-void sdm_tree_traverse_reset(struct sdm_tree *);
-struct sdm_tree_entry *sdm_tree_traverse_next_entry(struct sdm_tree *);
-
-
-static inline void *sdm_tree_find(struct sdm_tree *tree, const char *name) {
-	struct sdm_tree_entry *entry;
-
-	if (!(entry = sdm_tree_find_entry(tree, name)))
-		return(NULL);
-	return(entry->data);
-}
-
-static inline void *sdm_tree_find_partial(struct sdm_tree *tree, const char *name) {
-	struct sdm_tree_entry *entry;
-
-	if (!(entry = sdm_tree_find_entry_partial(tree, name)))
-		return(NULL);
-	return(entry->data);
-}
-
-static inline void *sdm_tree_traverse_next(struct sdm_tree *tree) {
-	struct sdm_tree_entry *entry;
-
-	if (!(entry = sdm_tree_traverse_next_entry(tree)))
-		return(NULL);
-	return(entry->data);
-}
 
 #endif
 

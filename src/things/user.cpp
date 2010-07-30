@@ -31,7 +31,7 @@ MooObjectType moo_user_obj_type = {
 	(moo_type_create_t) moo_user_create
 };
 
-static struct sdm_hash *user_list = NULL;
+static MooHash<MooUser *> *user_list = NULL;
 
 int init_user(void)
 {
@@ -41,8 +41,7 @@ int init_user(void)
 
 	if (user_list)
 		return(1);
-	if (!(user_list = create_sdm_hash(0, -1, NULL)))
-		return(-1);
+	user_list = new MooHash<MooUser *>(MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
 
 	/** Load all the users into memory in a disconnected state */
 	data = new MooDataFile("etc/passwd.xml", SDM_DATA_READ, "passwd");
@@ -59,17 +58,7 @@ int init_user(void)
 
 void release_user(void)
 {
-	MooUser *user;
-
-	if (user_list) {
-		sdm_hash_traverse_reset(user_list);
-		while ((user = sdm_hash_traverse_next(user_list))) {
-			if (user->m_inter)
-				delete user->m_inter
-			delete user;
-		}
-		destroy_sdm_hash(user_list);
-	}
+	delete user_list;
 	user_list = NULL;
 }
 
@@ -85,7 +74,7 @@ MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, 
 		throw -1;
 
 	/** If there is already a user with that name then fail */
-	if (sdm_hash_add(user_list, name, this))
+	if (user_list->set(name, this))
 		return(-1);
 	sdm_user_read(this);
 	return(0);
@@ -97,7 +86,7 @@ MooUser::~MooUser()
 	this->disconnect();
 
 	/** Release the user's other resources */
-	sdm_hash_remove(user_list, m_name);
+	user_list->remove(m_name);
 	memory_free(m_name);
 	delete m_inter;
 }
@@ -131,7 +120,7 @@ int MooUser::connect(MooInterface *inter)
 	return(0);
 }
 
-MooUser::~MooUser()
+MooUser::disconnect()
 {
 	struct sdm_number *number;
 
@@ -153,7 +142,8 @@ MooUser::~MooUser()
 	/** Save the user information to the user's file only if we were already connected */
 	if (user->inter)
 		sdm_user_write(user);
-	user->inter = NULL;
+	// TODO How does this all even work?
+	//user->inter = NULL;
 }
 
 
@@ -208,7 +198,7 @@ int moo_user_logged_in(const char *name)
 {
 	MooUser *user;
 
-	if ((user = sdm_hash_find(user_list, name)) && user->m_inter)
+	if ((user = user_list->get(name)) && user->m_inter)
 		return(1);
 	return(0);
 }

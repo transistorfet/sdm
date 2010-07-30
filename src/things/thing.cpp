@@ -18,8 +18,9 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 
-#define THING_INIT_PROPERTIES			5
-#define THING_INIT_ACTIONS			5
+#define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
+#define THING_PROPERTIES_SIZE		5
+#define THING_ACTIONS_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETEALL | MOO_TBF_DELETE
 
 #define MOO_THING_INIT_SIZE			100
 /** This is to prevent us from making giant table accidentally */
@@ -62,13 +63,11 @@ MooThing::MooThing()
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)
 {
-	if (!(m_properties = create_sdm_hash(0, THING_INIT_PROPERTIES, (destroy_t) destroy_sdm_object)))
-		throw -1;
+	m_properties = new MooHash<MooObject *>(THING_PROPERTIES_SIZE, THING_PROPERTIES_BITS);
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	if (!(m_actions = create_sdm_tree(0, (destroy_t) destroy_sdm_object)))
-		throw -1;
+	m_actions = new MooTree<MooAction *>(THING_ACTIONS_BITS);
 
 	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
 	    If the id = SDM_NEW_ID then assign the next available id */
@@ -89,9 +88,9 @@ MooThing::~MooThing()
 	if (m_location)
 		m_location->remove(this);
 	if (m_properties)
-		destroy_sdm_hash(m_properties);
+		delete m_properties;
 	if (m_actions)
-		destroy_sdm_tree(m_actions);
+		delete m_actions;
 	if (m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
 
@@ -166,8 +165,8 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 
 int MooThing::write_data(MooDataFile *data)
 {
-	struct sdm_hash_entry *hentry;
-	struct sdm_tree_entry *tentry;
+	MooHashEntry<MooObject *> *hentry;
+	MooTreeEntry<MooAction *> *tentry;
 
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
@@ -176,22 +175,22 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_integer_entry("location", m_location->m_id);
 
 	/** Write the properties to the file */
-	sdm_hash_traverse_reset(m_properties);
-	while ((hentry = sdm_hash_traverse_next_entry(m_properties))) {
+	m_properties->reset();
+	while ((hentry = m_properties->next_entry())) {
 		data->write_begin_entry("property");
-		data->write_attrib("type", ((MooObject *) hentry->data)->m_type->m_name);
-		data->write_attrib("name", hentry->name);
-		((MooObject *) hentry->data)->write_data(data);
+		data->write_attrib("type", hentry->m_data->type_name());
+		data->write_attrib("name", hentry->m_key);
+		hentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
 
 	/** Write the actions to the file */
-	sdm_tree_traverse_reset(m_actions);
-	while ((tentry = sdm_tree_traverse_next_entry(m_actions))) {
+	m_actions->reset();
+	while ((tentry = m_actions->next_entry())) {
 		data->write_begin_entry("action");
-		data->write_attrib("type", ((MooObject *) tentry->data)->m_type->m_name);
-		data->write_attrib("name", tentry->name);
-		((MooObject *) tentry->data)->write_data(data);
+		data->write_attrib("type", tentry->m_data->type_name());
+		data->write_attrib("name", tentry->m_key);
+		tentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
 
@@ -200,15 +199,13 @@ int MooThing::write_data(MooDataFile *data)
 		if (cur->is_a(&moo_user_obj_type))
 			continue;
 		else if (cur->is_a(&moo_world_obj_type)) {
-			cur->write(data);
-			/** If we don't continue here, the world will be written to this file which we don't want
-			    because the world object is a reference only and is written to it's own file */
-			continue;
+			cur->write_data(data);
 		}
-		else
+		else {
 			data->write_begin_entry("thing");
-		cur->write_data(data);
-		data->write_end_entry();
+			cur->write_data(data);
+			data->write_end_entry();
+		}
 	}
 	return(0);
 }
@@ -220,10 +217,8 @@ int MooThing::set_property(const char *name, MooObject *obj)
 		return(-1);
 	/** If the object is NULL, remove the entry from the table */
 	if (!obj)
-		return(sdm_hash_remove(m_properties, name));
-	if (sdm_hash_find(m_properties, name))
-		return(sdm_hash_replace(m_properties, name, obj));
-	return(sdm_hash_add(m_properties, name, obj));
+		return(m_properties->remove(name));
+	return(m_properties->set(name, obj));
 }
 
 MooObject *MooThing::get_property(const char *name, MooObjectType *type)
@@ -232,7 +227,7 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 	MooObject *obj;
 
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if (!(obj = sdm_hash_find(m_properties, name)))
+		if (!(obj = m_properties->get(name)))
 			continue;
 		if (!type || obj->is_a(type))
 			return(obj);
@@ -247,10 +242,8 @@ int MooThing::set_action(const char *name, MooAction *action)
 		return(-1);
 	/** If the action is NULL, remove the entry from the table */
 	if (!action)
-		return(sdm_tree_remove(m_actions, name));
-	if (sdm_tree_find(m_actions, name))
-		return(sdm_tree_replace(m_actions, name, action));
-	return(sdm_tree_add(m_actions, name, action));
+		return(m_actions->remove(name));
+	return(m_actions->set(name, action));
 }
 
 int MooThing::do_action(const char *name, MooArgs *args)
@@ -263,7 +256,7 @@ int MooThing::do_action(const char *name, MooArgs *args)
 	args->action = name;
 	args->result = NULL;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = sdm_tree_find(cur->m_actions, name)))
+		if ((action = cur->m_actions->get(name)))
 			return(action->do_action(this, args));
 	}
 	return(1);
@@ -279,7 +272,7 @@ int MooThing::do_abbreved_action(const char *name, MooArgs *args)
 	args->action = name;
 	args->result = NULL;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = sdm_tree_find_partial(cur->m_actions, name)))
+		if ((action = cur->m_actions->get_partial(name)))
 			return(action->do_action(this, args));
 	}
 	return(1);
@@ -335,5 +328,6 @@ int MooThing::assign_id(moo_id_t id)
 		m_id = id;
 	else
 		m_id = -1;
+	return(m_id);
 }
 

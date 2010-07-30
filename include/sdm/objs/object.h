@@ -31,6 +31,9 @@ class MooObject {
 	MooObject();
 	virtual ~MooObject();
 
+	MooObjectType *type() { return(m_type); }
+	const char *type_name() { return(m_type->m_name); }
+
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
 	int read_data(MooDataFile *data);
@@ -57,17 +60,6 @@ class MooObject {
 		return(0);
 	}
 };
-
-/*
-class MooObjectType {
-    public:
-	const char *name;
-
-	virtual MooObject *create() = 0;
-};
-*/
-
-
 
 int init_object(void);
 void release_object(void);
