@@ -11,15 +11,14 @@
 #include <stdarg.h>
 
 #include <sdm/misc.h>
+#include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processes/process.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 
 class MooUser : public MooThing {
-	MooInterface *m_inter;
-	MooProcess *m_proc;
+	MooTask *m_task;
 	string_t m_name;
     public:
 	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);

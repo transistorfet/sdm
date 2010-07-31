@@ -1,25 +1,23 @@
 /*
- * Object Name:	login.h
- * Description:	Login Process
+ * Task Name:	login.h
+ * Description:	Login Task
  */
 
-#ifndef _SDM_PROCESS_LOGIN_H
-#define _SDM_PROCESS_LOGIN_H
+#ifndef _SDM_TASKS_LOGIN_H
+#define _SDM_TASKS_LOGIN_H
 
 #include <string>
 #include <stdarg.h>
 
 #include <sdm/misc.h>
-#include <sdm/processes/process.h>
+#include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
 
-// TODO this would be a specific process for handling telnet connections (IRC would use a different such process)
+// TODO this would be a specific task for handling telnet connections (IRC would use a different such process)
 
-#define SDM_LOGIN(ptr)		( (struct sdm_login *) (ptr) )
-
-class MooLogin : public MooProcess {
+class MooLogin : public MooTask {
 	std::string name;
 	// TODO assume just password authentication for now
 	std::string password;

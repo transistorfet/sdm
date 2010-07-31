@@ -36,6 +36,19 @@
 	  out of the core and allow you to use sshd of course (i don't think this is possible because sshd is too specfic for shells)
 	* perhaps you should focus on the raw format and have a completely seperate process of some kind that does the actual detailed
 	  handling of I/O, acting as an intermediate client
+	* the editor process could be implemented via whatever protocol by just passing all the code to the client, allowing it to
+	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
+	  a buffer, edit it, and then pass it all back when done.
+
+	* you could have a protocol that would allow object based RPC (via xmsrpc or a custom system or something) such that you could
+	  implement both a client connection (calling actions (methods) on the user thing object through which everything can be done)
+	  or controlling other objects allowing out of process extensions (object servers and stuff written in other languages, allowing
+	  language support like perl and stuff (???)).
+	* for this to work, you need a permissions system (which you need anyways) so that a connection cannot do an action on an
+	  object it does not have permissions on.
+
+	* think about multithreading possibilities
+	* rename processes to tasks (i think it's now more appropriate)
 
     Covnersion TODO:
 	* you need to modify the handle()/wait() function system to either pass an indicator of what type or event is ready (r/w/e)

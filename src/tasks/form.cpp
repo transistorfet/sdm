@@ -1,5 +1,5 @@
 /*
- * Object Name:	form.c
+ * Task Name:	form.cpp
  * Description:	Form Object
  */
 
@@ -16,11 +16,11 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processes/interpreter.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/processes/process.h>
-#include <sdm/processes/form.h>
+#include <sdm/tasks/interpreter.h>
+#include <sdm/tasks/task.h>
+#include <sdm/tasks/form.h>
 
 struct sdm_processor_type sdm_form_obj_type = { {
 	(struct sdm_object_type *) &sdm_processor_obj_type,

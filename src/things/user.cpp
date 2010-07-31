@@ -13,13 +13,11 @@
 #include <sdm/hash.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/tasks/task.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/processes/form.h>
-#include <sdm/processes/process.h>
-#include <sdm/processes/interpreter.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
@@ -100,10 +98,15 @@ int MooUser::connect(MooInterface *inter)
 		delete m_inter;
 	m_inter = inter;
 
+	// TODO we could instead of all this crap, have the m_task set by the task who manipulates this object
+	//	All output would be written to the task via an output method called from whatever code (possibly all
+	//	code would call user->output() or write() or whatever, and it would then call m_task->output() which would
+	//	then call output() on the interface.
+
 	if (m_parent > 0)
-		m_proc = new MooInterpreter();
+		m_task = new MooInterpreter();
 	else
-		m_proc = new MooForm("etc/register.xml");
+		m_task = new MooForm("etc/register.xml");
 
 	/** Move the user to the last location recorded or to a safe place if there is no last location */
 	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
@@ -114,9 +117,9 @@ int MooUser::connect(MooInterface *inter)
 		sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_thing_lookup_id(50), NULL);
 		//sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
 
-	if (!user->m_proc)
+	if (!user->m_task)
 		return(-1);
-	user->m_proc->initialize(user);
+	user->m_task->initialize(user);
 	return(0);
 }
 

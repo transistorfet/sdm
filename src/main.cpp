@@ -37,6 +37,8 @@ int init_moo(void)
 		return(-1);
 	if (init_timer() < 0)
 		return(-1);
+	if (init_task() < 0)
+		return(-1);
 	if (init_interface() < 0)
 		return(-1);
 	if (init_telnet() < 0)
@@ -77,6 +79,7 @@ void release_moo(void)
 
 	release_telnet();
 	release_interface();
+	release_task();
 	release_timer();
 	release_object();
 

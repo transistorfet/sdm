@@ -16,6 +16,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
@@ -79,25 +80,25 @@ int MooInterface::wait(float t)
 	    and return when each connection gets a chance to read data so that
 	    we can check other events and remain responsive */
 	for (i = 0; i < interface_list->size(); i++) {
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_READ)
 		  && (cur->m_bitflags & IO_READY_READ)) {
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 			ret++;
 		}
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_WRITE)
 		  && (cur->m_bitflags & IO_READY_WRITE)) {
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 			ret++;
 		}
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_ERROR)
 		  && (cur->m_bitflags & IO_READY_ERROR)) {
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 			ret++;
 		}
 	}
@@ -140,23 +141,23 @@ int MooInterface::wait(float t)
 	for (i = 0;i < interface_list->size();i++) {
 		/** We check that the interface is not NULL before each condition in case the previous
 		    callback destroyed the interface */
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_READ)
 		    && ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd)))
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_WRITE)
 		    && ((cur->m_wfd != -1) && FD_ISSET(cur->m_wfd, &wr)))
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 
-		if (!(cur = interface_list->get(i)) || !cur->m_proc)
+		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_condition & IO_COND_ERROR)
 		    && ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err)))
-			cur->m_proc->handle(cur);
+			cur->m_task->handle(cur);
 	}
 	return(ret);
 }

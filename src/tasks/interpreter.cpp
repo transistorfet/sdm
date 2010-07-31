@@ -1,6 +1,6 @@
 /*
- * Object Name:	interpreter.c
- * Description:	Command Interpreter Object
+ * Task Name:	interpreter.cpp
+ * Description:	Command Interpreter Task
  */
 
 #include <stdio.h>
@@ -19,11 +19,11 @@
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/processes/process.h>
-#include <sdm/processes/interpreter.h>
+#include <sdm/tasks/task.h>
+#include <sdm/tasks/interpreter.h>
 
 MooObjectType moo_interpreter_obj_type = {
-	&moo_processor_obj_type,
+	&moo_task_obj_type,
 	"interpreter",
 	(moo_type_create_t) moo_interpreter_create
 };

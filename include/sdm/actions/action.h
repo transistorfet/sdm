@@ -9,7 +9,8 @@
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/things/thing.h>
+
+class MooThing;
 
 typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *);
 
@@ -22,6 +23,8 @@ class MooArgs {
 	MooThing *obj;
 	MooThing *target;
 	const char *text;
+
+	MooArgs() { memset(this, '\0', sizeof(MooArgs)); }
 };
 
 class MooAction : public MooObject {

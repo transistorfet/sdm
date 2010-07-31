@@ -13,7 +13,7 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/utils.h>
-#include <sdm/processes/interpreter.h>
+#include <sdm/tasks/interpreter.h>
 
 #include <sdm/actions/lua/funcs.h>
 

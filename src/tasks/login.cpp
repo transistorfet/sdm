@@ -1,6 +1,6 @@
 /*
- * Object Name:	login.c
- * Description:	Login Process
+ * Task Name:	login.cpp
+ * Description:	Login Task
  */
 
 #include <stdio.h>
@@ -14,10 +14,11 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/login.h>
+#include <sdm/tasks/task.h>
+#include <sdm/tasks/login.h>
 
 MooObjectType moo_login_obj_type = {
-	&moo_process_obj_type,
+	&moo_task_obj_type,
 	"login",
 	(moo_type_create_t) moo_login_create
 };

@@ -9,8 +9,8 @@
 #include <stdarg.h>
 
 #include <sdm/globals.h>
+#include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
-#include <sdm/processes/process.h>
 
 #define IO_COND_READ			0x0001
 #define IO_COND_WRITE			0x0002
@@ -29,7 +29,7 @@ class MooInterface : public MooObject {
 	int m_rfd;
 	int m_wfd;
 	int m_efd;
-	MooProcess *m_proc;
+	MooTask *m_task;
 
 	void set_ready() { m_bitflags |= IO_READY_READ; }
 	void set_not_ready() { m_bitflags &= ~IO_READY_READ; }
@@ -37,7 +37,7 @@ class MooInterface : public MooObject {
     public:
 	MooInterface();
 	~MooInterface();
-	void set_process(MooProcess *proc) { m_proc = proc; }
+	void set_task(MooTask *task) { m_task = task; }
 
 	virtual int read(char *data, int len) = 0;
 	virtual int write(const char *data) = 0;

@@ -1,23 +1,23 @@
 /*
- * Object Name:	interpreter.h
- * Description:	Command Interpreter Object
+ * Task Name:	interpreter.h
+ * Description:	Command Interpreter Task
  */
 
-#ifndef _SDM_PROCESSORS_INTERPRETER_H
-#define _SDM_PROCESSORS_INTERPRETER_H
+#ifndef _SDM_TASKS_INTERPRETER_H
+#define _SDM_TASKS_INTERPRETER_H
 
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
-#include <sdm/processes/process.h>
+#include <sdm/tasks/task.h>
 
 #define SDM_CMD_CLOSE		1337
 
 #define SDM_INTERPRETER(ptr)		( (struct sdm_interpreter *) (ptr) )
 
-class MooInterpreter : public MooProcess {
+class MooInterpreter : public MooTask {
     public:
 	MooInterpreter();
 	virtual ~MooInterpreter();
