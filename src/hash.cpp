@@ -64,7 +64,7 @@ MooHash<T>::~MooHash()
  * Add an entry of "key" to the hash table.
  */
 template<typename T>
-int MooHash<T>::add(const char *key, T data)
+int MooHash<T>::set(const char *key, T data)
 {
 	unsigned int hash;
 	MooHashEntry<T> *entry;
