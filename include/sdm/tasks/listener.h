@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 #include <sdm/misc.h>
+#include <sdm/data.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
 
@@ -24,11 +25,14 @@ class MooListener : public MooTask {
 	MooListener();
 	~MooListener();
 
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
+
 	int initialize();
 	int idle();
 	int release();
 
-	int handle(MooInterface *inter);
+	int handle(MooInterface *inter, int ready);
 };
 
 extern MooObjectType moo_listener_obj_type;

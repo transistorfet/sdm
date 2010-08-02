@@ -37,6 +37,7 @@
 MooObjectType moo_tcp_obj_type = {
 	NULL,
 	"tcp",
+	typeid(MooTCP).name(),
 	(moo_type_create_t) moo_tcp_create
 };
 
@@ -58,6 +59,25 @@ MooTCP::~MooTCP()
 	this->disconnect();
 }
 
+int MooTCP::read_entry(const char *type, MooDataFile *data)
+{
+	if (!strcmp(type, "load")) {
+		// TODO what could you read in here?
+	}
+	else
+		return(MOO_NOT_HANDLED);
+	return(MOO_HANDLED);
+}
+
+
+int MooTCP::write_data(MooDataFile *data)
+{
+	// TODO what could you write here?
+	//data->write_begin_entry("load");
+	//data->write_attrib("ref", m_filename);
+	//data->write_end_entry();
+	return(0);
+}
 
 int MooTCP::connect(const char *addr, int port)
 {
@@ -71,11 +91,11 @@ int MooTCP::connect(const char *addr, int port)
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(port);
 
-	if ((m_rfd = socket(PF_INET, SOCK_STREAM, 0)) >= 0) {
+	if ((m_rfd = ::socket(PF_INET, SOCK_STREAM, 0)) >= 0) {
 		for (j = 0;host->h_addr_list[j];j++) {
 			saddr.sin_addr = *((struct in_addr *) host->h_addr_list[j]);
 			for (i = 0;i < TCP_CONNECT_ATTEMPTS;i++) {
-				if (connect(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
+				if (::connect(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
 					return(0);
 			}
 		}
@@ -92,15 +112,15 @@ int MooTCP::listen(int port)
 	saddr.sin_addr.s_addr = INADDR_ANY;
 	saddr.sin_port = htons(port);
 
-	if (((m_rfd = socket(PF_INET, SOCK_STREAM, 0)) >= 0)
-	    && (bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
-	    && (listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
+	if (((m_rfd = ::socket(PF_INET, SOCK_STREAM, 0)) >= 0)
+	    && (::bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
+	    && (::listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
 		return(0);
 	}
 	return(-1);
 }
 
-int accept(MooTCP *inter)
+int MooTCP::accept(MooTCP *inter)
 {
 	int size;
 	fd_set rd;
@@ -112,11 +132,11 @@ int accept(MooTCP *inter)
 	/** Make sure there is a connection waiting */
 	FD_ZERO(&rd);
 	FD_SET(m_rfd, &rd);
-	if (select(m_rfd + 1, &rd, NULL, NULL, &timeout) <= 0)
+	if (::select(m_rfd + 1, &rd, NULL, NULL, &timeout) <= 0)
 		return(-1);
 
 	size = sizeof(struct sockaddr_in);
-	if ((m_rfd = accept(m_rfd, (struct sockaddr *) &saddr, &size))) {
+	if ((m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
 		sdm_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
 		// TODO do anything you might want with the saddr
 		return(0);
@@ -124,12 +144,12 @@ int accept(MooTCP *inter)
 	return(-1);
 }
 
-int MooTCP::disconnect()
+void MooTCP::disconnect()
 {
 	if (m_rfd <= 0)
 		return;
-	shutdown(m_rfd, 2);
-	close(m_rfd);
+	::shutdown(m_rfd, 2);
+	::close(m_rfd);
 	m_rfd = -1;
 }
 
@@ -161,17 +181,17 @@ int MooTCP::receive(char *data, int len)
 	struct timeval timeout = { 0, 0 };
 
 	this->set_not_ready();
-	for (i = 0;i < size;i++) {
+	for (i = 0; i < len; i++) {
 		if (m_read_pos >= m_read_length)
 			break;
-		buffer[i] = m_read_buffer[m_read_pos++];
+		data[i] = m_read_buffer[m_read_pos++];
 	}
 
-	if (i < size) {
+	if (i < len) {
 		FD_ZERO(&rd);
 		FD_SET(m_rfd, &rd);
-		if (select(m_rfd + 1, &rd, NULL, NULL, &timeout)
-		    && ((j = recv(m_rfd, &buffer[i], size - i, 0)) > 0))
+		if (::select(m_rfd + 1, &rd, NULL, NULL, &timeout)
+		    && ((j = ::recv(m_rfd, &data[i], len - i, 0)) > 0))
 			i += j;
 		if (j <= 0)
 			return(-1);
@@ -185,17 +205,19 @@ int MooTCP::receive(char *data, int len)
  * Send the string of length size to the given network connection and
  * return the number of bytes written or -1 on error.
  */
-int MooTCP::send(const char *msg, int size)
+int MooTCP::send(const char *data, int len)
 {
 	int sent, count = 0;
 
+	if (len == -1)
+		len = strlen(data);
 	do {
-		if ((sent = send(m_rfd, (void *) msg, size, 0)) < 0)
+		if ((sent = ::send(m_rfd, (void *) data, len, 0)) < 0)
 			return(-1);
 		else if (!sent)
 			return(0);
 		count += sent;
-	} while (count < size);
+	} while (count < len);
 	return(count);
 }
 
@@ -212,12 +234,12 @@ int MooTCP::recv_to_buffer()
 
 	FD_ZERO(&rd);
 	FD_SET(m_rfd, &rd);
-	if ((res = select(m_rfd + 1, &rd, NULL, NULL, &timeout)) < 0)
+	if ((res = ::select(m_rfd + 1, &rd, NULL, NULL, &timeout)) < 0)
 		return(-1);
 	else if (res == 0)
 		return(m_read_length - m_read_pos);
 
-	if ((res = recv(m_rfd, &m_read_buffer[m_read_length], TCP_READ_BUFFER - m_read_length - 1, 0)) <= 0)
+	if ((res = ::recv(m_rfd, &m_read_buffer[m_read_length], TCP_READ_BUFFER - m_read_length - 1, 0)) <= 0)
 		return(-1);
 	res += m_read_length;
 	m_read_length = res;

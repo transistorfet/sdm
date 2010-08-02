@@ -38,8 +38,7 @@ class MooThing : public MooObject {
 
 	int assign_id(moo_id_t id);
     public:
-	MooThing();
-	MooThing(moo_id_t id, moo_id_t parent);
+	MooThing(moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooThing();
 
 	virtual int read_entry(const char *type, MooDataFile *data);

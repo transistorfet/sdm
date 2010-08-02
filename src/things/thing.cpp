@@ -29,6 +29,7 @@
 MooObjectType moo_thing_obj_type = {
 	NULL,
 	"thing",
+	typeid(MooThing).name(),
 	(moo_type_create_t) moo_thing_create
 };
 
@@ -54,11 +55,6 @@ void release_thing(void)
 MooObject *moo_thing_create(void)
 {
 	return(new MooThing());
-}
-
-MooThing::MooThing()
-{
-	MooThing::MooThing(-1, 0);
 }
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)
@@ -105,7 +101,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	int res;
 	char buffer[STRING_SIZE];
 	MooObject *obj = NULL;
-	MooObjectType *objtype;
+	const MooObjectType *objtype;
 
 	if (!strcmp(type, "property")) {
 		data->read_attrib("type", buffer, STRING_SIZE);

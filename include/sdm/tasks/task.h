@@ -24,15 +24,13 @@ class MooTask : public MooObject {
 
 	virtual int initialize() = 0;
 	virtual int idle() = 0;
-	virtual int handle(MooInterface *inter) = 0;
+	virtual int handle(MooInterface *inter, int ready) = 0;
 	virtual int release() = 0;
 };
 
 int init_task(void);
 void release_task(void);
 extern MooObjectType moo_task_obj_type;
-
-MooObject *moo_task_create(void);
 
 #endif
 

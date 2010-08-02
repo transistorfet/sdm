@@ -25,6 +25,7 @@ static MooArray<MooInterface *> *interface_list = NULL;
 MooObjectType moo_interface_obj_type = {
 	NULL,
 	"interface",
+	typeid(MooInterface).name(),
 	(moo_type_create_t) NULL
 };
 
@@ -82,23 +83,8 @@ int MooInterface::wait(float t)
 	for (i = 0; i < interface_list->size(); i++) {
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
-		if ((cur->m_condition & IO_COND_READ)
-		  && (cur->m_bitflags & IO_READY_READ)) {
-			cur->m_task->handle(cur);
-			ret++;
-		}
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
-			continue;
-		if ((cur->m_condition & IO_COND_WRITE)
-		  && (cur->m_bitflags & IO_READY_WRITE)) {
-			cur->m_task->handle(cur);
-			ret++;
-		}
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
-			continue;
-		if ((cur->m_condition & IO_COND_ERROR)
-		  && (cur->m_bitflags & IO_READY_ERROR)) {
-			cur->m_task->handle(cur);
+		if (cur->m_bits & IO_STATE) {
+			cur->m_task->handle(cur, cur->m_bits & IO_STATE);
 			ret++;
 		}
 	}
@@ -133,7 +119,7 @@ int MooInterface::wait(float t)
 		}
 	}
 
-	if ((ret = select(max + 1, &rd, &wr, &err, &timeout)) == -1) {
+	if ((ret = ::select(max + 1, &rd, &wr, &err, &timeout)) == -1) {
 		/** There was a socket error so we'll just return */
 		return(-1);
 	}
@@ -143,21 +129,15 @@ int MooInterface::wait(float t)
 		    callback destroyed the interface */
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
-		if ((cur->m_condition & IO_COND_READ)
-		    && ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd)))
-			cur->m_task->handle(cur);
+		if ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd))
+			m_bits |= IO_READY_READ;
+		if ((cur->m_wfd != -1) && FD_ISSET(cur->m_wfd, &wr))
+			m_bits |= IO_READY_WRITE;
+		if ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err))
+			m_bits |= IO_READY_ERROR;
 
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
-			continue;
-		if ((cur->m_condition & IO_COND_WRITE)
-		    && ((cur->m_wfd != -1) && FD_ISSET(cur->m_wfd, &wr)))
-			cur->m_task->handle(cur);
-
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
-			continue;
-		if ((cur->m_condition & IO_COND_ERROR)
-		    && ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err)))
-			cur->m_task->handle(cur);
+		if (cur->m_bits & IO_STATE)
+			cur->m_task->handle(cur, cur->m_bits & IO_STATE);
 	}
 	return(ret);
 }

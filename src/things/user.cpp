@@ -26,6 +26,7 @@
 MooObjectType moo_user_obj_type = {
 	&sdm_thing_obj_type,
 	"user",
+	typeid(MooUser).name(),
 	(moo_type_create_t) moo_user_create
 };
 

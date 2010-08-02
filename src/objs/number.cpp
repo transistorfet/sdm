@@ -15,6 +15,7 @@
 struct MooObjectType moo_number_obj_type = {
 	NULL,
 	"number",
+	typeid(MooNumber).name(),
 	(moo_type_create_t) moo_number_create
 };
 

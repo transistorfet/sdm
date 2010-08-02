@@ -17,6 +17,7 @@
 MooObjectType moo_world_obj_type = {
 	&moo_thing_obj_type,
 	"world",
+	typeid(MooWorld).name(),
 	(moo_type_create_t) moo_world_create
 };
 

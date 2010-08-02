@@ -15,26 +15,23 @@
 MooObjectType moo_task_obj_type = {
 	NULL,
 	"task",
-	(moo_type_create_t) moo_task_create
+	typeid(MooTask).name(),
+	(moo_type_create_t) NULL
 };
 
-static MooArray<MooTask *> task_list = NULL;
+static MooArray<MooTask *> *task_list = NULL;
 
 int init_task(void)
 {
 	if (task_list)
 		return(1);
 	task_list = new MooArray<MooTask *>();
+	return(0);
 }
 
 void release_task(void)
 {
 	delete task_list;
-}
-
-MooObject *moo_task_create(void)
-{
-	return(new MooTask());
 }
 
 MooTask::MooTask()

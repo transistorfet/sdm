@@ -12,39 +12,54 @@
 
 #include <sdm/objs/object.h>
 
-static MooHash<MooObjectType *> *object_type_list = NULL;
+const MooObjectType moo_object_obj_type = {
+	NULL,
+	"object",
+	typeid(MooObject).name(),
+	NULL
+};
+
+static MooHash<const MooObjectType *> *name_type_list = NULL;
+static MooHash<const MooObjectType *> *realname_type_list = NULL;
 
 int init_object(void)
 {
-	if (object_type_list)
+	if (name_type_list)
 		return(1);
-	object_type_list = new MooHash<MooObjectType *>(MOO_HBF_REPLACE | MOO_HBF_REMOVE);
+	name_type_list = new MooHash<const MooObjectType *>(MOO_HBF_REPLACE | MOO_HBF_REMOVE);
+	realname_type_list = new MooHash<const MooObjectType *>(MOO_HBF_REPLACE | MOO_HBF_REMOVE);
+	moo_object_register_type(&moo_object_obj_type);
 	return(0);
 }
 
 void release_object(void)
 {
-	if (!object_type_list)
+	if (!name_type_list)
 		return;
-	delete object_type_list;
-	object_type_list = NULL;
+	delete realname_type_list;
+	delete name_type_list;
+	name_type_list = NULL;
 }
 
-int moo_object_register_type(MooObjectType *type)
+int moo_object_register_type(const MooObjectType *type)
 {
-	return(object_type_list->set(type->m_name, type));
+	name_type_list->set(type->m_name, type);
+	name_type_list->set(type->m_realname, type);
+	return(0);
 }
 
-int moo_object_deregister_type(MooObjectType *type)
+int moo_object_deregister_type(const MooObjectType *type)
 {
-	return(object_type_list->remove(type->m_name));
+	name_type_list->remove(type->m_name);
+	name_type_list->remove(type->m_realname);
+	return(0);
 }
 
-MooObjectType *moo_object_find_type(const char *name, MooObjectType *base)
+const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base)
 {
-	MooObjectType *type, *cur;
+	const MooObjectType *type, *cur;
 
-	if (!(type = object_type_list->get(name)))
+	if (!(type = name_type_list->get(name)))
 		return(NULL);
 	/** If base is given, then only return this type if it is a subclass of base */
 	if (!base)
@@ -57,7 +72,7 @@ MooObjectType *moo_object_find_type(const char *name, MooObjectType *base)
 }
 
 
-MooObject *moo_make_object(MooObjectType *type)
+MooObject *moo_make_object(const MooObjectType *type)
 {
 	if (!type)
 		return(NULL);
@@ -66,6 +81,13 @@ MooObject *moo_make_object(MooObjectType *type)
 	} catch(int e) {
 		return(NULL);
 	}
+}
+
+MooObject::MooObject()
+{
+	m_type = realname_type_list->get(typeid(this).name());
+	if (!m_type)
+		m_type = name_type_list->get("object");
 }
 
 int MooObject::read_file(const char *file, const char *type)

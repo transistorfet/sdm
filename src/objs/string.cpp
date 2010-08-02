@@ -16,6 +16,7 @@
 MooObjectType moo_string_obj_type = {
 	NULL,
 	"string",
+	typeid(MooString).name(),
 	(moo_type_create_t) moo_string_create
 };
 

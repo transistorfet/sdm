@@ -10,8 +10,9 @@
 	* include a fully functional editor/construction kit, which could even save the word automatically
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
-	  MooObjects.  I'm not entirely sure of the point of this and so on.
-	* make processes a bit more like generic processes/tasks/etc
+	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
+	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
+	  behaviour of the table much.
 
 	* there should be like a process that listens for connections and automatically breaks them off to a sperate
 	  "process" which "handles" the connection via launching subprocesses (it's very similar to somthing inetd
@@ -48,12 +49,8 @@
 	  object it does not have permissions on.
 
 	* think about multithreading possibilities
-	* rename processes to tasks (i think it's now more appropriate)
 
     Covnersion TODO:
-	* you need to modify the handle()/wait() function system to either pass an indicator of what type or event is ready (r/w/e)
-	  and/or a flag of what conditions to call the handle() function on.  You then need to make the handle() function only get
-	  called once per check (rather than 3 checks/3 calls)
 
 
 

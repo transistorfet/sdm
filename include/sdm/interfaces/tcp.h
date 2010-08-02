@@ -10,6 +10,7 @@
 
 #include <sdm/globals.h>
 
+#include <sdm/data.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
@@ -24,10 +25,13 @@
 class MooTCP : public MooInterface {
 	int m_read_pos;
 	int m_read_length;
-	unsigned char m_read_buffer[TCP_READ_BUFFER];
+	char m_read_buffer[TCP_READ_BUFFER];
     public:
 	MooTCP();
 	virtual ~MooTCP();
+
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 
 	int connect(const char *addr, int port);
 	int listen(int port);
@@ -37,8 +41,8 @@ class MooTCP : public MooInterface {
 	virtual int read(char *data, int len);
 	virtual int write(const char *data);
 
-	int receive(char *buffer, int size);
-	int send(const char *msg, int size);
+	int receive(char *data, int len);
+	int send(const char *data, int len = -1);
 
 	int recv_to_buffer();
 	int load_buffer(const char *data, int len);

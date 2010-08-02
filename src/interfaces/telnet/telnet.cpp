@@ -28,6 +28,7 @@
 MooObjectType moo_telnet_obj_type = {
 	&moo_tcp_obj_type,
 	"telnet",
+	typeid(MooTelnet).name(),
 	(moo_type_create_t) moo_telnet_create
 };
 

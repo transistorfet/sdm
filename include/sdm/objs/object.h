@@ -6,6 +6,7 @@
 #ifndef _SDM_OBJS_OBJECT_H
 #define _SDM_OBJS_OBJECT_H
 
+#include <typeinfo>
 #include <stdarg.h>
 #include <sdm/data.h>
 
@@ -18,20 +19,21 @@
 typedef class MooObject *(*moo_type_create_t)(void);
 
 typedef struct MooObjectType {
-	MooObjectType *m_parent;
-	char *m_name;
+	const MooObjectType *m_parent;
+	const char *m_name;
+	const char *m_realname;
 	moo_type_create_t m_create;
 } MooObjectType;
 
 class MooObject {
     protected:
-	MooObjectType *m_type;
+	const MooObjectType *m_type;
 	int m_bitflags;
     public:
 	MooObject();
-	virtual ~MooObject();
+	virtual ~MooObject() { }
 
-	MooObjectType *type() { return(m_type); }
+	const MooObjectType *type() { return(m_type); }
 	const char *type_name() { return(m_type->m_name); }
 
 	int read_file(const char *file, const char *type);
@@ -50,8 +52,8 @@ class MooObject {
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
 	virtual int write_data(MooDataFile *data) = 0;
 
-	inline int is_a(MooObjectType *type) {
-		MooObjectType *cur;
+	inline int is_a(const MooObjectType *type) {
+		const MooObjectType *cur;
 
 		for (cur = m_type; cur; cur = cur->m_parent) {
 			if (cur == type)
@@ -61,14 +63,16 @@ class MooObject {
 	}
 };
 
+extern const MooObjectType moo_object_obj_type;
+
 int init_object(void);
 void release_object(void);
 
-int moo_object_register_type(MooObjectType *type);
-int moo_object_deregister_type(MooObjectType *type);
-MooObjectType *moo_object_find_type(const char *name, MooObjectType *base);
+int moo_object_register_type(const MooObjectType *type);
+int moo_object_deregister_type(const MooObjectType *type);
+const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base);
 
-MooObject *moo_make_object(MooObjectType *type);
+MooObject *moo_make_object(const MooObjectType *type);
 
 #endif
 

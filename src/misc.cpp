@@ -38,7 +38,7 @@ string_t make_string(char *fmt, ...)
 	char buffer[STRING_MAX_SIZE];
 
 	vsnprintf(buffer, STRING_MAX_SIZE, fmt, va);
-	if (!(str = memory_alloc(strlen(buffer) + 1)))
+	if (!(str = (string_t) memory_alloc(strlen(buffer) + 1)))
 		return(NULL);
 	strcpy(str, buffer);
 	return(str);
@@ -51,7 +51,7 @@ string_t duplicate_string(string_t str)
 {
 	string_t dup;
 
-	if (!str || !(dup = memory_alloc(strlen(str) + 1)))
+	if (!str || !(dup = (string_t) memory_alloc(strlen(str) + 1)))
 		return(NULL);
 	strcpy(dup, str);
 	return(dup);

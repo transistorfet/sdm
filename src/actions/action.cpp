@@ -14,6 +14,7 @@
 MooObjectType moo_action_obj_type = {
 	NULL,
 	"action",
+	typeid(MooAction).name(),
 	(moo_type_create_t) moo_action_create
 };
 

@@ -92,7 +92,7 @@ T MooArray<T>::set(int index, T value)
 	}
 
 	if (m_data[index]) {
-		if (!(m_bits & MOO_ABF_REPLACE))
+		if (value && !(m_bits & MOO_ABF_REPLACE))
 			return(NULL);
 		if (m_bits & MOO_ABF_DELETE)
 			delete m_data[index];
