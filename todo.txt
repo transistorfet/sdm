@@ -51,6 +51,8 @@
 	* think about multithreading possibilities
 
     Covnersion TODO:
+	* sort out and make better use of exceptions
+	* add a try/catch block around all action calls
 
 
 
