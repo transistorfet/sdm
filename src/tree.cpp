@@ -10,227 +10,224 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-static void sdm_tree_destroy_subtree(struct sdm_tree *, struct sdm_tree_entry *);
-
-/**
- * Allocate a binary tree generic data.
- */
-struct sdm_tree *create_sdm_tree(short bitflags, destroy_t destroy)
+template<typename T>
+MooTree<T>::MooTree(int bits)
 {
-	struct sdm_tree *env;
-
-	if (!(env = (struct sdm_tree *) memory_alloc(sizeof(struct sdm_tree))))
-		return(NULL);
-	env->bitflags = bitflags;
-	env->destroy = destroy;
-	env->traverse_next = NULL;
-	env->root = NULL;
-	return(env);
+	m_bits = bits;
+	m_traverse_next = NULL;
+	m_root = NULL;
 }
 
-/**
- * Free resources allocated by the binary tree.
- */
-void destroy_sdm_tree(struct sdm_tree *env)
+template<typename T>
+void MooTree<T>::~MooTree()
 {
-	if (env->root)
-		sdm_tree_destroy_subtree(env, env->root);
-	memory_free(env);
+	if (m_root)
+		this->destroy_subtree(m_root);
 }
 
 
-/**
- * Add an entry of "name" to the binary tree.
- */
-int sdm_tree_add(struct sdm_tree *env, const char *name, void *data)
+template<typename T>
+int MooTree<T>::set(const char *key, T data)
 {
 	int res;
-	struct sdm_tree_entry *prev, *entry;
+	MooTreeEntry<T> *prev, *entry;
 
-	if (!name || !data || (env->bitflags & SDM_TBF_NO_ADD))
+	if (!key || !data || (m_bits & MOO_TBF_NO_ADD))
 		return(-1);
 	/** Search for an existing entry */
-	for (entry = env->root, prev = NULL; entry; ) {
-		if (!(res = strcmp(name, entry->name)))
-			return(-1);
+	for (entry = m_root, prev = NULL; entry; ) {
+		if (!(res = strcmp(key, entry->m_key))) {
+			if (!(m_bits & MOO_TBF_REPLACE))
+				return(-1);
+			if (m_bits & MOO_TBF_DELETE)
+				delete entry->m_data;
+			entry->m_data = data;
+			return(0);
+		}
 		prev = entry;
-		entry = (res < 0) ? entry->left : entry->right;
+		entry = (res < 0) ? entry->m_left : entry->m_right;
 	}
 
-	if (!(entry = (struct sdm_tree_entry *) memory_alloc(sizeof(struct sdm_tree_entry) + strlen(name) + 1)))
+	if (!(entry = (MooTreeEntry<T> *) memory_alloc(sizeof(MooTreeEntry<T>) + strlen(key) + 1)))
 		return(-1);
-	entry->name = (char *) (entry + 1);
-	strcpy(entry->name, name);
-	entry->data = data;
+	entry->m_key = (char *) (entry + 1);
+	strcpy(entry->m_key, key);
+	entry->m_data = data;
 
-	entry->left = NULL;
-	entry->right = NULL;
-	entry->parent = prev;
+	entry->m_left = NULL;
+	entry->m_right = NULL;
+	entry->m_parent = prev;
 	if (!prev)
-		env->root = entry;
-	else if (strcmp(name, prev->name) < 0)
-		prev->left = entry;
+		m_root = entry;
+	else if (strcmp(key, prev->m_key) < 0)
+		prev->m_left = entry;
 	else
-		prev->right = entry;
+		prev->m_right = entry;
 	return(0);
 }
 
-/**
- * Replace the entry's data with "data".
- */
-int sdm_tree_replace(struct sdm_tree *env, const char *name, void *data)
+template<typename T>
+int MooTree<T>::remove(const char *key)
 {
 	int res;
-	struct sdm_tree_entry *cur;
+	MooTreeEntry<T> *cur, *tmp;
 
-	if (!name || !data || (env->bitflags & SDM_TBF_NO_REPLACE))
+	if (!key || (m_bits & MOO_TBF_REMOVE))
 		return(-1);
-	for (cur = env->root; cur; ) {
-		if (!(res = strcmp(name, cur->name))) {
-			if (env->destroy)
-				env->destroy(cur->data);
-			cur->data = data;
-			return(0);
-		}
-		cur = (res < 0) ? cur->left : cur->right;
-	}
-	return(-1);
-}
-
-/**
- * Remove an entry of "name" from binary tree
- */
-int sdm_tree_remove(struct sdm_tree *env, const char *name)
-{
-	int res;
-	struct sdm_tree_entry *cur, *tmp;
-
-	if (!name || (env->bitflags & SDM_TBF_NO_REMOVE))
-		return(-1);
-	for (cur = env->root; cur; ) {
-		if (!(res = strcmp(name, cur->name))) {
-			if (!cur->left && !cur->right) {
-				if (!cur->parent)
-					env->root = NULL;
-				else if (cur->parent->left == cur)
-					cur->parent->left = NULL;
+	for (cur = m_root; cur; ) {
+		if (!(res = strcmp(key, cur->m_key))) {
+			if (!cur->m_left && !cur->m_right) {
+				if (!cur->m_parent)
+					m_root = NULL;
+				else if (cur->m_parent->m_left == cur)
+					cur->m_parent->m_left = NULL;
 				else
-					cur->parent->right = NULL;
+					cur->m_parent->m_right = NULL;
 			}
-			else if (cur->left && cur->right) {
-				tmp = cur->left;
-				while (tmp->right)
-					tmp = tmp->right;
-				if (cur->left == tmp) {
-					cur->left = tmp->left;
-					if (tmp->left)
-						tmp->left->parent = cur;
+			else if (cur->m_left && cur->m_right) {
+				tmp = cur->m_left;
+				while (tmp->m_right)
+					tmp = tmp->m_right;
+				if (cur->m_left == tmp) {
+					cur->m_left = tmp->m_left;
+					if (tmp->m_left)
+						tmp->m_left->m_parent = cur;
 				}
 				else {
-					tmp->parent->right = tmp->left;
-					if (tmp->left)
-						tmp->left->parent = tmp->parent;
+					tmp->m_parent->m_right = tmp->m_left;
+					if (tmp->m_left)
+						tmp->m_left->m_parent = tmp->m_parent;
 				}
-				tmp->left = cur->left;
-				tmp->right = cur->right;
-				tmp->parent = cur->parent;
-				if (cur == env->root)
-					env->root = tmp;
+				tmp->m_left = cur->m_left;
+				tmp->m_right = cur->m_right;
+				tmp->m_parent = cur->m_parent;
+				if (cur == m_root)
+					m_root = tmp;
 			}
 			else {
-				tmp = cur->left ? cur->left : cur->right;
-				if (!cur->parent)
-					env->root = tmp;
-				else if (cur->parent->left == cur)
-					cur->parent->left = tmp;
+				tmp = cur->m_left ? cur->m_left : cur->m_right;
+				if (!cur->m_parent)
+					m_root = tmp;
+				else if (cur->m_parent->m_left == cur)
+					cur->m_parent->m_left = tmp;
 				else
-					cur->parent->right = tmp;
-				tmp->parent = cur->parent;
+					cur->m_parent->m_right = tmp;
+				tmp->m_parent = cur->m_parent;
 			}
 			// TODO this is incorrect but the correct way depends on how you traverse
-			if (env->traverse_next == cur)
-				env->traverse_next = NULL;
-			if (env->destroy)
-				env->destroy(cur->data);
+			if (m_traverse_next == cur)
+				m_traverse_next = NULL;
+			if (m_bits & MOO_TBF_DELETE)
+				delete cur->m_data;
 			memory_free(cur);
 			return(0);
 		}
-		cur = (res < 0) ? cur->left : cur->right;
+		cur = (res < 0) ? cur->m_left : cur->m_right;
 	}
 	return(-1);
 }
 
-/**
- * Find the value bound to name in table.
- */
-struct sdm_tree_entry *sdm_tree_find_entry(struct sdm_tree *env, const char *name)
+template<typename T>
+MooTreeEntry<T> *MooTree<T>::get_entry(const char *key)
 {
 	int res;
-	struct sdm_tree_entry *cur;
+	MooTreeEntry<T> *cur;
 
-	for (cur = env->root; cur; ) {
-		if (!(res = strcmp(name, cur->name)))
+	for (cur = m_root; cur; ) {
+		if (!(res = strcmp(key, cur->m_key)))
 			return(cur);
-		cur = (res < 0) ? cur->left : cur->right;
+		cur = (res < 0) ? cur->m_left : cur->m_right;
 	}
 	return(NULL);
 }
 
-/**
- * Find the value bound to partial name.
- */
-struct sdm_tree_entry *sdm_tree_find_entry_partial(struct sdm_tree *env, const char *name)
+template<typename T>
+MooTreeEntry<T> *MooTree<T>::get_entry_partial(const char *key)
 {
 	int res, len;
-	struct sdm_tree_entry *cur;
+	MooTreeEntry<T> *cur;
 
-	len = strlen(name);
-	for (cur = env->root; cur; ) {
-		if (!(res = strncmp(name, cur->name, len)))
+	len = strlen(key);
+	for (cur = m_root; cur; ) {
+		if (!(res = strncmp(key, cur->m_key, len)))
 			return(cur);
-		cur = (res < 0) ? cur->left : cur->right;
+		cur = (res < 0) ? cur->m_left : cur->m_right;
 	}
 	return(NULL);
 }
 
-void sdm_tree_traverse_reset(struct sdm_tree *env)
+template<typename T>
+T MooTree<T>::get(const char *key)
 {
-	env->traverse_next = env->root;
+	MooTreeEntry<T> *entry;
+
+	entry = this->get_entry();
+	if (!entry)
+		return(NULL);
+	return(entry->m_data);
 }
 
-struct sdm_tree_entry *sdm_tree_traverse_next_entry(struct sdm_tree *env)
+template<typename T>
+T MooTree<T>::get_partial(const char *key)
 {
-	struct sdm_tree_entry *entry, *cur, *prev;
+	MooTreeEntry<T> *entry;
 
-	if (!env->traverse_next)
+	entry = this->get_entry_partial();
+	if (!entry)
 		return(NULL);
-	entry = env->traverse_next;
-	if (env->traverse_next->left)
-		env->traverse_next = env->traverse_next->left;
-	else if (env->traverse_next->right)
-		env->traverse_next = env->traverse_next->right;
+	return(entry->m_data);
+}
+
+template<typename T>
+void MooTree<T>::reset()
+{
+	m_traverse_next = m_root;
+}
+
+template<typename T>
+MooTreeEntry<T> *MooTree<T>::next_entry()
+{
+	MooTreeEntry<T> *entry, *cur, *prev;
+
+	if (!m_traverse_next)
+		return(NULL);
+	entry = m_traverse_next;
+	if (m_traverse_next->m_left)
+		m_traverse_next = m_traverse_next->m_left;
+	else if (m_traverse_next->m_right)
+		m_traverse_next = m_traverse_next->m_right;
 	else {
-		for (prev = env->traverse_next, cur = env->traverse_next->parent; cur; prev = cur, cur = cur->parent) {
-			if ((cur->left == prev) && cur->right) {
-				env->traverse_next = cur->right;
+		for (prev = m_traverse_next, cur = m_traverse_next->m_parent; cur; prev = cur, cur = cur->m_parent) {
+			if ((cur->m_left == prev) && cur->m_right) {
+				m_traverse_next = cur->m_right;
 				return(entry);
 			}
 		}
-		env->traverse_next = NULL;
+		m_traverse_next = NULL;
 	}
 	return(entry);
 }
 
-/*** Local Functions ***/
-
-static void sdm_tree_destroy_subtree(struct sdm_tree *env, struct sdm_tree_entry *entry)
+template<typename T>
+T MooTree<T>::next()
 {
-	if (entry->left)
-		sdm_tree_destroy_subtree(env, entry->left);
-	if (entry->right)
-		sdm_tree_destroy_subtree(env, entry->right);
-	if (env->destroy)
-		env->destroy(entry->data);
+	MooTreeEntry<T> *entry;
+
+	entry = this->next_entry();
+	if (!entry)
+		return(NULL);
+	return(entry->m_data);
+}
+
+template<typename T>
+void MooTree<T>::destoy_subtree(MooTreeEntry<T> *entry)
+{
+	if (entry->m_left)
+		this->destroy_subtree(entry->m_left);
+	if (entry->m_right)
+		this->destroy_subtree(entry->m_right);
+	if (m_bits & MOO_TBF_DELETEALL)
+		delete entry->m_data;
 	memory_free(entry);
 }
 
