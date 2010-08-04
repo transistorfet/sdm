@@ -12,6 +12,8 @@
 
 #include <sdm/objs/object.h>
 
+#define TYPE_INIT_SIZE		32
+
 const MooObjectType moo_object_obj_type = {
 	NULL,
 	"object",
@@ -26,8 +28,8 @@ int init_object(void)
 {
 	if (name_type_list)
 		return(1);
-	name_type_list = new MooHash<const MooObjectType *>(MOO_HBF_REPLACE | MOO_HBF_REMOVE);
-	realname_type_list = new MooHash<const MooObjectType *>(MOO_HBF_REPLACE | MOO_HBF_REMOVE);
+	name_type_list = new MooHash<const MooObjectType *>(TYPE_INIT_SIZE, MOO_HBF_REPLACE | MOO_HBF_REMOVE);
+	realname_type_list = new MooHash<const MooObjectType *>(TYPE_INIT_SIZE, MOO_HBF_REPLACE | MOO_HBF_REMOVE);
 	moo_object_register_type(&moo_object_obj_type);
 	return(0);
 }
@@ -85,23 +87,28 @@ MooObject *moo_make_object(const MooObjectType *type)
 
 MooObject::MooObject()
 {
-	m_type = realname_type_list->get(typeid(this).name());
+	printf("%s\n", typeid(*this).name());
+	m_type = realname_type_list->get(typeid(*this).name());
 	if (!m_type)
 		m_type = name_type_list->get("object");
 }
 
 int MooObject::read_file(const char *file, const char *type)
 {
-	int res;
+	int res = -1;
 	MooDataFile *data;
 
-	sdm_status("Reading %s data from file \"%s\".", type, file);
-	if (!(moo_data_file_exists(file)))
+	try {
+		data = new MooDataFile(file, MOO_DATA_READ, type);
+		sdm_status("Reading %s data from file \"%s\".", type, file);
+		res = this->read_data(data);
+		delete data;
+		return(res);
+	}
+	catch (...) {
+		sdm_status("Error opening file \"%s\".", file);
 		return(-1);
-	data = new MooDataFile(file, MOO_DATA_READ, type);
-	res = this->read_data(data);
-	delete data;
-	return(res);
+	}
 }
 
 int MooObject::write_file(const char *file, const char *type)

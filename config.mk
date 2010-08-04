@@ -12,7 +12,7 @@ LDFLAGS = -L$(SDRL)/lib
 
 CC	= gcc
 CXX	= g++
-LD	= gcc
+LD	= g++
 AS	= as
 AR	= ar
 RANLIB	= ranlib

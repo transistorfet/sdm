@@ -14,6 +14,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/task.h>
 #include <sdm/tasks/listener.h>
 
@@ -32,7 +33,10 @@ MooObject *moo_listener_create(void)
 
 MooListener::MooListener()
 {
-
+	m_port = -1;
+	m_itype = NULL;
+	m_ttype = NULL;
+	m_inter = NULL;
 }
 
 MooListener::~MooListener()
@@ -43,8 +47,21 @@ MooListener::~MooListener()
 
 int MooListener::read_entry(const char *type, MooDataFile *data)
 {
-	if (!strcmp(type, "load")) {
-		// TODO what could you read in here?
+	char buffer[STRING_SIZE];
+
+	if (!strcmp(type, "port")) {
+		m_port = data->read_integer_entry();
+		this->listen(m_port);
+	}
+	else if (!strcmp(type, "type")) {
+		data->read_string(buffer, STRING_SIZE);
+		if (!(m_itype = moo_object_find_type((*buffer != '\0') ? buffer : "tcp", &moo_tcp_obj_type)))
+			return(-1);
+	}
+	else if (!strcmp(type, "task")) {
+		data->read_string(buffer, STRING_SIZE);
+		if (!(m_ttype = moo_object_find_type(buffer, &moo_task_obj_type)))
+			return(-1);
 	}
 	else
 		return(MOO_NOT_HANDLED);
@@ -54,10 +71,11 @@ int MooListener::read_entry(const char *type, MooDataFile *data)
 
 int MooListener::write_data(MooDataFile *data)
 {
-	// TODO what could you write here?
-	//data->write_begin_entry("load");
-	//data->write_attrib("ref", m_filename);
-	//data->write_end_entry();
+	data->write_integer_entry("port", m_port);
+	if (m_itype)
+		data->write_string_entry("type", m_itype->m_name);
+	if (m_ttype)
+		data->write_string_entry("task", m_ttype->m_name);
 	return(0);
 }
 
@@ -86,12 +104,32 @@ int MooListener::handle(MooInterface *inter, int ready)
 	//	that interface (perhaps call proc->take(inter) which sets it's own m_inter field (or array of interfaces) and then
 	//	calls inter->set_task(this)
 
+	MooTCP *newtcp;
+	MooTask *newtask;
 
-	char buffer[LARGE_STRING_SIZE];
+	printf("HERE\n");
 
-	inter->read(buffer, LARGE_STRING_SIZE);
-	printf("%s", buffer);
+	if (!(ready & IO_READY_READ))
+		return(-1);
+	if (!(newtcp = (MooTCP *) moo_make_object(m_itype)))
+		return(-1);
+	if (!(m_inter->accept(newtcp))
+	    || !(newtask = (MooTask *) moo_make_object(m_ttype))) {
+		delete newtcp;
+		return(-1);
+	}
+	newtask->bestow(newtcp);
+	return(0);
+}
 
+int MooListener::listen(int port)
+{
+	// TODO is this the correct way to close the existing server connection?
+	if (m_inter)
+		delete m_inter;
+	m_inter = new MooTCP();
+	m_inter->set_task(this);
+	m_inter->listen(port);
 	return(0);
 }
 

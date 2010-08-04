@@ -47,12 +47,17 @@
 	  language support like perl and stuff (???)).
 	* for this to work, you need a permissions system (which you need anyways) so that a connection cannot do an action on an
 	  object it does not have permissions on.
+	* instead of using MooTask in interface as the object you call in order to handle I/O, maybe you could make a special abstract
+	  class and use multiple inheritence so that any object (not just tasks) can be called in response to I/O.  The same would
+	  then go for MooTimer
 
 	* think about multithreading possibilities
 
     Covnersion TODO:
 	* sort out and make better use of exceptions
 	* add a try/catch block around all action calls
+	* your fucking type system solution did not work and needs to be replaced.  typeid() returns the type of the pointer and not
+	  the actual core type of the object
 
 
 

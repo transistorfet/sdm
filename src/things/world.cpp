@@ -39,7 +39,8 @@ void release_world(void)
 	if (!root_world)
 		return;
 	/** Write the world to disk */
-	root_world->write();
+	// TODO BUG there is an infinite loop on writing the world file
+	//root_world->write();
 	delete root_world;
 	moo_object_deregister_type(&moo_world_obj_type);
 }
@@ -63,7 +64,7 @@ MooWorld::MooWorld()
 MooWorld::MooWorld(const char *file, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
 	m_filename = new std::string(file);
-	world->read_file(world->filename, "world");
+	this->read_file(m_filename->c_str(), "world");
 }
 
 MooWorld::~MooWorld()
@@ -83,7 +84,7 @@ int MooWorld::read_entry(const char *type, MooDataFile *data)
 	if (!strcmp(type, "load")) {
 		data->read_attrib("ref", buffer, STRING_SIZE);
 		obj = new MooWorld(buffer, SDM_NO_ID, 0);
-		if (world->add(obj) < 0) {
+		if (this->add(obj) < 0) {
 			delete obj;
 			return(-1);
 		}
@@ -102,7 +103,7 @@ int MooWorld::write_data(MooDataFile *data)
 	// TODO should you have a call to MooThing::write_data(data) here?
 	if (data) {
 		data->write_begin_entry("load");
-		data->write_attrib("ref", m_filename);
+		data->write_attrib("ref", m_filename->c_str());
 		data->write_end_entry();
 	}
 	return(res);
@@ -110,7 +111,7 @@ int MooWorld::write_data(MooDataFile *data)
 
 int MooWorld::write()
 {
-	return(this->write_file(m_filename, "world"));
+	return(this->write_file(m_filename->c_str(), "world"));
 }
 
 

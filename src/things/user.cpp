@@ -16,15 +16,16 @@
 #include <sdm/tasks/task.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/things/utils.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/user.h>
 
+#define USER_INIT_SIZE		64
+
 MooObjectType moo_user_obj_type = {
-	&sdm_thing_obj_type,
+	&moo_thing_obj_type,
 	"user",
 	typeid(MooUser).name(),
 	(moo_type_create_t) moo_user_create
@@ -36,22 +37,24 @@ int init_user(void)
 {
 	const char *str;
 	char buffer[STRING_SIZE];
-	struct sdm_data_file *data;
+	MooDataFile *data;
 
 	if (user_list)
 		return(1);
-	user_list = new MooHash<MooUser *>(MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
+	user_list = new MooHash<MooUser *>(USER_INIT_SIZE, MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
 
 	/** Load all the users into memory in a disconnected state */
-	data = new MooDataFile("etc/passwd.xml", SDM_DATA_READ, "passwd");
+/*
+	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
 			data->read_attrib("name", buffer, STRING_SIZE);
 			// TODO make sure the user is in it's proper disconnected state (in the cryolocker)
-			create_sdm_user(buffer);
+			//create_sdm_user(buffer);
 		}
 	} while (data->read_next());
 	delete data;
+*/
 	return(0);
 }
 
@@ -69,14 +72,7 @@ MooObject *moo_user_create(void)
 
 MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
-	if (!name || !moo_user_valid_username(name) || !(m_name = make_string("%s", name)))
-		throw -1;
-
-	/** If there is already a user with that name then fail */
-	if (user_list->set(name, this))
-		return(-1);
-	sdm_user_read(this);
-	return(0);
+	this->load(name);
 }
 
 MooUser::~MooUser()
@@ -87,7 +83,19 @@ MooUser::~MooUser()
 	/** Release the user's other resources */
 	user_list->remove(m_name);
 	memory_free(m_name);
-	delete m_inter;
+	//delete m_inter;
+}
+
+int MooUser::load(const char *name)
+{
+	if (!name || !moo_user_valid_username(name) || !(m_name = make_string("%s", name)))
+		throw -1;
+
+	/** If there is already a user with that name then fail */
+	if (user_list->set(name, this))
+		return(-1);
+	this->read_file();
+	return(0);
 }
 
 int MooUser::connect(MooInterface *inter)
@@ -95,6 +103,7 @@ int MooUser::connect(MooInterface *inter)
 	double room;
 	MooThing *location;
 
+/*
 	if (m_inter)
 		delete m_inter;
 	m_inter = inter;
@@ -109,7 +118,7 @@ int MooUser::connect(MooInterface *inter)
 	else
 		m_task = new MooForm("etc/register.xml");
 
-	/** Move the user to the last location recorded or to a safe place if there is no last location */
+	// Move the user to the last location recorded or to a safe place if there is no last location
 	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
 	    && (location = moo_thing_lookup_id(room)))
 		sdm_moveto(SDM_THING(user), SDM_THING(user), location, NULL);
@@ -121,14 +130,16 @@ int MooUser::connect(MooInterface *inter)
 	if (!user->m_task)
 		return(-1);
 	user->m_task->initialize(user);
+*/
 	return(0);
 }
 
-MooUser::disconnect()
+void MooUser::disconnect()
 {
+/*
 	struct sdm_number *number;
 
-	/** Shutdown the input processor */
+	// Shutdown the input processor
 	if (user->proc) {
 		sdm_processor_shutdown(user->proc, user);
 		destroy_sdm_object(SDM_OBJECT(user->proc));
@@ -143,11 +154,12 @@ MooUser::disconnect()
 	if (SDM_THING(user)->location)
 		sdm_thing_remove(SDM_THING(user)->location, SDM_THING(user));
 
-	/** Save the user information to the user's file only if we were already connected */
+	// Save the user information to the user's file only if we were already connected
 	if (user->inter)
 		sdm_user_write(user);
 	// TODO How does this all even work?
 	//user->inter = NULL;
+*/
 }
 
 
@@ -178,7 +190,7 @@ int MooUser::read_file(void)
 	char buffer[STRING_SIZE];
 
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
-	return(sdm_object_read_file(SDM_OBJECT(user), buffer, "user"));
+	return(MooObject::read_file(buffer, "user"));
 }
 
 int MooUser::write_file(void)
@@ -186,7 +198,7 @@ int MooUser::write_file(void)
 	char buffer[STRING_SIZE];
 
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
-	return(sdm_object_write_file(SDM_OBJECT(user), buffer, "user"));
+	return(MooObject::write_file(buffer, "user"));
 }
 
 
@@ -202,9 +214,9 @@ int moo_user_logged_in(const char *name)
 {
 	MooUser *user;
 
-	if ((user = user_list->get(name)) && user->m_inter)
-		return(1);
-	return(0);
+	//if ((user = user_list->get(name)) && user->m_inter)
+	//	return(1);
+	//return(0);
 }
 
 int moo_user_valid_username(const char *name)

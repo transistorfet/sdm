@@ -21,12 +21,14 @@ class MooUser : public MooThing {
 	MooTask *m_task;
 	string_t m_name;
     public:
+	MooUser(moo_id_t id = -1, moo_id_t parent = 0) { }
 	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooUser();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
+	int load(const char *name);
 	int connect(MooInterface *inter);
 	void disconnect();
 

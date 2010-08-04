@@ -13,11 +13,12 @@
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
 
-#include <sdm/actions/lua/lua.h>
+//#include <sdm/actions/lua/lua.h>
 #include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
+#include <sdm/objs/config.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
 
@@ -31,7 +32,7 @@ int init_moo(void)
 {
 	if (init_data() < 0)
 		return(-1);
-	sdm_set_data_path("data");
+	moo_set_data_path("data");
 
 	if (init_object() < 0)
 		return(-1);
@@ -41,24 +42,26 @@ int init_moo(void)
 		return(-1);
 	if (init_interface() < 0)
 		return(-1);
-	if (init_telnet() < 0)
-		return(-1);
+//	if (init_telnet() < 0)
+//		return(-1);
 
 	if (init_moo_number_type() < 0)
 		return(-1);
 	if (init_moo_string_type() < 0)
 		return(-1);
 
-	if (init_builtin() < 0)
-		return(-1);
-	if (init_lua() < 0)
-		return(-1);
+//	if (init_builtin() < 0)
+//		return(-1);
+//	if (init_lua() < 0)
+//		return(-1);
 
 	if (init_thing() < 0)
 		return(-1);
 	if (init_world() < 0)
 		return(-1);
 	if (init_user() < 0)
+		return(-1);
+	if (load_global_config())
 		return(-1);
 
 	signal(SIGINT, handle_sigint);
@@ -71,13 +74,13 @@ void release_moo(void)
 	release_world();
 	release_thing();
 
-	release_lua();
-	release_builtin();
+//	release_lua();
+//	release_builtin();
 
 	release_moo_string_type();
 	release_moo_number_type();
 
-	release_telnet();
+//	release_telnet();
 	release_interface();
 	release_task();
 	release_timer();
@@ -106,8 +109,8 @@ int main(int argc, char **argv)
 int serverloop(void)
 {
 	while (exit_flag) {
-		MooInterface->wait(1);
-		sdm_timer_check();
+		MooInterface::wait(1);
+		MooTimer::check();
 	}
 	return(0);
 }

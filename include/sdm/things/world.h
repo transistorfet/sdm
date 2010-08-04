@@ -15,7 +15,7 @@
 #include <sdm/things/thing.h>
 
 class MooWorld : public MooThing {
-	std::string m_filename;
+	std::string *m_filename;
     public:
 	MooWorld();
 	MooWorld(const char *file);

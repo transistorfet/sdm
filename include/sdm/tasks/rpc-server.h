@@ -1,10 +1,10 @@
 /*
- * Task Name:	listener.h
- * Description:	Listener Task
+ * Task Name:	rpc-server.h
+ * Description:	RPC Server Task
  */
 
-#ifndef _SDM_TASKS_LISTENER_H
-#define _SDM_TASKS_LISTENER_H
+#ifndef _SDM_TASKS_RPC_SERVER_H
+#define _SDM_TASKS_RPC_SERVER_H
 
 #include <string>
 #include <stdarg.h>
@@ -13,19 +13,18 @@
 #include <sdm/data.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
-#include <sdm/interfaces/tcp.h>
 
 #include <sdm/objs/object.h>
 
-class MooListener : public MooTask {
+class MooRPCServer : public MooTask {
 	int m_port;
 	const MooObjectType *m_itype;
 	const MooObjectType *m_ttype;
 	MooTCP *m_inter;
 
     public:
-	MooListener();
-	~MooListener();
+	MooRPCServer();
+	~MooRPCServer();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -35,15 +34,13 @@ class MooListener : public MooTask {
 	int release();
 
 	int handle(MooInterface *inter, int ready);
-
-	int listen(int port);
+	int bestow(MooInterface *inter);
 };
 
-extern MooObjectType moo_listener_obj_type;
+extern MooObjectType moo_rpc_server_obj_type;
 
-MooObject *moo_listener_create(void);
+MooObject *moo_rpc_server_create(void);
 
 #endif
-
 
 

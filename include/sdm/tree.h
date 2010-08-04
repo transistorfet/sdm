@@ -15,6 +15,8 @@
 #define MOO_TBF_DELETE			0x0010		// Delete elements when removed from list
 #define MOO_TBF_DELETEALL		0x0020		// Delete all elements when list is destroyed
 
+#define MOO_TREE_DEFAULT_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETE | MOO_TBF_DELETEALL
+
 template<typename T>
 class MooTreeEntry {
     public:
@@ -34,7 +36,7 @@ class MooTree {
 
 	void destroy_subtree(MooTreeEntry<T> *entry);
     public:
-	MooTree(int bits);
+	MooTree(int bits = MOO_TREE_DEFAULT_BITS);
 	~MooTree();
 
 	int set(const char *key, T data);

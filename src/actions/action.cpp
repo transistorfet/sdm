@@ -15,10 +15,10 @@ MooObjectType moo_action_obj_type = {
 	NULL,
 	"action",
 	typeid(MooAction).name(),
-	(moo_type_create_t) moo_action_create
+	(moo_type_create_t) NULL
 };
 
-int MooAction::MooAction(moo_action_t func)
+MooAction::MooAction(moo_action_t func)
 {
 	m_func = func;
 }
@@ -26,5 +26,6 @@ int MooAction::MooAction(moo_action_t func)
 int MooAction::do_action(MooThing *thing, MooArgs *args)
 {
 
+	return(0);
 }
 

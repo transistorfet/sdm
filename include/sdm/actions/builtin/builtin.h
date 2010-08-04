@@ -8,23 +8,25 @@
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/actions/action.h>
 
-#define SDM_BUILTIN(ptr)		( (struct sdm_builtin *) (ptr) )
+class MooBuiltin : public MooAction {
 
-struct sdm_builtin {
-	struct sdm_action action;
-	struct sdm_hash_entry *entry;
+    public:
+	MooBuiltin();
+	virtual ~MooBuiltin();
+
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
+
+	virtual int do_action(MooThing *thing, MooArgs *args);
 };
 
-extern struct sdm_object_type sdm_builtin_obj_type;
-
-#define SDM_BUILTIN_ARGS(func)			SDM_ACTION_ARGS(func)
+extern MooObjectType moo_builtin_obj_type;
 
 int init_builtin(void);
 void release_builtin(void);
-
-int sdm_builtin_read_entry(struct sdm_builtin *, const char *, struct sdm_data_file *);
-int sdm_builtin_write_data(struct sdm_builtin *, struct sdm_data_file *);
+MooObject *moo_builtin_create(void);
 
 #endif
 

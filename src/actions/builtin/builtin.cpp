@@ -18,61 +18,67 @@
 #include <sdm/actions/builtin/basics.h>
 #include <sdm/actions/builtin/builtin.h>
 
-struct sdm_object_type sdm_builtin_obj_type = {
-	&sdm_action_obj_type,
+MooObjectType moo_builtin_obj_type = {
+	&moo_action_obj_type,
 	"builtin",
-	sizeof(struct sdm_builtin),
-	NULL,
-	(sdm_object_init_t) NULL,
-	(sdm_object_release_t) NULL,
-	(sdm_object_read_entry_t) sdm_builtin_read_entry,
-	(sdm_object_write_data_t) sdm_builtin_write_data
+	typeid(MooBuiltin).name(),
+	(moo_type_create_t) moo_builtin_create
 };
 
-static struct sdm_hash *builtin_actions = NULL;
-
-extern int sdm_builtin_load_builder(struct sdm_hash *);
-extern int sdm_builtin_load_room_actions(struct sdm_hash *);
+//static struct sdm_hash *builtin_actions = NULL;
 
 int init_builtin(void)
 {
+	if (moo_object_register_type(&moo_builtin_obj_type) < 0)
+		return(-1);
+/*
 	if (builtin_actions)
 		return(1);
 	if (!(builtin_actions = create_sdm_hash(0, -1, NULL)))
 		return(-1);
-	if (sdm_object_register_type(&sdm_builtin_obj_type) < 0)
-		return(-1);
 	sdm_builtin_load_basics(builtin_actions);
 	sdm_builtin_load_builder(builtin_actions);
 	sdm_builtin_load_room_actions(builtin_actions);
+*/
 	return(0);
 }
 
 void release_builtin(void)
 {
+/*
 	if (!builtin_actions)
 		return;
 	destroy_sdm_hash(builtin_actions);
 	builtin_actions = NULL;
-	sdm_object_deregister_type(&sdm_builtin_obj_type);
+*/
+	moo_object_deregister_type(&moo_builtin_obj_type);
 }
 
+MooObject *moo_builtin_create(void)
+{
+	return(new MooBuiltin());
+}
 
-int sdm_builtin_read_entry(struct sdm_builtin *builtin, const char *name, struct sdm_data_file *data)
+MooBuiltin::MooBuiltin()
+{
+
+}
+
+int MooBuiltin::read_entry(const char *type, MooDataFile *data)
 {
 	char buffer[STRING_SIZE];
 
-	if (sdm_data_read_string(data, buffer, STRING_SIZE) < 0)
+	if (data->read_string(buffer, STRING_SIZE) < 0)
 		return(-1);
-	if (!(builtin->entry = sdm_hash_find_entry(builtin_actions, buffer)))
-		return(-1);
-	SDM_ACTION(builtin)->func = (sdm_action_t) builtin->entry->data;
-	return(SDM_HANDLED_ALL);
+	//if (!(m_entry = builtin_actions->find_entry(buffer)))
+	//	return(-1);
+	//m_func = (sdm_action_t) m_entry->m_data;
+	return(MOO_HANDLED_ALL);
 }
 
-int sdm_builtin_write_data(struct sdm_builtin *builtin, struct sdm_data_file *data)
+int MooBuiltin::write_data(MooDataFile *data)
 {
-	sdm_data_write_string(data, builtin->entry->name);
+	//data->write_string(m_entry->name);
 	return(0);
 }
 

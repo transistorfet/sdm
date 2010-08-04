@@ -130,11 +130,11 @@ int MooInterface::wait(float t)
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd))
-			m_bits |= IO_READY_READ;
+			cur->m_bits |= IO_READY_READ;
 		if ((cur->m_wfd != -1) && FD_ISSET(cur->m_wfd, &wr))
-			m_bits |= IO_READY_WRITE;
+			cur->m_bits |= IO_READY_WRITE;
 		if ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err))
-			m_bits |= IO_READY_ERROR;
+			cur->m_bits |= IO_READY_ERROR;
 
 		if (cur->m_bits & IO_STATE)
 			cur->m_task->handle(cur, cur->m_bits & IO_STATE);

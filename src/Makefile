@@ -11,30 +11,27 @@ TARGET = ../bin/mud
 OBJS =	data.o	\
 	main.o	\
 	misc.o	\
-	test.o	\
 	timer.o	\
-	tree.o	\
 	actions/action.o	\
-	actions/builtin/basics.o	\
-	actions/builtin/builder.o	\
-	actions/builtin/builtin.o	\
-	actions/builtin/room.o	\
-	actions/lua/funcs.o	\
-	actions/lua/lua.o	\
 	interfaces/interface.o	\
+	interfaces/rpc.o	\
 	interfaces/tcp.o	\
-	interfaces/telnet/ansi.o	\
-	interfaces/telnet/login.o	\
-	interfaces/telnet/register.o	\
-	interfaces/telnet/telnet.o	\
-	objs/list.o	\
+	objs/config.o	\
 	objs/number.o	\
 	objs/object.o	\
 	objs/string.o	\
+	tasks/listener.o	\
+	tasks/rpc-server.o	\
+	tasks/task.o	\
 	things/thing.o	\
 	things/user.o	\
-	things/utils.o	\
 	things/world.o
+
+#	tasks/form.o	\
+#	tasks/interpreter.o	\
+#	tasks/login.o	\
+#	things/utils.o	\
+#	objs/list.o	\
 
 LIBS =	-lcrypt	\
 	-llua	\
@@ -65,6 +62,8 @@ $(LIB_TARGET): builds $(OBJS)
 clean:
 	$(RM) $(OBJS)
 
+2test.o: 2test.cpp
+
 data.o: data.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/misc.h ../include/sdm/memory.h
 
@@ -72,23 +71,22 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/misc.h ../include/sdm/timer.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
   ../include/sdm/objs/object.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/telnet.h ../include/sdm/actions/lua/lua.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h \
-  ../include/sdm/actions/builtin/builtin.h ../include/sdm/things/user.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/interfaces/telnet.h \
+  ../include/sdm/actions/builtin/builtin.h \
+  ../include/sdm/actions/action.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/config.h \
+  ../include/sdm/things/user.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/things/world.h
 
 misc.o: misc.cpp ../include/sdm/misc.h ../include/sdm/memory.h
 
-test.o: test.cpp ../include/sdm/globals.h ../include/sdm/hash.h \
-  ../include/sdm/memory.h
+test.o: test.cpp ../include/sdm/globals.h ../include/sdm/data.h \
+  ../include/sdm/misc.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/listener.h
 
-timer.o: timer.c ../include/sdm/timer.h ../include/sdm/globals.h \
-  ../include/sdm/memory.h
-
-tree.o: tree.cpp ../include/sdm/tree.h ../include/sdm/globals.h \
+timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/memory.h
 
 actions/action.o: actions/action.cpp ../include/sdm/memory.h \
@@ -96,109 +94,26 @@ actions/action.o: actions/action.cpp ../include/sdm/memory.h \
   ../include/sdm/data.h ../include/sdm/misc.h \
   ../include/sdm/actions/action.h
 
-actions/builtin/basics.o: actions/builtin/basics.c ../include/sdm/misc.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/data.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/utils.h ../include/sdm/tasks/interpreter.h \
-  ../include/sdm/actions/builtin/basics.h
-
-actions/builtin/builder.o: actions/builtin/builder.c \
-  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h
-
-actions/builtin/builtin.o: actions/builtin/builtin.cpp \
-  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/data.h \
-  ../include/sdm/objs/object.h ../include/sdm/actions/action.h \
-  ../include/sdm/actions/builtin/basics.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builtin.h
-
-actions/builtin/room.o: actions/builtin/room.c ../include/sdm/misc.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/data.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/utils.h ../include/sdm/tasks/interpreter.h
-
-actions/lua/funcs.o: actions/lua/funcs.c ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/misc.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/number.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h ../include/sdm/actions/lua/funcs.h
-
-actions/lua/lua.o: actions/lua/lua.cpp ../include/sdm/misc.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/data.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/actions/lua/lua.h ../include/sdm/actions/lua/funcs.h
-
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/array.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
   ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/misc.h \
   ../include/sdm/interfaces/interface.h
 
+interfaces/rpc.o: interfaces/rpc.cpp ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/misc.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/rpc.h
+
 interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/misc.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/tcp.h
 
-interfaces/telnet/ansi.o: interfaces/telnet/ansi.c ../include/sdm/hash.h \
-  ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/telnet.h interfaces/telnet/ansi.h
-
-interfaces/telnet/login.o: interfaces/telnet/login.c \
-  ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
-  ../include/sdm/things/user.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h
-
-interfaces/telnet/register.o: interfaces/telnet/register.c \
-  ../include/sdm/text.h ../include/sdm/misc.h ../include/sdm/globals.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
-  ../include/sdm/things/user.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h
-
-interfaces/telnet/telnet.o: interfaces/telnet/telnet.cpp \
-  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/things/user.h ../include/sdm/misc.h \
-  ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h ../include/sdm/tasks/login.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
-  interfaces/telnet/ansi.h interfaces/telnet/commands.h
+objs/config.o: objs/config.cpp ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/misc.h \
+  ../include/sdm/objs/config.h
 
 objs/list.o: objs/list.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/object.h \
@@ -218,6 +133,51 @@ objs/string.o: objs/string.cpp ../include/sdm/memory.h \
   ../include/sdm/data.h ../include/sdm/misc.h \
   ../include/sdm/objs/string.h
 
+tasks/form.o: tasks/form.cpp ../include/sdm/text.h ../include/sdm/misc.h \
+  ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/things/user.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/things/thing.h ../include/sdm/hash.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/utils.h ../include/sdm/tasks/interpreter.h \
+  ../include/sdm/tasks/form.h
+
+tasks/interpreter.o: tasks/interpreter.cpp ../include/sdm/text.h \
+  ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/object.h \
+  ../include/sdm/data.h ../include/sdm/misc.h \
+  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/world.h ../include/sdm/things/utils.h \
+  ../include/sdm/tasks/interpreter.h
+
+tasks/listener.o: tasks/listener.cpp ../include/sdm/misc.h \
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/tasks/listener.h
+
+tasks/login.o: tasks/login.cpp ../include/sdm/misc.h \
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/tasks/task.h ../include/sdm/tasks/login.h \
+  ../include/sdm/interfaces/interface.h
+
+tasks/rpc-server.o: tasks/rpc-server.cpp ../include/sdm/misc.h \
+  ../include/sdm/data.h ../include/sdm/globals.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/tasks/rpc-server.h
+
+tasks/task.o: tasks/task.cpp ../include/sdm/array.h \
+  ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/misc.h ../include/sdm/tasks/task.h
+
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/globals.h ../include/sdm/tree.h \
   ../include/sdm/data.h ../include/sdm/misc.h ../include/sdm/array.h \
@@ -231,10 +191,10 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/misc.h ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/tasks/task.h \
   ../include/sdm/objs/object.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/things/utils.h \
+  ../include/sdm/objs/string.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/actions/action.h ../include/sdm/tasks/interpreter.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/user.h
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/user.h
 
 things/utils.o: things/utils.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/objs/number.h \
@@ -242,14 +202,14 @@ things/utils.o: things/utils.cpp ../include/sdm/memory.h \
   ../include/sdm/misc.h ../include/sdm/objs/string.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/tree.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
   ../include/sdm/tasks/interpreter.h
 
 things/world.o: things/world.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/misc.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/tree.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/world.h
 
