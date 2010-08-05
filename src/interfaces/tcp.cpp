@@ -127,7 +127,7 @@ int MooTCP::accept(MooTCP *inter)
 	struct sockaddr_in saddr;
 	struct timeval timeout = { 0, 0 };
 
-	this->disconnect();
+	inter->disconnect();
 
 	/** Make sure there is a connection waiting */
 	FD_ZERO(&rd);

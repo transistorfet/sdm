@@ -56,8 +56,6 @@
     Covnersion TODO:
 	* sort out and make better use of exceptions
 	* add a try/catch block around all action calls
-	* your fucking type system solution did not work and needs to be replaced.  typeid() returns the type of the pointer and not
-	  the actual core type of the object
 
 
 

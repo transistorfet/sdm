@@ -75,6 +75,10 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	else if (m_id == SDM_NEW_ID)
 		moo_thing_table->add(this);
 	m_parent = parent;
+	m_location = NULL;
+	m_next = NULL;
+	m_objects = NULL;
+	m_end_objects = NULL;
 }
 
 MooThing::~MooThing()

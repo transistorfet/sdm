@@ -87,10 +87,16 @@ MooObject *moo_make_object(const MooObjectType *type)
 
 MooObject::MooObject()
 {
-	printf("%s\n", typeid(*this).name());
-	m_type = realname_type_list->get(typeid(*this).name());
-	if (!m_type)
-		m_type = name_type_list->get("object");
+
+}
+
+const MooObjectType *MooObject::type()
+{
+	const MooObjectType *type;
+	type = realname_type_list->get(typeid(*this).name());
+	if (!type)
+		type = name_type_list->get("object");
+	return(type);
 }
 
 int MooObject::read_file(const char *file, const char *type)

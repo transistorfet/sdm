@@ -27,14 +27,13 @@ typedef struct MooObjectType {
 
 class MooObject {
     protected:
-	const MooObjectType *m_type;
-	int m_bitflags;
+	int m_bits;
     public:
 	MooObject();
 	virtual ~MooObject() { }
 
-	const MooObjectType *type() { return(m_type); }
-	const char *type_name() { return(m_type->m_name); }
+	const MooObjectType *type();
+	const char *type_name() { return(this->type()->m_name); }
 
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
@@ -55,7 +54,7 @@ class MooObject {
 	inline int is_a(const MooObjectType *type) {
 		const MooObjectType *cur;
 
-		for (cur = m_type; cur; cur = cur->m_parent) {
+		for (cur = this->type(); cur; cur = cur->m_parent) {
 			if (cur == type)
 				return(1);
 		}

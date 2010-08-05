@@ -42,6 +42,8 @@ MooString::MooString(const char *str)
 	// TODO add valist later
 	//char buffer[LARGE_STRING_SIZE];
 	//vsnprintf(buffer, LARGE_STRING_SIZE, str, va);
+	this->str = NULL;
+	this->len = 0;
 	this->set(str);
 }
 

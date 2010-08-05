@@ -54,12 +54,12 @@ int MooListener::read_entry(const char *type, MooDataFile *data)
 		this->listen(m_port);
 	}
 	else if (!strcmp(type, "type")) {
-		data->read_string(buffer, STRING_SIZE);
+		data->read_string_entry(buffer, STRING_SIZE);
 		if (!(m_itype = moo_object_find_type((*buffer != '\0') ? buffer : "tcp", &moo_tcp_obj_type)))
 			return(-1);
 	}
 	else if (!strcmp(type, "task")) {
-		data->read_string(buffer, STRING_SIZE);
+		data->read_string_entry(buffer, STRING_SIZE);
 		if (!(m_ttype = moo_object_find_type(buffer, &moo_task_obj_type)))
 			return(-1);
 	}

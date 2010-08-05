@@ -72,6 +72,7 @@ MooObject *moo_user_create(void)
 
 MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
+	m_task = NULL;
 	this->load(name);
 }
 

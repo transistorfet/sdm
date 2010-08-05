@@ -56,6 +56,12 @@ int moo_data_file_exists(const char *file)
 
 MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 {
+	this->doc = NULL;
+	this->root = NULL;
+	this->current = NULL;
+	this->writer = NULL;
+	this->buffer = NULL;
+
 	if (!data_path)
 		throw -1;	// TODO should this be... something a little more descriptive?
 	if (!(this->filename = make_string("%s%s", data_path, file)))

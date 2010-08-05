@@ -15,7 +15,7 @@
 #include <sdm/globals.h>
 
 MooObjectType moo_rpc_obj_type = {
-	NULL,
+	&moo_tcp_obj_type,
 	"rpc",
 	typeid(MooRPC).name(),
 	(moo_type_create_t) moo_rpc_create
