@@ -10,10 +10,12 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
-class MooBuiltin : public MooAction {
+typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *);
 
+class MooBuiltin : public MooAction {
+	moo_action_t m_func;
     public:
-	MooBuiltin();
+	MooBuiltin(moo_action_t func = NULL);
 	virtual ~MooBuiltin();
 
 	virtual int read_entry(const char *type, MooDataFile *data);

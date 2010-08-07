@@ -106,13 +106,13 @@ int MooObject::read_file(const char *file, const char *type)
 
 	try {
 		data = new MooDataFile(file, MOO_DATA_READ, type);
-		sdm_status("Reading %s data from file \"%s\".", type, file);
+		moo_status("Reading %s data from file \"%s\".", type, file);
 		res = this->read_data(data);
 		delete data;
 		return(res);
 	}
 	catch (...) {
-		sdm_status("Error opening file \"%s\".", file);
+		moo_status("Error opening file \"%s\".", file);
 		return(-1);
 	}
 }
@@ -121,7 +121,7 @@ int MooObject::write_file(const char *file, const char *type)
 {
 	MooDataFile *data;
 
-	sdm_status("Writing %s data to file \"%s\".", type, file);
+	moo_status("Writing %s data to file \"%s\".", type, file);
 	data = new MooDataFile(file, MOO_DATA_WRITE, type);
 	this->write_data(data);
 	delete data;

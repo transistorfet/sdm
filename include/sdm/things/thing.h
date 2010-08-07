@@ -38,6 +38,10 @@ class MooThing : public MooObject {
 	MooThing *m_end_objects;
 
 	int assign_id(moo_id_t id);
+
+	int add(MooThing *thing);
+	int remove(MooThing *thing);
+
     public:
 	MooThing(moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooThing();
@@ -52,38 +56,32 @@ class MooThing : public MooObject {
 	int do_action(const char *name, MooArgs *args);
 	int do_abbreved_action(const char *name, MooArgs *args);
 
-	int add(MooThing *thing);
-	int remove(MooThing *thing);
+	int moveto(MooThing *thing, MooThing *by);
 
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent() { return(m_parent); }
-
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
-	inline int is_a_thing(moo_id_t id) {
-		for (MooThing *cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-			if (cur->m_id == id)
-				return(1);
-		}
-		return(0);
-	}
-};
+	inline int is_a_thing(moo_id_t id);
 
-/*
-class MooThingType : public MooObjectType {
-    public:
-	MooThingType(const char *name) { this->name = name; }
-	virtual MooObject *create() { return new MooThing(); }
+	// TODO add functions to do name lookups like "/core/room" and stuff (all the crap from utils)
 };
-
-MooThingType moo_thing_type("thing");
-*/
 
 extern MooObjectType moo_thing_obj_type;
 
 int init_thing(void);
 void release_thing(void);
 MooObject *moo_thing_create(void);
+
+
+inline int MooThing::is_a_thing(moo_id_t id)
+{
+	for (MooThing *cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+		if (cur->m_id == id)
+			return(1);
+	}
+	return(0);
+}
 
 #endif
 

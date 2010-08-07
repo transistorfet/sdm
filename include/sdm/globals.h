@@ -7,6 +7,7 @@
 #define _SDM_GLOBALS_H
 
 #include <string.h>
+#include <sdm/exception.h>
 
 #define STRING_SIZE		512
 #define LARGE_STRING_SIZE	2048

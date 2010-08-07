@@ -3,12 +3,15 @@
  * Description:	Mud
  */
 
+#define DEFINE_EXCEPTIONS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 
 #include <sdm/data.h>
 #include <sdm/timer.h>
+#include <sdm/exception.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
@@ -47,16 +50,13 @@ int init_moo(void)
 //	if (init_telnet() < 0)
 //		return(-1);
 
-	if (init_moo_number_type() < 0)
-		return(-1);
-	if (init_moo_string_type() < 0)
-		return(-1);
-
 //	if (init_builtin() < 0)
 //		return(-1);
 //	if (init_lua() < 0)
 //		return(-1);
 
+	moo_object_register_type(&moo_number_obj_type);
+	moo_object_register_type(&moo_string_obj_type);
 	moo_object_register_type(&moo_rpc_obj_type);
 	moo_object_register_type(&moo_rpc_server_obj_type);
 
@@ -81,9 +81,6 @@ void release_moo(void)
 
 //	release_lua();
 //	release_builtin();
-
-	release_moo_string_type();
-	release_moo_number_type();
 
 //	release_telnet();
 	release_interface();

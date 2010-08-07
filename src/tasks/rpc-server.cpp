@@ -15,6 +15,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/tcp.h>
+#include <sdm/interfaces/rpc.h>
 #include <sdm/tasks/task.h>
 #include <sdm/tasks/rpc-server.h>
 
@@ -87,7 +88,9 @@ int MooRPCServer::release()
 
 int MooRPCServer::handle(MooInterface *inter, int ready)
 {
-
+	char buffer[STRING_SIZE];
+	m_inter->read(buffer, STRING_SIZE);
+	printf("%s\n", buffer);
 	return(0);
 }
 
@@ -96,7 +99,7 @@ int MooRPCServer::bestow(MooInterface *inter)
 	// TODO do we need to do any other special stuff before disconnecting the old socket
 	if (m_inter)
 		delete m_inter;
-	m_inter = (MooTCP *) inter;
+	m_inter = dynamic_cast<MooRPC *>(inter);
 	m_inter->set_task(this);
 	return(0);
 }

@@ -137,7 +137,7 @@ int MooTCP::accept(MooTCP *inter)
 
 	size = sizeof(struct sockaddr_in);
 	if ((m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
-		sdm_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
+		moo_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
 		// TODO do anything you might want with the saddr
 		return(0);
 	}

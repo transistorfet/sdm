@@ -12,7 +12,7 @@
 
 #define STRING_MAX_SIZE			1024
 
-int sdm_status(const char *fmt, ...)
+int moo_status(const char *fmt, ...)
 {
 	va_list va;
 
@@ -56,3 +56,4 @@ string_t duplicate_string(string_t str)
 	strcpy(dup, str);
 	return(dup);
 }
+

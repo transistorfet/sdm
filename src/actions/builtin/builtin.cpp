@@ -59,9 +59,9 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin()
+MooBuiltin::MooBuiltin(moo_action_t func)
 {
-
+	m_func = func;
 }
 
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
@@ -81,5 +81,17 @@ int MooBuiltin::write_data(MooDataFile *data)
 	//data->write_string(m_entry->name);
 	return(0);
 }
+
+int MooBuiltin::do_action(MooThing *thing, MooArgs *args)
+{
+	return(m_func(this, thing, args));
+}
+
+
+
+/**
+ * tell function: will call a function user->tell directly
+
+ */
 
 

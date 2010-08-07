@@ -90,7 +90,7 @@ MooUser::~MooUser()
 int MooUser::load(const char *name)
 {
 	if (!name || !moo_user_valid_username(name) || !(m_name = make_string("%s", name)))
-		throw -1;
+		throw MooException("User name error");
 
 	/** If there is already a user with that name then fail */
 	if (user_list->set(name, this))
@@ -233,4 +233,48 @@ int moo_user_valid_username(const char *name)
 	}
 	return(1);
 }
+
+
+/** Called by the client task which reads input from the interface.  This function would parse
+ *  the input as an action and then execute that action. */
+/*
+int MooUser::command(const char *text)
+{
+
+}
+
+int MooUser::command(const char *action, const char *text)
+{
+
+}
+
+int MooUser::command(const char *action, const char *object, const char *target)
+{
+
+}
+*/
+
+int MooUser::command(const char *action, MooThing *object, MooThing *target)
+{
+	MooArgs args;
+
+	// TODO change this with a MooArgs method for setting
+	args.m_user = this;
+	args.m_caller = (MooThing *) this;
+	args.m_thing = (MooThing *) this;
+	args.m_object = object;
+	args.m_target = target;
+	args.m_text = NULL;
+
+	// TODO should this be abreved action instead?
+	return(object->do_action(action, &args));
+}
+
+/** Sends data output of some kind to the client.  Things like the output of actions, like 'look', 'exits', etc
+ */
+int MooUser::tell(const char *text, ...)
+{
+
+}
+
 

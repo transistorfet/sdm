@@ -24,8 +24,6 @@ class MooNumber : public MooObject {
 
 extern MooObjectType moo_number_obj_type;
 
-int init_moo_number_type(void);
-void release_moo_number_type(void);
 MooObject *moo_number_create(void);
 
 #endif

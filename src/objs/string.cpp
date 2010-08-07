@@ -20,18 +20,6 @@ MooObjectType moo_string_obj_type = {
 	(moo_type_create_t) moo_string_create
 };
 
-int init_moo_string_type(void)
-{
-	if (moo_object_register_type(&moo_string_obj_type) < 0)
-		return(-1);
-	return(0);
-}
-
-void release_moo_string_type(void)
-{
-	moo_object_deregister_type(&moo_string_obj_type);
-}
-
 MooObject *moo_string_create(void)
 {
 	return(new MooString(""));

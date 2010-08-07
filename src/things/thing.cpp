@@ -139,7 +139,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		res = obj->read_data(data);
 		data->read_parent();
 		if ((res < 0) || (this->set_action(buffer, (MooAction *) obj) < 0)) {
-			sdm_status("Error loading action, %s.", buffer);
+			moo_status("Error loading action, %s.", buffer);
 			delete obj;
 			return(-1);
 		}
@@ -251,13 +251,22 @@ int MooThing::do_action(const char *name, MooArgs *args)
 	MooThing *cur;
 	MooAction *action;
 
-	if (!args->thing)
-		args->thing = this;
-	args->action = name;
-	args->result = NULL;
+	// TODO is this right, deleting the result if it's present?
+	if (args->m_result)
+		delete args->m_result;
+	args->m_result = NULL;
+	if (!args->m_thing)
+		args->m_thing = this;
+	args->m_action = name;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get(name)))
-			return(action->do_action(this, args));
+		if ((action = cur->m_actions->get(name))) {
+			try {
+				return(action->do_action(this, args));
+			}
+			catch (...) {
+				moo_status("An unspecified error has occured during \"%s\", name");
+			}
+		}
 	}
 	return(1);
 }
@@ -267,13 +276,19 @@ int MooThing::do_abbreved_action(const char *name, MooArgs *args)
 	MooThing *cur;
 	MooAction *action;
 
-	if (!args->thing)
-		args->thing = this;
-	args->action = name;
-	args->result = NULL;
+	if (!args->m_thing)
+		args->m_thing = this;
+	args->m_action = name;
+	args->m_result = NULL;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get_partial(name)))
-			return(action->do_action(this, args));
+		if ((action = cur->m_actions->get_partial(name))) {
+			try {
+				return(action->do_action(this, args));
+			}
+			catch (...) {
+				moo_status("An unspecified error has occured during \"%s\", name");
+			}
+		}
 	}
 	return(1);
 }
@@ -316,6 +331,13 @@ int MooThing::remove(MooThing *obj)
 		}
 	}
 	return(1);
+}
+
+int MooThing::moveto(MooThing *thing, MooThing *by)
+{
+	// TODO fill this in
+	// TODO this will check permissions of via to perform the action (??) and then
+	//	call various actions on the objects to actually do the move
 }
 
 int MooThing::assign_id(moo_id_t id)

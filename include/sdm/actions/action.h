@@ -11,30 +11,30 @@
 #include <sdm/objs/object.h>
 
 class MooThing;
-
-typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *);
+class MooUser;
 
 class MooArgs {
     public:
-	const char *action;
-	MooObject *result;
-	MooThing *thing;
-	MooThing *caller;
-	MooThing *obj;
-	MooThing *target;
-	const char *text;
+	const char *m_action;
+	MooObject *m_result;
+	MooUser *m_user;
+	MooThing *m_caller;
+	MooThing *m_thing;
+	MooThing *m_object;
+	MooThing *m_target;
+	const char *m_text;
 
-	MooArgs() { memset(this, '\0', sizeof(MooArgs)); }
+	MooArgs();
+
+	int set(MooThing *thing, const char *text);
 };
 
 class MooAction : public MooObject {
-	moo_action_t m_func;
     public:
-	MooAction(moo_action_t func = NULL);
+	MooAction();
 	virtual ~MooAction() { }
 
-	virtual int do_action(MooThing *thing, MooArgs *args);
-
+	virtual int do_action(MooThing *thing, MooArgs *args) = 0;
 };
 
 extern MooObjectType moo_action_obj_type;

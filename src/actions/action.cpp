@@ -18,14 +18,20 @@ MooObjectType moo_action_obj_type = {
 	(moo_type_create_t) NULL
 };
 
-MooAction::MooAction(moo_action_t func)
+MooArgs::MooArgs()
 {
-	m_func = func;
+	m_action = NULL;
+	m_result = NULL;
+	m_user = NULL;
+	m_caller = NULL;
+	m_thing = NULL;
+	m_object = NULL;
+	m_target = NULL;
+	m_text = NULL;
 }
 
-int MooAction::do_action(MooThing *thing, MooArgs *args)
+MooAction::MooAction()
 {
 
-	return(0);
 }
 

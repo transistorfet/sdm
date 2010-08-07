@@ -27,7 +27,7 @@ typedef struct MooObjectType {
 
 class MooObject {
     protected:
-	int m_bits;
+
     public:
 	MooObject();
 	virtual ~MooObject() { }

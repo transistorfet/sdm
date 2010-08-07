@@ -99,16 +99,10 @@ int MooListener::release()
 
 int MooListener::handle(MooInterface *inter, int ready)
 {
-	// TODO this will create an object of type m_itype and pass it to m_inter->accept()
-	// TODO create a new process of type m_ptype and set it up so that the new interface calls it and it does everythnig with
-	//	that interface (perhaps call proc->take(inter) which sets it's own m_inter field (or array of interfaces) and then
-	//	calls inter->set_task(this)
-
 	MooTCP *newtcp;
 	MooTask *newtask;
 
-	printf("HERE\n");
-
+	// TODO we should probably make sure we don't get a loop somehow where we keep getting called and don't handle the request
 	if (!(ready & IO_READY_READ))
 		return(-1);
 	if (!(newtcp = (MooTCP *) moo_make_object(m_itype)))

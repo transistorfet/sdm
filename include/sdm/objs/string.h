@@ -27,8 +27,6 @@ class MooString : public MooObject {
 
 extern MooObjectType moo_string_obj_type;
 
-int init_moo_string_type(void);
-void release_moo_string_type(void);
 MooObject *moo_string_create(void);
 
 #endif

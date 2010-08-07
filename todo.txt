@@ -14,29 +14,15 @@
 	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
 	  behaviour of the table much.
 
-	* there should be like a process that listens for connections and automatically breaks them off to a sperate
-	  "process" which "handles" the connection via launching subprocesses (it's very similar to somthing inetd
-	  and launching a shell process for each connection which then runs sub programs
 	* the user object should have actions called on itself most of the time, so that the user can reprogram his/her
 	  own object to customize and extend their own interface and command set
 	* there must be a process table and any time a process does stuff, it is set to the current process.  Any processes
 	  that are created by that process will use that as their parent process.  Each interface will have a reference to the
 	  process that owns it.
-	* Each listening socket will have it's own listening process which it calls when it receives a connection (or wait
-	  does this even need to be a process of it's own).  It will create a specific interface (based on the listening
-	  interface which since there is one per listener, each listening process will only launch one specific interface type
-	  thus why we might not need a listening process).  A standard login process will be started to handle the interface
-	  further.  That login process will create an appropriate handling process (either a char gen/account creation process
-	  or an interpreter process, or something, perhaps even something specific to the interface type)  This can all be
-	  handled via config data of some kind (like a property in the user thing which would be created by the login process)
-	* add some code somewhere to launch the initial listening process(es) or whatever  for each port through a <process>
-	  block in the main config file.  This would tell it which process to use and all that
 	* is it possible to have something like sshd automatically run a certain program upon connection (to a specific port) such
 	  that this program either directly transfers data to the MOO (running in a seperate process) or handles the basic I/O and
 	  such, communicating with the MOO core via a raw protocol of some kind?  This would move most of the communications code
 	  out of the core and allow you to use sshd of course (i don't think this is possible because sshd is too specfic for shells)
-	* perhaps you should focus on the raw format and have a completely seperate process of some kind that does the actual detailed
-	  handling of I/O, acting as an intermediate client
 	* the editor process could be implemented via whatever protocol by just passing all the code to the client, allowing it to
 	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
 	  a buffer, edit it, and then pass it all back when done.
@@ -54,14 +40,28 @@
 	* think about multithreading possibilities
 
     Covnersion TODO:
-	* sort out and make better use of exceptions
-	* add a try/catch block around all action calls
+	* sort out and make better use of exceptions (in do_action in particular)
+	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
+	  words) as well as functions that set the values for certain circumstances
+	* make various functions in thing.cpp (like those in utils right now)
+	* fill out the MooArgs class
+	* fill in the various functions in MooUser for basic communications
+	* implement basic builtin functions like 'tell' and 'look'
+
+	* make an IRC pseudo server which acts like a single-IRC-servered network and communicates with clients via server-to-client
+	  IRC protocol, but which cannot connect to an existing IRC server.
+	* in future, we could make a client (klunky), services (is this even possible), or server based IRC interface.  If it requires
+	  (or would be easier to use) some existing code (like perhaps even writing a module for anope), you could easily just have it
+	  act as an RPC client which connects via socket to the moo server's RPC server (which we have yet to figure out)
+
+	* add a function that MooInterface can call on a task to notify it that the interface is being destroyed
+	* modify the handle() function to do something like close the interface if an error occurs?
+
 
 
 
 
     Old Stuff:
-	* make an array object like SDRL
 	* make sdm able to use python and SDRL (and possibly lua) simultaneously but there is no need to
 	  make it capable of supporting more than this.  Making it capable of *only* python would not be
 	  terrible either because that's likely the only language worth using.

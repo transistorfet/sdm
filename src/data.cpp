@@ -63,14 +63,14 @@ MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 	this->buffer = NULL;
 
 	if (!data_path)
-		throw -1;	// TODO should this be... something a little more descriptive?
+		throw MooException("No data path");
 	if (!(this->filename = make_string("%s%s", data_path, file)))
-		throw -1;	// TODO same
+		throw moo_mem_error;
 
 	if (mode & MOO_DATA_READ) {
 		if (!(this->doc = xmlReadFile(this->filename, NULL, 0))
 		    || !(this->root = xmlDocGetRootElement(this->doc)) || xmlStrcmp(this->root->name, (xmlChar *) rootname)) {
-			throw -1;	// TODO same
+			throw MooException("Error opening XML file for reading");
 		}
 		this->current = this->root->children;
 	}
@@ -81,7 +81,7 @@ MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 		    || (xmlTextWriterSetIndent(this->writer, 1) < 0)
 		    || (xmlTextWriterStartDocument(this->writer, NULL, "UTF-8", NULL) < 0)
 		    || (xmlTextWriterStartElement(this->writer, (xmlChar *) rootname) < 0)) {
-			throw -1;	// TODO same
+			throw MooException("Error opening XML file for writing");
 		}
 	}
 }

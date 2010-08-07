@@ -34,6 +34,10 @@ class MooUser : public MooThing {
 
 	int read_file();
 	int write_file();
+
+	int command(const char *action, MooThing *object, MooThing *target);
+	int tell(const char *text, ...);
+
 };
 
 extern MooObjectType moo_user_obj_type;

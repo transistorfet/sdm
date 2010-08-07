@@ -44,9 +44,11 @@ void release_interface(void)
 
 MooInterface::MooInterface()
 {
+	m_bits = 0;
 	m_rfd = -1;
 	m_wfd = -1;
 	m_efd = -1;
+	m_task = NULL;
 
 	interface_list->add(this);
 }
@@ -72,6 +74,7 @@ MooInterface::~MooInterface()
 int MooInterface::wait(float t)
 {
 	int i;
+	int state;
 	int max, ret = 0;
 	MooInterface *cur;
 	fd_set rd, wr, err;
@@ -83,8 +86,9 @@ int MooInterface::wait(float t)
 	for (i = 0; i < interface_list->size(); i++) {
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
-		if (cur->m_bits & IO_STATE) {
-			cur->m_task->handle(cur, cur->m_bits & IO_STATE);
+		if ((state = (cur->m_bits & IO_STATE))) {
+			cur->m_bits &= ~IO_STATE;
+			cur->m_task->handle(cur, state);
 			ret++;
 		}
 	}
@@ -136,8 +140,10 @@ int MooInterface::wait(float t)
 		if ((cur->m_efd != -1) && FD_ISSET(cur->m_efd, &err))
 			cur->m_bits |= IO_READY_ERROR;
 
-		if (cur->m_bits & IO_STATE)
-			cur->m_task->handle(cur, cur->m_bits & IO_STATE);
+		if ((state = (cur->m_bits & IO_STATE))) {
+			cur->m_bits &= ~IO_STATE;
+			cur->m_task->handle(cur, state);
+		}
 	}
 	return(ret);
 }

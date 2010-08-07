@@ -19,18 +19,6 @@ struct MooObjectType moo_number_obj_type = {
 	(moo_type_create_t) moo_number_create
 };
 
-int init_moo_number_type(void)
-{
-	if (moo_object_register_type(&moo_number_obj_type) < 0)
-		return(-1);
-	return(0);
-}
-
-void release_moo_number_type(void)
-{
-	moo_object_deregister_type(&moo_number_obj_type);
-}
-
 MooObject *moo_number_create(void)
 {
 	return(new MooNumber(0));

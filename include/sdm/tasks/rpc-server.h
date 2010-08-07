@@ -13,6 +13,7 @@
 #include <sdm/data.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
+#include <sdm/interfaces/rpc.h>
 
 #include <sdm/objs/object.h>
 
@@ -20,7 +21,7 @@ class MooRPCServer : public MooTask {
 	int m_port;
 	const MooObjectType *m_itype;
 	const MooObjectType *m_ttype;
-	MooTCP *m_inter;
+	MooRPC *m_inter;
 
     public:
 	MooRPCServer();
