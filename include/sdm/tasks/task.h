@@ -12,6 +12,7 @@
 
 typedef int moo_tid_t;
 
+class MooUser;
 class MooInterface;
 
 class MooTask : public MooObject {
@@ -24,9 +25,13 @@ class MooTask : public MooObject {
 
 	virtual int initialize() = 0;
 	virtual int idle() = 0;
-	virtual int handle(MooInterface *inter, int ready) = 0;
 	virtual int release() = 0;
+
+	virtual int handle(MooInterface *inter, int ready) = 0;
 	virtual int bestow(MooInterface *inter);
+	virtual int purge(MooInterface *inter) { return(-1); }
+
+	virtual int purge(MooUser *user) { return(-1); }
 };
 
 extern MooObjectType moo_task_obj_type;

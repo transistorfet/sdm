@@ -6,25 +6,20 @@
 #ifndef _SDM_EXCEPTION_H
 #define _SDM_EXCEPTION_H
 
+#include <string>
+
 class MooException {
-	const char *m_msg;
+	std::string m_msg;
     public:
-	MooException(const char *msg) { m_msg = msg; }
-	const char *get() const { return(m_msg); }
+	MooException(const char *msg, ...);
+	const char *get() const { return(m_msg.c_str()); }
 };
 
+extern MooException moo_mem_error;
+extern MooException moo_closed;
+extern MooException moo_unknown;
 
-#ifdef DEFINE_EXCEPTIONS
-#define EXTERN(def, msg)	def(msg);
-#else
-#define EXTERN(def, msg)	extern def;
-#endif
-
-EXTERN(MooException moo_mem_error, "Out of Memory")
-EXTERN(MooException moo_whatever, "Whatever")
-
-// TODO and then you can do throw MooException("Some customized Error");
-
+int moo_status(const char *fmt, ...);
 
 #endif
 

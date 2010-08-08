@@ -27,6 +27,10 @@ typedef struct MooObjectType {
 
 class MooObject {
     protected:
+	int m_delete;
+
+	int is_deleting() { return(m_delete); }
+	void set_delete() { m_delete = 1; }
 
     public:
 	MooObject();

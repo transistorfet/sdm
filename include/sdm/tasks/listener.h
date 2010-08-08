@@ -35,6 +35,7 @@ class MooListener : public MooTask {
 	int release();
 
 	int handle(MooInterface *inter, int ready);
+	int purge(MooInterface *inter);
 
 	int listen(int port);
 };

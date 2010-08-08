@@ -115,6 +115,7 @@ int MooTCP::listen(int port)
 	if (((m_rfd = ::socket(PF_INET, SOCK_STREAM, 0)) >= 0)
 	    && (::bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
 	    && (::listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
+		moo_status("Listening on port %d", port);
 		return(0);
 	}
 	return(-1);
@@ -136,7 +137,7 @@ int MooTCP::accept(MooTCP *inter)
 		return(-1);
 
 	size = sizeof(struct sockaddr_in);
-	if ((m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
+	if ((inter->m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
 		moo_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
 		// TODO do anything you might want with the saddr
 		return(0);
@@ -151,6 +152,9 @@ void MooTCP::disconnect()
 	::shutdown(m_rfd, 2);
 	::close(m_rfd);
 	m_rfd = -1;
+	m_read_pos = 0;
+	m_read_length = 0;
+	this->clear_state();
 }
 
 
@@ -194,12 +198,32 @@ int MooTCP::receive(char *data, int len)
 		    && ((j = ::recv(m_rfd, &data[i], len - i, 0)) > 0))
 			i += j;
 		if (j <= 0)
-			return(-1);
+			throw moo_closed;
 	}
 	if (m_read_pos < m_read_length)
 		this->set_ready();
 	return(i);
 }
+
+int MooTCP::receive(char *data, int len, char delim)
+{
+	int i, j = 0;
+
+	if (this->recv_to_buffer() < 0)
+		throw moo_closed;
+	for (i = m_read_pos; i < m_read_length; i++) {
+		if (m_read_buffer[i] == delim) {
+			data[j] = '\0';
+			this->read_pos(i + 1);
+			return(j);
+		}
+		data[j++] = m_read_buffer[i];
+	}
+	/** We didn't receive a delim character so we'll act like we didn't read anything */
+	return(0);
+}
+
+
 
 /**
  * Send the string of length size to the given network connection and

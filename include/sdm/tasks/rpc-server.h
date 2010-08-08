@@ -36,6 +36,7 @@ class MooRPCServer : public MooTask {
 
 	int handle(MooInterface *inter, int ready);
 	int bestow(MooInterface *inter);
+	int purge(MooInterface *inter);
 };
 
 extern MooObjectType moo_rpc_server_obj_type;

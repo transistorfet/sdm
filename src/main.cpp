@@ -3,8 +3,6 @@
  * Description:	Mud
  */
 
-#define DEFINE_EXCEPTIONS
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -17,6 +15,7 @@
 #include <sdm/interfaces/telnet.h>
 #include <sdm/interfaces/rpc.h>
 #include <sdm/tasks/rpc-server.h>
+#include <sdm/tasks/irc/pseudoserv.h>
 
 //#include <sdm/actions/lua/lua.h>
 #include <sdm/actions/builtin/builtin.h>
@@ -57,8 +56,11 @@ int init_moo(void)
 
 	moo_object_register_type(&moo_number_obj_type);
 	moo_object_register_type(&moo_string_obj_type);
+
+	moo_object_register_type(&moo_tcp_obj_type);
 	moo_object_register_type(&moo_rpc_obj_type);
 	moo_object_register_type(&moo_rpc_server_obj_type);
+	moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 	if (init_thing() < 0)
 		return(-1);

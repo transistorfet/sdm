@@ -41,6 +41,7 @@ MooListener::MooListener()
 
 MooListener::~MooListener()
 {
+	this->set_delete();
 	if (m_inter)
 		delete m_inter;
 }
@@ -56,12 +57,12 @@ int MooListener::read_entry(const char *type, MooDataFile *data)
 	else if (!strcmp(type, "type")) {
 		data->read_string_entry(buffer, STRING_SIZE);
 		if (!(m_itype = moo_object_find_type((*buffer != '\0') ? buffer : "tcp", &moo_tcp_obj_type)))
-			return(-1);
+			throw MooException("No tcp type, %s", buffer);
 	}
 	else if (!strcmp(type, "task")) {
 		data->read_string_entry(buffer, STRING_SIZE);
 		if (!(m_ttype = moo_object_find_type(buffer, &moo_task_obj_type)))
-			return(-1);
+			throw MooException("No task type, %s", buffer);
 	}
 	else
 		return(MOO_NOT_HANDLED);
@@ -107,12 +108,23 @@ int MooListener::handle(MooInterface *inter, int ready)
 		return(-1);
 	if (!(newtcp = (MooTCP *) moo_make_object(m_itype)))
 		return(-1);
-	if (!(m_inter->accept(newtcp))
+	if (m_inter->accept(newtcp) < 0
 	    || !(newtask = (MooTask *) moo_make_object(m_ttype))) {
 		delete newtcp;
 		return(-1);
 	}
 	newtask->bestow(newtcp);
+	return(0);
+}
+
+int MooListener::purge(MooInterface *inter)
+{
+	if (inter != m_inter)
+		return(-1);
+	// We assume that since we were called because the interface is already being deleted, in which case we don't want to delete too
+	m_inter = NULL;
+	if (!this->is_deleting())
+		delete this;
 	return(0);
 }
 

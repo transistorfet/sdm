@@ -14,14 +14,17 @@ typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *
 
 class MooBuiltin : public MooAction {
 	moo_action_t m_func;
+	MooBuiltin *m_master;
     public:
 	MooBuiltin(moo_action_t func = NULL);
-	virtual ~MooBuiltin();
+	virtual ~MooBuiltin() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
 	virtual int do_action(MooThing *thing, MooArgs *args);
+
+	int set(const char *name);
 };
 
 extern MooObjectType moo_builtin_obj_type;

@@ -23,9 +23,11 @@
 #endif
 
 class MooTCP : public MooInterface {
+    protected:
 	int m_read_pos;
 	int m_read_length;
 	char m_read_buffer[TCP_READ_BUFFER];
+
     public:
 	MooTCP();
 	virtual ~MooTCP();
@@ -42,8 +44,10 @@ class MooTCP : public MooInterface {
 	virtual int write(const char *data);
 
 	int receive(char *data, int len);
+	int receive(char *data, int len, char delim);
 	int send(const char *data, int len = -1);
 
+    protected:
 	int recv_to_buffer();
 	int load_buffer(const char *data, int len);
 	int read_pos(int pos);

@@ -55,6 +55,8 @@ MooInterface::MooInterface()
 
 MooInterface::~MooInterface()
 {
+	if (m_task)
+		m_task->purge(this);
 	interface_list->remove(this);
 	if (m_rfd > 0)
 		close(m_rfd);

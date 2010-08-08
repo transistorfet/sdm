@@ -39,6 +39,7 @@ MooRPCServer::MooRPCServer()
 
 MooRPCServer::~MooRPCServer()
 {
+	this->set_delete();
 	if (m_inter)
 		delete m_inter;
 }
@@ -91,6 +92,17 @@ int MooRPCServer::handle(MooInterface *inter, int ready)
 	char buffer[STRING_SIZE];
 	m_inter->read(buffer, STRING_SIZE);
 	printf("%s\n", buffer);
+	return(0);
+}
+
+int MooRPCServer::purge(MooInterface *inter)
+{
+	if (inter != m_inter)
+		return(-1);
+	// We assume that since we were called because the interface is already being deleted, in which case we don't want to delete too
+	m_inter = NULL;
+	if (!this->is_deleting())
+		delete this;
 	return(0);
 }
 

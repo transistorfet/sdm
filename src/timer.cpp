@@ -21,13 +21,12 @@ void release_timer(void)
 	MooTimer::delete_all();
 }
 
-MooTimer::MooTimer(int bits, float interval)
+MooTimer::MooTimer(int bits, float interval, MooTimerHandler *handler)
 {
 	m_bits = bits;
-	//m_callback.func = func;
-	//m_callback.ptr = ptr;
 	m_interval = interval;
 	m_start = time(NULL);
+	m_handler = handler;
 	m_prev = NULL;
 	m_next = NULL;
 	this->insert();
@@ -36,21 +35,17 @@ MooTimer::MooTimer(int bits, float interval)
 MooTimer::~MooTimer()
 {
 	this->remove();
+	if (m_handler)
+		m_handler->timer_close();
 }
 
-/*
-struct callback_s sdm_timer_get_callback(struct sdm_timer *timer)
+MooTimerHandler *MooTimer::handler(MooTimerHandler *handler)
 {
-	return(timer->callback);
+	if (m_handler)
+		m_handler->timer_close();
+	m_handler = handler;
+	return(m_handler);
 }
-
-
-void sdm_timer_set_callback(struct sdm_timer *timer, callback_t func, void *ptr)
-{
-	timer->callback.func = func;
-	timer->callback.ptr = ptr;
-}
-*/
 
 int MooTimer::reset()
 {
@@ -90,7 +85,8 @@ int MooTimer::check()
 			continue;
 		else if ((current_time - cur->m_start) >= cur->m_interval) {
 			cur->m_bits |= MOO_TBF_EXPIRED;
-			//EXECUTE_CALLBACK(cur->callback, cur);
+			if (cur->m_handler)
+				cur->m_handler->handle_timer(cur);
 			if (cur->m_bits & MOO_TBF_PERIODIC)
 				cur->reset();
 		}

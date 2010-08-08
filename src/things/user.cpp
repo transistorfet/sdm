@@ -28,9 +28,10 @@ MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
 	typeid(MooUser).name(),
-	(moo_type_create_t) moo_user_create
+	(moo_type_create_t) NULL
 };
 
+static MooThing *cryolocker = NULL;
 static MooHash<MooUser *> *user_list = NULL;
 
 int init_user(void)
@@ -42,38 +43,42 @@ int init_user(void)
 	if (user_list)
 		return(1);
 	user_list = new MooHash<MooUser *>(USER_INIT_SIZE, MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
+	moo_object_register_type(&moo_user_obj_type);
+	// TODO we need to find/create/whatever the cryolocker! (we haven't loaded the world at this point though)
 
 	/** Load all the users into memory in a disconnected state */
-/*
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
 			data->read_attrib("name", buffer, STRING_SIZE);
-			// TODO make sure the user is in it's proper disconnected state (in the cryolocker)
-			//create_sdm_user(buffer);
+			new MooUser(buffer);
 		}
 	} while (data->read_next());
 	delete data;
-*/
 	return(0);
 }
 
 void release_user(void)
 {
+	if (!user_list)
+		return;
 	delete user_list;
 	user_list = NULL;
-}
-
-MooObject *moo_user_create(void)
-{
-	return(new MooUser());
 }
 
 
 MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
 	m_task = NULL;
-	this->load(name);
+	m_name = NULL;
+
+	if (!name || !moo_user_valid_username(name))
+		throw MooException("User name error");
+	m_name = new std::string(name);
+
+	if (user_list->set(name, this))
+		throw MooException("Unable to add user to list: %s", name);
+	this->load();
 }
 
 MooUser::~MooUser()
@@ -81,39 +86,50 @@ MooUser::~MooUser()
 	/** Save the user information to the user's file, and disconnect */
 	this->disconnect();
 
+	/** If we are associated with a task, then notify it that we are dying */
+	if (m_task)
+		m_task->purge(this);
+
 	/** Release the user's other resources */
-	user_list->remove(m_name);
-	memory_free(m_name);
-	//delete m_inter;
+	if (m_name) {
+		user_list->remove(m_name->c_str());
+		delete m_name;
+	}
 }
 
-int MooUser::load(const char *name)
+int MooUser::load()
 {
-	if (!name || !moo_user_valid_username(name) || !(m_name = make_string("%s", name)))
-		throw MooException("User name error");
+	char buffer[STRING_SIZE];
 
-	/** If there is already a user with that name then fail */
-	if (user_list->set(name, this))
-		return(-1);
-	this->read_file();
-	return(0);
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
+	return(MooObject::read_file(buffer, "user"));
 }
 
-int MooUser::connect(MooInterface *inter)
+int MooUser::save()
+{
+	char buffer[STRING_SIZE];
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
+	return(MooObject::write_file(buffer, "user"));
+}
+
+int MooUser::connect(MooTask *task)
 {
 	double room;
 	MooThing *location;
 
-/*
-	if (m_inter)
-		delete m_inter;
-	m_inter = inter;
+	if (m_task)
+		return(-1);
+	m_task = task;
+
+
 
 	// TODO we could instead of all this crap, have the m_task set by the task who manipulates this object
 	//	All output would be written to the task via an output method called from whatever code (possibly all
 	//	code would call user->output() or write() or whatever, and it would then call m_task->output() which would
 	//	then call output() on the interface.
 
+/*
 	if (m_parent > 0)
 		m_task = new MooInterpreter();
 	else
@@ -137,30 +153,26 @@ int MooUser::connect(MooInterface *inter)
 
 void MooUser::disconnect()
 {
-/*
-	struct sdm_number *number;
+	//if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
+	//    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {
+	//	number->num = SDM_THING(user)->location ? SDM_THING(user)->location->id : -1;
+	//}
 
-	// Shutdown the input processor
-	if (user->proc) {
-		sdm_processor_shutdown(user->proc, user);
-		destroy_sdm_object(SDM_OBJECT(user->proc));
-		user->proc = NULL;
-	}
+	// TODO make sure this will work; it's a superb improvement over the old way we had to do this (note: any old value would be deleted)
+	//this->set_property("last_location", m_location ? m_location->m_id : -1);
 
-	if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
-	    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {
-		number->num = SDM_THING(user)->location ? SDM_THING(user)->location->id : -1;
-	}
 	// TODO how do you tell this function to forcefully remove the user
-	if (SDM_THING(user)->location)
-		sdm_thing_remove(SDM_THING(user)->location, SDM_THING(user));
+	//if (SDM_THING(user)->location)
+	//	sdm_thing_remove(SDM_THING(user)->location, SDM_THING(user));
+	// TODO call action "force_exit" or something on location to remove user
+	//cryolocker->add(this);
 
 	// Save the user information to the user's file only if we were already connected
-	if (user->inter)
-		sdm_user_write(user);
-	// TODO How does this all even work?
-	//user->inter = NULL;
-*/
+	if (m_task) {
+		this->save();
+		m_task->purge(this);
+	}
+	m_task = NULL;
 }
 
 
@@ -179,31 +191,15 @@ int MooUser::read_entry(const char *type, MooDataFile *data)
 int MooUser::write_data(MooDataFile *data)
 {
 	MooThing::write_data(data);
-	data->write_string_entry("name", m_name);
+	data->write_string_entry("name", m_name->c_str());
 	data->write_integer_entry("lastseen", time(NULL));
+	// TODO wait, would we even need to save these things?
 	// TODO write telnet/interface settings
 	// TODO write processor settings and types
 	return(0);
 }
 
-int MooUser::read_file(void)
-{
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
-	return(MooObject::read_file(buffer, "user"));
-}
-
-int MooUser::write_file(void)
-{
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name);
-	return(MooObject::write_file(buffer, "user"));
-}
-
-
-int moo_user_exists(const char *name)
+int MooUser::exists(const char *name)
 {
 	char buffer[STRING_SIZE];
 
@@ -211,13 +207,13 @@ int moo_user_exists(const char *name)
 	return(moo_data_file_exists(buffer));
 }
 
-int moo_user_logged_in(const char *name)
+int MooUser::logged_in(const char *name)
 {
 	MooUser *user;
 
-	//if ((user = user_list->get(name)) && user->m_inter)
-	//	return(1);
-	//return(0);
+	if ((user = user_list->get(name)) && user->m_task)
+		return(1);
+	return(0);
 }
 
 int moo_user_valid_username(const char *name)

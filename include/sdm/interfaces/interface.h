@@ -29,6 +29,7 @@ class MooInterface : public MooObject {
 
 	void set_ready() { m_bits |= IO_READY_READ; }
 	void set_not_ready() { m_bits &= ~IO_READY_READ; }
+	void clear_state() { m_bits &= ~IO_STATE; }
 
     public:
 	MooInterface();

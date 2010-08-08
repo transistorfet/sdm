@@ -37,11 +37,6 @@ class MooThing : public MooObject {
 	MooThing *m_objects;
 	MooThing *m_end_objects;
 
-	int assign_id(moo_id_t id);
-
-	int add(MooThing *thing);
-	int remove(MooThing *thing);
-
     public:
 	MooThing(moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooThing();
@@ -65,6 +60,12 @@ class MooThing : public MooObject {
 	inline int is_a_thing(moo_id_t id);
 
 	// TODO add functions to do name lookups like "/core/room" and stuff (all the crap from utils)
+
+    protected:
+	int assign_id(moo_id_t id);
+
+	int add(MooThing *thing);
+	int remove(MooThing *thing);
 };
 
 extern MooObjectType moo_thing_obj_type;

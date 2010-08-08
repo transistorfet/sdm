@@ -87,7 +87,7 @@ MooObject *moo_make_object(const MooObjectType *type)
 
 MooObject::MooObject()
 {
-
+	m_delete = 0;
 }
 
 const MooObjectType *MooObject::type()

@@ -36,6 +36,11 @@
 	* instead of using MooTask in interface as the object you call in order to handle I/O, maybe you could make a special abstract
 	  class and use multiple inheritence so that any object (not just tasks) can be called in response to I/O.  The same would
 	  then go for MooTimer
+	* in MooUser, it should store the pointer to the cryolocker but how would it create or load it?  The init happens before the
+	  world is loaded, so we can't just look up the object.  We could create one though, it just wont have any settings of any
+	  kind.
+	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
+	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
 
 	* think about multithreading possibilities
 
@@ -47,6 +52,7 @@
 	* fill out the MooArgs class
 	* fill in the various functions in MooUser for basic communications
 	* implement basic builtin functions like 'tell' and 'look'
+	* should you try to replace all make_string references with std::string stuff?
 
 	* make an IRC pseudo server which acts like a single-IRC-servered network and communicates with clients via server-to-client
 	  IRC protocol, but which cannot connect to an existing IRC server.
@@ -56,6 +62,8 @@
 
 	* add a function that MooInterface can call on a task to notify it that the interface is being destroyed
 	* modify the handle() function to do something like close the interface if an error occurs?
+
+	* perhaps you could use namespaces in the IRC stuff
 
 
 

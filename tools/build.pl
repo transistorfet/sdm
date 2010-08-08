@@ -191,7 +191,7 @@ sub get_source_files {
 		if (-d $source) {
 			opendir(DIR, $source) or (print "Unable to open directory $source\n" and exit(-1));
 			while (my $file = readdir(DIR)) {
-				if ($file =~ /($exts)$/) {
+				if (!(-d "$source/$file") and $file =~ /($exts)$/) {
 					$file = "$source/$file";
 					$file =~ s/^\Q$base\/\E//;
 					$file =~ s/^\.\///;

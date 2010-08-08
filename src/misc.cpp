@@ -12,19 +12,6 @@
 
 #define STRING_MAX_SIZE			1024
 
-int moo_status(const char *fmt, ...)
-{
-	va_list va;
-
-	// TODO add the date/time to the output
-	va_start(va, fmt);
-	vprintf(fmt, va);
-	va_end(va);
-	putchar('\n');
-	return(0);
-}
-
-
 /**
  * Allocate a string big enough to hold the given string after
  * character expansion (using the given arguments) and return

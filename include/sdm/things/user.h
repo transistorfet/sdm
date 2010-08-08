@@ -19,25 +19,24 @@
 
 class MooUser : public MooThing {
 	MooTask *m_task;
-	string_t m_name;
+	std::string *m_name;
     public:
-	MooUser(moo_id_t id = -1, moo_id_t parent = 0) { }
 	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooUser();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int load(const char *name);
-	int connect(MooInterface *inter);
+	int load();
+	int save();
+	int connect(MooTask *task);
 	void disconnect();
-
-	int read_file();
-	int write_file();
 
 	int command(const char *action, MooThing *object, MooThing *target);
 	int tell(const char *text, ...);
 
+	static int exists(const char *name);
+	static int logged_in(const char *name);
 };
 
 extern MooObjectType moo_user_obj_type;

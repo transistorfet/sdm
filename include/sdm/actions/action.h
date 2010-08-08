@@ -34,6 +34,9 @@ class MooAction : public MooObject {
 	MooAction();
 	virtual ~MooAction() { }
 
+	virtual int read_entry(const char *type, MooDataFile *data) = 0;
+	virtual int write_data(MooDataFile *data) = 0;
+
 	virtual int do_action(MooThing *thing, MooArgs *args) = 0;
 };
 

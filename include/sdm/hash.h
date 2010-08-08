@@ -49,6 +49,7 @@ class MooHash {
 
 	MooHashEntry<T> *get_entry(const char *key);
 	T get(const char *key);
+	const char *key(T value);
 
 	void reset();
 	MooHashEntry<T> *next_entry();
@@ -186,6 +187,20 @@ T MooHash<T>::get(const char *key)
 	for (cur = m_table[hash % m_size]; cur; cur = cur->m_next) {
 		if (!strcasecmp(key, cur->m_key))
 			return(cur->m_data);
+	}
+	return(NULL);
+}
+
+template<typename T>
+const char *MooHash<T>::key(T value)
+{
+	MooHashEntry<T> *cur;
+
+	for (int i = 0; i < m_size; i++) {
+		for (cur = m_table[i]; cur; cur = cur->m_next) {
+			if (cur->m_data == value)
+				return(cur->m_key);
+		}
 	}
 	return(NULL);
 }
