@@ -48,6 +48,8 @@
 	  (which would be the direct parent and not a child which is calling it).  I don't know what purpose this would serve but it
 	  might be needed at some point
 	* there needs to be a global channel system for IRC to work
+	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
+	  only wizards (or owners of the room??) can do this for most room except a few with a special flag that allows it
 
 	* think about multithreading possibilities
 

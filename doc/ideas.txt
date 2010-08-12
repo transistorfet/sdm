@@ -1,4 +1,16 @@
 
+- The Jabberwock!  You could have the jabberwock as the supreme beast of the realm which is so invincible that
+  it can only be killed with the Vorpal Blade (which has as a description something like "It looks like it
+  goes snicker-snack").  The jabberwock should be very hard to find and *perhaps* it randomly appears (but only
+  in certain areas) and destroys everything.  Perhaps it should generally only do that to places without
+  players because it would suck getting randomly killed.  The vorpal blade would also be very hard to find.
+  It would only be wieldable and even pickupable by players of sufficient level and would have something like
+  +1,000,000 damage to the jabberwock (or to some special class of monster).  There would only be one such
+  blade and anyone carrying it will have a special description so that other players know who posesses it.
+  Any player that posesses it must have PvP enabled (if it can even be disabled) so that people can fight
+  for it.  The blade should therefore only be marginally better than the best weapon when used against
+  players (to give people a chance).
+
 - you could have a clearing or something with a white rabbit that if you follow the rabbit, it takes you to
   a room that you can't get into any other way that leads down the rabbit hole into wonderland.  In order to
   get out, (if this is possible) you can "wake up" and you will be teleported back to the clearing where it
@@ -9,9 +21,9 @@
 - the great hall can be called "The Banquet Hall of Gobbles The Great".  Gobbles can be a god most likely
 - Perhaps you start in the entrance hall, outside the entrance to the great hall in the clouds.  The whole
   things is surrounded by clouds with a beanstock or something poking through the clouds from below that you
-  can't see the bottom of (a the base of the great hall).  The entrance has a cloak room and mabye some other
+  can't see the bottom of (at the base of the great hall).  The entrance has a cloak room and mabye some other
   things and then you go into the banquet hall of gobbles the great with rooms off to the sides (the hall
-  itself could be 3 rooms long).
+  itself could be 3 rooms long).  (What is the cloak room for?)
 
 - List of monsters, might come in handy =)  http://en.wikipedia.org/wiki/List_of_Monsters
 
@@ -49,7 +61,8 @@
 - societies (secret societies)
 - a world inside of an orb (special orb object that teleports you when you
   examine it)
-- should there be game areas and non-game (social only) areas?
+- should there be game areas and non-game (social only) areas?  You could have a flag on rooms such that
+  certain mobiles/npcs can't enter, and fighting is not allowed
 - should there be multiple games/world in the same server or just have
   multiple server processes that are completely seperate?
 - a special map teleporter object? you can record certain locations and by
