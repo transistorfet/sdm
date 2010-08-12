@@ -14,12 +14,12 @@ typedef double moo_number_t;
 
 class MooNumber : public MooObject {
     public:
-	moo_number_t num;
+	moo_number_t m_num;
 
-	MooNumber(moo_number_t num) { this->num = num; }
+	MooNumber(moo_number_t num) { m_num = num; }
 
-	virtual int read_entry(const char *type, MooDataFile *);
-	virtual int write_data(MooDataFile *);
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 };
 
 extern MooObjectType moo_number_obj_type;

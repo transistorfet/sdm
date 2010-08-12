@@ -19,7 +19,7 @@ class MooArgs {
 	MooObject *m_result;
 	MooUser *m_user;
 	MooThing *m_caller;
-	MooThing *m_thing;
+	MooThing *m_this;
 	MooThing *m_object;
 	MooThing *m_target;
 	const char *m_text;

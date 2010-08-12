@@ -23,6 +23,21 @@ MooObjectType moo_irc_pseudoserv_obj_type = {
 	(moo_type_create_t) moo_irc_pseudoserv_create
 };
 
+const char *server_name = "moo.jabberwocky.ca";
+
+int init_irc_pseudoserv(void)
+{
+	// TODO why wont this compile
+	extern int init_irc_msg();
+	init_irc_msg();
+	return(0);
+}
+
+void release_irc_pseudoserv(void)
+{
+
+}
+
 MooObject *moo_irc_pseudoserv_create(void)
 {
 	return(new MooIRC::PseudoServ());
@@ -32,6 +47,8 @@ using namespace MooIRC;
 
 PseudoServ::PseudoServ()
 {
+	m_bits = 0;
+	m_nick = NULL;
 	m_inter = NULL;
 	m_user = NULL;
 }
@@ -39,6 +56,8 @@ PseudoServ::PseudoServ()
 PseudoServ::~PseudoServ()
 {
 	this->set_delete();
+	if (m_nick)
+		delete m_nick;
 	if (m_inter)
 		delete m_inter;
 	if (m_user)
@@ -101,7 +120,17 @@ int PseudoServ::handle(MooInterface *inter, int ready)
 		if (!msg)
 			return(1);
 		this->dispatch(msg);
+		delete msg;
 	}
+/*
+	catch (IRCException e) {
+		Msg::send_numeric(inter, e.m_num, e.get());
+		if (m_nick)
+			moo_status("IRC: %s: %s", m_nick, e.get());
+		else
+			moo_status("IRC: %s", e.get());
+	}
+*/
 	catch (MooException e) {
 		moo_status("IRC: %s", e.get());
 		delete this;
@@ -122,7 +151,7 @@ int PseudoServ::purge(MooInterface *inter)
 {
 	if (inter != m_inter)
 		return(-1);
-	// We assume that since we were called because the interface is already being deleted, in which case we don't want to delete too
+	// We assume that we were called because the interface is already being deleted, in which case we don't want to delete it too
 	m_inter = NULL;
 	if (!this->is_deleting())
 		delete this;
@@ -142,8 +171,114 @@ int PseudoServ::purge(MooUser *user)
 
 int PseudoServ::dispatch(Msg *msg)
 {
-	msg->debug_print();
-	delete msg;
+	if (msg->need_more_params())
+		return(Msg::send(m_inter, ":%s %03d %s :Not enough parameters\r\n", server_name, IRC_ERR_NEEDMOREPARAMS, msg->m_cmdtext));
+
+	// Process messages that are common for pre and post registration
+	switch (msg->cmd()) {
+	    case IRC_MSG_PING:
+		if (msg->m_numparams != 1 || strcmp(msg->m_params[0], server_name))
+			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[0]));
+		Msg::send(m_inter, ":%s PONG %s :%s\r\n", server_name, server_name, server_name);
+		return(0);
+	    default:
+		break;
+	}
+
+	if (!this->welcomed()) {
+		switch (msg->cmd()) {
+		    case IRC_MSG_PASS:
+			// TODO check it
+			break;
+		    case IRC_MSG_NICK: {
+			if (!MooUser::valid_username(msg->m_params[0]))
+				return(Msg::send(m_inter, ":%s %03d %s :Erroneus nickname\r\n", server_name, IRC_ERR_ERRONEUSNICKNAME, msg->m_params[0]));
+			if (MooUser::logged_in(msg->m_params[0]))
+				return(Msg::send(m_inter, ":%s %03d %s :Nickname is already in use\r\n", server_name, IRC_ERR_NICKNAMEINUSE, msg->m_params[0]));
+			if (m_nick)
+				delete m_nick;
+			m_nick = new std::string(msg->m_params[0]);
+			if (this->received_user())
+				this->send_welcome();
+			break;
+		    }
+		    case IRC_MSG_USER:
+			m_bits |= IRC_BF_RECEIVED_USER;
+			if (m_nick)
+				this->send_welcome();
+			break;
+		    default:
+			return(Msg::send(m_inter, ":%s %03d :You have not registered\r\n", server_name, IRC_ERR_NOTREGISTERED));
+		}
+		return(0);
+	}
+
+	// Process messages that are only acceptable after registration
+	switch (msg->cmd()) {
+	    case IRC_MSG_PASS:
+	    case IRC_MSG_USER:
+		return(Msg::send(m_inter, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
+	    case IRC_MSG_PRIVMSG:
+
+		return(0);
+	    default:
+		break;
+	}
+
+	/*
+	JOIN
+	PART
+	MODE
+	NICK
+	QUIT
+	TOPIC
+	NAMES
+	LIST
+	PRIVMSG
+	NOTICE
+	WALLOPS
+
+	VERSION
+
+	* Possibly temporarily not implement the following:
+	INVITE
+	KICK
+	MOTD
+	LUSERS
+	STATS
+	LINKS
+	TIME
+	ADMIN
+	INFO
+	WHO
+	WHOIS
+	WHOWAS
+	AWAY
+	USERHOST
+	ISON
+
+	* Possibly error appropriately on the following:
+	OPER
+	SQUIT
+	CONNECT
+	TRACE
+	SERVLIST
+	SQUERY
+	KILL
+	DIE
+	RESTART
+	REHASH
+
+	Also check errors for which conditions should be caught and reported on
+	*/
+
+	return(0);
+}
+
+int PseudoServ::send_welcome()
+{
+	// TODO we need to send the user@host part, do we not?
+	Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!?@?\r\n", server_name, IRC_RPL_WELCOME, m_nick->c_str(), m_nick->c_str());
 	return(0);
 }
 

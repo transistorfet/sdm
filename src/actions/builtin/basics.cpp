@@ -18,33 +18,34 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/utils.h>
-#include <sdm/tasks/interpreter.h>
 
 #include <sdm/actions/action.h>
+#include <sdm/actions/builtin/builtin.h>
 #include <sdm/actions/builtin/basics.h>
 
-int sdm_builtin_load_basics(struct sdm_hash *actions)
+int moo_load_basic_actions(MooActionHash *actions)
 {
-	sdm_hash_add(actions, "builtin_notify", sdm_builtin_action_notify);
-	sdm_hash_add(actions, "builtin_examine", sdm_builtin_action_examine);
-	sdm_hash_add(actions, "builtin_go", sdm_builtin_action_go);
+	actions->set("builtin_notify", moo_basics_notify);
+	actions->set("builtin_examine", moo_basics_examine);
+	actions->set("builtin_go", moo_basics_go);
 
-	sdm_hash_add(actions, "builtin_inventory", sdm_builtin_action_inventory);
-	sdm_hash_add(actions, "builtin_get", sdm_builtin_action_get);
-	sdm_hash_add(actions, "builtin_drop", sdm_builtin_action_drop);
+	actions->set("builtin_inventory", moo_basics_inventory);
+	actions->set("builtin_get", moo_basics_get);
+	actions->set("builtin_drop", moo_basics_drop);
 	return(0);
 }
 
 
-int sdm_builtin_action_notify(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_notify(MooAction *action, MooThing *thing, MooArgs *args)
 {
+/*
 	if (!sdm_is_user(thing) || !SDM_USER(thing)->inter)
 		return(-1);
 	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args->text));
+*/
 }
 
-int sdm_builtin_action_examine(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_examine(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	struct sdm_thing *cur;
 
@@ -58,7 +59,7 @@ int sdm_builtin_action_examine(struct sdm_action *action, struct sdm_thing *thin
 	return(0);
 }
 
-int sdm_builtin_action_go(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_go(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	double num;
 	struct sdm_thing *location;
@@ -71,7 +72,7 @@ int sdm_builtin_action_go(struct sdm_action *action, struct sdm_thing *thing, st
 	return(0);
 }
 
-int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_inventory(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	const char *str;
 	struct sdm_thing *cur;
@@ -90,7 +91,7 @@ int sdm_builtin_action_inventory(struct sdm_action *action, struct sdm_thing *th
 	return(0);
 }
 
-int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_get(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	// TODO this just gets one arg for now because parsing is broken
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
@@ -105,7 +106,7 @@ int sdm_builtin_action_get(struct sdm_action *action, struct sdm_thing *thing, s
 	return(0);
 }
 
-int sdm_builtin_action_drop(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+int moo_basics_drop(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	int i = 0;
 

@@ -24,7 +24,7 @@ MooArgs::MooArgs()
 	m_result = NULL;
 	m_user = NULL;
 	m_caller = NULL;
-	m_thing = NULL;
+	m_this = NULL;
 	m_object = NULL;
 	m_target = NULL;
 	m_text = NULL;

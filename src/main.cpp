@@ -48,6 +48,8 @@ int init_moo(void)
 		return(-1);
 //	if (init_telnet() < 0)
 //		return(-1);
+	if (init_irc_pseudoserv() < 0)
+		return(-1);
 
 //	if (init_builtin() < 0)
 //		return(-1);
@@ -84,6 +86,7 @@ void release_moo(void)
 //	release_lua();
 //	release_builtin();
 
+	release_irc_pseudoserv();
 //	release_telnet();
 	release_interface();
 	release_task();

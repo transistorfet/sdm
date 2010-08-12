@@ -12,17 +12,20 @@
 
 class MooString : public MooObject {
     public:
-	char *str;
-	int len;
+	char *m_str;
+	int m_len;
 
-	MooString(const char *str);
+	MooString(const char *fmt, ...);
 	virtual ~MooString();
 
-	virtual int read_entry(const char *type, MooDataFile *);
-	virtual int write_data(MooDataFile *);
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
 
 	// TODO should all fault conditions throw an exception instead of returning an int?
 	int set(const char *str);
+
+	int compare(const char *str);
+	int compare(const char *str, int len);
 };
 
 extern MooObjectType moo_string_obj_type;

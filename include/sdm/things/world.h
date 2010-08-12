@@ -26,6 +26,8 @@ class MooWorld : public MooThing {
 	virtual int write_data(MooDataFile *data);
 
 	int write();
+
+	static MooWorld *root();
 };
 
 extern MooObjectType moo_world_obj_type;
@@ -33,7 +35,6 @@ extern MooObjectType moo_world_obj_type;
 int init_world(void);
 void release_world(void);
 MooObject *moo_world_create(void);
-MooWorld *moo_get_root_world(void);
 
 #endif
 

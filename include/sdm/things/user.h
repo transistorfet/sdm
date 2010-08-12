@@ -32,11 +32,14 @@ class MooUser : public MooThing {
 	int connect(MooTask *task);
 	void disconnect();
 
+	int command(const char *text);
 	int command(const char *action, MooThing *object, MooThing *target);
-	int tell(const char *text, ...);
+	MooThing *find_thing(const char *name);
+	int tell(MooThing *thing, const char *text, ...);
 
 	static int exists(const char *name);
 	static int logged_in(const char *name);
+	static int valid_username(const char *name);
 };
 
 extern MooObjectType moo_user_obj_type;
@@ -44,10 +47,6 @@ extern MooObjectType moo_user_obj_type;
 int init_user(void);
 void release_user(void);
 MooObject *moo_user_create(void);
-
-int moo_user_exists(const char *);
-int moo_user_logged_in(const char *);
-int moo_user_valid_username(const char *);
 
 #endif
 

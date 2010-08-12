@@ -10,23 +10,24 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
+#include <sdm/actions/builtin/builtin.h>
 
-int sdm_builtin_load_basics(struct sdm_hash *);
+int moo_load_basic_actions(MooActionHash *);
 
-int sdm_builtin_action_notify(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_announce(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_say(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_look(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_examine(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_go(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_direction(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int moo_basics_notify(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_announce(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_say(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_look(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_examine(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_go(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_direction(MooAction *action, MooThing *thing, MooArgs *args);
 
-int sdm_builtin_action_inventory(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_get(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_drop(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int moo_basics_inventory(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_get(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_drop(MooAction *action, MooThing *thing, MooArgs *args);
 
-int sdm_builtin_action_room_do_enter(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-int sdm_builtin_action_room_do_leave(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+int moo_basics_room_do_enter(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_room_do_leave(MooAction *action, MooThing *thing, MooArgs *args);
 
 #endif
 

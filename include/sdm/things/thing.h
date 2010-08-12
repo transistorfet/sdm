@@ -18,6 +18,8 @@
 #include <sdm/objs/string.h>
 #include <sdm/actions/action.h>
 
+#define MOO_ACTION_NOT_FOUND	1
+
 #define SDM_NO_ID		-1
 #define SDM_NEW_ID		-2
 
@@ -48,6 +50,10 @@ class MooThing : public MooObject {
 	MooObject *get_property(const char *name, MooObjectType *type);
 
 	int set_action(const char *name, MooAction *action);
+	// TODO should you implement this function??  If so, either Action itself must have a pointer to the object which it is actually
+	//	an action of (the parent proto-object) or else we need to make it not required
+	MooAction *get_action(const char *name);
+	int do_action(MooAction *action, MooArgs *args);
 	int do_action(const char *name, MooArgs *args);
 	int do_abbreved_action(const char *name, MooArgs *args);
 
@@ -59,7 +65,8 @@ class MooThing : public MooObject {
 
 	inline int is_a_thing(moo_id_t id);
 
-	// TODO add functions to do name lookups like "/core/room" and stuff (all the crap from utils)
+	MooThing *find(const char *name);
+	static MooThing *reference(const char *name);
 
     protected:
 	int assign_id(moo_id_t id);

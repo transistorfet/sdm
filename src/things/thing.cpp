@@ -246,29 +246,35 @@ int MooThing::set_action(const char *name, MooAction *action)
 	return(m_actions->set(name, action));
 }
 
+int MooThing::do_action(MooAction *action, MooArgs *args)
+{
+	try {
+		// TODO add permissions checks
+		// TODO is this right, deleting the result if it's present?
+		if (args->m_result)
+			delete args->m_result;
+		args->m_result = NULL;
+		args->m_this = this;
+		return(action->do_action(this, args));
+	}
+	catch (...) {
+		moo_status("An unspecified error has occured during \"%s\", name");
+		return(-1);
+	}
+}
+
 int MooThing::do_action(const char *name, MooArgs *args)
 {
 	MooThing *cur;
 	MooAction *action;
 
-	// TODO is this right, deleting the result if it's present?
-	if (args->m_result)
-		delete args->m_result;
-	args->m_result = NULL;
-	if (!args->m_thing)
-		args->m_thing = this;
+	// TODO should this be set here or should it just be in MooAction or something
 	args->m_action = name;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get(name))) {
-			try {
-				return(action->do_action(this, args));
-			}
-			catch (...) {
-				moo_status("An unspecified error has occured during \"%s\", name");
-			}
-		}
+		if ((action = cur->m_actions->get(name)))
+			return(cur->do_action(action, args));
 	}
-	return(1);
+	return(MOO_ACTION_NOT_FOUND);
 }
 
 int MooThing::do_abbreved_action(const char *name, MooArgs *args)
@@ -276,21 +282,12 @@ int MooThing::do_abbreved_action(const char *name, MooArgs *args)
 	MooThing *cur;
 	MooAction *action;
 
-	if (!args->m_thing)
-		args->m_thing = this;
 	args->m_action = name;
-	args->m_result = NULL;
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get_partial(name))) {
-			try {
-				return(action->do_action(this, args));
-			}
-			catch (...) {
-				moo_status("An unspecified error has occured during \"%s\", name");
-			}
-		}
+		if ((action = cur->m_actions->get_partial(name)))
+			return(cur->do_action(action, args));
 	}
-	return(1);
+	return(MOO_ACTION_NOT_FOUND);
 }
 
 
@@ -351,5 +348,65 @@ int MooThing::assign_id(moo_id_t id)
 	else
 		m_id = -1;
 	return(m_id);
+}
+
+MooThing *MooThing::find(const char *name)
+{
+	int len;
+	MooString *str;
+	const char *end;
+	MooThing *cur, *thing;
+
+	if (name[0] == '/') {
+		thing = (MooThing *) MooWorld::root();
+		name = &name[1];
+	}
+	else
+		thing = this;
+
+	while (thing) {
+		if ((end = strchr(name, '/')))
+			len = end - name;
+		else
+			len = strlen(name);
+		for (cur = thing->m_objects; cur; cur = cur->m_next) {
+			// TODO modify this to use the aliases list or something
+			if (!(str = (MooString *) cur->get_property("name", &moo_string_obj_type)))
+				continue;
+			if (!str->compare(name, len)) {
+				if (name[len] == '\0')
+					return(cur);
+				else {
+					thing = cur;
+					name = &name[len + 1];
+					break;
+				}
+			}
+		}
+		if (!cur)
+			return(NULL);
+	}
+	return(NULL);
+}
+
+MooThing *MooThing::reference(const char *name)
+{
+	moo_id_t id;
+
+	if (name[0] == '#') {
+		id = atoi(&name[1]);
+		if (id <= 0 || id > MOO_THING_MAX_SIZE)
+			return(NULL);
+		return(moo_thing_table->get(id));
+	}
+	else if (name[0] == '/') {
+		MooWorld *world = MooWorld::root();
+		if (!world)
+			return(NULL);
+		return(world->find(name));
+	}
+	else if (name[0] == '$')
+		;// TODO do some kind of lookup by variable name (where is this table?)
+	return(NULL);
 }
 

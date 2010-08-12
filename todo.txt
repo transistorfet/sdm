@@ -41,8 +41,29 @@
 	  kind.
 	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
 	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
+	* for lua, why can't you just make a bunch of special "types" which are just tables with functions and a pointer to the raw
+	  internal data value (like MooThing *, or whatever) and the functions are c functions that get the raw pointer and do raw
+	  manipulations on it
+	* on a totally unrelated note straight out of the blue, should you add a pointer to MooAction which points to the owning thing
+	  (which would be the direct parent and not a child which is calling it).  I don't know what purpose this would serve but it
+	  might be needed at some point
+	* there needs to be a global channel system for IRC to work
 
 	* think about multithreading possibilities
+
+	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
+	  on which the action was called (which m_thing would be set to in the args anyways)?
+	* we should add various checky things to MooAction like the number of args that are acceptable and stuff so that we can do
+	  checking
+	* data sent back to the user (output to be printed) should be accompanied by one or more Things (eg. the "channel" object
+	  and the user or object where the message originated from).  So if someone says somehting in a chat channel, it gets sent
+	  to that Thing, which then sends it out to each of the other users.  Or if you interact with an object (if you 'examine' an
+	  object), it could send the response back along with the object and the room you are both in.
+	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
+	  MooObject value, or to the value embedded in the object in MooThing itself so that it is easy for C stuff to access directly
+	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
+	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
+	  easier to manipulate in C) (???)
 
     Covnersion TODO:
 	* sort out and make better use of exceptions (in do_action in particular)
@@ -63,7 +84,7 @@
 	* add a function that MooInterface can call on a task to notify it that the interface is being destroyed
 	* modify the handle() function to do something like close the interface if an error occurs?
 
-	* perhaps you could use namespaces in the IRC stuff
+	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that
 
 
 

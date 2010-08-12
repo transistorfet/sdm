@@ -24,6 +24,8 @@
 
 #define USER_INIT_SIZE		64
 
+#define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )
+
 MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
@@ -72,7 +74,7 @@ MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, 
 	m_task = NULL;
 	m_name = NULL;
 
-	if (!name || !moo_user_valid_username(name))
+	if (!name || !MooUser::valid_username(name))
 		throw MooException("User name error");
 	m_name = new std::string(name);
 
@@ -216,7 +218,7 @@ int MooUser::logged_in(const char *name)
 	return(0);
 }
 
-int moo_user_valid_username(const char *name)
+int MooUser::valid_username(const char *name)
 {
 	int i;
 
@@ -231,46 +233,75 @@ int moo_user_valid_username(const char *name)
 }
 
 
-/** Called by the client task which reads input from the interface.  This function would parse
- *  the input as an action and then execute that action. */
-/*
 int MooUser::command(const char *text)
 {
+	int i;
+	char *action;
+	MooThing *object, *target;
+	char buffer[LARGE_STRING_SIZE];
 
+	strcpy(buffer, text);
+	// Parse out the action string
+	for (i = 0; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
+		;
+	action = &buffer[i];
+	for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
+		;
+	buffer[i] = '\0';
+
+
+	// TODO should we break the text into words first (which will also process out any quoted strings)
+	// split the text into 2 strings by looking for a preposition (???)
+	// call user->find_thing() on the 2 object names or NULL if not found
+
+
+
+	return(this->command(action, object, target));
 }
-
-int MooUser::command(const char *action, const char *text)
-{
-
-}
-
-int MooUser::command(const char *action, const char *object, const char *target)
-{
-
-}
-*/
 
 int MooUser::command(const char *action, MooThing *object, MooThing *target)
 {
+	int res;
 	MooArgs args;
 
 	// TODO change this with a MooArgs method for setting
 	args.m_user = this;
 	args.m_caller = (MooThing *) this;
-	args.m_thing = (MooThing *) this;
 	args.m_object = object;
 	args.m_target = target;
 	args.m_text = NULL;
 
-	// TODO should this be abreved action instead?
-	return(object->do_action(action, &args));
+	if ((res = this->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (m_location && (res = m_location->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (object && (res = object->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (target && (res = target->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	return(MOO_ACTION_NOT_FOUND);
 }
 
-/** Sends data output of some kind to the client.  Things like the output of actions, like 'look', 'exits', etc
- */
-int MooUser::tell(const char *text, ...)
+MooThing *MooUser::find_thing(const char *name)
 {
+	MooThing *thing;
 
+	if ((thing = MooThing::reference(name)))
+		return(thing);
+	else if (!strcmp(name, "me"))
+		return(this);
+	else if (!strcmp(name, "here") && m_location)
+		return(m_location);
+	else if ((thing = this->find(name)))
+		return(thing);
+	else if (m_location && (thing = m_location->find(name)))
+		return(thing);
+	return(NULL);
+}
+
+int MooUser::tell(MooThing *thing, const char *text, ...)
+{
+	// TODO this should be passed *at least* one 'thing' pointer to identify the source
 }
 
 

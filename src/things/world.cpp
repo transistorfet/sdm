@@ -50,12 +50,6 @@ MooObject *moo_world_create(void)
 	return(new MooWorld());
 }
 
-MooWorld *moo_get_root_world(void)
-{
-	return(root_world);
-}
-
-
 MooWorld::MooWorld()
 {
 	m_filename = NULL;
@@ -114,5 +108,9 @@ int MooWorld::write()
 	return(this->write_file(m_filename->c_str(), "world"));
 }
 
+MooWorld *MooWorld::root()
+{
+	return(root_world);
+}
 
 

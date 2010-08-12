@@ -6,6 +6,7 @@
 #ifndef _SDM_ACTIONS_BUILTIN_BUILTIN_H
 #define _SDM_ACTIONS_BUILTIN_BUILTIN_H
 
+#include <sdm/hash.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
@@ -26,6 +27,8 @@ class MooBuiltin : public MooAction {
 
 	int set(const char *name);
 };
+
+typedef MooHash<MooBuiltin *> MooBuiltinHash;
 
 extern MooObjectType moo_builtin_obj_type;
 

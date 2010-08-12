@@ -25,19 +25,22 @@ MooObject *moo_string_create(void)
 	return(new MooString(""));
 }
 
-MooString::MooString(const char *str)
+MooString::MooString(const char *fmt, ...)
 {
-	// TODO add valist later
-	//char buffer[LARGE_STRING_SIZE];
-	//vsnprintf(buffer, LARGE_STRING_SIZE, str, va);
-	this->str = NULL;
-	this->len = 0;
-	this->set(str);
+	va_list va;
+	char buffer[LARGE_STRING_SIZE];
+
+	m_str = NULL;
+	m_len = 0;
+	va_start(va, fmt);
+	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
+	va_end(va);
+	this->set(buffer);
 }
 
 MooString::~MooString()
 {
-	memory_free(this->str);
+	memory_free(m_str);
 }
 
 int MooString::read_entry(const char *type, MooDataFile *data)
@@ -51,27 +54,36 @@ int MooString::read_entry(const char *type, MooDataFile *data)
 
 int MooString::write_data(MooDataFile *data)
 {
-	data->write_string(this->str);
+	data->write_string(m_str);
 	return(0);
 }
 
 
 int MooString::set(const char *str)
 {
-	if (this->str)
-		memory_free(this->str);
+	if (m_str)
+		memory_free(m_str);
 	if (!str) {
-		this->str = "";
+		m_str = "";
 		return(0);
 	}
 
-	this->len = strlen(str);
-	if (!(this->str = (char *) memory_alloc(this->len + 1))) {
-		this->len = 0;
+	m_len = strlen(str);
+	if (!(m_str = (char *) memory_alloc(m_len + 1))) {
+		m_len = 0;
 		return(-1);
 	}
-	strcpy(this->str, str);
+	strcpy(m_str, str);
 	return(0);
 }
 
+int MooString::compare(const char *str)
+{
+	return(strcasecmp(m_str, str));
+}
+
+int MooString::compare(const char *str, int len)
+{
+	return(strncasecmp(m_str, str, len));
+}
 
