@@ -24,6 +24,7 @@ MooObjectType moo_irc_pseudoserv_obj_type = {
 };
 
 const char *server_name = "moo.jabberwocky.ca";
+const char *server_version = "0.1";
 
 int init_irc_pseudoserv(void)
 {
@@ -215,13 +216,35 @@ int PseudoServ::dispatch(Msg *msg)
 
 	// Process messages that are only acceptable after registration
 	switch (msg->cmd()) {
+	    case IRC_MSG_PRIVMSG:
+
+
+		return(0);
+	    case IRC_MSG_MODE:
+		if (0) { // TODO moo_is_channel_name(msg->m_params[0])) {
+
+		}
+		else {
+			if (strcmp(m_nick->c_str(), msg->m_params[0]))
+				return(Msg::send(m_inter, ":%s %03d :Cannot change mode for other users\r\n", server_name, IRC_ERR_USERSDONTMATCH));
+
+			// TODO check for unknown mode flag
+			//return(Msg::send(m_inter, ":%s %03d :Unknown MODE flag\r\n", server_name, IRC_ERR_UMODEUNKNOWNFLAG));
+
+			// User MODE command reply
+			return(Msg::send(m_inter, ":%s %03d %s\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
+		}
+		break;
+	    case IRC_MSG_WHOIS:
+
+		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick));
+	    case IRC_MSG_QUIT:
+		return(0);
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
 		return(Msg::send(m_inter, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
-	    case IRC_MSG_PRIVMSG:
-
-		return(0);
 	    default:
+		return(Msg::send(m_inter, ":%s %03d %s :Unknown Command\r\n", server_name, IRC_ERR_UNKNOWNCOMMAND, msg->m_params[0]));
 		break;
 	}
 
@@ -279,6 +302,14 @@ int PseudoServ::send_welcome()
 {
 	// TODO we need to send the user@host part, do we not?
 	Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!?@?\r\n", server_name, IRC_RPL_WELCOME, m_nick->c_str(), m_nick->c_str());
+	Msg::send(m_inter, ":%s %03d %s :Your host is %s, running version SuperDuperMoo v%s\r\n", server_name, IRC_RPL_YOURHOST, m_nick->c_str(), server_name, server_version);
+	Msg::send(m_inter, ":%s %03d %s :This server was created ???\r\n", server_name, IRC_RPL_CREATED, m_nick->c_str());
+	Msg::send(m_inter, ":%s %03d %s :%s SuperDuperMoo v%s ? ?\r\n", server_name, IRC_RPL_MYINFO, m_nick->c_str(), server_name, server_version);
+	//Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!?@?\r\n", server_name, IRC_RPL_BOUNCE, m_nick->c_str(), m_nick->c_str());
+
+	Msg::send(m_inter, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, m_nick->c_str(), server_name);
+	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
+	m_bits |= IRC_BF_WELCOMED;
 	return(0);
 }
 

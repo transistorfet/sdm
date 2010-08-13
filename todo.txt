@@ -1,55 +1,43 @@
 
-    New Focus:
+    Large Ideas/Features:
 	* make irc client-like interface, c/w full line editing, status bar stuff maybe, smart autocomplete, and
 	  make it so that what you type is said directly, but a special command prefix means it's a command (/get)
-	* make it able/focus on chatting as if it's just like an irc channel like #philosophy, but it has objects which
-	  the chatters can interact with and with eachother with actual effect, play games, etc
-	* possibly make an IRC-like protocol (maybe even IRC protocol itself so that you can use irc clients to connect)
+	* focus on chatting/social rather than game (for now)
 	* make it possible, one way or another, for bots (external programs) to connect and act like players (npcs)
-	* focus on the objects and object interaction rather than rooms, maps, or a story
 	* include a fully functional editor/construction kit, which could even save the word automatically
-
-	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
-	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
-	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
-	  behaviour of the table much.
-
-	* the user object should have actions called on itself most of the time, so that the user can reprogram his/her
-	  own object to customize and extend their own interface and command set
-	* there must be a process table and any time a process does stuff, it is set to the current process.  Any processes
-	  that are created by that process will use that as their parent process.  Each interface will have a reference to the
-	  process that owns it.
-	* is it possible to have something like sshd automatically run a certain program upon connection (to a specific port) such
-	  that this program either directly transfers data to the MOO (running in a seperate process) or handles the basic I/O and
-	  such, communicating with the MOO core via a raw protocol of some kind?  This would move most of the communications code
-	  out of the core and allow you to use sshd of course (i don't think this is possible because sshd is too specfic for shells)
-	* the editor process could be implemented via whatever protocol by just passing all the code to the client, allowing it to
-	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
-	  a buffer, edit it, and then pass it all back when done.
-
-	* you could have a protocol that would allow object based RPC (via xmsrpc or a custom system or something) such that you could
+	* you could have a protocol that would allow object based RPC (via xmlrpc or a custom system or something) such that you could
 	  implement both a client connection (calling actions (methods) on the user thing object through which everything can be done)
-	  or controlling other objects allowing out of process extensions (object servers and stuff written in other languages, allowing
-	  language support like perl and stuff (???)).
-	* for this to work, you need a permissions system (which you need anyways) so that a connection cannot do an action on an
-	  object it does not have permissions on.
-	* instead of using MooTask in interface as the object you call in order to handle I/O, maybe you could make a special abstract
-	  class and use multiple inheritence so that any object (not just tasks) can be called in response to I/O.  The same would
-	  then go for MooTimer
-	* in MooUser, it should store the pointer to the cryolocker but how would it create or load it?  The init happens before the
-	  world is loaded, so we can't just look up the object.  We could create one though, it just wont have any settings of any
-	  kind.
-	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
-	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
+	  or controlling other objects allowing out of process extensions
+	* in future, we could make a client (klunky), services (is this even possible), or server based IRC interface.  If it requires
+	  (or would be easier to use) some existing code (like perhaps even writing a module for anope), you could easily just have it
+	  act as an RPC client to the Moo Server over a socket (which we have yet to figure out)
+
+    Discussion:
+
+	* there must be a task table and any time a task does stuff, it is set to the current task.  Any taskes
+	  that are created by that task will use that as their parent task.  Each interface will have a reference to the
+	  task that owns it.  How does this actually work?  When are tasks changed, etc
+	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
+	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
+	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
+	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
+
 	* for lua, why can't you just make a bunch of special "types" which are just tables with functions and a pointer to the raw
 	  internal data value (like MooThing *, or whatever) and the functions are c functions that get the raw pointer and do raw
 	  manipulations on it
+
+	* in MooUser, it should store the pointer to the cryolocker but how would it create or load it?  The world appears to be
+	  loaded first but can we rely on that?
+	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
+	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
 	* on a totally unrelated note straight out of the blue, should you add a pointer to MooAction which points to the owning thing
 	  (which would be the direct parent and not a child which is calling it).  I don't know what purpose this would serve but it
 	  might be needed at some point
-	* there needs to be a global channel system for IRC to work
+	* there needs to be a global channel system for IRC to work (A channel would be an object, but how would it record which
+	  users are in that channel or not?)
 	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
 	  only wizards (or owners of the room??) can do this for most room except a few with a special flag that allows it
+	* there needs to be a really easy and simple way of making command aliases
 
 	* think about multithreading possibilities
 
@@ -59,34 +47,34 @@
 	  checking
 	* data sent back to the user (output to be printed) should be accompanied by one or more Things (eg. the "channel" object
 	  and the user or object where the message originated from).  So if someone says somehting in a chat channel, it gets sent
-	  to that Thing, which then sends it out to each of the other users.  Or if you interact with an object (if you 'examine' an
-	  object), it could send the response back along with the object and the room you are both in.
+	  to that channel Thing, which then sends it out to each of the other users.  Or if you interact with an object (if you
+	  'examine' an object), it could send the response back along with the object and the room you are both in.
 	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
 	  MooObject value, or to the value embedded in the object in MooThing itself so that it is easy for C stuff to access directly
 	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
 
+	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
+	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
+	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
+	  behaviour of the table much.
+
     Covnersion TODO:
 	* sort out and make better use of exceptions (in do_action in particular)
 	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
 	  words) as well as functions that set the values for certain circumstances
-	* make various functions in thing.cpp (like those in utils right now)
-	* fill out the MooArgs class
-	* fill in the various functions in MooUser for basic communications
+	* make various functions in thing.cpp (like those in utils right nowo for basic manipulation)
+	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
+	* complete the parser functions in MooUser
 	* implement basic builtin functions like 'tell' and 'look'
 	* should you try to replace all make_string references with std::string stuff?
-
-	* make an IRC pseudo server which acts like a single-IRC-servered network and communicates with clients via server-to-client
-	  IRC protocol, but which cannot connect to an existing IRC server.
-	* in future, we could make a client (klunky), services (is this even possible), or server based IRC interface.  If it requires
-	  (or would be easier to use) some existing code (like perhaps even writing a module for anope), you could easily just have it
-	  act as an RPC client which connects via socket to the moo server's RPC server (which we have yet to figure out)
-
-	* add a function that MooInterface can call on a task to notify it that the interface is being destroyed
+	* add fully integrated permissions for objects
+	* finish the dispatcher in IRC
 	* modify the handle() function to do something like close the interface if an error occurs?
+	* make MooTCP store the connecting IP or otherwise make a function that can access that
 
-	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that
+	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
 
 
