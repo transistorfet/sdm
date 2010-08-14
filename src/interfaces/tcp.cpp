@@ -52,10 +52,15 @@ MooTCP::MooTCP()
 	m_read_pos = 0;
 	m_read_length = 0;
 	memset(m_read_buffer, '\0', TCP_READ_BUFFER);
+	m_host = NULL;
 }
 
 MooTCP::~MooTCP()
 {
+	if (m_host) {
+		moo_status("TCP: Disconnecting from %s", m_host->c_str());
+		delete m_host;
+	}
 	this->disconnect();
 }
 
@@ -115,7 +120,7 @@ int MooTCP::listen(int port)
 	if (((m_rfd = ::socket(PF_INET, SOCK_STREAM, 0)) >= 0)
 	    && (::bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
 	    && (::listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
-		moo_status("Listening on port %d", port);
+		moo_status("TCP: Listening on port %d", port);
 		return(0);
 	}
 	return(-1);
@@ -138,8 +143,8 @@ int MooTCP::accept(MooTCP *inter)
 
 	size = sizeof(struct sockaddr_in);
 	if ((inter->m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
-		moo_status("Accepted connection from %s", inet_ntoa(saddr.sin_addr));
-		// TODO do anything you might want with the saddr
+		inter->m_host = new std::string(inet_ntoa(saddr.sin_addr));
+		moo_status("TCP: Accepted connection from %s", inter->m_host->c_str());
 		return(0);
 	}
 	return(-1);

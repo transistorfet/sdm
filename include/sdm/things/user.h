@@ -33,13 +33,17 @@ class MooUser : public MooThing {
 	void disconnect();
 
 	int command(const char *text);
+	int command(const char *action, const char *text);
 	int command(const char *action, MooThing *object, MooThing *target);
 	MooThing *find_thing(const char *name);
-	int tell(MooThing *thing, const char *text, ...);
+	int output(MooThing *thing, const char *text, ...);
 
 	static int exists(const char *name);
 	static int logged_in(const char *name);
 	static int valid_username(const char *name);
+	static MooUser *register_new(const char *name, ...);
+	static MooUser *login(const char *name, const char *passwd);
+	static void encrypt_password(const char *salt, char *passwd, int max);
 };
 
 extern MooObjectType moo_user_obj_type;

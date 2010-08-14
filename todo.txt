@@ -54,6 +54,7 @@
 	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
+	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
 	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
@@ -61,6 +62,14 @@
 	  behaviour of the table much.
 
     Covnersion TODO:
+	* add MooAlias : public MooAction which can be called exactly like an action but just forms a string and invokes the MooUser
+	  parsing to complete the command
+	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
+	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
+	* make an internal language of some kind
+	* writing data back to XML does not work!  Type names used are incorrect (always uses "object" instead of "string", etc)
+
+	* implement user password checking in login()
 	* sort out and make better use of exceptions (in do_action in particular)
 	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
 	  words) as well as functions that set the values for certain circumstances
@@ -68,13 +77,18 @@
 	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
 	* complete the parser functions in MooUser
 	* implement basic builtin functions like 'tell' and 'look'
-	* should you try to replace all make_string references with std::string stuff?
+	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* add fully integrated permissions for objects
-	* finish the dispatcher in IRC
 	* modify the handle() function to do something like close the interface if an error occurs?
 	* make MooTCP store the connecting IP or otherwise make a function that can access that
+	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
+	* you can easily (and should) implement the whole thing with builtins and aliases
 
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
+
+	* add irc server-to-client pinging & connection timeouts
+	* add privmsg and privmsg error checking
+	* fill in all other IRC message processing
 
 
 

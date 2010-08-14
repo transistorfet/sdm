@@ -6,6 +6,7 @@
 #ifndef _SDM_INTERFACES_TCP_H
 #define _SDM_INTERFACES_TCP_H
 
+#include <string>
 #include <stdarg.h>
 
 #include <sdm/globals.h>
@@ -27,6 +28,7 @@ class MooTCP : public MooInterface {
 	int m_read_pos;
 	int m_read_length;
 	char m_read_buffer[TCP_READ_BUFFER];
+	std::string *m_host;
 
     public:
 	MooTCP();
@@ -39,6 +41,7 @@ class MooTCP : public MooInterface {
 	int listen(int port);
 	int accept(MooTCP *inter);
 	void disconnect();
+	const char *host() { if (!m_host) return(NULL); return(m_host->c_str()); }
 
 	virtual int read(char *data, int len);
 	virtual int write(const char *data);

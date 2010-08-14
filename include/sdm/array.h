@@ -76,7 +76,7 @@ T MooArray<T>::operator[](int index)
 template<typename T>
 T MooArray<T>::get(int index)
 {
-	if (index > m_size)
+	if (index < 0 || index > m_size)
 		return(NULL);
 	return(m_data[index]);
 }
@@ -84,6 +84,8 @@ T MooArray<T>::get(int index)
 template<typename T>
 T MooArray<T>::set(int index, T value)
 {
+	if (index < 0)
+		return(NULL);
 	if (index > m_size) {
 		if ((m_bits & MOO_ABF_RESIZE) && (m_max == -1 || index < m_max))
 			this->resize(index + 1);

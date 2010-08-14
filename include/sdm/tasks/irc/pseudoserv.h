@@ -24,6 +24,7 @@ class PseudoServ : public MooTask {
     protected:
 	int m_bits;
 	std::string *m_nick;
+	std::string *m_pass;
 	MooTCP *m_inter;
 	MooUser *m_user;
 
@@ -49,7 +50,11 @@ class PseudoServ : public MooTask {
     protected:
 	int welcomed() { return(m_bits & IRC_BF_WELCOMED); }
 	int received_user() { return(m_bits & IRC_BF_RECEIVED_USER); }
+
+	int login();
 	int send_welcome();
+	int join(const char *name);
+	int part(const char *name);
 };
 
 }

@@ -122,21 +122,8 @@ int MooUser::connect(MooTask *task)
 
 	if (m_task)
 		return(-1);
-	m_task = task;
-
-
-
-	// TODO we could instead of all this crap, have the m_task set by the task who manipulates this object
-	//	All output would be written to the task via an output method called from whatever code (possibly all
-	//	code would call user->output() or write() or whatever, and it would then call m_task->output() which would
-	//	then call output() on the interface.
 
 /*
-	if (m_parent > 0)
-		m_task = new MooInterpreter();
-	else
-		m_task = new MooForm("etc/register.xml");
-
 	// Move the user to the last location recorded or to a safe place if there is no last location
 	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
 	    && (location = moo_thing_lookup_id(room)))
@@ -145,11 +132,9 @@ int MooUser::connect(MooTask *task)
 		// TODO you should do this some othe way
 		sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_thing_lookup_id(50), NULL);
 		//sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
-
-	if (!user->m_task)
-		return(-1);
-	user->m_task->initialize(user);
 */
+	// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
+	m_task = task;
 	return(0);
 }
 
@@ -171,7 +156,8 @@ void MooUser::disconnect()
 
 	// Save the user information to the user's file only if we were already connected
 	if (m_task) {
-		this->save();
+		// TODO don't save while testing (because it doesn't work)
+		//this->save();
 		m_task->purge(this);
 	}
 	m_task = NULL;
@@ -183,8 +169,6 @@ int MooUser::read_entry(const char *type, MooDataFile *data)
 	if (!strcmp(type, "name")) {
 		// TODO this should already have been set but maybe we can generate an error if it doesn't match
 	}
-	// TODO read processor type and settings
-	// TODO read telnet/interface settings if we are going to do that
 	else
 		return(MooThing::read_entry(type, data));
 	return(0);
@@ -200,38 +184,6 @@ int MooUser::write_data(MooDataFile *data)
 	// TODO write processor settings and types
 	return(0);
 }
-
-int MooUser::exists(const char *name)
-{
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", name);
-	return(moo_data_file_exists(buffer));
-}
-
-int MooUser::logged_in(const char *name)
-{
-	MooUser *user;
-
-	if ((user = user_list->get(name)) && user->m_task)
-		return(1);
-	return(0);
-}
-
-int MooUser::valid_username(const char *name)
-{
-	int i;
-
-	for (i = 0; name[i] != '\0'; i++) {
-		if (!(((name[i] >= 0x30) && (name[i] <= 0x39))
-		    || ((name[i] >= 0x41) && (name[i] <= 0x5a))
-		    || ((name[i] >= 0x61) && (name[i] <= 0x7a))
-		    || (name[i] == '-') || (name[i] == '.') || (name[i] == '_')))
-			return(0);
-	}
-	return(1);
-}
-
 
 int MooUser::command(const char *text)
 {
@@ -249,7 +201,6 @@ int MooUser::command(const char *text)
 		;
 	buffer[i] = '\0';
 
-
 	// TODO should we break the text into words first (which will also process out any quoted strings)
 	// split the text into 2 strings by looking for a preposition (???)
 	// call user->find_thing() on the 2 object names or NULL if not found
@@ -257,6 +208,13 @@ int MooUser::command(const char *text)
 
 
 	return(this->command(action, object, target));
+}
+
+int MooUser::command(const char *action, const char *text)
+{
+	// TODO this is used by IRC to do command("say", <text>);
+
+	return(0);
 }
 
 int MooUser::command(const char *action, MooThing *object, MooThing *target)
@@ -299,9 +257,69 @@ MooThing *MooUser::find_thing(const char *name)
 	return(NULL);
 }
 
-int MooUser::tell(MooThing *thing, const char *text, ...)
+int MooUser::output(MooThing *thing, const char *text, ...)
 {
 	// TODO this should be passed *at least* one 'thing' pointer to identify the source
+}
+
+
+int MooUser::exists(const char *name)
+{
+	char buffer[STRING_SIZE];
+
+	snprintf(buffer, STRING_SIZE, "users/%s.xml", name);
+	return(moo_data_file_exists(buffer));
+}
+
+int MooUser::logged_in(const char *name)
+{
+	MooUser *user;
+
+	if ((user = user_list->get(name)) && user->m_task)
+		return(1);
+	return(0);
+}
+
+int MooUser::valid_username(const char *name)
+{
+	int i;
+
+	for (i = 0; name[i] != '\0'; i++) {
+		if (!(((name[i] >= 0x30) && (name[i] <= 0x39))
+		    || ((name[i] >= 0x41) && (name[i] <= 0x5a))
+		    || ((name[i] >= 0x61) && (name[i] <= 0x7a))
+		    || (name[i] == '-') || (name[i] == '.') || (name[i] == '_')))
+			return(0);
+	}
+	return(1);
+}
+
+MooUser *MooUser::register_new(const char *name, ...)
+{
+	// TODO create a new user (don't know what info we will need for this)
+	return(NULL);
+}
+
+MooUser *MooUser::login(const char *name, const char *passwd)
+{
+	MooUser *user;
+
+	if (!(user = user_list->get(name)) || user->m_task)
+		return(NULL);
+	// TODO how the fuck do we get the password!?  It's got to come from etc/passwd.xml
+	//if (strcmp(user->m_passwd, passwd))
+	//	return(NULL);
+
+	// TODO should this also do connect()
+	return(user);
+}
+
+void MooUser::encrypt_password(const char *salt, char *passwd, int max)
+{
+	char *enc;
+
+	enc = crypt(passwd, salt);
+	strncpy(passwd, enc, max);
 }
 
 

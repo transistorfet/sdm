@@ -46,19 +46,31 @@ MooObject *moo_irc_pseudoserv_create(void)
 
 using namespace MooIRC;
 
+static inline int moo_is_channel_name(const char *name)
+{
+	if (name[0] == '#' || name[0] == '&' || name[0] == '+' || name[0] == '!')
+		return(1);
+	return(0);
+}
+
 PseudoServ::PseudoServ()
 {
 	m_bits = 0;
 	m_nick = NULL;
 	m_inter = NULL;
 	m_user = NULL;
+	m_pass = NULL;
 }
 
 PseudoServ::~PseudoServ()
 {
+	// TODO do all deletey stuff like log user out, remove from channels, etc
+
 	this->set_delete();
 	if (m_nick)
 		delete m_nick;
+	if (m_pass)
+		delete m_pass;
 	if (m_inter)
 		delete m_inter;
 	if (m_user)
@@ -123,15 +135,6 @@ int PseudoServ::handle(MooInterface *inter, int ready)
 		this->dispatch(msg);
 		delete msg;
 	}
-/*
-	catch (IRCException e) {
-		Msg::send_numeric(inter, e.m_num, e.get());
-		if (m_nick)
-			moo_status("IRC: %s: %s", m_nick, e.get());
-		else
-			moo_status("IRC: %s", e.get());
-	}
-*/
 	catch (MooException e) {
 		moo_status("IRC: %s", e.get());
 		delete this;
@@ -189,7 +192,7 @@ int PseudoServ::dispatch(Msg *msg)
 	if (!this->welcomed()) {
 		switch (msg->cmd()) {
 		    case IRC_MSG_PASS:
-			// TODO check it
+			m_pass = new std::string(msg->m_params[0]);
 			break;
 		    case IRC_MSG_NICK: {
 			if (!MooUser::valid_username(msg->m_params[0]))
@@ -200,13 +203,13 @@ int PseudoServ::dispatch(Msg *msg)
 				delete m_nick;
 			m_nick = new std::string(msg->m_params[0]);
 			if (this->received_user())
-				this->send_welcome();
+				this->login();
 			break;
 		    }
 		    case IRC_MSG_USER:
 			m_bits |= IRC_BF_RECEIVED_USER;
 			if (m_nick)
-				this->send_welcome();
+				this->login();
 			break;
 		    default:
 			return(Msg::send(m_inter, ":%s %03d :You have not registered\r\n", server_name, IRC_ERR_NOTREGISTERED));
@@ -217,12 +220,25 @@ int PseudoServ::dispatch(Msg *msg)
 	// Process messages that are only acceptable after registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PRIVMSG:
+		if (!msg->m_last)
+			return(Msg::send(m_inter, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
+		else if (moo_is_channel_name(msg->m_params[0])) {
+			if (!strcmp(msg->m_params[0], "#realm")) {
+				if (!m_user)
+					return(Msg::send(m_inter, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
+				else if (msg->m_last[0] == '.')
+					m_user->command(&msg->m_last[1]);
+				else
+					m_user->command("say", msg->m_last);
+			}
+		}
+		else {
 
-
+		}
 		return(0);
 	    case IRC_MSG_MODE:
-		if (0) { // TODO moo_is_channel_name(msg->m_params[0])) {
-
+		if (moo_is_channel_name(msg->m_params[0])) {
+			// TODO do channel mode command processing
 		}
 		else {
 			if (strcmp(m_nick->c_str(), msg->m_params[0]))
@@ -235,17 +251,44 @@ int PseudoServ::dispatch(Msg *msg)
 			return(Msg::send(m_inter, ":%s %03d %s\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
 		}
 		break;
+	    case IRC_MSG_JOIN:
+		// TODO check for invite only??
+		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+i)\r\n", server_name, IRC_ERR_INVITEONLYCHAN, msg->m_params[0]));
+		// TODO check for channel limit? is there one?
+		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+l)\r\n", server_name, IRC_ERR_CHANNELISFULL, msg->m_params[0]));
+		// TODO check for too many channels joined?
+		//	return(Msg::send(m_inter, ":%s %03d %s :You have joined too many channels\r\n", server_name, IRC_ERR_TOOMANYCHANNELS, msg->m_params[0]));
+		// TODO check for banned??
+		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+b)\r\n", server_name, IRC_ERR_BANNEDFROMCHAN, msg->m_params[0]));
+
+		// TODO what are these messages for??
+		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+k)\r\n", server_name, IRC_ERR_BADCHANNELKEY, msg->m_params[0]));
+		//	return(Msg::send(m_inter, ":%s %03d %s :Bad channel mask\r\n", server_name, IRC_ERR_BADCHANMASK, msg->m_params[0]));
+		//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
+		//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+
+		// TODO check for invalid channel name
+		//	return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, msg->m_params[0]));
+
+		if (!strcmp(msg->m_params[0], "0"))
+			;// TODO leave all channels
+		else
+			// TODO parse out the possibility of multiple channels
+			return(this->join(msg->m_params[0]));
+		break;
 	    case IRC_MSG_WHOIS:
 
-		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick));
+		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
 	    case IRC_MSG_QUIT:
+		// TODO send quit message around???
+		Msg::send(m_inter, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_inter->host());
+		delete this;
 		return(0);
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
 		return(Msg::send(m_inter, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
 	    default:
 		return(Msg::send(m_inter, ":%s %03d %s :Unknown Command\r\n", server_name, IRC_ERR_UNKNOWNCOMMAND, msg->m_params[0]));
-		break;
 	}
 
 	/*
@@ -298,18 +341,61 @@ int PseudoServ::dispatch(Msg *msg)
 	return(0);
 }
 
+int PseudoServ::login()
+{
+	char buffer[STRING_SIZE];
+
+	// If we didn't receive a password then we aren't going to login but we wont fail either
+	if (m_pass) {
+		strcpy(buffer, m_pass->c_str());
+		MooUser::encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
+		m_user = MooUser::login(m_nick->c_str(), buffer);
+		// Free the password whether it was correct or not so it's not lying around
+		delete m_pass;
+		m_pass = NULL;
+		if (!m_user) {
+			Msg::send(m_inter, "ERROR :Closing Link: Invalid password for %s\r\n", m_nick->c_str());
+			delete this;
+			return(0);
+		}
+		else if (m_user->connect(this) < 0) {
+			Msg::send(m_inter, "ERROR :Closing Link: Error when logging in to %s\r\n", m_nick->c_str());
+			delete this;
+			return(0);
+		}
+	}
+	this->send_welcome();
+	return(1);
+}
+
 int PseudoServ::send_welcome()
 {
-	// TODO we need to send the user@host part, do we not?
-	Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!?@?\r\n", server_name, IRC_RPL_WELCOME, m_nick->c_str(), m_nick->c_str());
+	Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!~%s@%s\r\n", server_name, IRC_RPL_WELCOME, m_nick->c_str(), m_nick->c_str(), m_nick->c_str(), m_inter->host());
 	Msg::send(m_inter, ":%s %03d %s :Your host is %s, running version SuperDuperMoo v%s\r\n", server_name, IRC_RPL_YOURHOST, m_nick->c_str(), server_name, server_version);
 	Msg::send(m_inter, ":%s %03d %s :This server was created ???\r\n", server_name, IRC_RPL_CREATED, m_nick->c_str());
 	Msg::send(m_inter, ":%s %03d %s :%s SuperDuperMoo v%s ? ?\r\n", server_name, IRC_RPL_MYINFO, m_nick->c_str(), server_name, server_version);
-	//Msg::send(m_inter, ":%s %03d %s :Welcome to the Moo IRC Portal %s!?@?\r\n", server_name, IRC_RPL_BOUNCE, m_nick->c_str(), m_nick->c_str());
+	// TODO you can send the 005 ISUPPORT messages as well (which doesn't appear to be defined in the IRC standard)
 
 	Msg::send(m_inter, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, m_nick->c_str(), server_name);
+	// TODO send a motd (etc/motd.irc)
 	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
 	m_bits |= IRC_BF_WELCOMED;
+	if (m_user)
+		this->join("#realm");
+	return(0);
+}
+
+int PseudoServ::join(const char *name)
+{
+	Msg::send(m_inter, ":%s!~%s@%s JOIN :%s\r\n", m_nick->c_str(), m_nick->c_str(), m_inter->host(), name);
+	// TODO send topic
+	// TODO send names replies
+	return(0);
+}
+
+int PseudoServ::part(const char *name)
+{
+
 	return(0);
 }
 
