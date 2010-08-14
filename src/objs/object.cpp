@@ -46,14 +46,14 @@ void release_object(void)
 int moo_object_register_type(const MooObjectType *type)
 {
 	name_type_list->set(type->m_name, type);
-	name_type_list->set(type->m_realname, type);
+	realname_type_list->set(type->m_realname, type);
 	return(0);
 }
 
 int moo_object_deregister_type(const MooObjectType *type)
 {
 	name_type_list->remove(type->m_name);
-	name_type_list->remove(type->m_realname);
+	realname_type_list->remove(type->m_realname);
 	return(0);
 }
 

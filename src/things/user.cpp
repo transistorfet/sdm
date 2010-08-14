@@ -156,7 +156,7 @@ void MooUser::disconnect()
 
 	// Save the user information to the user's file only if we were already connected
 	if (m_task) {
-		// TODO don't save while testing (because it doesn't work)
+		// TODO don't save while testing (works now but still wont)
 		//this->save();
 		m_task->purge(this);
 	}
