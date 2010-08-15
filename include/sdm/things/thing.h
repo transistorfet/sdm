@@ -23,6 +23,8 @@
 #define SDM_NO_ID		-1
 #define SDM_NEW_ID		-2
 
+class MooUser;
+
 typedef int moo_id_t;
 
 extern MooArray<MooThing *> *moo_thing_table;
@@ -53,17 +55,18 @@ class MooThing : public MooObject {
 	MooObject *get_property(const char *name, MooObjectType *type);
 
 	int set_action(const char *name, MooAction *action);
-	// TODO should you implement this function??  If so, either Action itself must have a pointer to the object which it is actually
-	//	an action of (the parent proto-object) or else we need to make it not required
 	MooAction *get_action(const char *name);
+	MooAction *get_action_partial(const char *name);
 	int do_action(MooAction *action, MooArgs *args);
 	int do_action(const char *name, MooArgs *args);
-	int do_abbreved_action(const char *name, MooArgs *args);
+	int do_action(const char *name, MooUser *user, MooThing *object, MooThing *target);
 
 	int moveto(MooThing *thing, MooThing *by);
 
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent() { return(m_parent); }
+	inline MooThing *contents() { return(m_objects); }
+	inline MooThing *next() { return(m_next); }
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
 	inline int is_a_thing(moo_id_t id);

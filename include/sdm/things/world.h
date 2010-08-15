@@ -30,6 +30,7 @@ class MooWorld : public MooThing {
 	static MooWorld *root();
 };
 
+extern MooWorld *moo_root_world;
 extern MooObjectType moo_world_obj_type;
 
 int init_world(void);

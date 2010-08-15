@@ -207,6 +207,9 @@ int MooUser::command(const char *text)
 	// split the text into 2 strings by looking for a preposition (???)
 	// call user->find_thing() on the 2 object names or NULL if not found
 
+	// TODO temp
+	object = this;
+	target = NULL;
 
 
 	return(this->command(action, object, target));
@@ -221,7 +224,6 @@ int MooUser::command(const char *action, const char *text)
 
 int MooUser::command(const char *action, MooThing *object, MooThing *target)
 {
-	int res;
 	MooArgs args;
 
 	// TODO change this with a MooArgs method for setting
@@ -230,14 +232,20 @@ int MooUser::command(const char *action, MooThing *object, MooThing *target)
 	args.m_object = object;
 	args.m_target = target;
 	args.m_text = NULL;
+	return(this->command(action, &args));
+}
 
-	if ((res = this->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+int MooUser::command(const char *action, MooArgs *args)
+{
+	int res;
+
+	if ((res = this->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (m_location && (res = m_location->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+	if (m_location && (res = m_location->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (object && (res = object->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+	if (args->m_object && (res = args->m_object->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (target && (res = target->do_action(action, &args)) != MOO_ACTION_NOT_FOUND)
+	if (args->m_target && (res = args->m_target->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
 		return(res);
 	return(MOO_ACTION_NOT_FOUND);
 }

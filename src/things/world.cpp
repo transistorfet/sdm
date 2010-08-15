@@ -21,14 +21,14 @@ MooObjectType moo_world_obj_type = {
 	(moo_type_create_t) moo_world_create
 };
 
-static MooWorld *root_world = NULL;
+MooWorld *moo_root_world = NULL;
 
 int init_world(void)
 {
-	if (root_world)
+	if (moo_root_world)
 		return(1);
 	/** Create the world object with ID = 1, and parent ID = -1 since the world has no parent */
-	root_world = new MooWorld("maps/world.xml", 1, -1);
+	moo_root_world = new MooWorld("maps/world.xml", 1, -1);
 	if (moo_object_register_type(&moo_world_obj_type) < 0)
 		return(-1);
 	return(0);
@@ -36,12 +36,12 @@ int init_world(void)
 
 void release_world(void)
 {
-	if (!root_world)
+	if (!moo_root_world)
 		return;
 	/** Write the world to disk */
 	// TODO BUG there is an infinite loop on writing the world file
-	//root_world->write();
-	delete root_world;
+	//moo_root_world->write();
+	delete moo_root_world;
 	moo_object_deregister_type(&moo_world_obj_type);
 }
 
@@ -110,7 +110,7 @@ int MooWorld::write()
 
 MooWorld *MooWorld::root()
 {
-	return(root_world);
+	return(moo_root_world);
 }
 
 

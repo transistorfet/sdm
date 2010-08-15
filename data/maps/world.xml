@@ -13,7 +13,7 @@
    <parent>11</parent>
    <location>50</location>
    <property type="string" name="title">North</property>
-   <property type="number" name="target">55.000000</property>
+   <property type="thingref" name="target">55</property>
    <property type="string" name="brief">A typical looking wooden doorway</property>
    <property type="string" name="name">north</property>
    <property type="string" name="description">It's a door that you don't need to open. What more do you need to know</property>
@@ -30,7 +30,7 @@
    <parent>11</parent>
    <location>55</location>
    <property type="string" name="title">South</property>
-   <property type="number" name="target">50.000000</property>
+   <property type="thingref" name="target">50</property>
    <property type="string" name="brief">A strange looking curved hallway</property>
    <property type="string" name="name">south</property>
    <property type="string" name="description">For some reason you are unable to see the hallway clearly</property>

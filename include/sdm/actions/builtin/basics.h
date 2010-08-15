@@ -14,7 +14,8 @@
 
 int moo_load_basic_actions(MooBuiltinHash *);
 
-int moo_basics_notify(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_tell(MooAction *action, MooThing *thing, MooArgs *args);
+int moo_basics_tell_view(MooAction *action, MooThing *thing, MooArgs *args);
 int moo_basics_announce(MooAction *action, MooThing *thing, MooArgs *args);
 int moo_basics_say(MooAction *action, MooThing *thing, MooArgs *args);
 int moo_basics_look(MooAction *action, MooThing *thing, MooArgs *args);

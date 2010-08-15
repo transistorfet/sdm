@@ -59,6 +59,12 @@
 	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
 	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
 	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
+	* you could have a function like user->tell(thing, str) or something that looks up the action and calls it (which would most
+	  likely be directed to user->print() but would allow it to be reprogrammed)
+	* should you have user->print/printf like they are now or should you just make one function that prints a preformatted string
+	  and then have a function like const char *format(buffer, size, args, fmt, ...) which could directly pass the result to
+	  another function, or NULL, which would be checekd by the other function and would make it not print it (you still have to
+	  deal with buffer allocation and stuff though =/)
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
 	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
@@ -69,6 +75,7 @@
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
+	* check if the problem you sometimes have is due to the listening port not being free (where it floods with accepting msgs)
 
 	* complete the parser functions in MooUser
 	* add fully integrated permissions for objects

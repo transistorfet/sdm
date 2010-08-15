@@ -10,14 +10,9 @@
   <location>2</location>
   <property type="string" name="title">something</property>
   <property type="string" name="name">thing</property>
-  <!-- <action type="builtin" name="look_self">builtin_examine</action> -->
-  <!-- <script ref="core.lua"> -->
-
-  <action type="lua" name="look_self">core:look_self</action>  <!-- Or could you even make this not be required -->
-  <action type="lua" name="tell_view"><![CDATA[
-			local name = get_property(this, "name");
-			if name then notify(caller, "<brightblue>You see " .. name .. " here.\n"); end
-		]]></action>
+  <property type="string" name="description">You're not sure what it is.</property>
+  <action type="builtin" name="examine">builtin_examine</action>
+  <action type="builtin" name="tell_view">builtin_tell_view</action>
  </thing>
  <thing>
   <id>4</id>
@@ -42,16 +37,8 @@
   <action type="builtin" name="inv">builtin_inventory</action>
   <action type="builtin" name="get">builtin_get</action>
   <action type="builtin" name="drop">builtin_drop</action>
-  <action type="lua" name="describe"><![CDATA[
-			if set_property(caller, "description", text) then
-				notify(caller, "<green>Description set successfully\n");
-			else
-				notify(caller, "<red>Error setting description\n");
-			end
-		]]></action>
-  <action type="lua" name="whereami"><![CDATA[
-			notify(caller, "You are in #" .. get_location(caller) .. "\n")
-		]]></action>
+  <action type="builtin" name="describe">builtin_describe</action>
+  <action type="builtin" name="whereami">builtin_whereami</action>
  </thing>
  <thing>
   <id>7</id>
@@ -59,10 +46,7 @@
   <location>2</location>
   <property type="string" name="title">a powerful wizard</property>
   <property type="string" name="name">wizard</property>
-  <action type="lua" name="teleport"><![CDATA[
-			local room = get_thing(caller, text);
-			moveto(caller, room);
-		]]></action>
+  <action type="builtin" name="teleport">basics_teleport</action>
   <action type="builtin" name="@create">builder_create</action>
   <action type="builtin" name="@add_exit">builder_add_exit</action>
   <action type="builtin" name="@create_room">builder_create_room</action>
@@ -87,11 +71,7 @@
   <action type="builtin" name="do_enter">room_do_enter</action>
   <action type="builtin" name="do_leave">room_do_leave</action>
   <action type="builtin" name="look">room_look</action>
-  <action type="lua" name="emote"><![CDATA[
-			local str = get_property(caller, "name") .. " " .. text .. "\n";
-			notify(caller, str);
-			do_action(get_location(caller), "announce", -1, "\n" .. str);
-		]]></action>
+  <action type="builtin" name="emote">something</action>
   <action type="builtin" name="s">room_direction</action>
   <action type="builtin" name="w">room_direction</action>
   <action type="builtin" name="u">room_direction</action>
@@ -105,9 +85,6 @@
   <property type="string" name="name">exit</property>
   <action type="builtin" name="go">builtin_go</action>
   <action type="builtin" name="move">builtin_go</action>
-  <action type="lua" name="tell_view"><![CDATA[
-			local name = get_property(this, "name");
-			if name then notify(caller, "<brightmagenta>You can go " .. name .. "\n"); end
-		]]></action>
+  <action type="builtin" name="tell_view">exit_tell_view</action>
  </thing>
 </world>

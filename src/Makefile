@@ -6,7 +6,7 @@
 .PHONY: builds clean
 
 ROOT = ..
-TARGET = ../bin/mud
+TARGET = ../bin/moo
 
 OBJS =	data.o	\
 	exception.o	\

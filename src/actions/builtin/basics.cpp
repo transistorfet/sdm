@@ -18,6 +18,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/world.h>
 
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
@@ -25,7 +26,8 @@
 
 int moo_load_basic_actions(MooBuiltinHash *actions)
 {
-	actions->set("builtin_notify", new MooBuiltin(moo_basics_notify));
+	actions->set("builtin_tell", new MooBuiltin(moo_basics_tell));
+	actions->set("builtin_tell_view", new MooBuiltin(moo_basics_tell_view));
 	actions->set("builtin_examine", new MooBuiltin(moo_basics_examine));
 	actions->set("builtin_go", new MooBuiltin(moo_basics_go));
 
@@ -46,21 +48,28 @@ int moo_basics_tell(MooAction *action, MooThing *thing, MooArgs *args)
 		return(-1);
 	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args->text));
 */
+	// TODO NULL should be the sender, and is m_text right?
+	args->m_user->printf(moo_root_world, NULL, args, args->m_text);
+	return(0);
+}
+
+int moo_basics_tell_view(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	args->m_user->printf(moo_root_world, args->m_this, args, "<brightblue>You see $this.title here.");
+	return(0);
 }
 
 int moo_basics_examine(MooAction *action, MooThing *thing, MooArgs *args)
 {
-/*
-	struct sdm_thing *cur;
+	MooThing *cur;
 
-	sdm_notify(args->caller, args, "<brightyellow>$thing.title</brightyellow>\n");
-	sdm_notify(args->caller, args, "<brightgreen>$thing.description</brightgreen>\n");
-	for (cur = thing->objects; cur; cur = cur->next) {
-		if (cur == args->caller)
+	args->m_user->printf(moo_root_world, args->m_this, args, "<brightyellow>$this.title");
+	args->m_user->printf(moo_root_world, args->m_this, args, "<brightgreen>$this.description");
+	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
+		if (cur == args->m_caller || cur == args->m_user)
 			continue;
-		sdm_do_nil_action(cur, args->caller, "tell_view");
+		cur->do_action("tell_view", args->m_user, NULL, NULL);
 	}
-*/
 	return(0);
 }
 

@@ -289,6 +289,30 @@ int MooThing::set_action(const char *name, MooAction *action)
 	return(m_actions->set(name, action));
 }
 
+MooAction *MooThing::get_action(const char *name)
+{
+	MooThing *cur;
+	MooAction *action;
+
+	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+		if ((action = cur->m_actions->get(name)))
+			return(action);
+	}
+	return(NULL);
+}
+
+MooAction *MooThing::get_action_partial(const char *name)
+{
+	MooThing *cur;
+	MooAction *action;
+
+	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+		if ((action = cur->m_actions->get_partial(name)))
+			return(action);
+	}
+	return(NULL);
+}
+
 int MooThing::do_action(MooAction *action, MooArgs *args)
 {
 	try {
@@ -308,28 +332,36 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 
 int MooThing::do_action(const char *name, MooArgs *args)
 {
-	MooThing *cur;
 	MooAction *action;
 
 	// TODO should this be set here or should it just be in MooAction or something
 	args->m_action = name;
-	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get(name)))
-			return(cur->do_action(action, args));
-	}
+	if ((action = this->get_action(name)))
+		// TODO this used to be 'cur->do_action' where cur was the actual thing that the action was on.  So either it's ok
+		//	to make 'this' be the thing the action is done on, rather than 'this' being the parent thing that the action
+		//	was *found* on, or we need to store the parent thing in the action itself!
+		return(this->do_action(action, args));
 	return(MOO_ACTION_NOT_FOUND);
 }
 
-int MooThing::do_abbreved_action(const char *name, MooArgs *args)
+int MooThing::do_action(const char *name, MooUser *user, MooThing *object, MooThing *target)
 {
-	MooThing *cur;
+	MooArgs args;
 	MooAction *action;
 
-	args->m_action = name;
-	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if ((action = cur->m_actions->get_partial(name)))
-			return(cur->do_action(action, args));
-	}
+	// TODO change this with a MooArgs method for setting
+	args.m_user = user;
+	args.m_caller = (MooThing *) user;
+	args.m_object = object;
+	args.m_target = target;
+	args.m_text = NULL;
+	args.m_action = name;
+
+	if ((action = this->get_action(name)))
+		// TODO this used to be 'cur->do_action' where cur was the actual thing that the action was on.  So either it's ok
+		//	to make 'this' be the thing the action is done on, rather than 'this' being the parent thing that the action
+		//	was *found* on, or we need to store the parent thing in the action itself!
+		return(this->do_action(action, &args));
 	return(MOO_ACTION_NOT_FOUND);
 }
 
@@ -556,7 +588,7 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 	int i;
 	char *name;
 	MooThing *thing;
-	MooObject *result;
+	MooObject *result = NULL;
 
 	max--;
 	if ((name = strchr(ref, '.'))) {
@@ -593,8 +625,17 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 		thing = MooThing::reference(ref);
 
 	buffer[0] = '\0';
-	if (!name || !(result = this->get_property(name, NULL)))
-		return(0);
+	if (name) {
+		if (!thing || !(result = thing->get_property(name, NULL)))
+			return(0);
+	}
+	else if (!result) {
+		if ((i = snprintf(buffer, max, "#%d", thing->m_id)) < 0)
+			return(0);
+		buffer[i] = '\0';
+		return(i);
+	}
+
 	if (result->is_a(&moo_string_obj_type)) {
 		strncpy(buffer, ((MooString *) result)->m_str, max);
 		return(((MooString *) result)->m_len);
