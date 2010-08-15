@@ -36,7 +36,9 @@ class MooUser : public MooThing {
 	int command(const char *action, const char *text);
 	int command(const char *action, MooThing *object, MooThing *target);
 	MooThing *find_thing(const char *name);
-	int output(MooThing *thing, const char *text, ...);
+	int print(MooThing *channel, MooThing *thing, const char *text);
+	int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
+	int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
 
 	static int exists(const char *name);
 	static int logged_in(const char *name);

@@ -87,6 +87,11 @@ int MooRPCServer::release()
 	return(0);
 }
 
+int MooRPCServer::print(MooThing *channel, MooThing *thing, const char *str)
+{
+
+}
+
 int MooRPCServer::handle(MooInterface *inter, int ready)
 {
 	char buffer[STRING_SIZE];

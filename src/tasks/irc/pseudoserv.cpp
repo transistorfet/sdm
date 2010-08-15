@@ -122,6 +122,14 @@ int PseudoServ::release()
 	return(0);
 }
 
+int PseudoServ::print(MooThing *channel, MooThing *thing, const char *str)
+{
+	// TODO how will you get the channel name from the channel???
+	// TODO how will you get the thing name?
+	// TODO you still need to parse out the colour tags (<brightyellow></brightyellow>)
+	return(Msg::send(m_inter, ":SOMEONE!id@host PRIVMSG #realm :%s\r\n", str));
+}
+
 int PseudoServ::handle(MooInterface *inter, int ready)
 {
 	Msg *msg;
@@ -380,8 +388,10 @@ int PseudoServ::send_welcome()
 	// TODO send a motd (etc/motd.irc)
 	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
 	m_bits |= IRC_BF_WELCOMED;
-	if (m_user)
+	if (m_user) {
 		this->join("#realm");
+		m_user->printf(NULL, NULL, "Welcome to The Realm of the Jabberwock, %s", m_nick->c_str());
+	}
 	return(0);
 }
 

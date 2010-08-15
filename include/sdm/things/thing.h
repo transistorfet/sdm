@@ -71,6 +71,12 @@ class MooThing : public MooObject {
 	MooThing *find(const char *name);
 	static MooThing *reference(const char *name);
 
+	int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
+	int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
+	int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);
+	int escape_char(const char *str, char *buffer);
+	static int atoi(const char *str, int radix);
+
     protected:
 	int assign_id(moo_id_t id);
 

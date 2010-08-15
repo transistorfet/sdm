@@ -30,17 +30,19 @@ class PseudoServ : public MooTask {
 
     public:
 	PseudoServ();
-	virtual ~PseudoServ();
+	~PseudoServ();
 
-	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
+	int read_entry(const char *type, MooDataFile *data);
+	int write_data(MooDataFile *data);
 
-	virtual int initialize();
-	virtual int idle();
-	virtual int release();
+	int initialize();
+	int idle();
+	int release();
 
-	virtual int handle(MooInterface *inter, int ready);
-	virtual int bestow(MooInterface *inter);
+	int print(MooThing *channel, MooThing *thing, const char *str);
+
+	int handle(MooInterface *inter, int ready);
+	int bestow(MooInterface *inter);
 	int purge(MooInterface *inter);
 
 	int purge(MooUser *user);

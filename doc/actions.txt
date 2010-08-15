@@ -92,6 +92,18 @@ room:announce(text)
 user:notify(text)
 	- send the text to the user
 
+user:print(channel, thing, str)
+	- send str to user, from thing, through channel.  For stuff that happens in the 'world', the
+	  first thing by ID (#0 i guess) should be sent.  Examples: 'look' would send from room-thing
+	  through realm-thing.  'examine' would send from object through realm-thing.  'say' would
+	  send from user/mobile through realm-thing.  'ooc' would send from user through ooc-channel.
+	  irc PRIVMSGs would send from user through channel-thing.
+
+user:printf(channel, thing, fmt, args, [...])
+	- same as print but formats the text via passed parameters (it's in the C++ interface but may or 
+	  may not be in the scrpiting language interface).  Either way, '$' style variable references
+	  will be expanded, using the args, including references to properties.
+
 
 tell
 whisper

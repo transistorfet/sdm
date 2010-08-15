@@ -13,6 +13,7 @@
 typedef int moo_tid_t;
 
 class MooUser;
+class MooThing;
 class MooInterface;
 
 class MooTask : public MooObject {
@@ -26,6 +27,8 @@ class MooTask : public MooObject {
 	virtual int initialize() = 0;
 	virtual int idle() = 0;
 	virtual int release() = 0;
+
+	virtual int print(MooThing *channel, MooThing *thing, const char *str) { return(-1); }
 
 	virtual int handle(MooInterface *inter, int ready) = 0;
 	virtual int bestow(MooInterface *inter);

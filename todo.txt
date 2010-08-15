@@ -66,27 +66,25 @@
 	  behaviour of the table much.
 
     Covnersion TODO:
-	* add MooAlias : public MooAction which can be called exactly like an action but just forms a string and invokes the MooUser
-	  parsing to complete the command
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
-	* writing data back to XML does not work!  Type names used are incorrect (always uses "object" instead of "string", etc)
 
+	* complete the parser functions in MooUser
+	* add fully integrated permissions for objects
+	* add the actual action eval to MooAlias (how will the alias be converted to a command? by $var substitution?)
+	* speaking of which, add a function somewhere that takes MooArgs and stuff and converts a string's $ references to
+	  appropriate values, including full MooThing property lookup ($this.name)
 	* implement user password checking in login()
-	* sort out and make better use of exceptions (in do_action in particular)
 	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
 	  words) as well as functions that set the values for certain circumstances
 	* make various functions in thing.cpp (like those in utils right nowo for basic manipulation)
 	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
-	* complete the parser functions in MooUser
 	* implement basic builtin functions like 'tell' and 'look'
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
-	* add fully integrated permissions for objects
 	* modify the handle() function to do something like close the interface if an error occurs?
-	* make MooTCP store the connecting IP or otherwise make a function that can access that
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
-	* you can easily (and should) implement the whole thing with builtins and aliases
+	* sort out and make better use of exceptions (in do_action in particular)
 
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 

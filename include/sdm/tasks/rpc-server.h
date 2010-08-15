@@ -27,12 +27,14 @@ class MooRPCServer : public MooTask {
 	MooRPCServer();
 	~MooRPCServer();
 
-	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
+	int read_entry(const char *type, MooDataFile *data);
+	int write_data(MooDataFile *data);
 
 	int initialize();
 	int idle();
 	int release();
+
+	int print(MooThing *channel, MooThing *thing, const char *str);
 
 	int handle(MooInterface *inter, int ready);
 	int bestow(MooInterface *inter);

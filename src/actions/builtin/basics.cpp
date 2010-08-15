@@ -36,8 +36,11 @@ int moo_load_basic_actions(MooBuiltinHash *actions)
 }
 
 
-int moo_basics_notify(MooAction *action, MooThing *thing, MooArgs *args)
+int moo_basics_tell(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	// TODO i have no idea how this would work.  a direct user:print() would be weird.  How would you
+	//	determine the channel and thing objects and stuff.  What is actually needed it terms of
+	//	permissions checks, and possibly uses for this function?
 /*
 	if (!sdm_is_user(thing) || !SDM_USER(thing)->inter)
 		return(-1);

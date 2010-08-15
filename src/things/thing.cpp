@@ -437,7 +437,7 @@ MooThing *MooThing::reference(const char *name)
 	moo_id_t id;
 
 	if (name[0] == '#') {
-		id = atoi(&name[1]);
+		id = ::atoi(&name[1]);
 		if (id <= 0 || id > MOO_THING_MAX_SIZE)
 			return(NULL);
 		return(moo_thing_table->get(id));
@@ -451,5 +451,252 @@ MooThing *MooThing::reference(const char *name)
 	else if (name[0] == '$')
 		;// TODO do some kind of lookup by variable name (where is this table?)
 	return(NULL);
+}
+
+/**
+ * Format a string using the given fmt string and place the resulting
+ * string into the given buffer.  The number of characters written to
+ * the buffer is returned.  If a $ is encountered, the substring up
+ * to the next space is taken to be a reference name.  If the reference
+ * name is enclosed in { }, then the reference name is take to be
+ * up to the closing }.  The reference is evaluated into a string using
+ * the MooThing::expand_reference function.  If a & follows the $ then the
+ * resolved string is recursively expanded.
+ */
+int MooThing::expand_str(char *buffer, int max, MooArgs *args, const char *fmt)
+{
+	int i;
+	int j = 0;
+
+	max--;
+	for (i = 0;(fmt[i] != '\0') && (j < max);i++) {
+		if (fmt[i] == '\\') {
+			if (fmt[++i] == '\0')
+				break;
+			i += MooThing::escape_char(&fmt[i], &buffer[j++]) - 1;
+		}
+		else if (fmt[i] == '$')
+			j += MooThing::expand_reference(&buffer[j], max - j + 1, args, &fmt[i], &i);
+		else
+			buffer[j++] = fmt[i];
+	}
+	buffer[j] = '\0';
+	return(j);
+}
+
+#define IS_NUMBER_CHAR(ch)	\
+	( ((ch) >= 0x30) && ((ch) <= 0x39) )
+
+#define IS_VALID_CHAR(ch)	\
+	( (((ch) >= '0') && ((ch) <= '9'))	\
+	|| (((ch) >= 'A') && ((ch) <= 'Z')) || (((ch) >= 'a') && ((ch) <= 'z'))	\
+	|| ((ch) == '.') || ((ch) == '_') )
+
+/**
+ * Expand the reference using the given args and copy the resulting string
+ * to the given buffer up to the max number of characters.  The number
+ * of characters written to the buffer is returned.  If the given str_count
+ * pointer is not NULL then the number of characters used as the variable
+ * name in str is added to the value it points to.  The given str may
+ * start with the '$' char or may start just after it.
+ */
+int MooThing::expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used)
+{
+	int k;
+	char delim;
+	int recurse;
+	int i = 0, j = 0;
+	char value[STRING_SIZE];
+
+	if (str[i] == '$')
+		i++;
+
+	if (str[i] == '&') {
+		recurse = 1;
+		i++;
+	}
+	else
+		recurse = 0;
+
+	if (str[i] == '{') {
+		delim = '}';
+		i++;
+	}
+	else
+		delim = ' ';
+
+	for (k = 0;(str[i] != '\0') && (str[i] != delim) && IS_VALID_CHAR(str[i]) && (k < max - 1);k++, i++)
+		buffer[k] = str[i];
+	buffer[k] = '\0';
+	if (MooThing::resolve_reference(value, STRING_SIZE, args, buffer) >= 0) {
+		if (recurse)
+			j = MooThing::expand_str(buffer, max, args, value);
+		else {
+			strncpy(buffer, value, max - 1);
+			if ((j = strlen(value)) >= max)
+				j = max - 1;
+		}
+	}
+	if (delim != '}')
+		i--;
+
+	if (used)
+		*used += i;
+	buffer[j] = '\0';
+	return(j);
+}
+
+/**
+ * Resolves the given reference using the given arguments and copies the
+ * resulting string into the given buffer.  The number of characters written
+ * to the buffer is returned.
+ */
+int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char *ref)
+{
+	int i;
+	char *name;
+	MooThing *thing;
+	MooObject *result;
+
+	max--;
+	if ((name = strchr(ref, '.'))) {
+		i = name - ref;
+		name++;
+	}
+	else
+		i = strlen(ref);
+
+	if (!strncmp(ref, "text", i)) {
+		// TODO we are ignoring the rest of the reference for now ($text.prop <=> $text)
+		strncpy(buffer, args->m_text, max);
+		buffer[max] = '\0';
+		return(strlen(args->m_text));
+	}
+	else if (!strncmp(ref, "action", i)) {
+		strncpy(buffer, args->m_action, max);
+		buffer[max] = '\0';
+		return(strlen(args->m_action));
+	}
+	else if (!strncmp(ref, "user", i))
+		thing = args->m_user;
+	else if (!strncmp(ref, "this", i))
+		thing = args->m_this;
+	else if (!strncmp(ref, "caller", i))
+		thing = args->m_caller;
+	else if (!strncmp(ref, "object", i))
+		thing = args->m_object;
+	else if (!strncmp(ref, "target", i))
+		thing = args->m_target;
+	else if (!strncmp(ref, "result", i))
+		result = args->m_result;
+	else
+		thing = MooThing::reference(ref);
+
+	buffer[0] = '\0';
+	if (!name || !(result = this->get_property(name, NULL)))
+		return(0);
+	if (result->is_a(&moo_string_obj_type)) {
+		strncpy(buffer, ((MooString *) result)->m_str, max);
+		return(((MooString *) result)->m_len);
+	}
+	else if (result->is_a(&moo_number_obj_type)) {
+		if ((i = snprintf(buffer, max, "%f", ((MooNumber *) result)->m_num)) < 0)
+			return(0);
+		buffer[i] = '\0';
+		return(i);
+	}
+	else if (result->is_a(&moo_thingref_obj_type)) {
+		if ((i = snprintf(buffer, max, "#%d", ((MooThingRef *) result)->m_id)) < 0)
+			return(0);
+		buffer[i] = '\0';
+		return(i);
+	}
+	return(0);
+}
+
+
+/**
+ * Convert the charcter escape sequence (assuming str starts after the escape
+ * character) and stores the character in buffer[0].  The number of characters
+ * read as a sequence from str is returned
+ */
+int MooThing::escape_char(const char *str, char *buffer)
+{
+	char number[3];
+
+	if (*str == '\0')
+		return(0);
+	switch (str[0]) {
+		case 'n':
+			buffer[0] = '\n';
+			break;
+		case 'r':
+			buffer[0] = '\r';
+			break;
+		case 't':
+			buffer[0] = '\t';
+			break;
+		case 'e':
+			buffer[0] = '\x1b';
+			break;
+		case 'x':
+			if ((str[1] != '\0') && (str[2] != '\0')) {
+				number[0] = str[1];
+				number[1] = str[2];
+				number[2] = '\0';
+				buffer[0] = MooThing::atoi(number, 16);
+			}
+			return(3);
+		default:
+			if (IS_NUMBER_CHAR(str[0])) {
+				buffer[0] = str[0] - 0x30;
+				if (IS_NUMBER_CHAR(str[1])) {
+					buffer[0] = (buffer[0] * 8) + str[1] - 0x30;
+					if (IS_NUMBER_CHAR(str[2])) {
+						buffer[0] = (buffer[0] * 8) + str[2] - 0x30;
+						return(3);
+					}
+					return(2);
+				}
+				return(1);
+			}
+			else
+				buffer[0] = str[0];
+			break;
+	}
+	return(1);
+}
+
+/**
+ * Convert a string of the given radix to an interger.
+ */
+int MooThing::atoi(const char *str, int radix)
+{
+	int i = -1, ret = 0, mul = 1;
+
+	if (!str)
+		return(0);
+
+	while (str[++i] == ' ' || str[i] == '\t' || str[i] == '\n')
+		if (str[i] == '\0')
+			return(0);
+
+	if (str[i] == '-') {
+		mul = -1;
+		i++;
+	}
+
+	for (;str[i] != '\0';i++) {
+		ret *= radix;
+		if (str[i] >= 0x30 && str[i] <= 0x39)
+			ret += (str[i] - 0x30);
+		else if (str[i] >= 0x41 && str[i] <= 0x5a)
+			ret += (str[i] - 0x37);
+		else if (str[i] >= 0x61 && str[i] <= 0x7a)
+			ret += (str[i] - 0x57);
+		else
+			break;
+	}
+	return(ret * mul);
 }
 

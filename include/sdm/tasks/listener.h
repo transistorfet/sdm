@@ -27,8 +27,8 @@ class MooListener : public MooTask {
 	MooListener();
 	~MooListener();
 
-	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
+	int read_entry(const char *type, MooDataFile *data);
+	int write_data(MooDataFile *data);
 
 	int initialize();
 	int idle();

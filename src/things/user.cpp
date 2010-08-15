@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include <sdm/data.h>
 #include <sdm/misc.h>
@@ -258,9 +259,52 @@ MooThing *MooUser::find_thing(const char *name)
 	return(NULL);
 }
 
-int MooUser::output(MooThing *thing, const char *text, ...)
+int MooUser::print(MooThing *channel, MooThing *thing, const char *text)
 {
-	// TODO this should be passed *at least* one 'thing' pointer to identify the source
+	if (!m_task)
+		return(-1);
+	return(m_task->print(channel, thing, text));
+}
+
+int MooUser::printf(MooThing *channel, MooThing *thing, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+	va_start(va, fmt);
+	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
+	return(m_task->print(channel, thing, buffer));
+}
+
+int MooUser::print(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt)
+{
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+	// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
+	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, fmt);
+	return(m_task->print(channel, thing, buffer));
+}
+
+int MooUser::printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...)
+{
+	va_list va;
+	char buffer2[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+
+	{
+		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
+		char buffer1[LARGE_STRING_SIZE];
+		va_start(va, fmt);
+		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
+		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
+	}
+	return(m_task->print(channel, thing, buffer2));
 }
 
 
