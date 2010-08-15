@@ -1,0 +1,27 @@
+
+
+* Config: the configuration defines a listener task which is created when the system starts.
+	Config Gives: interface-name, task-name
+* Listener: creates a listening socket which is 'selected' for by MooInterface
+* INCOMING: -> handled by listener
+* Listener: creates a new interface and accepts the connection on it
+* Listener: creates a new task and gives it control of the new interface (both task and interface have a pointer to the other)
+* Task: through the protocol, it identifies the user to be associated with this connection
+* Task: looks up the user name in the MooUser table, saves a pointer to it, and calls connect() on it, passing a pointer to the task
+* User: saves the task pointer and uses it for back-talk and stuff
+
+
+
+
+* if the interface is destroyed/closed/etc, then it must be able to call a function in the task that owns it, to notify it
+* if the user is destroyed, then it must be able to call a function on the task, as well
+
+
+TASK NEEDS METHODS TO:
+* handle incoming network data (called by MooInterface when socket is ready)
+* handle outgoing MOO data (called by MooUser when data is to be sent to client)
+* accept a new interface to monitor (called by MooListener when a connection has been established)
+* remove/notify-of-destruction-of an interface (called on interface destruction)
+* remove/notify-of-destruction-of a user (called on user destruction)
+
+

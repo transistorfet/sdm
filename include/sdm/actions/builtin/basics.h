@@ -12,7 +12,7 @@
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
-int moo_load_basic_actions(MooActionHash *);
+int moo_load_basic_actions(MooBuiltinHash *);
 
 int moo_basics_notify(MooAction *action, MooThing *thing, MooArgs *args);
 int moo_basics_announce(MooAction *action, MooThing *thing, MooArgs *args);

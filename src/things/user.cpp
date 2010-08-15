@@ -146,6 +146,7 @@ void MooUser::disconnect()
 	//}
 
 	// TODO make sure this will work; it's a superb improvement over the old way we had to do this (note: any old value would be deleted)
+	// TODO we want this to be treated as a MooThingRef and not a float number
 	//this->set_property("last_location", m_location ? m_location->m_id : -1);
 
 	// TODO how do you tell this function to forcefully remove the user

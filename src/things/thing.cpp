@@ -16,6 +16,9 @@
 #include <sdm/things/world.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
 
 #define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
@@ -210,15 +213,55 @@ int MooThing::write_data(MooDataFile *data)
 	return(0);
 }
 
+MooThing *MooThing::create(MooUser *user, moo_id_t parent)
+{
+	MooThing *thing;
+
+	// TODO create a new object and fully initialze it
+	thing = new MooThing(-1, parent);
+	// TODO how do we know if this fails?  we should destroy the object if it does
+	thing->set_property("owner", new MooNumber(user->m_id));
+	//thing->permissions(THING_DEFAULT_PERMISSIONS);
+
+	//thing->moveto(user, user);
+
+	return(thing);
+}
 
 int MooThing::set_property(const char *name, MooObject *obj)
 {
 	if (!name || (*name == '\0'))
 		return(-1);
 	/** If the object is NULL, remove the entry from the table */
-	if (!obj)
-		return(m_properties->remove(name));
+	if (!obj) {
+		m_properties->remove(name);
+		return(1);
+	}
 	return(m_properties->set(name, obj));
+}
+
+int MooThing::set_property(const char *name, moo_id_t id)
+{
+	MooThingRef *obj;
+
+	obj = new MooThingRef(id);
+	return(this->set_property(name, obj));
+}
+
+int MooThing::set_property(const char *name, double num)
+{
+	MooNumber *obj;
+
+	obj = new MooNumber(num);
+	return(this->set_property(name, obj));
+}
+
+int MooThing::set_property(const char *name, const char *str)
+{
+	MooString *obj;
+
+	obj = new MooString(str);
+	return(this->set_property(name, obj));
 }
 
 MooObject *MooThing::get_property(const char *name, MooObjectType *type)

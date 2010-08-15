@@ -1,0 +1,25 @@
+
+- Output sent to a user will include at least one MooThing
+- Output is sent without some of the qualifying stuff parsed in and it will be the resposnibility of the interface/task to add it
+  such as when someone says something, the output function gets "THIS", telnet will print "User says THIS" and irc will send
+  :user PRIVMSG #realm :THIS or whatever
+
+
+OUTPUT EXAMPLES:
+- another player says something: player-thing, [room-thing] "THIS"
+- the output of look: room-thing "description"
+- the output of examine: object-thing "description"
+- player says something in channel: player-thing, channel-thing "THIS"
+
+
+
+
+HOW WILL THE FOLLOWING WORK:
+- /whois should return some descriptions and stuff, possibly even evaling 'examine me' and returning results but
+  when you type 'examine me', it should output it as normal.  How do you distinguish this?
+
+- should output go directly to the user all the time or should it (maybe sometimes, dependant on function) be returned
+  by a function (by an action i mean) for the calling function to print?  Or should it be redirectable in some way on
+  a temporary basis?
+
+

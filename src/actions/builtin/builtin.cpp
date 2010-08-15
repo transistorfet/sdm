@@ -37,9 +37,7 @@ int init_builtin(void)
 	if (builtin_actions)
 		return(1);
 	builtin_actions = new MooBuiltinHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
-	//sdm_builtin_load_basics(builtin_actions);
-	//sdm_builtin_load_builder(builtin_actions);
-	//sdm_builtin_load_room_actions(builtin_actions);
+	moo_load_basic_actions(builtin_actions);
 	return(0);
 }
 

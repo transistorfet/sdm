@@ -55,6 +55,10 @@
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
+	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
+	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
+	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
+	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
 	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so

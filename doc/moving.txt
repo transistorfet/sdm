@@ -1,0 +1,74 @@
+
+
+- a user connects or teleports to a location
+- a user enters a room through an obvious or non-obvious exit
+- a user picks up or drops an object in a room
+- a user gets or places an object in a container object
+- a user gives or steals an object to/from another user
+- an object is teleported to/from a room or is deleted
+
+
+- the manner in which a user is teleported depends on the teleportation command or action (could be a command
+  or it could be a spell or an enchanted object that makes the user teleport).
+- the manner in which an object is transfered is dependant on the command that was performed.  Maybe you
+  give a ball to another user or maybe you throw a ball at another user and in both cases it ends up in their
+  inventory.
+
+
+user:teleport(room)
+	/** This assumes that the failure messages will be printed in these check functions */
+	if user.location:can_leave(user) && !room:can_enter(user)
+		announce(user.location, "$user.name leaves in a puff of smoke")
+		add(user, room)
+		look
+		announce(room, "$user.name enters in a shower of sparks")
+
+exit:go()
+	if exit:can_use(user) && user.location:can_leave(user) && !room:can_enter(user)
+		if exit.obvious == 1
+			announce(user.location, "$user.name leaves to the $exit.name")
+		else
+			announce(user.location, "$user.name leaves")
+		add(user, exit.target)
+		look
+		if get_opposite(exit).obvious == 1
+			announce(user.location, "$user.name enters from the " .. get_opposite(exit).name)
+		else
+			announce(user.location, "$user.name enters")
+
+// TODO where is this?  on the object or the user?  if you want to say get <obj> <container>, this has
+//	to be on the container or else the obj wont be found because only the room and user's immediate
+//	inventory is searched but that doesn't work for the syntax so this must be on the user
+user:get(obj)
+	(checks)
+	...	
+
+
+// Where will this be called from?  Should we return an error message or should we print the error
+//	to the calling object.  If a function wants to avoid the error going to the user directly,
+//	they could always use a different object as the caller (with no notify action or something)
+room:can_enter(obj)
+	if caller == room.owner
+		return true
+	else if room.locked == 1
+		notify(caller, "That room is locked")
+		return false
+	else if is_mobile(obj)	// a property, action, or based on the parent (thing_is_a function)
+		return true
+	else if room.litterbug == 0
+		notify(caller, "You can't drop things in this room")
+		return false
+	else
+		return true
+
+room:can_leave(obj)
+	if is_mobile(obj)
+		return true
+	else if room.stick == 1
+		notify(caller, "You can't seem to pick that up")
+		return false
+	else
+		return true
+		
+
+

@@ -42,11 +42,14 @@ class MooThing : public MooObject {
     public:
 	MooThing(moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooThing();
-
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	static MooThing *create(MooUser *user, moo_id_t parent);
 
 	int set_property(const char *name, MooObject *obj);
+	int set_property(const char *name, moo_id_t id);
+	int set_property(const char *name, double num);
+	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
 
 	int set_action(const char *name, MooAction *action);

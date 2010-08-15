@@ -1,0 +1,18 @@
+
+- User connects and if the nick is registered, he must log in somehow (nickserv or possibly via PASS before connecting) or else
+  he cannot use that account.  If the nick is not a registered user, then a temp user is created which is not saved to disk and
+  which has limited functionality
+
+- All users join #realm as their main window to the world??
+- Perhaps a special user "Realm" or "TheRealm" will say things to you, like the status and stuff
+- the topic should be a semi-brief description of the current room
+
+- should moving from room to room force-change the channel (perhaps each channel name is #<thingid>) or should it be
+  in the same channel, in which case all the users from the old room will PART and the people in the new room JOIN
+  which might seem pretty strange.  The alternative is to make it a session between you and TheRealm in which case you
+  wont see the people in the current room in the user's list and it will seem a little clunky perhaps, everything being said
+  by TheRealm, however the actual text that is printed could be the same whether it's printed on telnet or IRC.
+  (eg. the output function would in both cases receive "soandso says THIS" and both would print it as such so that
+  telnet would just say "soandso says THIS" and IRC would say "[timestamp] <TheRealm> soandso says THIS"
+
+

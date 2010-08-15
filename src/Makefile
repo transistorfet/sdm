@@ -14,6 +14,8 @@ OBJS =	data.o	\
 	misc.o	\
 	timer.o	\
 	actions/action.o	\
+	actions/alias.o	\
+	actions/builtin/basics.o	\
 	actions/builtin/builtin.o	\
 	interfaces/interface.o	\
 	interfaces/rpc.o	\
@@ -22,6 +24,7 @@ OBJS =	data.o	\
 	objs/number.o	\
 	objs/object.o	\
 	objs/string.o	\
+	objs/thingref.o	\
 	tasks/listener.o	\
 	tasks/rpc-server.o	\
 	tasks/task.o	\
@@ -69,8 +72,6 @@ $(LIB_TARGET): builds $(OBJS)
 clean:
 	$(RM) $(OBJS)
 
-2test.o: 2test.cpp
-
 data.o: data.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
   ../include/sdm/memory.h
@@ -84,20 +85,15 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/object.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/interfaces/telnet.h ../include/sdm/interfaces/rpc.h \
   ../include/sdm/tasks/rpc-server.h ../include/sdm/tasks/irc/pseudoserv.h \
-  ../include/sdm/tasks/irc/msg.h ../include/sdm/actions/builtin/builtin.h \
-  ../include/sdm/actions/action.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/config.h \
   ../include/sdm/things/user.h ../include/sdm/things/thing.h \
   ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/things/world.h
+  ../include/sdm/array.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
+  ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/commands.h \
+  ../include/sdm/actions/alias.h ../include/sdm/actions/builtin/builtin.h \
+  ../include/sdm/objs/config.h ../include/sdm/things/world.h
 
 misc.o: misc.cpp ../include/sdm/misc.h ../include/sdm/memory.h
-
-test.o: test.cpp ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/data.h ../include/sdm/misc.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/object.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/tasks/listener.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h
@@ -107,6 +103,12 @@ actions/action.o: actions/action.cpp ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
   ../include/sdm/misc.h ../include/sdm/actions/action.h
 
+actions/alias.o: actions/alias.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/data.h \
+  ../include/sdm/objs/object.h ../include/sdm/actions/action.h \
+  ../include/sdm/actions/alias.h
+
 actions/builtin/basics.o: actions/builtin/basics.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -115,8 +117,8 @@ actions/builtin/basics.o: actions/builtin/basics.cpp \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h \
+  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/builtin.h \
   ../include/sdm/actions/builtin/basics.h
 
 actions/builtin/builder.o: actions/builtin/builder.cpp \
@@ -134,8 +136,10 @@ actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h \
-  ../include/sdm/actions/action.h \
-  ../include/sdm/actions/builtin/builtin.h
+  ../include/sdm/actions/action.h ../include/sdm/actions/builtin/basics.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
@@ -192,6 +196,11 @@ objs/string.o: objs/string.cpp ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
   ../include/sdm/misc.h ../include/sdm/objs/string.h
 
+objs/thingref.o: objs/thingref.cpp ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/misc.h ../include/sdm/objs/number.h
+
 tasks/form.o: tasks/form.cpp ../include/sdm/text.h ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/string.h \
@@ -247,14 +256,21 @@ tasks/irc/msg.o: tasks/irc/msg.cpp ../include/sdm/objs/object.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/msg.h
+  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/commands.h \
+  ../include/sdm/tasks/irc/msg.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h
 
 tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/misc.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/pseudoserv.h
+  ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/commands.h \
+  ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/things/user.h \
+  ../include/sdm/things/thing.h ../include/sdm/hash.h \
+  ../include/sdm/memory.h ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h
 
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \

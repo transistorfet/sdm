@@ -18,6 +18,7 @@
 #include <sdm/tasks/irc/pseudoserv.h>
 
 //#include <sdm/actions/lua/lua.h>
+#include <sdm/actions/alias.h>
 #include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/number.h>
@@ -51,10 +52,12 @@ int init_moo(void)
 	if (init_irc_pseudoserv() < 0)
 		return(-1);
 
-//	if (init_builtin() < 0)
-//		return(-1);
+	if (init_builtin() < 0)
+		return(-1);
 //	if (init_lua() < 0)
 //		return(-1);
+
+	moo_object_register_type(&moo_alias_obj_type);
 
 	moo_object_register_type(&moo_number_obj_type);
 	moo_object_register_type(&moo_string_obj_type);
@@ -84,7 +87,7 @@ void release_moo(void)
 	release_thing();
 
 //	release_lua();
-//	release_builtin();
+	release_builtin();
 
 	release_irc_pseudoserv();
 //	release_telnet();
