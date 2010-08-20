@@ -278,6 +278,34 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 	return(NULL);
 }
 
+/*
+moo_id_t MooThing::get_property(const char *name)
+{
+	MooThingRef *obj;
+
+	if (!(obj = this->get_property(name, &moo_thingref_obj_type)))
+		return(NULL);
+	return(obj->m_id);
+}
+
+double MooThing::get_property(const char *name)
+{
+	MooNumber *obj;
+
+	if (!(obj = this->get_property(name, &moo_number_obj_type)))
+		return(NULL);
+	return(obj->m_num);
+}
+
+const char *MooThing::get_property(const char *name)
+{
+	MooString *obj;
+
+	if (!(obj = this->get_property(name, &moo_string_obj_type)))
+		return(NULL);
+	return(obj->m_str);
+}
+*/
 
 int MooThing::set_action(const char *name, MooAction *action)
 {
@@ -286,6 +314,7 @@ int MooThing::set_action(const char *name, MooAction *action)
 	/** If the action is NULL, remove the entry from the table */
 	if (!action)
 		return(m_actions->remove(name));
+	action->init(name, this);
 	return(m_actions->set(name, action));
 }
 
@@ -322,6 +351,8 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 			delete args->m_result;
 		args->m_result = NULL;
 		args->m_this = this;
+		args->m_action = action;
+		// TODO should 'this' here instead be action->m_owner??
 		return(action->do_action(this, args));
 	}
 	catch (...) {
@@ -334,12 +365,7 @@ int MooThing::do_action(const char *name, MooArgs *args)
 {
 	MooAction *action;
 
-	// TODO should this be set here or should it just be in MooAction or something
-	args->m_action = name;
 	if ((action = this->get_action(name)))
-		// TODO this used to be 'cur->do_action' where cur was the actual thing that the action was on.  So either it's ok
-		//	to make 'this' be the thing the action is done on, rather than 'this' being the parent thing that the action
-		//	was *found* on, or we need to store the parent thing in the action itself!
 		return(this->do_action(action, args));
 	return(MOO_ACTION_NOT_FOUND);
 }
@@ -355,12 +381,8 @@ int MooThing::do_action(const char *name, MooUser *user, MooThing *object, MooTh
 	args.m_object = object;
 	args.m_target = target;
 	args.m_text = NULL;
-	args.m_action = name;
 
 	if ((action = this->get_action(name)))
-		// TODO this used to be 'cur->do_action' where cur was the actual thing that the action was on.  So either it's ok
-		//	to make 'this' be the thing the action is done on, rather than 'this' being the parent thing that the action
-		//	was *found* on, or we need to store the parent thing in the action itself!
 		return(this->do_action(action, &args));
 	return(MOO_ACTION_NOT_FOUND);
 }
@@ -403,6 +425,42 @@ int MooThing::remove(MooThing *obj)
 		}
 	}
 	return(1);
+}
+
+int MooThing::cryolocker_store()
+{
+	MooThing *cryolocker;
+
+	if (!(cryolocker = MooThing::reference("/core/cryolocker")))
+		return(-1);
+	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
+	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
+	if (this->m_location != cryolocker) {
+		this->set_property("last_location", m_location ? m_location->m_id : -1);
+		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
+		//	puff of smoke" or something like that
+		cryolocker->add(this);
+	}
+	return(0);
+}
+
+int MooThing::cryolocker_revive()
+{
+	MooThingRef *ref;
+	MooThing *cryolocker, *thing;
+
+	if (!(cryolocker = MooThing::reference("/core/cryolocker")))
+		return(-1);
+	if (this->m_location == cryolocker) {
+		if (!(ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
+			return(-1);
+		if (!(thing = MooThing::lookup(ref->m_id)))
+			return(-1);
+		// TODO how the fuck does the 'by' param work?
+		if (thing->moveto(this, NULL))
+			;//thing->moveto("thestartinglocationwhereeverthatis")
+	}
+	return(0);
 }
 
 int MooThing::moveto(MooThing *thing, MooThing *by)
@@ -605,9 +663,10 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 		return(strlen(args->m_text));
 	}
 	else if (!strncmp(ref, "action", i)) {
-		strncpy(buffer, args->m_action, max);
+		// TODO we are ignoring the rest of the reference for now ($action.owner, $action.name)
+		strncpy(buffer, args->m_action->name(), max);
 		buffer[max] = '\0';
-		return(strlen(args->m_action));
+		return(strlen(buffer));
 	}
 	else if (!strncmp(ref, "user", i))
 		thing = args->m_user;

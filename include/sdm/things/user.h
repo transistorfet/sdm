@@ -20,6 +20,10 @@
 class MooUser : public MooThing {
 	MooTask *m_task;
 	std::string *m_name;
+
+    public:
+	const char *name() { return(m_name->c_str()); }
+
     public:
 	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooUser();
@@ -37,10 +41,12 @@ class MooUser : public MooThing {
 	int command(const char *action, MooThing *object, MooThing *target);
 	int command(const char *action, MooArgs *args);
 	MooThing *find_thing(const char *name);
-	int print(MooThing *channel, MooThing *thing, const char *text);
-	int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
-	int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
-	int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
+	int print(MooArgs *args, const char *text);
+	//int print(MooThing *channel, MooThing *thing, const char *text);
+	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
+	//int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
+	//int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
+	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
 
 	static int exists(const char *name);
 	static int logged_in(const char *name);

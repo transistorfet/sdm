@@ -17,7 +17,7 @@ class MooBuiltin : public MooAction {
 	moo_action_t m_func;
 	MooBuiltin *m_master;
     public:
-	MooBuiltin(moo_action_t func = NULL);
+	MooBuiltin(moo_action_t func = NULL, const char *name = NULL, MooThing *owner = NULL);
 	virtual ~MooBuiltin() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);

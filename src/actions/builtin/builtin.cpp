@@ -30,6 +30,9 @@ MooObjectType moo_builtin_obj_type = {
 
 static MooBuiltinHash *builtin_actions = NULL;
 
+
+extern int moo_load_room_actions(MooBuiltinHash *actions);
+
 int init_builtin(void)
 {
 	if (moo_object_register_type(&moo_builtin_obj_type) < 0)
@@ -38,6 +41,7 @@ int init_builtin(void)
 		return(1);
 	builtin_actions = new MooBuiltinHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
 	moo_load_basic_actions(builtin_actions);
+	moo_load_room_actions(builtin_actions);
 	return(0);
 }
 
@@ -55,7 +59,7 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin(moo_action_t func)
+MooBuiltin::MooBuiltin(moo_action_t func, const char *name, MooThing *owner) : MooAction(name, owner)
 {
 	m_func = func;
 	m_master = NULL;

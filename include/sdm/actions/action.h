@@ -10,12 +10,13 @@
 
 #include <sdm/objs/object.h>
 
-class MooThing;
 class MooUser;
+class MooThing;
+class MooAction;
 
 class MooArgs {
     public:
-	const char *m_action;
+	MooAction *m_action;
 	MooObject *m_result;
 	MooUser *m_user;
 	MooThing *m_caller;
@@ -30,14 +31,21 @@ class MooArgs {
 };
 
 class MooAction : public MooObject {
+	std::string *m_name;
+	MooThing *m_owner;
     public:
-	MooAction();
-	virtual ~MooAction() { }
+	MooAction(const char *name = NULL, MooThing *owner = NULL);
+	virtual ~MooAction();
+	void init(const char *name = NULL, MooThing *owner = NULL);
 
 	virtual int read_entry(const char *type, MooDataFile *data) = 0;
 	virtual int write_data(MooDataFile *data) = 0;
 
 	virtual int do_action(MooThing *thing, MooArgs *args) = 0;
+
+    public:
+	const char *name() { return(m_name->c_str()); }
+	MooThing *owner() { return(m_owner); }
 };
 
 extern MooObjectType moo_action_obj_type;

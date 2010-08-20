@@ -11,60 +11,117 @@
 	* in future, we could make a client (klunky), services (is this even possible), or server based IRC interface.  If it requires
 	  (or would be easier to use) some existing code (like perhaps even writing a module for anope), you could easily just have it
 	  act as an RPC client to the Moo Server over a socket (which we have yet to figure out)
+	* for lua, why can't you just make a bunch of special "types" which are just tables with functions and a pointer to the raw
+	  internal data value (like MooThing *, or whatever) and the functions are c functions that get the raw pointer and do raw
+	  manipulations on it
 
     Discussion:
 
-	* there must be a task table and any time a task does stuff, it is set to the current task.  Any taskes
-	  that are created by that task will use that as their parent task.  Each interface will have a reference to the
-	  task that owns it.  How does this actually work?  When are tasks changed, etc
 	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
 	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
 	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
 	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
 
-	* for lua, why can't you just make a bunch of special "types" which are just tables with functions and a pointer to the raw
-	  internal data value (like MooThing *, or whatever) and the functions are c functions that get the raw pointer and do raw
-	  manipulations on it
+	* there must be a task table and any time a task does stuff, it is set to the current task.  Any taskes
+	  that are created by that task will use that as their parent task.  Each interface will have a reference to the
+	  task that owns it.  How does this actually work?  When are tasks changed, etc
+	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
+	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
+	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
+	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
+	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
+	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
+	* think about multithreading possibilities
 
 	* in MooUser, it should store the pointer to the cryolocker but how would it create or load it?  The world appears to be
 	  loaded first but can we rely on that?
-	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
-	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
-	* on a totally unrelated note straight out of the blue, should you add a pointer to MooAction which points to the owning thing
-	  (which would be the direct parent and not a child which is calling it).  I don't know what purpose this would serve but it
-	  might be needed at some point
 	* there needs to be a global channel system for IRC to work (A channel would be an object, but how would it record which
 	  users are in that channel or not?)
 	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
 	  only wizards (or owners of the room??) can do this for most room except a few with a special flag that allows it
-	* there needs to be a really easy and simple way of making command aliases
-
-	* think about multithreading possibilities
 
 	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
 	  on which the action was called (which m_thing would be set to in the args anyways)?
 	* we should add various checky things to MooAction like the number of args that are acceptable and stuff so that we can do
 	  checking
-	* data sent back to the user (output to be printed) should be accompanied by one or more Things (eg. the "channel" object
-	  and the user or object where the message originated from).  So if someone says somehting in a chat channel, it gets sent
-	  to that channel Thing, which then sends it out to each of the other users.  Or if you interact with an object (if you
-	  'examine' an object), it could send the response back along with the object and the room you are both in.
 	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
 	  MooObject value, or to the value embedded in the object in MooThing itself so that it is easy for C stuff to access directly
 	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
-	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
-	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
-	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
-	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
 	* you could have a function like user->tell(thing, str) or something that looks up the action and calls it (which would most
 	  likely be directed to user->print() but would allow it to be reprogrammed)
 	* should you have user->print/printf like they are now or should you just make one function that prints a preformatted string
 	  and then have a function like const char *format(buffer, size, args, fmt, ...) which could directly pass the result to
 	  another function, or NULL, which would be checekd by the other function and would make it not print it (you still have to
 	  deal with buffer allocation and stuff though =/)
+	* should there be a function (in builtins) that creates either a special root object (for various types, like room, channel, etc)
+	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
+	  subobject which inherits from the core object?
+	* by make a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
+	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
+	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
+	  write to user, can be redirected over an RPC connection, and come out the other side, just as the other side of the function
+	  call.  Therefore, we need to work on the RPC system, the IRC system, and the telnet system =P
+	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
+	  directly printed, exactly the same as it would appear on telnet (more or less), -OR- server based, either the same as the
+	  client (but with services like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
+	  since all users associated with that channel will receive the same text, so everyone will recieve everyone else's private
+	  traffic.  #realm could be use for only talking, with notices being sent for status messages, but that would get really
+	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
+	  or something like that would still be possible (channels could be +si or something, so that you can only join if you are
+	  forcejoin'd by TheRealm.)
+	* the #<numeric> channels idea would require the object number corresponding to the intended target.  If it's the user object,
+	  it's sent to the user directly as a privmsg (whisper would be like this).  If it's something else (like a room) then it's sent
+	  to the user as coming from that channel.
+	* pseudoserver works fine with the new talk() function for other channel data, but for the realm channel, there is still an issue
+	  with how the data sent to the function is formatted.  If it is formatted the same as would be used in the telnet or irc client
+	  methods, then the data would have to be sent from TheRealm user, or to #realm channel, as if it were direct status messages.
+	  (eg. $timestamp <TheRealm> chanser says, "You're weird"  \  <TheRealm> Rabbit whispers, "Hey man"  \  <TheRealm> Rabbit picks
+	  up a short sword from the ground.)  It would look kind of weird but it gets the job done.  This would require only the
+	  formatted string text to be sent to the function.  Alternately, if you want to make it appear like 
+	  eg. $timestamp <chanser> You're weird  \  PM->$timestamp <Rabbit> Hey man  \  * Rabbit picks up a short sword from the ground.
+	  This would require the action name called (say, whisper, etc) and the user object who says or does the thing.  If you got
+	  (rabbit, "says", "Hey man"), it would print that as a privmsg (channel speech vs pm could be determined with a channel param.
+	  see below note for details).  If you needed to print something like "You see a strange goat here", you could either be
+	  bold and send (you, "see" "a strange goat here"), or you could be less bold and say (TheRealm, NULL, "You see a strange goat
+	  here") which would appear as $timestamp <TheRealm> *** You see a strange goat here
+	* Either of the pseudoserv function solutions mentioned above will need a MooThing *channel parameter to also be compatible with
+	  the #<numeric> method.
+	* also, how will join/quit and channel membership be stored?  It could be a list in properties of user references.  How
+	  would the list be maintained though
+	* there is yet another option for everything: when someone talks in the realm (in a room, as normal speech) then the data
+	  is sent by calling talk(root_world, user, "Hey") and when displaying anything else (like actions, etc) it is sent
+	  as print(thing, "You see a goose"), where thing is the room or whatever that it originates from (for use by the #<numeric>
+	  method).  talk() could simply check for root_world and print it however it should be in the root world ("$user.name says Hey"
+	  if it's a client/telnet, or :$user.name PRIVMSG $channel.name :Hey for IRC.  You could also handle the ':' emote in the same
+	  way.
+	* #<numeric> doesn't work with the number being the room id.  It only works if the channel is a special custom channel for
+	  that user.  This would not require the forcejoin method.  It doesn't work because again, you have no way to print status
+	  messages, just like #realm in a multiserver irc system.  With this in mind, the "realm" messages don't need a channel
+	  identifier, since the data always goes to the same user-specific channel
+	* we could have print(thing, "text") and if thing is NULL, then it's just a direct status message (to come from TheRealm) and
+	  if user is something, then it's identical to the talk() function (where direct text is "say" data, and ':' text is "emote"
+	  data, for that user).  Since we don't need the channel id, we might even be able to use talk() with channel set to NULL
+	  being equivallent to print() (thus unifying back into a single function with multiplexing based on params)
+	* should all everything (actions, all code that prints) call do_action on user, which would call a function which calls the
+	  task's API, rather than directly calling user->print() or whatever?  This would all redirection of the I/O calls
+	* how will a task notify objects of a join/leave/quit event?  How will an object do the same to tasks?  I actually don't think
+	  we need task to notify objects, since everything will be done via actions on objects
+	* We can make use of the single unified task notify() function if we want since the interface will be hidden by methods on
+	  MooUser (i think).  We will still have user->print, and perhaps user->talk which then calls methods on task.
+
+	* for channel management, it is possible to have user call an action on itself when it connects/disconnects, which can then call
+	  the channel central object (which has a list of all channels) and it then calls actions on each channel to notify it of the
+	  user's new status, which causes it to remove the user from the list of users and send disconnect notices to each user in
+	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
+
+	* we could have a number of methods on MooThing which directly call actions (like notify(), announce(), etc)
+	* we could have queue actions (or a special param or something passed to do_action) such that the action data can be copied
+	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
+	* at some point we should rethink about MooArgs, and the ability to pass multiple parameters, specifically, being able to
+	  have an action like notify(channel, user, type_num, string)
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
 	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
@@ -77,21 +134,25 @@
 	* make an internal language of some kind
 	* check if the problem you sometimes have is due to the listening port not being free (where it floods with accepting msgs)
 
+	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* complete the parser functions in MooUser
 	* add fully integrated permissions for objects
 	* add the actual action eval to MooAlias (how will the alias be converted to a command? by $var substitution?)
-	* speaking of which, add a function somewhere that takes MooArgs and stuff and converts a string's $ references to
-	  appropriate values, including full MooThing property lookup ($this.name)
 	* implement user password checking in login()
 	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
 	  words) as well as functions that set the values for certain circumstances
 	* make various functions in thing.cpp (like those in utils right nowo for basic manipulation)
 	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
 	* implement basic builtin functions like 'tell' and 'look'
-	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* modify the handle() function to do something like close the interface if an error occurs?
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* sort out and make better use of exceptions (in do_action in particular)
+	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
+	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
+	  you can specify an action with <action type="builtin">basics_look</action>. 
+	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
+	  preposition, target)
+	* actions should/could have their own permissions (lambdamoo 'rwxd')
 
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 

@@ -53,6 +53,9 @@ class MooThing : public MooObject {
 	int set_property(const char *name, double num);
 	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
+	//moo_id_t get_property(const char *name);
+	//double get_property(const char *name);
+	//const char *get_property(const char *name);
 
 	int set_action(const char *name, MooAction *action);
 	MooAction *get_action(const char *name);
@@ -61,6 +64,8 @@ class MooThing : public MooObject {
 	int do_action(const char *name, MooArgs *args);
 	int do_action(const char *name, MooUser *user, MooThing *object, MooThing *target);
 
+	int cryolocker_store();
+	int cryolocker_revive();
 	int moveto(MooThing *thing, MooThing *by);
 
 	inline moo_id_t id() { return(m_id); }

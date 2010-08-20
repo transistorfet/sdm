@@ -126,22 +126,51 @@ int PseudoServ::release()
 	return(0);
 }
 
-int PseudoServ::print(MooThing *channel, MooThing *thing, const char *str)
+int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char *str)
 {
-	char buffer[LARGE_STRING_SIZE];
-
-	// TODO how will you get the channel name from the channel???
-	// TODO how will you get the thing name?
-	// TODO thing.name could always be a short no-space name, and thing.title would be the brief description of the thing
-	//	so normally you'd see the title (like realname) "Transistor the Great", then just use thing.name as the thing and
-	//	name.
-
-
-	PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
-	if (channel == moo_root_world)
+	switch (type) {
+	    case TNT_STATUS: {
+		char buffer[LARGE_STRING_SIZE];
+		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
 		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :%s\r\n", server_name, buffer));
+	    }
+	    case TNT_SAY:
+	    case TNT_EMOTE: {
+		MooString *thing_name;
+		MooString *channel_name;
+		char buffer[LARGE_STRING_SIZE];
+
+		/// We don't send a message if it was said by our user, since the IRC client will echo that message itself
+		if (!thing || thing == m_user)
+			return(0);
+		thing_name = (MooString *) thing->get_property("name", &moo_string_obj_type);
+
+		if (channel)
+			channel_name = (MooString *) thing->get_property("name", &moo_string_obj_type);
+		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
+		if (type == TNT_SAY)
+			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name->m_str : "Unknown", thing_name ? thing_name->m_str : "realm", server_name, (channel && channel_name) ? channel_name->m_str : "#realm", buffer));
+		else
+			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name->m_str : "Unknown", thing_name ? thing_name->m_str : "realm", server_name, (channel && channel_name) ? channel_name->m_str : "#realm", buffer));
+		break;
+	    }
+	    case TNT_JOIN:
+	    case TNT_LEAVE:
+	    case TNT_QUIT:
+		// TODO implement these later
+		break;
+	    default:
+		break;
+	}
 	return(0);
 }
+
+//int PseudoServ::talk(MooThing *channel, MooThing *thing, const char *str)
+
+//int PseudoServ::print(MooThing *channel, MooThing *thing, const char *str)
+//{
+
+//}
 
 int PseudoServ::handle(MooInterface *inter, int ready)
 {
@@ -176,7 +205,7 @@ int PseudoServ::purge(MooInterface *inter)
 {
 	if (inter != m_inter)
 		return(-1);
-	// We assume that we were called because the interface is already being deleted, in which case we don't want to delete it too
+	/// We assume that we were called because the interface is already being deleted, in which case we don't want to delete it too
 	m_inter = NULL;
 	if (!this->is_deleting())
 		delete this;
@@ -187,7 +216,7 @@ int PseudoServ::purge(MooUser *user)
 {
 	if (user != m_user)
 		return(-1);
-	// We assume that since we were called because the user is already being deleted, in which case we don't want to delete too
+	/// We assume that since we were called because the user is already being deleted, in which case we don't want to delete too
 	m_user = NULL;
 	if (!this->is_deleting())
 		delete this;
@@ -199,7 +228,7 @@ int PseudoServ::dispatch(Msg *msg)
 	if (msg->need_more_params())
 		return(Msg::send(m_inter, ":%s %03d %s :Not enough parameters\r\n", server_name, IRC_ERR_NEEDMOREPARAMS, msg->m_cmdtext));
 
-	// Process messages that are common for pre and post registration
+	/// Process messages that are common for pre and post registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PING:
 		if (msg->m_numparams != 1 || strcmp(msg->m_params[0], server_name))
@@ -238,7 +267,7 @@ int PseudoServ::dispatch(Msg *msg)
 		return(0);
 	}
 
-	// Process messages that are only acceptable after registration
+	/// Process messages that are only acceptable after registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PRIVMSG:
 		if (!msg->m_last)
@@ -268,7 +297,7 @@ int PseudoServ::dispatch(Msg *msg)
 			// TODO check for unknown mode flag
 			//return(Msg::send(m_inter, ":%s %03d :Unknown MODE flag\r\n", server_name, IRC_ERR_UMODEUNKNOWNFLAG));
 
-			// User MODE command reply
+			/// User MODE command reply
 			return(Msg::send(m_inter, ":%s %03d %s\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
 		}
 		break;
@@ -366,12 +395,14 @@ int PseudoServ::login()
 {
 	char buffer[STRING_SIZE];
 
-	// If we didn't receive a password then we aren't going to login but we wont fail either
+	// TODO overwrite buffers used to store password as a security measure
+
+	/// If we didn't receive a password then we aren't going to login but we wont fail either
 	if (m_pass) {
 		strcpy(buffer, m_pass->c_str());
 		MooUser::encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
 		m_user = MooUser::login(m_nick->c_str(), buffer);
-		// Free the password whether it was correct or not so it's not lying around
+		/// Free the password whether it was correct or not so it's not lying around
 		delete m_pass;
 		m_pass = NULL;
 		if (!m_user) {
@@ -403,7 +434,7 @@ int PseudoServ::send_welcome()
 	m_bits |= IRC_BF_WELCOMED;
 	if (m_user) {
 		this->join("#realm");
-		m_user->printf(NULL, NULL, "Welcome to The Realm of the Jabberwock, %s", m_nick->c_str());
+		//m_user->notify(TNT_STATUS, NULL, NULL, "Welcome to The Realm of the Jabberwock, %s", m_nick->c_str());
 	}
 	return(0);
 }
@@ -440,7 +471,7 @@ int PseudoServ::format(char *buffer, int max, const char *str)
 			if (str[i] == '/')
 				k++;
 			k = PseudoServ::write_attrib(&buffer[j], max - j - 1, &str[k]);
-			// If a recognized tag was not found, then copy it through to the output
+			/// If a recognized tag was not found, then copy it through to the output
 			if (!k)
 				buffer[j++] = '<';
 			else {

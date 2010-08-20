@@ -30,8 +30,22 @@ MooArgs::MooArgs()
 	m_text = NULL;
 }
 
-MooAction::MooAction()
+MooAction::MooAction(const char *name, MooThing *owner)
 {
-
+	this->init(name, owner);
 }
+
+MooAction::~MooAction()
+{
+	// TODO maybe you could check the owner and make sure the action is removed???
+	if (m_name)
+		delete m_name;
+}
+
+void MooAction::init(const char *name, MooThing *owner)
+{
+	m_name = name ? new std::string(name) : NULL;
+	m_owner = owner;
+}
+
 

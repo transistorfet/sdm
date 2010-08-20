@@ -17,6 +17,7 @@ OBJS =	data.o	\
 	actions/alias.o	\
 	actions/builtin/basics.o	\
 	actions/builtin/builtin.o	\
+	actions/builtin/room.o	\
 	interfaces/interface.o	\
 	interfaces/rpc.o	\
 	interfaces/tcp.o	\
@@ -34,12 +35,7 @@ OBJS =	data.o	\
 	things/user.o	\
 	things/world.o
 
-#	actions/builtin/basics.o	\
 #	actions/builtin/builder.o	\
-#	actions/builtin/room.o	\
-#	tasks/form.o	\
-#	tasks/interpreter.o	\
-#	tasks/login.o	\
 #	things/utils.o	\
 #	objs/list.o	\
 
@@ -117,7 +113,7 @@ actions/builtin/basics.o: actions/builtin/basics.cpp \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/world.h \
   ../include/sdm/actions/builtin/builtin.h \
   ../include/sdm/actions/builtin/basics.h
 
@@ -129,8 +125,7 @@ actions/builtin/builder.o: actions/builtin/builder.cpp \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h
+  ../include/sdm/actions/action.h ../include/sdm/things/utils.h
 
 actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
@@ -148,8 +143,7 @@ actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
   ../include/sdm/objs/string.h ../include/sdm/things/user.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/utils.h ../include/sdm/tasks/interpreter.h
+  ../include/sdm/array.h ../include/sdm/actions/action.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/array.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
@@ -199,30 +193,11 @@ objs/string.o: objs/string.cpp ../include/sdm/memory.h \
 objs/thingref.o: objs/thingref.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/number.h
-
-tasks/form.o: tasks/form.cpp ../include/sdm/text.h ../include/sdm/misc.h \
-  ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/string.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/utils.h ../include/sdm/tasks/interpreter.h \
-  ../include/sdm/tasks/form.h
-
-tasks/interpreter.o: tasks/interpreter.cpp ../include/sdm/text.h \
-  ../include/sdm/memory.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/string.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/misc.h ../include/sdm/objs/thingref.h \
   ../include/sdm/things/thing.h ../include/sdm/hash.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/world.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h
 
 tasks/listener.o: tasks/listener.cpp ../include/sdm/misc.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
@@ -230,13 +205,6 @@ tasks/listener.o: tasks/listener.cpp ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
   ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/tasks/task.h ../include/sdm/tasks/listener.h
-
-tasks/login.o: tasks/login.cpp ../include/sdm/misc.h \
-  ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/hash.h \
-  ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/tasks/task.h ../include/sdm/tasks/login.h \
-  ../include/sdm/interfaces/interface.h
 
 tasks/rpc-server.o: tasks/rpc-server.cpp ../include/sdm/misc.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
@@ -270,7 +238,7 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp \
   ../include/sdm/things/thing.h ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h
+  ../include/sdm/actions/action.h ../include/sdm/things/world.h
 
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
@@ -280,7 +248,7 @@ things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/objs/object.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/things/world.h ../include/sdm/objs/thingref.h
 
 things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -299,8 +267,7 @@ things/utils.o: things/utils.cpp ../include/sdm/memory.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/hash.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h \
-  ../include/sdm/tasks/interpreter.h
+  ../include/sdm/actions/action.h ../include/sdm/things/utils.h
 
 things/world.o: things/world.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

@@ -27,6 +27,8 @@
 
 #define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )
 
+static char *moo_prepositions[] = { "from", "on", "with", "to", "at", NULL };
+
 MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
@@ -34,7 +36,6 @@ MooObjectType moo_user_obj_type = {
 	(moo_type_create_t) NULL
 };
 
-static MooThing *cryolocker = NULL;
 static MooHash<MooUser *> *user_list = NULL;
 
 int init_user(void)
@@ -42,19 +43,20 @@ int init_user(void)
 	const char *str;
 	char buffer[STRING_SIZE];
 	MooDataFile *data;
+	MooUser *user;
 
 	if (user_list)
 		return(1);
 	user_list = new MooHash<MooUser *>(USER_INIT_SIZE, MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
 	moo_object_register_type(&moo_user_obj_type);
-	// TODO we need to find/create/whatever the cryolocker! (we haven't loaded the world at this point though)
 
 	/** Load all the users into memory in a disconnected state */
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
 			data->read_attrib("name", buffer, STRING_SIZE);
-			new MooUser(buffer);
+			user = new MooUser(buffer);
+			user->cryolocker_store();
 		}
 	} while (data->read_next());
 	delete data;
@@ -118,22 +120,10 @@ int MooUser::save()
 
 int MooUser::connect(MooTask *task)
 {
-	double room;
-	MooThing *location;
-
 	if (m_task)
 		return(-1);
+	this->cryolocker_revive();
 
-/*
-	// Move the user to the last location recorded or to a safe place if there is no last location
-	if (((room = sdm_get_number_property(SDM_THING(user), "last_location")) > 0)
-	    && (location = moo_thing_lookup_id(room)))
-		sdm_moveto(SDM_THING(user), SDM_THING(user), location, NULL);
-	else
-		// TODO you should do this some othe way
-		sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_thing_lookup_id(50), NULL);
-		//sdm_moveto(SDM_THING(user), SDM_THING(user), sdm_interpreter_find_object(NULL, "/lost+found"), NULL);
-*/
 	// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
 	m_task = task;
 	return(0);
@@ -141,20 +131,7 @@ int MooUser::connect(MooTask *task)
 
 void MooUser::disconnect()
 {
-	//if ((number = SDM_NUMBER(sdm_thing_get_property(SDM_THING(user), "last_location", &sdm_number_obj_type)))
-	//    || ((number = create_sdm_number(-1)) && !sdm_thing_set_property(SDM_THING(user), "last_location", SDM_OBJECT(number)))) {
-	//	number->num = SDM_THING(user)->location ? SDM_THING(user)->location->id : -1;
-	//}
-
-	// TODO make sure this will work; it's a superb improvement over the old way we had to do this (note: any old value would be deleted)
-	// TODO we want this to be treated as a MooThingRef and not a float number
-	//this->set_property("last_location", m_location ? m_location->m_id : -1);
-
-	// TODO how do you tell this function to forcefully remove the user
-	//if (SDM_THING(user)->location)
-	//	sdm_thing_remove(SDM_THING(user)->location, SDM_THING(user));
-	// TODO call action "force_exit" or something on location to remove user
-	//cryolocker->add(this);
+	this->cryolocker_store();
 
 	// Save the user information to the user's file only if we were already connected
 	if (m_task) {
@@ -189,10 +166,12 @@ int MooUser::write_data(MooDataFile *data)
 
 int MooUser::command(const char *text)
 {
-	int i;
+	MooArgs args;
+	int i, j, k, len;
 	char *action;
-	MooThing *object, *target;
 	char buffer[LARGE_STRING_SIZE];
+	const char *objname, *tarname;
+	MooThing *object = NULL, *target = NULL;
 
 	strcpy(buffer, text);
 	// Parse out the action string
@@ -201,18 +180,36 @@ int MooUser::command(const char *text)
 	action = &buffer[i];
 	for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
 		;
-	buffer[i] = '\0';
+	buffer[i++] = '\0';
 
-	// TODO should we break the text into words first (which will also process out any quoted strings)
-	// split the text into 2 strings by looking for a preposition (???)
-	// call user->find_thing() on the 2 object names or NULL if not found
-
-	// TODO temp
-	object = this;
-	target = NULL;
-
-
-	return(this->command(action, object, target));
+	text = &text[i];
+	objname = &buffer[i];
+	while (buffer[i] != '\0') {
+		for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
+			;
+		k = i - 1;
+		for (j = 0; moo_prepositions[j] != NULL; j++) {
+			len = strlen(moo_prepositions[j]);
+			if (!strncmp(&buffer[i], moo_prepositions[j], len) && MOO_IS_WHITESPACE(buffer[i + len])) {
+				i += len;
+				for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
+					;
+				buffer[k] = '\0';
+				target = this->find_thing(&buffer[i]);
+				break;
+			}
+		}
+		for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
+			;
+	}
+	object = this->find_thing(objname);
+	
+	args.m_user = this;
+	args.m_caller = (MooThing *) this;
+	args.m_object = object;
+	args.m_target = target;
+	args.m_text = text;
+	return(this->command(action, &args));
 }
 
 int MooUser::command(const char *action, const char *text)
@@ -267,11 +264,22 @@ MooThing *MooUser::find_thing(const char *name)
 	return(NULL);
 }
 
+int MooUser::print(MooArgs *args, const char *str)
+{
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, str);
+	return(m_task->notify(TNT_STATUS, NULL, NULL, buffer));
+}
+
+/*
 int MooUser::print(MooThing *channel, MooThing *thing, const char *text)
 {
 	if (!m_task)
 		return(-1);
-	return(m_task->print(channel, thing, text));
+	return(m_task->notify(channel, thing, TNT_SAY, text));
 }
 
 int MooUser::printf(MooThing *channel, MooThing *thing, const char *fmt, ...)
@@ -313,6 +321,14 @@ int MooUser::printf(MooThing *channel, MooThing *thing, MooArgs *args, const cha
 		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
 	}
 	return(m_task->print(channel, thing, buffer2));
+}
+*/
+
+int MooUser::notify(int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	if (!m_task)
+		return(-1);
+	return(m_task->notify(type, channel, thing, text));
 }
 
 
@@ -356,15 +372,35 @@ MooUser *MooUser::register_new(const char *name, ...)
 MooUser *MooUser::login(const char *name, const char *passwd)
 {
 	MooUser *user;
+	MooDataFile *data;
+	const char *str;
+	char buffer[STRING_SIZE];
 
+	// TODO overwrite buffers used to store password as a security measure
 	if (!(user = user_list->get(name)) || user->m_task)
 		return(NULL);
-	// TODO how the fuck do we get the password!?  It's got to come from etc/passwd.xml
-	//if (strcmp(user->m_passwd, passwd))
-	//	return(NULL);
-
-	// TODO should this also do connect()
-	return(user);
+	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
+	do {
+		if ((str = data->read_name()) && !strcmp(str, "user")) {
+			data->read_attrib("name", buffer, STRING_SIZE);
+			if (strcmp(buffer, name))
+				continue;
+			data->read_children();
+			do {
+				if ((str = data->read_name()) && !strcmp(str, "password")) {
+					data->read_string_entry(buffer, STRING_SIZE);
+					if (!strcmp(buffer, passwd)) {
+						delete data;
+						return(user);
+					}
+					return(NULL);
+				}
+			} while (data->read_next());
+			break;
+		}
+	} while (data->read_next());
+	delete data;
+	return(NULL);
 }
 
 void MooUser::encrypt_password(const char *salt, char *passwd, int max)

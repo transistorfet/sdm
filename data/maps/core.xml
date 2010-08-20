@@ -87,4 +87,11 @@
   <action type="builtin" name="move">builtin_go</action>
   <action type="builtin" name="tell_view">exit_tell_view</action>
  </thing>
+ <thing>
+  <id>12</id>
+  <parent>10</parent>
+  <location>2</location>
+  <property type="string" name="title">The Cryolocker</property>
+  <property type="string" name="name">cryolocker</property>
+ </thing>
 </world>

@@ -29,12 +29,9 @@ MooObject *moo_alias_create(void)
 	return(new MooAlias());
 }
 
-MooAlias::MooAlias(const char *command)
+MooAlias::MooAlias(const char *name, MooThing *owner, const char *command) : MooAction(name, owner)
 {
-	if (command)
-		m_command = new std::string(command);
-	else
-		m_command = NULL;
+	m_command = command ? new std::string(command) : NULL;
 }
 
 MooAlias::~MooAlias()

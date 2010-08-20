@@ -49,13 +49,13 @@ int moo_basics_tell(MooAction *action, MooThing *thing, MooArgs *args)
 	return(SDM_INTERFACE_WRITE(SDM_USER(thing)->inter, args->text));
 */
 	// TODO NULL should be the sender, and is m_text right?
-	args->m_user->printf(moo_root_world, NULL, args, args->m_text);
+	args->m_user->print(args, args->m_text);
 	return(0);
 }
 
 int moo_basics_tell_view(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	args->m_user->printf(moo_root_world, args->m_this, args, "<brightblue>You see $this.title here.");
+	args->m_user->print(args, "<brightblue>You see $this.title here.");
 	return(0);
 }
 
@@ -63,8 +63,8 @@ int moo_basics_examine(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
 
-	args->m_user->printf(moo_root_world, args->m_this, args, "<brightyellow>$this.title");
-	args->m_user->printf(moo_root_world, args->m_this, args, "<brightgreen>$this.description");
+	args->m_user->print(args, "<brightyellow>$this.title");
+	args->m_user->print(args, "<brightgreen>$this.description");
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		if (cur == args->m_caller || cur == args->m_user)
 			continue;
