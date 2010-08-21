@@ -56,6 +56,7 @@ int MooConfig::read_entry(const char *type, MooDataFile *data)
 
 int MooConfig::write_data(MooDataFile *data)
 {
+	// TODO there is currently no way of saving the config back to a file
 //	data->write_string(this->str);
 	return(0);
 }

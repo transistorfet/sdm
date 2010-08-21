@@ -88,6 +88,8 @@ int MooBuiltin::write_data(MooDataFile *data)
 
 int MooBuiltin::do_action(MooThing *thing, MooArgs *args)
 {
+	if (!m_func)
+		return(-1);
 	return(m_func(this, thing, args));
 }
 

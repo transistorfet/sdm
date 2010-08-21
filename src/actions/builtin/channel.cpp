@@ -57,12 +57,13 @@ static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args)
 
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		// TODO should this actually omit the user, or due to the non-formatted text dispatch, should it be ok?
-		if (cur != args->m_user)
+		if (cur != args->m_user) {
 			//sdm_notify(cur, args, "%s", args->text);
 			//cur->talk(args->m_this, args->m_user, "%s", args->m_text);
 			// TODO ^^ what the fuck?  Would MooThing have talk? Or do you need to do this as an action...
 			//cur->do_action("notify", "say", args->m_this, args->m_user, "%s", args->m_text);
 			// TODO ^^ this is even more bizzare.  How will these params map to MooArgs??
+		}
 	}
 	return(0);
 }

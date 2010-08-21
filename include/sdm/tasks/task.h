@@ -35,13 +35,6 @@ class MooTask : public MooObject {
 	virtual int idle() = 0;
 	virtual int release() = 0;
 
-	// TODO should these be here at all?
-	// Send channel data to the user, from thing.  If the string starts with ':', then it's an emote.
-	// If channel is the root_world thing, then it's meant 
-	//virtual int talk(MooThing *channel, MooThing *thing, const char *str) { return(-1); }
-	// Send data to the user console (from the realm).  'to' can be a user (privmsg), channel, or
-	//virtual int print(MooThing *thing, const char *str) { return(-1); }
-
 	// Notify the task of an event from the user object.  If channel is NULL, then it's a message from
 	// the realm, otherwise it is from a specific channel.  If thing is NULL, then it's from a status
 	// message from the realm.  Type determines the type of message (eg. say, emote, join, part, quit,

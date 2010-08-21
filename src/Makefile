@@ -16,7 +16,9 @@ OBJS =	data.o	\
 	actions/action.o	\
 	actions/alias.o	\
 	actions/builtin/basics.o	\
+	actions/builtin/builder.o	\
 	actions/builtin/builtin.o	\
+	actions/builtin/channel.o	\
 	actions/builtin/room.o	\
 	interfaces/interface.o	\
 	interfaces/rpc.o	\
@@ -34,10 +36,6 @@ OBJS =	data.o	\
 	things/thing.o	\
 	things/user.o	\
 	things/world.o
-
-#	actions/builtin/builder.o	\
-#	things/utils.o	\
-#	objs/list.o	\
 
 LIBS =	-lcrypt	\
 	-llua	\
@@ -125,7 +123,8 @@ actions/builtin/builder.o: actions/builtin/builder.cpp \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h
+  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
@@ -136,6 +135,17 @@ actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/array.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/actions/builtin/builtin.h
 
+actions/builtin/channel.o: actions/builtin/channel.cpp \
+  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/data.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/string.h \
+  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/builtin.h
+
 actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/data.h \
@@ -143,7 +153,8 @@ actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
   ../include/sdm/objs/string.h ../include/sdm/things/user.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/actions/action.h
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
+  ../include/sdm/actions/builtin/builtin.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/array.h \
   ../include/sdm/memory.h ../include/sdm/globals.h \
@@ -169,11 +180,6 @@ objs/config.o: objs/config.cpp ../include/sdm/memory.h \
   ../include/sdm/misc.h ../include/sdm/objs/config.h \
   ../include/sdm/tasks/listener.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h
-
-objs/list.o: objs/list.cpp ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/list.h
 
 objs/number.o: objs/number.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -258,16 +264,6 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/user.h
-
-things/utils.o: things/utils.cpp ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/object.h \
-  ../include/sdm/data.h ../include/sdm/misc.h \
-  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/utils.h
 
 things/world.o: things/world.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

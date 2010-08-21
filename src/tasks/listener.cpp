@@ -104,11 +104,15 @@ int MooListener::handle(MooInterface *inter, int ready)
 	MooTask *newtask;
 
 	// TODO we should probably make sure we don't get a loop somehow where we keep getting called and don't handle the request
-	if (!(ready & IO_READY_READ))
+	if (!(ready & IO_READY_READ)) {
+		delete inter;
 		return(-1);
-	if (!(newtcp = (MooTCP *) moo_make_object(m_itype)))
+	}
+	if (!(newtcp = (MooTCP *) moo_make_object(m_itype))) {
+		delete this;
 		return(-1);
-	if (m_inter->accept(newtcp) < 0
+	}
+	if ((m_inter->accept(newtcp) < 0)
 	    || !(newtask = (MooTask *) moo_make_object(m_ttype))) {
 		delete newtcp;
 		return(-1);

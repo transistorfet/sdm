@@ -142,7 +142,7 @@ int MooTCP::accept(MooTCP *inter)
 		return(-1);
 
 	size = sizeof(struct sockaddr_in);
-	if ((inter->m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size))) {
+	if ((inter->m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size)) > 0) {
 		inter->m_host = new std::string(inet_ntoa(saddr.sin_addr));
 		moo_status("TCP: Accepted connection from %s", inter->m_host->c_str());
 		return(0);

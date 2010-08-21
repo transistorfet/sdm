@@ -34,8 +34,6 @@ class MooRPCServer : public MooTask {
 	int idle();
 	int release();
 
-	//int talk(MooThing *channel, MooThing *thing, const char *str);
-	//int print(MooThing *channel, MooThing *thing, const char *str);
 	int notify(int type, MooThing *channel, MooThing *thing, const char *str);
 
 	int handle(MooInterface *inter, int ready);

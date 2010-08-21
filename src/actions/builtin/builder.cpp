@@ -13,20 +13,19 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/utils.h>
-#include <sdm/tasks/interpreter.h>
+#include <sdm/actions/builtin/builtin.h>
 
-static int builder_create(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-static int builder_create_room(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-static int builder_add_exit(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
-static int builder_set(struct sdm_action *, struct sdm_thing *, struct sdm_action_args *);
+static int builder_create(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_set(MooAction *action, MooThing *thing, MooArgs *args);
 
-int sdm_builtin_load_builder(struct sdm_hash *actions)
+int moo_load_builder_actions(MooBuiltinHash *actions)
 {
-	sdm_hash_add(actions, "builder_create", builder_create);
-	sdm_hash_add(actions, "builder_create_room", builder_create_room);
-	sdm_hash_add(actions, "builder_add_exit", builder_add_exit);
-	sdm_hash_add(actions, "builder_set", builder_set);
+	actions->set("builder_create", new MooBuiltin(builder_create));
+	actions->set("builder_create_room", new MooBuiltin(builder_create_room));
+	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
+	actions->set("builder_set", new MooBuiltin(builder_set));
 	return(0);
 }
 
@@ -37,8 +36,9 @@ int sdm_builtin_load_builder(struct sdm_hash *actions)
  *	target:		not used
  *	args:		not used
  */
-static int builder_create(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_create(MooAction *action, MooThing *thing, MooArgs *args)
 {
+/*
 	struct sdm_thing *obj;
 
 	if (sdm_interpreter_parse_args(args, 1) < 0) {
@@ -55,11 +55,13 @@ static int builder_create(struct sdm_action *action, struct sdm_thing *thing, st
 	sdm_moveto(args->caller, obj, args->caller, NULL);
 	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
+*/
 	return(0);
 }
 
-static int builder_create_room(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args)
 {
+/*
 	struct sdm_thing *obj;
 	struct sdm_thing *room;
 
@@ -75,11 +77,13 @@ static int builder_create_room(struct sdm_action *action, struct sdm_thing *thin
 	sdm_moveto(args->caller, obj, args->caller->location->location, NULL);
 	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
+*/
 	return(0);
 }
 
-static int builder_add_exit(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args)
 {
+/*
 	int i = 0;
 	char buffer[STRING_SIZE];
 	struct sdm_thing *obj, *exit, *target;
@@ -100,11 +104,13 @@ static int builder_add_exit(struct sdm_action *action, struct sdm_thing *thing, 
 	sdm_moveto(args->caller, obj, args->caller->location, NULL);
 	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
+*/
 	return(0);
 }
 
-static int builder_set(struct sdm_action *action, struct sdm_thing *thing, struct sdm_action_args *args)
+static int builder_set(MooAction *action, MooThing *thing, MooArgs *args)
 {
+/*
 	int i = 0;
 	char prop[STRING_SIZE];
 	struct sdm_string *string;
@@ -122,6 +128,7 @@ static int builder_set(struct sdm_action *action, struct sdm_thing *thing, struc
 		sdm_notify(args->caller, args, "<green>Property set successfully.\n");
 	else
 		sdm_notify(args->caller, args, "<red>Error setting property.\n");
+*/
 	return(0);
 }
 

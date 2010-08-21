@@ -53,9 +53,9 @@ class MooThing : public MooObject {
 	int set_property(const char *name, double num);
 	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
-	//moo_id_t get_property(const char *name);
-	//double get_property(const char *name);
-	//const char *get_property(const char *name);
+	moo_id_t get_thing_property(const char *name);
+	double get_number_property(const char *name);
+	const char *get_string_property(const char *name);
 
 	int set_action(const char *name, MooAction *action);
 	MooAction *get_action(const char *name);
@@ -67,11 +67,15 @@ class MooThing : public MooObject {
 	int cryolocker_store();
 	int cryolocker_revive();
 	int moveto(MooThing *thing, MooThing *by);
+	virtual int notify(int type, MooThing *channel, MooThing *thing, const char *text);
+	int notify_all(int type, MooThing *channel, MooThing *thing, const char *text);
+	int notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text);
 
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent() { return(m_parent); }
 	inline MooThing *contents() { return(m_objects); }
 	inline MooThing *next() { return(m_next); }
+	inline MooThing *location() { return(m_location); }
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
 	inline int is_a_thing(moo_id_t id);

@@ -43,17 +43,7 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 
 static int room_announce(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	MooThing *cur;
-
-	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-		// TODO should this actually omit the user, or due to the non-formatted text dispatch, should it be ok?
-		if (cur != args->m_user && cur->is_a(&moo_user_obj_type)) {
-			// TODO for the time being, we are only able to send a notification to MooUsers
-			//sdm_notify(cur, args, "%s", args->text);
-			//((MooUser *) cur)->notify(cur
-		}
-	}
-	return(0);
+	// TODO i guess this should call user->notify_all?
 }
 
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
@@ -62,13 +52,13 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 
 	if (*args->m_text == '\0')
 		return(-1);
-	args->m_user->notify(TNT_SAY, NULL, args->m_user, args->m_text);
+	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
 
 	//sdm_announce(thing, args, "$user.name says \"$text\"");
-	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-		if (cur != args->m_user && cur->is_a(&moo_user_obj_type))
-			((MooUser *) cur)->notify(TNT_SAY, NULL, args->m_user, args->m_text);
-	}
+	//for (cur = args->m_this->contents(); cur; cur = cur->next()) {
+	//	if (cur != args->m_user && cur->is_a(&moo_user_obj_type))
+	//		((MooUser *) cur)->notify(TNT_SAY, NULL, args->m_user, args->m_text);
+	//}
 	return(0);
 }
 

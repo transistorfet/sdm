@@ -128,6 +128,10 @@ int PseudoServ::release()
 
 int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char *str)
 {
+	const char *cmd;
+	const char *thing_name;
+	const char *channel_name;
+
 	switch (type) {
 	    case TNT_STATUS: {
 		char buffer[LARGE_STRING_SIZE];
@@ -136,41 +140,52 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 	    }
 	    case TNT_SAY:
 	    case TNT_EMOTE: {
-		MooString *thing_name;
-		MooString *channel_name;
 		char buffer[LARGE_STRING_SIZE];
 
 		/// We don't send a message if it was said by our user, since the IRC client will echo that message itself
 		if (!thing || thing == m_user)
 			return(0);
-		thing_name = (MooString *) thing->get_property("name", &moo_string_obj_type);
+		thing_name = thing->get_string_property("name");
 
 		if (channel)
-			channel_name = (MooString *) thing->get_property("name", &moo_string_obj_type);
+			channel_name = channel->get_string_property("name");
 		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
-			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name->m_str : "Unknown", thing_name ? thing_name->m_str : "realm", server_name, (channel && channel_name) ? channel_name->m_str : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		else
-			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name->m_str : "Unknown", thing_name ? thing_name->m_str : "realm", server_name, (channel && channel_name) ? channel_name->m_str : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		break;
 	    }
 	    case TNT_JOIN:
+		cmd = "JOIN";
 	    case TNT_LEAVE:
-	    case TNT_QUIT:
-		// TODO implement these later
+		if (type != TNT_JOIN)
+			cmd = "PART";
+		if (!thing)
+			return(0);
+		thing_name = thing->get_string_property("name");
+		if (channel)
+			channel_name = channel->get_string_property("name");
+		if (thing == m_user)
+			return(Msg::send(m_inter, "%s :%s\r\n", cmd, (channel && channel_name) ? channel_name : "#realm"));
+		else
+			return(Msg::send(m_inter, ":%s!%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, (channel && channel_name) ? channel_name : "#realm"));
+	    case TNT_QUIT: {
+		char buffer[LARGE_STRING_SIZE];
+
+		if (!thing)
+			return(0);
+		thing_name = thing->get_string_property("name");
+		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
+		if (thing == m_user)
+			return(Msg::send(m_inter, ":%s!%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
 		break;
+	    }
 	    default:
 		break;
 	}
 	return(0);
 }
-
-//int PseudoServ::talk(MooThing *channel, MooThing *thing, const char *str)
-
-//int PseudoServ::print(MooThing *channel, MooThing *thing, const char *str)
-//{
-
-//}
 
 int PseudoServ::handle(MooInterface *inter, int ready)
 {
@@ -330,7 +345,7 @@ int PseudoServ::dispatch(Msg *msg)
 
 		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
 	    case IRC_MSG_QUIT:
-		// TODO send quit message around???
+		// TODO send quit message to channels and stuff to notify other users?? (or will disconnect handle this)
 		Msg::send(m_inter, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_inter->host());
 		delete this;
 		return(0);

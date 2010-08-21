@@ -278,34 +278,32 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 	return(NULL);
 }
 
-/*
-moo_id_t MooThing::get_property(const char *name)
+moo_id_t MooThing::get_thing_property(const char *name)
 {
 	MooThingRef *obj;
 
-	if (!(obj = this->get_property(name, &moo_thingref_obj_type)))
-		return(NULL);
+	if (!(obj = (MooThingRef *) this->get_property(name, &moo_thingref_obj_type)))
+		return(-1);
 	return(obj->m_id);
 }
 
-double MooThing::get_property(const char *name)
+double MooThing::get_number_property(const char *name)
 {
 	MooNumber *obj;
 
-	if (!(obj = this->get_property(name, &moo_number_obj_type)))
-		return(NULL);
+	if (!(obj = (MooNumber *) this->get_property(name, &moo_number_obj_type)))
+		return(0);
 	return(obj->m_num);
 }
 
-const char *MooThing::get_property(const char *name)
+const char *MooThing::get_string_property(const char *name)
 {
 	MooString *obj;
 
-	if (!(obj = this->get_property(name, &moo_string_obj_type)))
+	if (!(obj = (MooString *) this->get_property(name, &moo_string_obj_type)))
 		return(NULL);
 	return(obj->m_str);
 }
-*/
 
 int MooThing::set_action(const char *name, MooAction *action)
 {
@@ -439,6 +437,9 @@ int MooThing::cryolocker_store()
 		this->set_property("last_location", m_location ? m_location->m_id : -1);
 		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
 		//	puff of smoke" or something like that
+
+		// TODO how should the quit message thing work?  where will it come from (property?)
+		this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
 		cryolocker->add(this);
 	}
 	return(0);
@@ -447,17 +448,15 @@ int MooThing::cryolocker_store()
 int MooThing::cryolocker_revive()
 {
 	MooThingRef *ref;
-	MooThing *cryolocker, *thing;
+	MooThing *cryolocker, *thing = NULL;
 
 	if (!(cryolocker = MooThing::reference("/core/cryolocker")))
 		return(-1);
 	if (this->m_location == cryolocker) {
-		if (!(ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
-			return(-1);
-		if (!(thing = MooThing::lookup(ref->m_id)))
-			return(-1);
+		if ((ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
+			thing = MooThing::lookup(ref->m_id);
 		// TODO how the fuck does the 'by' param work?
-		if (thing->moveto(this, NULL))
+		if (!thing || thing->moveto(this, NULL))
 			;//thing->moveto("thestartinglocationwhereeverthatis")
 	}
 	return(0);
@@ -468,7 +467,42 @@ int MooThing::moveto(MooThing *thing, MooThing *by)
 	// TODO fill this in
 	// TODO this will check permissions of via to perform the action (??) and then
 	//	call various actions on the objects to actually do the move
+
+	// TODO this should be a setting or something in the user object
+	this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
+	thing->add(this);
+	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
+	return(0);
 }
+
+int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
+	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
+	return(0);
+}
+
+int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	MooThing *cur;
+
+	for (cur = this->contents(); cur; cur = cur->next()) {
+		cur->notify(type, channel, thing, text);
+	}
+	return(0);
+}
+
+int MooThing::notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	MooThing *cur;
+
+	for (cur = this->contents(); cur; cur = cur->next()) {
+		if (cur != except)
+			cur->notify(type, channel, thing, text);
+	}
+	return(0);
+}
+
 
 int MooThing::assign_id(moo_id_t id)
 {
