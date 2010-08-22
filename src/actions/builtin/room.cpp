@@ -45,7 +45,7 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	MooThing *cur;
+	//MooThing *cur;
 
 	// TODO Check if room silence bit is set for this room
 
@@ -63,7 +63,7 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	MooThing *cur;
+	//MooThing *cur;
 
 	// TODO check room_say for modification suggestions
 	if (*args->m_text == '\0')
@@ -82,6 +82,7 @@ static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO send messages to the sender and reciever
 	// TODO send message to all other users unless room is silenced ("$n whispers something to $N.")
 	// TODO check for room/object/mobile triggers based on speech
+	return(0);
 }
 
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args)

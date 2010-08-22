@@ -15,7 +15,6 @@
 #include <sdm/objs/object.h>
 
 #include <sdm/actions/action.h>
-#include <sdm/actions/builtin/basics.h>
 #include <sdm/actions/builtin/builtin.h>
 
 #define BUILTIN_LIST_SIZE	32
@@ -31,7 +30,13 @@ MooObjectType moo_builtin_obj_type = {
 static MooBuiltinHash *builtin_actions = NULL;
 
 
+extern int moo_load_basic_actions(MooBuiltinHash *actions);
+extern int moo_load_builder_actions(MooBuiltinHash *actions);
+extern int moo_load_channel_actions(MooBuiltinHash *actions);
+extern int moo_load_item_actions(MooBuiltinHash *actions);
+extern int moo_load_mobile_actions(MooBuiltinHash *actions);
 extern int moo_load_room_actions(MooBuiltinHash *actions);
+extern int moo_load_user_actions(MooBuiltinHash *actions);
 
 int init_builtin(void)
 {
@@ -41,7 +46,12 @@ int init_builtin(void)
 		return(1);
 	builtin_actions = new MooBuiltinHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
 	moo_load_basic_actions(builtin_actions);
+	moo_load_builder_actions(builtin_actions);
+	moo_load_channel_actions(builtin_actions);
+	moo_load_item_actions(builtin_actions);
+	moo_load_mobile_actions(builtin_actions);
 	moo_load_room_actions(builtin_actions);
+	moo_load_user_actions(builtin_actions);
 	return(0);
 }
 

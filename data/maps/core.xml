@@ -11,8 +11,8 @@
   <property type="string" name="title">something</property>
   <property type="string" name="name">thing</property>
   <property type="string" name="description">You're not sure what it is.</property>
-  <action type="builtin" name="examine">builtin_examine</action>
-  <action type="builtin" name="tell_view">builtin_tell_view</action>
+  <action type="builtin" name="examine">basics_examine</action>
+  <action type="builtin" name="tell_view">basics_tell_view</action>
  </thing>
  <thing>
   <id>4</id>
@@ -33,12 +33,12 @@
   <location>2</location>
   <property type="string" name="title">someone</property>
   <property type="string" name="name">user</property>
-  <action type="builtin" name="notify">builtin_notify</action>
-  <action type="builtin" name="inv">builtin_inventory</action>
-  <action type="builtin" name="get">builtin_get</action>
-  <action type="builtin" name="drop">builtin_drop</action>
-  <action type="builtin" name="describe">builtin_describe</action>
-  <action type="builtin" name="whereami">builtin_whereami</action>
+  <action type="builtin" name="notify">basics_notify</action>
+  <action type="builtin" name="inv">item_inventory</action>
+  <action type="builtin" name="get">item_get</action>
+  <action type="builtin" name="drop">item_drop</action>
+  <action type="builtin" name="describe">basics_describe</action>
+  <action type="builtin" name="whereami">basics_whereami</action>
  </thing>
  <thing>
   <id>7</id>
@@ -83,8 +83,8 @@
   <location>2</location>
   <property type="string" name="title">an exit</property>
   <property type="string" name="name">exit</property>
-  <action type="builtin" name="go">builtin_go</action>
-  <action type="builtin" name="move">builtin_go</action>
+  <action type="builtin" name="go">basics_go</action>
+  <action type="builtin" name="move">basics_go</action>
   <action type="builtin" name="tell_view">exit_tell_view</action>
  </thing>
  <thing>

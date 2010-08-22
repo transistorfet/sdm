@@ -68,9 +68,9 @@ void release_user(void)
 }
 
 
-MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
+MooUser::MooUser(const char *name, int bits, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
-	m_bits = 0;
+	m_bits = bits;
 	m_task = NULL;
 	m_name = NULL;
 
@@ -97,6 +97,24 @@ MooUser::~MooUser()
 		user_list->remove(m_name->c_str());
 		delete m_name;
 	}
+}
+
+MooUser *MooUser::make_guest(const char *name)
+{
+	MooUser *user;
+
+	if (MooUser::exists(name))
+		throw MooException("User already exists.  Cannot make guest.");
+	user = new MooUser(name, MOO_UBF_GUEST);
+	// TODO should this use a clone-like function or something?
+	// TODO you need to initialize this properly. I guess parent, and stuff need to be set
+
+	user->set_property("name", name);
+	// TODO how do you find the base user name/id to set as the parent
+
+	// TODO is this the correct way to moving a user to the starting location?
+	user->moveto(MooThing::reference("/start"), NULL);
+	return(user);
 }
 
 int MooUser::load()

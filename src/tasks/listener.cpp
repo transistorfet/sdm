@@ -103,7 +103,7 @@ int MooListener::handle(MooInterface *inter, int ready)
 	MooTCP *newtcp;
 	MooTask *newtask;
 
-	// TODO we should probably make sure we don't get a loop somehow where we keep getting called and don't handle the request
+	// TODO should we try to make this handle errors a bit better instead of destroying itself when something goes wrong
 	if (!(ready & IO_READY_READ)) {
 		delete inter;
 		return(-1);
@@ -134,7 +134,6 @@ int MooListener::purge(MooInterface *inter)
 
 int MooListener::listen(int port)
 {
-	// TODO is this the correct way to close the existing server connection?
 	if (m_inter)
 		delete m_inter;
 	m_inter = new MooTCP();

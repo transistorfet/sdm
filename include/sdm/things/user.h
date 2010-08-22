@@ -28,8 +28,9 @@ class MooUser : public MooThing {
 	const char *name() { return(m_name->c_str()); }
 
     public:
-	MooUser(const char *name, moo_id_t id = -1, moo_id_t parent = 0);
+	MooUser(const char *name, int bits = 0, moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooUser();
+	static MooUser *make_guest(const char *name);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

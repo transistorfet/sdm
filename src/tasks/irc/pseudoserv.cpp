@@ -426,8 +426,8 @@ int PseudoServ::login()
 
 	// TODO overwrite buffers used to store password as a security measure
 
-	/// If we didn't receive a password then we aren't going to login but we wont fail either
 	if (m_pass) {
+		/// We received a password so attempt to log in as the user with the network password
 		strcpy(buffer, m_pass->c_str());
 		MooUser::encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
 		m_user = MooUser::login(m_nick->c_str(), buffer);
@@ -445,6 +445,17 @@ int PseudoServ::login()
 			return(0);
 		}
 		this->owner(m_user->id());
+	}
+	else {
+		/// We received no network password so sign in as a guest
+		try {
+			m_user = MooUser::make_guest(m_nick->c_str());
+		}
+		catch (...) {
+			Msg::send(m_inter, "ERROR :Closing Link: Unable to connect as guest, %s\r\n", m_nick->c_str());
+			delete this;
+			return(0);
+		}
 	}
 	this->send_welcome();
 	return(1);
@@ -510,7 +521,9 @@ int PseudoServ::send_names(const char *name)
 					buffer[j++] = ' ';
 				}
 			}
-			buffer[--j] = '\0';
+			if (buffer[j] == ' ')
+				j--;
+			buffer[j] = '\0';
 			// TODO the '=' should be different depending on if it's a secret, private, or public channel
 			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, buffer);
 		} while (cur);

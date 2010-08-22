@@ -66,10 +66,10 @@ MooTCP::~MooTCP()
 
 int MooTCP::read_entry(const char *type, MooDataFile *data)
 {
-	if (!strcmp(type, "load")) {
+	//if (!strcmp(type, "load")) {
 		// TODO what could you read in here?
-	}
-	else
+	//}
+	//else
 		return(MOO_NOT_HANDLED);
 	return(MOO_HANDLED);
 }

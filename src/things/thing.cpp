@@ -293,7 +293,7 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 	MooObject *obj;
 
 	// TODO do permissions check??
-	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+	for (cur = this; cur; cur = cur->parent()) {
 		if (!(obj = m_properties->get(name)))
 			continue;
 		if (!type || obj->is_a(type))
@@ -349,7 +349,7 @@ MooAction *MooThing::get_action(const char *name)
 	MooAction *action;
 
 	// TODO do permissions check??
-	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+	for (cur = this; cur; cur = cur->parent()) {
 		if ((action = cur->m_actions->get(name)))
 			return(action);
 	}
@@ -361,7 +361,7 @@ MooAction *MooThing::get_action_partial(const char *name)
 	MooThing *cur;
 	MooAction *action;
 
-	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
+	for (cur = this; cur; cur = cur->parent()) {
 		if ((action = cur->m_actions->get_partial(name)))
 			return(action);
 	}
@@ -503,7 +503,8 @@ int MooThing::moveto(MooThing *thing, MooThing *by)
 	//	call various actions on the objects to actually do the move
 
 	// TODO this should be a setting or something in the user object
-	this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
+	if (this->m_location)
+		this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
 	thing->add(this);
 	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
 	return(0);

@@ -71,7 +71,8 @@ class MooThing : public MooObject {
 	int notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text);
 
 	inline moo_id_t id() { return(m_id); }
-	inline moo_id_t parent() { return(m_parent); }
+	inline moo_id_t parent_id() { return(m_parent); }
+	inline MooThing *parent() { return(MooThing::lookup(m_parent)); }
 	inline MooThing *contents() { return(m_objects); }
 	inline MooThing *next() { return(m_next); }
 	inline MooThing *location() { return(m_location); }
