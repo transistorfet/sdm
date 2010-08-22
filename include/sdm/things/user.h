@@ -17,7 +17,10 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 
+#define MOO_UBF_GUEST		0x0001		/// User is a guest (Don't save)
+
 class MooUser : public MooThing {
+	int m_bits;
 	MooTask *m_task;
 	std::string *m_name;
 

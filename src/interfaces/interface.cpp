@@ -82,22 +82,22 @@ int MooInterface::wait(float t)
 	fd_set rd, wr, err;
 	struct timeval timeout;
 
-	/** Check the buffer of each connection to see if any data is waiting
-	    and return when each connection gets a chance to read data so that
-	    we can check other events and remain responsive */
+	/// Check the buffer of each connection to see if any data is waiting
+	/// and return when each connection gets a chance to read data so that
+	/// we can check other events and remain responsive
 	for (i = 0; i < interface_list->size(); i++) {
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((state = (cur->m_bits & IO_STATE))) {
 			cur->m_bits &= ~IO_STATE;
-			cur->m_task->handle(cur, state);
+			cur->m_task->switch_handle(cur, state);
 			ret++;
 		}
 	}
 	if (ret)
 		return(ret);
 
-	/** Check each connection's socket for input using select */
+	/// Check each connection's socket for input using select
 	timeout.tv_sec = (int) t;
 	timeout.tv_usec = (int) ((t - timeout.tv_sec) * 1000000);
 
@@ -126,13 +126,13 @@ int MooInterface::wait(float t)
 	}
 
 	if ((ret = ::select(max + 1, &rd, &wr, &err, &timeout)) == -1) {
-		/** There was a socket error so we'll just return */
+		/// There was a socket error so we'll just return
 		return(-1);
 	}
 
 	for (i = 0;i < interface_list->size();i++) {
-		/** We check that the interface is not NULL before each condition in case the previous
-		    callback destroyed the interface */
+		/// We check that the interface is not NULL before each condition in case the previous
+		/// callback destroyed the interface
 		if (!(cur = interface_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd))
@@ -144,7 +144,7 @@ int MooInterface::wait(float t)
 
 		if ((state = (cur->m_bits & IO_STATE))) {
 			cur->m_bits &= ~IO_STATE;
-			cur->m_task->handle(cur, state);
+			cur->m_task->switch_handle(cur, state);
 		}
 	}
 	return(ret);

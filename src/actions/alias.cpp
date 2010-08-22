@@ -13,6 +13,8 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/things/thing.h>
+#include <sdm/things/user.h>
 
 #include <sdm/actions/action.h>
 #include <sdm/actions/alias.h>
@@ -29,7 +31,7 @@ MooObject *moo_alias_create(void)
 	return(new MooAlias());
 }
 
-MooAlias::MooAlias(const char *name, MooThing *owner, const char *command) : MooAction(name, owner)
+MooAlias::MooAlias(const char *name, moo_id_t owner, const char *command) : MooAction(name, owner)
 {
 	m_command = command ? new std::string(command) : NULL;
 }
@@ -62,9 +64,8 @@ int MooAlias::do_action(MooThing *thing, MooArgs *args)
 {
 	char buffer[STRING_SIZE];
 
-	// TODO combine and execute
-	// args->m_user->command(buffer);
-	return(0);
+	MooThing::expand_str(buffer, STRING_SIZE, args, m_command->c_str());
+	return(args->m_user->command(buffer));
 }
 
 

@@ -88,7 +88,7 @@ int MooTelnet::read(char *data, int len)
 
 	if ((res = sdm_tcp_read_to_buffer(SDM_TCP(inter))) < 0)
 		return(-1);
-	/** Ignore leading whitespace */
+	/// Ignore leading whitespace
 	for (i = 0; i < res && IS_WHITESPACE(SDM_TCP(inter)->read_buffer[i]); i++)
 		;
 	for (; i < res; i++) {
@@ -110,7 +110,7 @@ int MooTelnet::read(char *data, int len)
 			buffer[j++] = SDM_TCP(inter)->read_buffer[i];
 		}
 	}
-	/** We didn't receive a full line so we'll stick this back in the buffer */
+	/// We didn't receive a full line so we'll stick this back in the buffer
 	sdm_tcp_set_read_buffer(SDM_TCP(inter), buffer, j);
 	SDM_INTERFACE_SET_NOT_READY_READ(inter);
 	buffer[0] = '\0';
@@ -138,7 +138,7 @@ int MooTelnet::write(const char *data)
 			if (str[i] == '/')
 				buffer[j++] = str[i++];
 			for (; (j < LARGE_STRING_SIZE) && (str[i] != '\0'); i++, j++) {
-				/** Break at the first non-alphanumeric or '_' character. */
+				/// Break at the first non-alphanumeric or '_' character.
 				if (!(((str[i] >= '0') && (str[i] <= '9'))
 				    || ((str[i] >= 'A') && (str[i] <= 'Z'))
 				    || ((str[i] >= 'a') && (str[i] <= 'z')) || (str[i] == '_')))
@@ -146,7 +146,7 @@ int MooTelnet::write(const char *data)
 				buffer[j] = str[i];
 			}
 			if (str[i] != '>') {
-				/** This wasn't a tag so we'll ignore it */
+				/// This wasn't a tag so we'll ignore it
 				buffer[j++] = str[i];
 				break;
 			}
@@ -184,7 +184,7 @@ int MooTelnet::write(const char *data)
 	}
 
 	res = sdm_tcp_send(SDM_TCP(inter), buffer, j);
-	/** If we haven't closed all attribute tags then send the reset escape to put us back to normal */
+	/// If we haven't closed all attribute tags then send the reset escape to put us back to normal
 	if (stack.sp != 0)
 		sdm_telnet_reset_attribs(inter);
 	if (res < 0)
@@ -196,11 +196,11 @@ int MooTelnet::write(const char *data)
 void sdm_telnet_echo(struct sdm_telnet *inter, int action)
 {
 	if (action) {
-		/** Request the other end echo input locally */
+		/// Request the other end echo input locally
 		sdm_tcp_send(SDM_TCP(inter), "\xff\xfc\x01", 3);
 	}
 	else {
-		/** Request the other end stop echoing input locally */
+		/// Request the other end stop echoing input locally
 		sdm_tcp_send(SDM_TCP(inter), "\xff\xfb\x01", 3);
 	}
 }

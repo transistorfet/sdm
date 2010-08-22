@@ -9,11 +9,11 @@
 
 #include <sdm/globals.h>
 
-#define MOO_TBF_NO_ADD			0x0001		// No entries can be added
-#define MOO_TBF_REPLACE			0x0002		// Allow new elements to replace existing elements at the same index
-#define MOO_TBF_REMOVE			0x0004		// Allow entries to be removed
-#define MOO_TBF_DELETE			0x0010		// Delete elements when removed from list
-#define MOO_TBF_DELETEALL		0x0020		// Delete all elements when list is destroyed
+#define MOO_TBF_NO_ADD			0x0001		/// No entries can be added
+#define MOO_TBF_REPLACE			0x0002		/// Allow new elements to replace existing elements at the same index
+#define MOO_TBF_REMOVE			0x0004		/// Allow entries to be removed
+#define MOO_TBF_DELETE			0x0010		/// Delete elements when removed from list
+#define MOO_TBF_DELETEALL		0x0020		/// Delete all elements when list is destroyed
 
 #define MOO_TREE_DEFAULT_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETE | MOO_TBF_DELETEALL
 
@@ -77,7 +77,7 @@ int MooTree<T>::set(const char *key, T data)
 
 	if (!key || !data || (m_bits & MOO_TBF_NO_ADD))
 		return(-1);
-	/** Search for an existing entry */
+	/// Search for an existing entry
 	for (entry = m_root, prev = NULL; entry; ) {
 		if (!(res = strcmp(key, entry->m_key))) {
 			if (!(m_bits & MOO_TBF_REPLACE))

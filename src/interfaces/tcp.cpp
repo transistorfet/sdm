@@ -135,7 +135,7 @@ int MooTCP::accept(MooTCP *inter)
 
 	inter->disconnect();
 
-	/** Make sure there is a connection waiting */
+	/// Make sure there is a connection waiting
 	FD_ZERO(&rd);
 	FD_SET(m_rfd, &rd);
 	if (::select(m_rfd + 1, &rd, NULL, NULL, &timeout) <= 0)
@@ -224,7 +224,7 @@ int MooTCP::receive(char *data, int len, char delim)
 		}
 		data[j++] = m_read_buffer[i];
 	}
-	/** We didn't receive a delim character so we'll act like we didn't read anything */
+	/// We didn't receive a delim character so we'll act like we didn't read anything
 	return(0);
 }
 

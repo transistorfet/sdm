@@ -71,7 +71,7 @@
   <action type="builtin" name="do_enter">room_do_enter</action>
   <action type="builtin" name="do_leave">room_do_leave</action>
   <action type="builtin" name="look">room_look</action>
-  <action type="builtin" name="emote">something</action>
+  <action type="builtin" name="emote">room_emote</action>
   <action type="builtin" name="s">room_direction</action>
   <action type="builtin" name="w">room_direction</action>
   <action type="builtin" name="u">room_direction</action>

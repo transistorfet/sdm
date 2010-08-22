@@ -85,6 +85,7 @@ int MooTimer::check()
 			continue;
 		else if ((current_time - cur->m_start) >= cur->m_interval) {
 			cur->m_bits |= MOO_TBF_EXPIRED;
+			// TODO switch to the owner/task saved
 			if (cur->m_handler)
 				cur->m_handler->handle_timer(cur);
 			if (cur->m_bits & MOO_TBF_PERIODIC)

@@ -12,6 +12,7 @@
 #include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/tasks/task.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
 
@@ -26,7 +27,7 @@
 #define THING_ACTIONS_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETEALL | MOO_TBF_DELETE
 
 #define MOO_THING_INIT_SIZE			100
-/** This is to prevent us from making giant table accidentally */
+/// This is to prevent us from making giant table accidentally
 #define MOO_THING_MAX_SIZE			65536
 
 MooObjectType moo_thing_obj_type = {
@@ -68,8 +69,8 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	//	only send the request to it's parent object
 	m_actions = new MooTree<MooAction *>(THING_ACTIONS_BITS);
 
-	/** Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
-	    If the id = SDM_NEW_ID then assign the next available id */
+	/// Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
+	/// If the id = SDM_NEW_ID then assign the next available id
 	m_id = id;
 	if (m_id >= 0) {
 		if (!moo_thing_table->set(m_id, this))
@@ -138,6 +139,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		    || !(obj = moo_make_object(objtype)))
 			return(-1);
 		data->read_attrib("name", buffer, STRING_SIZE);
+		// TODO read the owner attrib and set it
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
@@ -177,7 +179,7 @@ int MooThing::write_data(MooDataFile *data)
 	if (m_location)
 		data->write_integer_entry("location", m_location->m_id);
 
-	/** Write the properties to the file */
+	/// Write the properties to the file
 	m_properties->reset();
 	while ((hentry = m_properties->next_entry())) {
 		data->write_begin_entry("property");
@@ -187,17 +189,18 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_end_entry();
 	}
 
-	/** Write the actions to the file */
+	/// Write the actions to the file
 	m_actions->reset();
 	while ((tentry = m_actions->next_entry())) {
 		data->write_begin_entry("action");
 		data->write_attrib("type", tentry->m_data->type_name());
 		data->write_attrib("name", tentry->m_key);
+		// TODO write owner attrib (as well as params? permissions? ??)
 		tentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
 
-	/** Write the things we contain to the file */
+	/// Write the things we contain to the file
 	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {
 		if (cur->is_a(&moo_user_obj_type))
 			continue;
@@ -213,14 +216,33 @@ int MooThing::write_data(MooDataFile *data)
 	return(0);
 }
 
-MooThing *MooThing::create(MooUser *user, moo_id_t parent)
+MooThing *MooThing::create(moo_id_t parent)
 {
 	MooThing *thing;
 
 	// TODO create a new object and fully initialze it
 	thing = new MooThing(-1, parent);
 	// TODO how do we know if this fails?  we should destroy the object if it does
-	thing->set_property("owner", new MooNumber(user->m_id));
+	thing->set_property("owner", new MooNumber(MooTask::current_owner()));
+	//thing->permissions(THING_DEFAULT_PERMISSIONS);
+
+	//thing->moveto(user, user);
+
+	return(thing);
+}
+
+MooThing *MooThing::clone()
+{
+	MooThing *thing;
+
+	// TODO check if the parent object is cloneable
+	thing = new MooThing(-1, m_parent);
+	// TODO how do we know if this fails?  we should destroy the object if it does
+
+	// TODO copy all properties
+	// TODO copy all actions
+
+	thing->set_property("owner", new MooNumber(MooTask::current_owner()));
 	//thing->permissions(THING_DEFAULT_PERMISSIONS);
 
 	//thing->moveto(user, user);
@@ -230,9 +252,10 @@ MooThing *MooThing::create(MooUser *user, moo_id_t parent)
 
 int MooThing::set_property(const char *name, MooObject *obj)
 {
+	// TODO do permissions check??
 	if (!name || (*name == '\0'))
 		return(-1);
-	/** If the object is NULL, remove the entry from the table */
+	/// If the object is NULL, remove the entry from the table
 	if (!obj) {
 		m_properties->remove(name);
 		return(1);
@@ -269,6 +292,7 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 	MooThing *cur;
 	MooObject *obj;
 
+	// TODO do permissions check??
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
 		if (!(obj = m_properties->get(name)))
 			continue;
@@ -309,10 +333,13 @@ int MooThing::set_action(const char *name, MooAction *action)
 {
 	if (!name || (*name == '\0'))
 		return(-1);
-	/** If the action is NULL, remove the entry from the table */
+	// TODO do permissions check??
+	/// If the action is NULL, remove the entry from the table
 	if (!action)
 		return(m_actions->remove(name));
-	action->init(name, this);
+	// TODO should the owner be the person currently executing this comamnd (current_owner()) or the owner of the thing? or the thing
+	//	itself???
+	action->init(name, this->m_id);
 	return(m_actions->set(name, action));
 }
 
@@ -321,6 +348,7 @@ MooAction *MooThing::get_action(const char *name)
 	MooThing *cur;
 	MooAction *action;
 
+	// TODO do permissions check??
 	for (cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
 		if ((action = cur->m_actions->get(name)))
 			return(action);
@@ -354,7 +382,7 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 		return(action->do_action(this, args));
 	}
 	catch (...) {
-		moo_status("An unspecified error has occured during \"%s\", name");
+		moo_status("%s: An unspecified error has occured", action);
 		return(-1);
 	}
 }
@@ -390,7 +418,7 @@ int MooThing::add(MooThing *obj)
 {
 	if (obj->m_location == this)
 		return(0);
-	/** If this object is in another object and it can't be removed, then we don't add it */
+	/// If this object is in another object and it can't be removed, then we don't add it
 	if (obj->m_location && obj->m_location->remove(obj))
 		return(-1);
 	obj->m_location = this;
@@ -456,12 +484,18 @@ int MooThing::cryolocker_revive()
 		if ((ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
 			thing = MooThing::lookup(ref->m_id);
 		// TODO how the fuck does the 'by' param work?
-		if (!thing || thing->moveto(this, NULL))
-			;//thing->moveto("thestartinglocationwhereeverthatis")
+		if (!thing || this->moveto(thing, NULL))
+			;//this->moveto("thestartinglocationwhereeverthatis")
 	}
 	return(0);
 }
 
+/**
+ * Arguments:
+ *	this = thing to move
+ *	thing = location to move to
+ *	by = ????
+ */
 int MooThing::moveto(MooThing *thing, MooThing *by)
 {
 	// TODO fill this in
@@ -506,10 +540,10 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *channel, M
 
 int MooThing::assign_id(moo_id_t id)
 {
-	/** If the thing already has an ID, then remove it from the table */
+	/// If the thing already has an ID, then remove it from the table
 	if (this->m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
-	/** Assign the thing to the appropriate index in the table and set the ID if it succeeded */
+	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
 	if (moo_thing_table->set(id, this))
 		m_id = id;
 	else

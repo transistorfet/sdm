@@ -66,6 +66,7 @@ Msg *Msg::read(MooTCP *inter)
 
 	if ((size = inter->receive(buffer, IRC_MAX_MSG, '\n')) <= 0)
 		return(NULL);
+	//moo_status("IRC: RCVD DEBUG: %s", buffer);
 	msg = new Msg();
 	if (msg->unmarshal(buffer, size) < 0)
 		return(NULL);
@@ -77,8 +78,11 @@ int Msg::send(MooTCP *inter, const char *fmt, ...)
 	va_list va;
 	char buffer[STRING_SIZE];
 
+	if (!inter)
+		return(-1);
 	va_start(va, fmt);
 	vsnprintf(buffer, STRING_SIZE, fmt, va);
+	//moo_status("IRC: SEND DEBUG: %s", buffer);
 	return(inter->send(buffer));
 }
 
@@ -168,7 +172,7 @@ int init_irc_msg()
 	irc_add_command("SQUIT", IRC_MSG_SQUIT, 1, 2, 2);
 	irc_add_command("JOIN", IRC_MSG_JOIN, 0, 1, 2);
 	irc_add_command("PART", IRC_MSG_PART, 1, 1, 2);
-	irc_add_command("MODE", IRC_MSG_MODE, 0, 2, 0);
+	irc_add_command("MODE", IRC_MSG_MODE, 0, 1, 0);
 	irc_add_command("TOPIC", IRC_MSG_TOPIC, 1, 1, 2);
 	irc_add_command("NAMES", IRC_MSG_NAMES, 0, 0, 2);
 	irc_add_command("LIST", IRC_MSG_LIST, 0, 0, 1);

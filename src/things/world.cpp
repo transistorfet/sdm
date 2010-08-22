@@ -27,7 +27,7 @@ int init_world(void)
 {
 	if (moo_root_world)
 		return(1);
-	/** Create the world object with ID = 1, and parent ID = -1 since the world has no parent */
+	/// Create the world object with ID = 1, and parent ID = -1 since the world has no parent
 	moo_root_world = new MooWorld("maps/world.xml", 1, -1);
 	if (moo_object_register_type(&moo_world_obj_type) < 0)
 		return(-1);
@@ -38,7 +38,7 @@ void release_world(void)
 {
 	if (!moo_root_world)
 		return;
-	/** Write the world to disk */
+	/// Write the world to disk
 	// TODO BUG there is an infinite loop on writing the world file
 	//moo_root_world->write();
 	delete moo_root_world;
@@ -63,9 +63,9 @@ MooWorld::MooWorld(const char *file, moo_id_t id, moo_id_t parent) : MooThing(id
 
 MooWorld::~MooWorld()
 {
-	/** We don't write the world here because we assume the root world is being destroyed and we
-	    don't want to write each world twice so if for some reason a world is being destroyed without
-	    the root world being destroyed, it must be written manually */
+	/// We don't write the world here because we assume the root world is being destroyed and we
+	/// don't want to write each world twice so if for some reason a world is being destroyed without
+	/// the root world being destroyed, it must be written manually
 	if (m_filename)
 		delete m_filename;
 }

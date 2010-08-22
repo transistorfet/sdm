@@ -25,10 +25,6 @@
 
 #define USER_INIT_SIZE		64
 
-#define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )
-
-static char *moo_prepositions[] = { "from", "on", "with", "to", "at", NULL };
-
 MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
@@ -50,7 +46,7 @@ int init_user(void)
 	user_list = new MooHash<MooUser *>(USER_INIT_SIZE, MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
 	moo_object_register_type(&moo_user_obj_type);
 
-	/** Load all the users into memory in a disconnected state */
+	/// Load all the users into memory in a disconnected state
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
@@ -74,6 +70,7 @@ void release_user(void)
 
 MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
+	m_bits = 0;
 	m_task = NULL;
 	m_name = NULL;
 
@@ -88,14 +85,14 @@ MooUser::MooUser(const char *name, moo_id_t id, moo_id_t parent) : MooThing(id, 
 
 MooUser::~MooUser()
 {
-	/** Save the user information to the user's file, and disconnect */
+	/// Save the user information to the user's file, and disconnect
 	this->disconnect();
 
-	/** If we are associated with a task, then notify it that we are dying */
+	///If we are associated with a task, then notify it that we are dying
 	if (m_task)
 		m_task->purge(this);
 
-	/** Release the user's other resources */
+	/// Release the user's other resources
 	if (m_name) {
 		user_list->remove(m_name->c_str());
 		delete m_name;
@@ -106,6 +103,8 @@ int MooUser::load()
 {
 	char buffer[STRING_SIZE];
 
+	if (m_bits & MOO_UBF_GUEST)
+		return(-1);
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
 	return(MooObject::read_file(buffer, "user"));
 }
@@ -114,6 +113,8 @@ int MooUser::save()
 {
 	char buffer[STRING_SIZE];
 
+	if (m_bits & MOO_UBF_GUEST)
+		return(-1);
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
 	return(MooObject::write_file(buffer, "user"));
 }
@@ -124,7 +125,7 @@ int MooUser::connect(MooTask *task)
 		return(-1);
 	this->cryolocker_revive();
 
-	// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
+	/// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
 	m_task = task;
 	return(0);
 }
@@ -133,7 +134,7 @@ void MooUser::disconnect()
 {
 	this->cryolocker_store();
 
-	// Save the user information to the user's file only if we were already connected
+	/// Save the user information to the user's file only if we were already connected
 	if (m_task) {
 		// TODO don't save while testing (works now but still wont)
 		//this->save();
@@ -166,57 +167,31 @@ int MooUser::write_data(MooDataFile *data)
 
 int MooUser::command(const char *text)
 {
+	int i;
 	MooArgs args;
-	int i, j, k, len;
-	char *action;
 	char buffer[LARGE_STRING_SIZE];
-	const char *objname, *tarname;
-	MooThing *object = NULL, *target = NULL;
 
 	strcpy(buffer, text);
-	// Parse out the action string
-	for (i = 0; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-		;
-	action = &buffer[i];
-	for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
-		;
-	buffer[i++] = '\0';
-
-	text = &text[i];
-	objname = &buffer[i];
-	while (buffer[i] != '\0') {
-		for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-			;
-		k = i - 1;
-		for (j = 0; moo_prepositions[j] != NULL; j++) {
-			len = strlen(moo_prepositions[j]);
-			if (!strncmp(&buffer[i], moo_prepositions[j], len) && MOO_IS_WHITESPACE(buffer[i + len])) {
-				i += len;
-				for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-					;
-				buffer[k] = '\0';
-				target = this->find_thing(&buffer[i]);
-				break;
-			}
-		}
-		for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
-			;
-	}
-	object = this->find_thing(objname);
-	
-	args.m_user = this;
-	args.m_caller = (MooThing *) this;
-	args.m_object = object;
-	args.m_target = target;
-	args.m_text = text;
-	return(this->command(action, &args));
+	i = args.parse_whitespace(buffer);
+	args.m_action_text = &buffer[i];
+	i += args.parse_word(buffer);
+	args.m_text = &text[i];
+	args.parse_args(this, args.m_action_text, &buffer[i]);
+	return(this->command(args.m_action_text, &args));
 }
 
 int MooUser::command(const char *action, const char *text)
 {
-	// TODO this is used by IRC to do command("say", <text>);
+	MooArgs args;
+	char buffer[LARGE_STRING_SIZE];
 
-	return(0);
+	strcpy(buffer, text);
+	args.parse_args(this, action, buffer);
+	args.m_text = text;
+	// TODO should there be a command(&args) rather than taking the action parameter?? (i guess 2 functions)
+	//	The issue appears to be that we didn't have action_text, and that action must be looked up on each
+	//	object, since we don't have a definite 'this' at this point (could be user, location, object, target)
+	return(this->command(action, &args));
 }
 
 int MooUser::command(const char *action, MooThing *object, MooThing *target)

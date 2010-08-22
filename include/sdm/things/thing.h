@@ -25,8 +25,6 @@
 
 class MooUser;
 
-typedef int moo_id_t;
-
 extern MooArray<MooThing *> *moo_thing_table;
 
 class MooThing : public MooObject {
@@ -46,7 +44,8 @@ class MooThing : public MooObject {
 	virtual ~MooThing();
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-	static MooThing *create(MooUser *user, moo_id_t parent);
+	static MooThing *create(moo_id_t parent);
+	MooThing *clone();
 
 	int set_property(const char *name, MooObject *obj);
 	int set_property(const char *name, moo_id_t id);
@@ -83,10 +82,10 @@ class MooThing : public MooObject {
 	MooThing *find(const char *name);
 	static MooThing *reference(const char *name);
 
-	int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
-	int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
-	int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);
-	int escape_char(const char *str, char *buffer);
+	static int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
+	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
+	static int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);
+	static int escape_char(const char *str, char *buffer);
 	static int atoi(const char *str, int radix);
 
     protected:

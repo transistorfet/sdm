@@ -57,6 +57,7 @@ class PseudoServ : public MooTask {
 	int send_welcome();
 	int join(const char *name);
 	int part(const char *name);
+	int send_names(const char *name);
 
 	int format(char *buffer, int max, const char *str);
 	int write_attrib(char *buffer, int max, const char *attrib);

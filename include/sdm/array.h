@@ -9,10 +9,10 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#define MOO_ABF_DELETE			0x01	// Delete elements when removed from list
-#define MOO_ABF_DELETEALL		0x02	// Delete all elements when list is destroyed
-#define MOO_ABF_RESIZE			0x04	// Allow resizing of the list when needed
-#define MOO_ABF_REPLACE			0x08	// Allow new elements to replace existing elements at the same index
+#define MOO_ABF_DELETE			0x01	/// Delete elements when removed from list
+#define MOO_ABF_DELETEALL		0x02	/// Delete all elements when list is destroyed
+#define MOO_ABF_RESIZE			0x04	/// Allow resizing of the list when needed
+#define MOO_ABF_REPLACE			0x08	/// Allow new elements to replace existing elements at the same index
 
 #define MOO_ARRAY_DEFAULT_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define MOO_ARRAY_DEFAULT_SIZE		32
@@ -101,7 +101,7 @@ T MooArray<T>::set(int index, T value)
 	}
 	m_data[index] = value;
 
-	/** Update the next_space value accordingly */
+	/// Update the next_space value accordingly
 	if (!value) {
 		if (index < m_next_space)
 			m_next_space = index;

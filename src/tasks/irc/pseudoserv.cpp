@@ -151,9 +151,9 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 			channel_name = channel->get_string_property("name");
 		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
-			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		else
-			return(Msg::send(m_inter, ":%s!%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		break;
 	    }
 	    case TNT_JOIN:
@@ -169,7 +169,7 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 		if (thing == m_user)
 			return(Msg::send(m_inter, "%s :%s\r\n", cmd, (channel && channel_name) ? channel_name : "#realm"));
 		else
-			return(Msg::send(m_inter, ":%s!%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, (channel && channel_name) ? channel_name : "#realm"));
+			return(Msg::send(m_inter, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, (channel && channel_name) ? channel_name : "#realm"));
 	    case TNT_QUIT: {
 		char buffer[LARGE_STRING_SIZE];
 
@@ -177,8 +177,8 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 			return(0);
 		thing_name = thing->get_string_property("name");
 		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
-		if (thing == m_user)
-			return(Msg::send(m_inter, ":%s!%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
+		if (thing != m_user)
+			return(Msg::send(m_inter, ":%s!~%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
 		break;
 	    }
 	    default:
@@ -284,7 +284,9 @@ int PseudoServ::dispatch(Msg *msg)
 
 	/// Process messages that are only acceptable after registration
 	switch (msg->cmd()) {
-	    case IRC_MSG_PRIVMSG:
+	    case IRC_MSG_PRIVMSG: {
+		int res;
+
 		if (!msg->m_last)
 			return(Msg::send(m_inter, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
 		else if (moo_is_channel_name(msg->m_params[0])) {
@@ -292,15 +294,19 @@ int PseudoServ::dispatch(Msg *msg)
 				if (!m_user)
 					return(Msg::send(m_inter, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
 				else if (msg->m_last[0] == '.')
-					m_user->command(&msg->m_last[1]);
+					res = m_user->command(&msg->m_last[1]);
 				else
-					m_user->command("say", msg->m_last);
+					res = m_user->command("say", msg->m_last);
+
+				if (res == MOO_ACTION_NOT_FOUND)
+					this->notify(TNT_STATUS, NULL, NULL, "Huh?");
 			}
 		}
 		else {
 
 		}
 		return(0);
+	    }
 	    case IRC_MSG_MODE:
 		if (moo_is_channel_name(msg->m_params[0])) {
 			// TODO do channel mode command processing
@@ -341,13 +347,21 @@ int PseudoServ::dispatch(Msg *msg)
 			// TODO parse out the possibility of multiple channels
 			return(this->join(msg->m_params[0]));
 		break;
+	    case IRC_MSG_NAMES:
+		// TODO check for ',' in channels names (a list of channels vs just one channel)
+		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
+			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+		this->send_names(msg->m_params[0]);
+		return(0);
 	    case IRC_MSG_WHOIS:
-
+		// TODO do rest of whois
 		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
 	    case IRC_MSG_QUIT:
-		// TODO send quit message to channels and stuff to notify other users?? (or will disconnect handle this)
 		Msg::send(m_inter, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_inter->host());
 		delete this;
+		return(0);
+	    case IRC_MSG_WHO:
+		// TODO this message is sent by irssi when a user quits a channel
 		return(0);
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
@@ -430,6 +444,7 @@ int PseudoServ::login()
 			delete this;
 			return(0);
 		}
+		this->owner(m_user->id());
 	}
 	this->send_welcome();
 	return(1);
@@ -458,13 +473,49 @@ int PseudoServ::join(const char *name)
 {
 	Msg::send(m_inter, ":%s!~%s@%s JOIN :%s\r\n", m_nick->c_str(), m_nick->c_str(), m_inter->host(), name);
 	// TODO send topic
-	// TODO send names replies
+	this->send_names(name);
 	return(0);
 }
 
 int PseudoServ::part(const char *name)
 {
 
+	return(0);
+}
+
+int PseudoServ::send_names(const char *name)
+{
+	int j;
+	MooThing *cur;
+	const char *thing_name;
+	char buffer[STRING_SIZE];
+
+	if (!m_user)
+		return(-1);
+
+	// TODO we still don't have a way of finding a channel by name
+	if (!strcmp(name, "#realm")) {
+		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
+		//	are in the cryolocker, for example)
+		cur = m_user->location();
+		if (cur)
+			cur = cur->contents();
+		do {
+			j = 0;
+			for (int i = 0; cur && i < 20; i++, cur = cur->next()) {
+				// TODO we should check that things are invisible, and also add @ for wizards or something
+				if ((thing_name = cur->get_string_property("name"))) {
+					strcpy(&buffer[j], thing_name);
+					j += strlen(thing_name);
+					buffer[j++] = ' ';
+				}
+			}
+			buffer[--j] = '\0';
+			// TODO the '=' should be different depending on if it's a secret, private, or public channel
+			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, buffer);
+		} while (cur);
+	}
+	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
 	return(0);
 }
 

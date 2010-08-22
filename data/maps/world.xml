@@ -6,6 +6,7 @@
   <id>50</id>
   <parent>10</parent>
   <location>1</location>
+  <property type="string" name="name">start</property>
   <property type="string" name="description">You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</property>
   <property type="string" name="title">The Test Room</property>
   <thing>

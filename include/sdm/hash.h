@@ -10,11 +10,11 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#define MOO_HBF_NO_ADD			0x0001		// No entries can be added
-#define MOO_HBF_REPLACE			0x0002		// Allow new elements to replace existing elements at the same index
-#define MOO_HBF_REMOVE			0x0004		// Allow entries to be removed
-#define MOO_HBF_DELETE			0x0010		// Delete elements when removed from list
-#define MOO_HBF_DELETEALL		0x0020		// Delete all elements when list is destroyed
+#define MOO_HBF_NO_ADD			0x0001		/// No entries can be added
+#define MOO_HBF_REPLACE			0x0002		/// Allow new elements to replace existing elements at the same index
+#define MOO_HBF_REMOVE			0x0004		/// Allow entries to be removed
+#define MOO_HBF_DELETE			0x0010		/// Delete elements when removed from list
+#define MOO_HBF_DELETEALL		0x0020		/// Delete all elements when list is destroyed
 
 #define MOO_HASH_DEFAULT_SIZE		32
 #define MOO_HASH_DEFAULT_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL
@@ -104,7 +104,7 @@ int MooHash<T>::set(const char *key, T data)
 
 	if (!key || !data || (m_bits & MOO_HBF_NO_ADD))
 		return(-1);
-	/** Search for an existing entry */
+	/// Search for an existing entry
 	hash = moo_hash_func(key) % m_size;
 	for (entry = m_table[hash]; entry; entry = entry->m_next) {
 		if (!strcasecmp(key, entry->m_key)) {

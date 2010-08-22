@@ -22,9 +22,6 @@
 	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
 	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
 
-	* there must be a task table and any time a task does stuff, it is set to the current task.  Any taskes
-	  that are created by that task will use that as their parent task.  Each interface will have a reference to the
-	  task that owns it.  How does this actually work?  When are tasks changed, etc
 	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
 	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
 	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
@@ -33,10 +30,6 @@
 	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
 	* think about multithreading possibilities
 
-	* in MooUser, it should store the pointer to the cryolocker but how would it create or load it?  The world appears to be
-	  loaded first but can we rely on that?
-	* there needs to be a global channel system for IRC to work (A channel would be an object, but how would it record which
-	  users are in that channel or not?)
 	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
 	  only wizards (or owners of the room??) can do this for most room except a few with a special flag that allows it
 
@@ -52,13 +45,10 @@
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
 	* you could have a function like user->tell(thing, str) or something that looks up the action and calls it (which would most
 	  likely be directed to user->print() but would allow it to be reprogrammed)
-	* should you have user->print/printf like they are now or should you just make one function that prints a preformatted string
-	  and then have a function like const char *format(buffer, size, args, fmt, ...) which could directly pass the result to
-	  another function, or NULL, which would be checekd by the other function and would make it not print it (you still have to
-	  deal with buffer allocation and stuff though =/)
 	* should there be a function (in builtins) that creates either a special root object (for various types, like room, channel, etc)
 	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
 	  subobject which inherits from the core object?
+
 	* by make a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
 	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
 	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
@@ -66,7 +56,7 @@
 	  call.  Therefore, we need to work on the RPC system, the IRC system, and the telnet system =P
 	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
 	  directly printed, exactly the same as it would appear on telnet (more or less), -OR- server based, either the same as the
-	  client (but with services like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
+	  client (but with services-like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
 	  since all users associated with that channel will receive the same text, so everyone will recieve everyone else's private
 	  traffic.  #realm could be use for only talking, with notices being sent for status messages, but that would get really
 	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
@@ -118,32 +108,33 @@
 	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
 
 	* we could have a number of methods on MooThing which directly call actions (like notify(), announce(), etc)
-	* we could have queue actions (or a special param or something passed to do_action) such that the action data can be copied
+	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
+
 	* at some point we should rethink about MooArgs, and the ability to pass multiple parameters, specifically, being able to
-	  have an action like notify(channel, user, type_num, string)
+	  have an action like notify(channel, user, type_num, string) (a static array of MooObjects??)
+
+	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
 
 	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
 	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
 	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
 	  behaviour of the table much.
 
+	* check out Smaug's system/socials.dat.  It has various premade commands for interaction which don't actually do anything
+	  other than print various messages to various people but would make a great addition.  Find out what each line is for
+	  (it's able to print different messages to different people/objects) and also what variables are available for expansion in
+	  the actual strings.
+
     Covnersion TODO:
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
-	* check if the problem you sometimes have is due to the listening port not being free (where it floods with accepting msgs)
 
+	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
+	  replace object and target perhaps).  That would allow better parameter passing
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
-	* complete the parser functions in MooUser
-	* add fully integrated permissions for objects
-	* add the actual action eval to MooAlias (how will the alias be converted to a command? by $var substitution?)
-	* implement user password checking in login()
-	* put a bunch of the functions in MooArgs for calculating derivative args (like breaking an arg string into multiple
-	  words) as well as functions that set the values for certain circumstances
-	* make various functions in thing.cpp (like those in utils right nowo for basic manipulation)
 	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
-	* implement basic builtin functions like 'tell' and 'look'
 	* modify the handle() function to do something like close the interface if an error occurs?
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* sort out and make better use of exceptions (in do_action in particular)
@@ -152,7 +143,18 @@
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
 	  preposition, target)
+
+	* add fully integrated permissions for objects
 	* actions should/could have their own permissions (lambdamoo 'rwxd')
+	* should each property have it's own permissions??
+	* when certain actions are called (perhaps) they can execute with the object's owner's permissions.  When actions are called
+	  normally, they execute with the invoking user's permissions.  By allowing these 'suid' actions, you can manipulate values
+	  that only the onwer can manipulate (or only an immortal can).  You can then have spells or other game elements that can
+	  effect values such as 'silence' (both on the room and on you) which you cannot yourself manipulate
+	* how can you have a value 'silence' on your user, that you cannot manipulate yourself?  Perhaps one way would be to make
+	  a special subobject which your user inherits from, but which you yourself cannot access due to permissions.  This would,
+	  however, make it difficult to manipulate those values, when give the user's object (since to set_property, you need a
+	  direct pointer, and thus need to first find the object rather than just directly using the user pointer)
 
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 

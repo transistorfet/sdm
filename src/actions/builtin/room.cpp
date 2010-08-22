@@ -20,8 +20,9 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int room_announce(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
+static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
+static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_look_self(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_direction(MooAction *action, MooThing *thing, MooArgs *args);
@@ -30,8 +31,9 @@ static int room_do_leave(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_room_actions(MooBuiltinHash *actions)
 {
-	actions->set("room_announce", new MooBuiltin(room_announce));
 	actions->set("room_say", new MooBuiltin(room_say));
+	actions->set("room_emote", new MooBuiltin(room_emote));
+	actions->set("room_whisper", new MooBuiltin(room_whisper));
 	actions->set("room_look", new MooBuiltin(room_look));
 	actions->set("room_look_self", new MooBuiltin(room_look_self));
 	actions->set("room_direction", new MooBuiltin(room_direction));
@@ -41,25 +43,45 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 }
 
 
-static int room_announce(MooAction *action, MooThing *thing, MooArgs *args)
-{
-	// TODO i guess this should call user->notify_all?
-}
-
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
 
+	// TODO Check if room silence bit is set for this room
+
 	if (*args->m_text == '\0')
 		return(-1);
+	// TODO for each user/npc/whatever
+	//		if ignoring bit set, don't send message
+	//		perhaps if the person trying to speak is special (immortal) then speak despite ignore bit
 	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
 
-	//sdm_announce(thing, args, "$user.name says \"$text\"");
-	//for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-	//	if (cur != args->m_user && cur->is_a(&moo_user_obj_type))
-	//		((MooUser *) cur)->notify(TNT_SAY, NULL, args->m_user, args->m_text);
-	//}
+	// TODO check for room/object/mobile triggers based on speech
+
 	return(0);
+}
+
+static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooThing *cur;
+
+	// TODO check room_say for modification suggestions
+	if (*args->m_text == '\0')
+		return(-1);
+	args->m_user->location()->notify_all(TNT_EMOTE, NULL, args->m_user, args->m_text);
+	return(0);
+}
+
+static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	// TODO check that the user is the room
+	// TODO check if the user is yourself (Smaug: "You have a nice little chat with yourself.\n\r")
+	// TODO switched? link-dead? afk?
+	// TODO check if user is deaf (whispers disallowed) or silenced (forced)
+	// TODO check if user is ignoring you
+	// TODO send messages to the sender and reciever
+	// TODO send message to all other users unless room is silenced ("$n whispers something to $N.")
+	// TODO check for room/object/mobile triggers based on speech
 }
 
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args)

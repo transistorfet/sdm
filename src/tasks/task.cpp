@@ -20,39 +20,78 @@ MooObjectType moo_task_obj_type = {
 	(moo_type_create_t) NULL
 };
 
-static MooTask *current_task = NULL;
-static MooArray<MooTask *> *task_list = NULL;
+static MooTask *g_current_task = NULL;
+static MooArray<MooTask *> *g_task_list = NULL;
 
 int init_task(void)
 {
-	if (task_list)
+	if (g_task_list)
 		return(1);
-	task_list = new MooArray<MooTask *>();
+	g_task_list = new MooArray<MooTask *>();
 	return(0);
 }
 
 void release_task(void)
 {
-	delete task_list;
+	delete g_task_list;
 }
 
 MooTask::MooTask()
 {
-	m_tid = task_list->add(this);
-	if (current_task)
-		m_parent_tid = current_task->m_tid;
-	else
+	m_tid = g_task_list->add(this);
+	if (g_current_task) {
+		m_owner = g_current_task->m_owner;
+		m_parent_tid = g_current_task->m_tid;
+	}
+	else {
+		m_owner = 0;
 		m_parent_tid = -1;
+	}
 }
 
 MooTask::~MooTask()
 {
-	task_list->set(m_tid, NULL);
+	if (this == g_current_task)
+		g_current_task = NULL;
+	g_task_list->set(m_tid, NULL);
 }
 
 int MooTask::bestow(MooInterface *inter)
 {
 	delete inter;
 	return(-1);
+}
+
+moo_id_t MooTask::owner(moo_id_t id)
+{
+	if (id > 0) {
+		// TODO do check for if current task has permissions to set the owner to this
+		m_owner = id;
+	}
+	return(m_owner);
+}
+
+int MooTask::switch_handle(MooInterface *inter, int ready)
+{
+	MooTask::switch_task(this);
+	return(this->handle(inter, ready));
+}
+
+MooTask *MooTask::current_task()
+{
+	return(g_current_task);
+}
+
+moo_id_t MooTask::current_owner()
+{
+	if (!g_current_task)
+		return(-1);
+	return(g_current_task->m_owner);
+}
+
+int MooTask::switch_task(MooTask *task)
+{
+	g_current_task = task;
+	return(0);
 }
 

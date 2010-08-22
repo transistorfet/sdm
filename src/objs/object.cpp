@@ -63,7 +63,7 @@ const MooObjectType *moo_object_find_type(const char *name, const MooObjectType 
 
 	if (!(type = name_type_list->get(name)))
 		return(NULL);
-	/** If base is given, then only return this type if it is a subclass of base */
+	/// If base is given, then only return this type if it is a subclass of base
 	if (!base)
 		return(type);
 	for (cur = type; cur; cur = cur->m_parent) {
@@ -140,11 +140,11 @@ int MooObject::read_data(MooDataFile *data)
 		this->read_entry(type, data);
 		if (res < 0)
 			error = 1;
-		/** We handled the whole rest of the data so just exit */
+		/// We handled the whole rest of the data so just exit
 		else if (res == MOO_HANDLED_ALL)
 			return(error);
 	} while (data->read_next());
-	/** We return if the file loaded incorrectly but we don't stop trying to load the file */
+	/// We return if the file loaded incorrectly but we don't stop trying to load the file
 	return(error);
 }
 
