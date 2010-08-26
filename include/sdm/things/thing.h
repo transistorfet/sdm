@@ -104,6 +104,8 @@ class MooThing : public MooObject {
 	inline int is_a_thing(moo_id_t id);
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
+	// TODO do you need an "is_a_wizard()" method here, to be used by MooObject->check_permissions()
+
 	/// String Parsers
 	static int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);

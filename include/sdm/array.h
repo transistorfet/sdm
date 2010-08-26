@@ -6,20 +6,22 @@
 #ifndef _SDM_ARRAY_H
 #define _SDM_ARRAY_H
 
+#include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/object.h>
 
 #define MOO_ABF_DELETE			0x01	/// Delete elements when removed from list
 #define MOO_ABF_DELETEALL		0x02	/// Delete all elements when list is destroyed
 #define MOO_ABF_RESIZE			0x04	/// Allow resizing of the list when needed
 #define MOO_ABF_REPLACE			0x08	/// Allow new elements to replace existing elements at the same index
 
-#define MOO_ARRAY_DEFAULT_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
+#define MOO_ARRAY_DEFAULT_BITS		MOO_ABF_RESIZE
 #define MOO_ARRAY_DEFAULT_SIZE		32
 #define MOO_ARRAY_GROWTH_FACTOR		1.75
 
 template<typename T>
-class MooArray {
+class MooArray : public MooObject {
 	int m_bits;
 	int m_size;
 	int m_max;
@@ -29,6 +31,8 @@ class MooArray {
     public:
 	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
 	~MooArray();
+	int read_entry(const char *name, MooDataFile *data);
+	int write_data(MooDataFile *data);
 	int size() { return(m_size); }
 	int next_space() { return(m_next_space); }
 
@@ -40,6 +44,11 @@ class MooArray {
 
 	void resize(int size);
 };
+
+typedef MooArray<MooObject *> MooObjectArray;
+
+extern MooObjectType moo_array_obj_type;
+MooObject *moo_array_create(void);
 
 template<typename T>
 MooArray<T>::MooArray(int size, int max, int bits)
@@ -64,6 +73,21 @@ MooArray<T>::~MooArray()
 		}
 	}
 	memory_free(m_data);
+}
+
+template<typename T>
+int MooArray<T>::read_entry(const char *name, MooDataFile *data)
+{
+	// TODO read all entries into the array
+	// <entry index="num"><value type="string" owner="93" permissions="0">VALUE</value></entry>
+	return(MOO_HANDLED);
+}
+
+template<typename T>
+int MooArray<T>::write_data(MooDataFile *data)
+{
+	// TODO write all entries in the array
+	return(0);
 }
 
 template<typename T>

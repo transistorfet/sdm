@@ -20,6 +20,8 @@
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 
+#define INTERFACE_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
+
 static MooArray<MooInterface *> *interface_list = NULL;
 
 MooObjectType moo_interface_obj_type = {
@@ -32,7 +34,7 @@ MooObjectType moo_interface_obj_type = {
 int init_interface(void)
 {
 	if (!interface_list)
-		interface_list = new MooArray<MooInterface *>();
+		interface_list = new MooArray<MooInterface *>(MOO_ARRAY_DEFAULT_SIZE, -1, INTERFACE_LIST_BITS);
 	return(0);
 }
 

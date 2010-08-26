@@ -14,6 +14,8 @@
 #include <sdm/actions/action.h>
 #include <sdm/interfaces/interface.h>
 
+#define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
+
 MooObjectType moo_task_obj_type = {
 	NULL,
 	"task",
@@ -29,7 +31,7 @@ int init_task(void)
 {
 	if (g_task_list)
 		return(1);
-	g_task_list = new MooArray<MooTask *>();
+	g_task_list = new MooArray<MooTask *>(MOO_ARRAY_DEFAULT_SIZE, -1, TASK_LIST_BITS);
 	return(0);
 }
 

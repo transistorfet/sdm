@@ -22,6 +22,7 @@
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
 
+#define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
 #define THING_PROPERTIES_SIZE		5
 #define THING_ACTIONS_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETEALL | MOO_TBF_DELETE
@@ -45,7 +46,7 @@ int init_thing(void)
 		return(1);
 	if (moo_object_register_type(&moo_thing_obj_type) < 0)
 		return(-1);
-	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE);
+	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
 	return(0);
 }
 
@@ -959,6 +960,7 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 		buffer[i] = '\0';
 		return(i);
 	}
+	// TODO should you check for the array type and print it??
 	return(0);
 }
 
