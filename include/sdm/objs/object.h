@@ -28,9 +28,8 @@ typedef struct MooObjectType {
 class MooObject {
     protected:
 	int m_delete;
-
-	int is_deleting() { return(m_delete); }
-	void set_delete() { m_delete = 1; }
+	moo_id_t m_owner;
+	moo_perm_t m_permissions;
 
     public:
 	MooObject();
@@ -38,6 +37,7 @@ class MooObject {
 
 	const MooObjectType *type();
 	const char *type_name() { return(this->type()->m_name); }
+	inline int is_a(const MooObjectType *type);
 
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
@@ -55,15 +55,19 @@ class MooObject {
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
 	virtual int write_data(MooDataFile *data) = 0;
 
-	inline int is_a(const MooObjectType *type) {
-		const MooObjectType *cur;
+    public:
+	/// Accessors
+	moo_id_t owner() { return(m_owner); }
+	moo_perm_t permissions() { return(m_permissions); }
 
-		for (cur = this->type(); cur; cur = cur->m_parent) {
-			if (cur == type)
-				return(1);
-		}
-		return(0);
-	}
+	// TODO shouldn't these be protected or something?  How will you change the values when loading actions and properties?
+    public:
+	moo_id_t owner(moo_id_t id);
+	moo_perm_t permissions(moo_perm_t perms);
+
+    protected:
+	int is_deleting() { return(m_delete); }
+	void set_delete() { m_delete = 1; }
 };
 
 extern const MooObjectType moo_object_obj_type;
@@ -76,6 +80,16 @@ int moo_object_deregister_type(const MooObjectType *type);
 const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base);
 
 MooObject *moo_make_object(const MooObjectType *type);
+
+inline int MooObject::is_a(const MooObjectType *type) {
+	const MooObjectType *cur;
+
+	for (cur = this->type(); cur; cur = cur->m_parent) {
+		if (cur == type)
+			return(1);
+	}
+	return(0);
+}
 
 #endif
 

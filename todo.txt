@@ -130,36 +130,37 @@
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
-
-	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
-	  replace object and target perhaps).  That would allow better parameter passing
-	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
-	* add various accessor functions to MooThing for easily accessing and manipulating properties (generally and for specific props)
-	* modify the handle() function to do something like close the interface if an error occurs?
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
-	* sort out and make better use of exceptions (in do_action in particular)
+
+	* modify the handle() function to do something like close the interface if an error occurs?
+	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
+
+	* sort out and make better use of exceptions (in do_action in particular).  You can't catch a segfault but you can throw
+	  exceptions when certain functions would otherwise return a NULL.  You could alternativley have an TRY() macro or something
+	  which runs the function and throws -1 if it returns a value less than 0 (what about NULL...  NULLCHK() )
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
 	  preposition, target)
+	* add a 'register' and 'login' commands to basics
+	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
+	  replace object and target perhaps).  That would allow better parameter passing
+	* finish the guest user creation function
+	* create 'init' actions for user, room, etc objects
+	* should you convert some functions to using a moo_id_t rather than a thing pointer?  It would require an extra lookup in
+	  exchange for allowing error checking (NULL checks in particular) to be moved to other functions
 
-	* add fully integrated permissions for objects
-	* actions should/could have their own permissions (lambdamoo 'rwxd')
-	* should each property have it's own permissions??
-	* when certain actions are called (perhaps) they can execute with the object's owner's permissions.  When actions are called
-	  normally, they execute with the invoking user's permissions.  By allowing these 'suid' actions, you can manipulate values
-	  that only the onwer can manipulate (or only an immortal can).  You can then have spells or other game elements that can
-	  effect values such as 'silence' (both on the room and on you) which you cannot yourself manipulate
-	* how can you have a value 'silence' on your user, that you cannot manipulate yourself?  Perhaps one way would be to make
-	  a special subobject which your user inherits from, but which you yourself cannot access due to permissions.  This would,
-	  however, make it difficult to manipulate those values, when give the user's object (since to set_property, you need a
-	  direct pointer, and thus need to first find the object rather than just directly using the user pointer)
+	* actions permissions (lambdamoo 'rwxd') property permissions??  SUID bit?
+	* we are thinking about permissions as ints directly in objects...  Lambda treats objects like dirs and prop/verbs as files,
+	  permissions-wise.
+	* fill in owner and permissions values in the existing XML files
+	* add various permissions flags and their meaning
+	* add permissions checking functions of some kind
 
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
 	* add irc server-to-client pinging & connection timeouts
-	* add privmsg and privmsg error checking
 	* fill in all other IRC message processing
 
 

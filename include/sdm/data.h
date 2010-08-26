@@ -34,7 +34,9 @@ class MooDataFile {
 	int read_parent();
 
 	const char *read_name();
-	int read_attrib(const char *name, char *buffer, int max);
+	long int read_attrib_integer(const char *name);
+	double read_attrib_float(const char *name);
+	int read_attrib_string(const char *name, char *buffer, int max);
 	long int read_integer();
 	double read_float();
 	int read_string(char *buffer, int max);
@@ -46,7 +48,9 @@ class MooDataFile {
 	int read_raw_string_entry(char *buffer, int max);
 
 	int write_begin_entry(const char *name);
-	int write_attrib(const char *name, const char *value);
+	int write_attrib_integer(const char *name, long int value);
+	int write_attrib_float(const char *name, double value);
+	int write_attrib_string(const char *name, const char *value);
 	int write_integer(long int value);
 	int write_float(double value);
 	int write_string(const char *value);

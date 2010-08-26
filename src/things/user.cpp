@@ -50,7 +50,7 @@ int init_user(void)
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
-			data->read_attrib("name", buffer, STRING_SIZE);
+			data->read_attrib_string("name", buffer, STRING_SIZE);
 			user = new MooUser(buffer);
 			user->cryolocker_store();
 		}
@@ -102,19 +102,25 @@ MooUser::~MooUser()
 MooUser *MooUser::make_guest(const char *name)
 {
 	MooUser *user;
+	MooThing *parent;
 
 	if (MooUser::exists(name))
 		throw MooException("User already exists.  Cannot make guest.");
-	user = new MooUser(name, MOO_UBF_GUEST);
-	// TODO should this use a clone-like function or something?
-	// TODO you need to initialize this properly. I guess parent, and stuff need to be set
-
+	// TODO should these references perhaps be stored in a hash table of some kind which is searched with $thing references
+	parent = MooThing::reference(MOO_GENERIC_USER);
+	user = new MooUser(name, MOO_UBF_GUEST, -1, parent ? parent->id() : 0);
 	user->set_property("name", name);
-	// TODO how do you find the base user name/id to set as the parent
-
+	user->init();
+	user->owner(user->m_id);
 	// TODO is this the correct way to moving a user to the starting location?
-	user->moveto(MooThing::reference("/start"), NULL);
+	user->moveto(MooThing::reference(MOO_START_ROOM), NULL);
 	return(user);
+}
+
+int MooUser::convert_guest()
+{
+	// TODO Convert a guest user into full user??
+	return(0);
 }
 
 int MooUser::load()
@@ -183,139 +189,6 @@ int MooUser::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooUser::command(const char *text)
-{
-	int i;
-	MooArgs args;
-	char buffer[LARGE_STRING_SIZE];
-
-	strcpy(buffer, text);
-	i = args.parse_whitespace(buffer);
-	args.m_action_text = &buffer[i];
-	i += args.parse_word(buffer);
-	args.m_text = &text[i];
-	args.parse_args(this, args.m_action_text, &buffer[i]);
-	return(this->command(args.m_action_text, &args));
-}
-
-int MooUser::command(const char *action, const char *text)
-{
-	MooArgs args;
-	char buffer[LARGE_STRING_SIZE];
-
-	strcpy(buffer, text);
-	args.parse_args(this, action, buffer);
-	args.m_text = text;
-	// TODO should there be a command(&args) rather than taking the action parameter?? (i guess 2 functions)
-	//	The issue appears to be that we didn't have action_text, and that action must be looked up on each
-	//	object, since we don't have a definite 'this' at this point (could be user, location, object, target)
-	return(this->command(action, &args));
-}
-
-int MooUser::command(const char *action, MooThing *object, MooThing *target)
-{
-	MooArgs args;
-
-	// TODO change this with a MooArgs method for setting
-	args.m_user = this;
-	args.m_caller = (MooThing *) this;
-	args.m_object = object;
-	args.m_target = target;
-	args.m_text = NULL;
-	return(this->command(action, &args));
-}
-
-int MooUser::command(const char *action, MooArgs *args)
-{
-	int res;
-
-	if ((res = this->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	if (m_location && (res = m_location->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	if (args->m_object && (res = args->m_object->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	if (args->m_target && (res = args->m_target->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	return(MOO_ACTION_NOT_FOUND);
-}
-
-MooThing *MooUser::find_thing(const char *name)
-{
-	MooThing *thing;
-
-	if ((thing = MooThing::reference(name)))
-		return(thing);
-	else if (!strcmp(name, "me"))
-		return(this);
-	else if (!strcmp(name, "here") && m_location)
-		return(m_location);
-	else if ((thing = this->find(name)))
-		return(thing);
-	else if (m_location && (thing = m_location->find(name)))
-		return(thing);
-	return(NULL);
-}
-
-int MooUser::print(MooArgs *args, const char *str)
-{
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, str);
-	return(m_task->notify(TNT_STATUS, NULL, NULL, buffer));
-}
-
-/*
-int MooUser::print(MooThing *channel, MooThing *thing, const char *text)
-{
-	if (!m_task)
-		return(-1);
-	return(m_task->notify(channel, thing, TNT_SAY, text));
-}
-
-int MooUser::printf(MooThing *channel, MooThing *thing, const char *fmt, ...)
-{
-	va_list va;
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-	va_start(va, fmt);
-	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
-	return(m_task->print(channel, thing, buffer));
-}
-
-int MooUser::print(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt)
-{
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-	// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
-	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, fmt);
-	return(m_task->print(channel, thing, buffer));
-}
-
-int MooUser::printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...)
-{
-	va_list va;
-	char buffer2[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-
-	{
-		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
-		char buffer1[LARGE_STRING_SIZE];
-		va_start(va, fmt);
-		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
-		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
-	}
-	return(m_task->print(channel, thing, buffer2));
-}
-*/
 
 int MooUser::notify(int type, MooThing *channel, MooThing *thing, const char *text)
 {
@@ -356,12 +229,6 @@ int MooUser::valid_username(const char *name)
 	return(1);
 }
 
-MooUser *MooUser::register_new(const char *name, ...)
-{
-	// TODO create a new user (don't know what info we will need for this)
-	return(NULL);
-}
-
 MooUser *MooUser::login(const char *name, const char *passwd)
 {
 	MooUser *user;
@@ -375,7 +242,7 @@ MooUser *MooUser::login(const char *name, const char *passwd)
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
-			data->read_attrib("name", buffer, STRING_SIZE);
+			data->read_attrib_string("name", buffer, STRING_SIZE);
 			if (strcmp(buffer, name))
 				continue;
 			data->read_children();

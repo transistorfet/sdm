@@ -94,4 +94,22 @@
   <property type="string" name="title">The Cryolocker</property>
   <property type="string" name="name">cryolocker</property>
  </thing>
+ <thing>
+  <id>13</id>
+  <parent>1</parent>
+  <location>2</location>
+  <property type="string" name="name">channels</property>
+  <thing>
+   <id>14</id>
+   <parent>13</parent>
+   <location>13</location>
+   <property type="string" name="name">help</property>
+  </thing>
+  <thing>
+   <id>15</id>
+   <parent>13</parent>
+   <location>13</location>
+   <property type="string" name="name">wartalk</property>
+  </thing>
+ </thing>
 </world>

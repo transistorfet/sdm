@@ -17,11 +17,12 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/actions/action.h>
+#include <sdm/things/references.h>
 
 #define MOO_ACTION_NOT_FOUND	1
 
-#define SDM_NO_ID		-1
-#define SDM_NEW_ID		-2
+#define MOO_NO_ID		-1
+#define MOO_NEW_ID		-2
 
 class MooUser;
 
@@ -44,9 +45,11 @@ class MooThing : public MooObject {
 	virtual ~MooThing();
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	int init();
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
 
+	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
 	int set_property(const char *name, moo_id_t id);
 	int set_property(const char *name, double num);
@@ -56,33 +59,52 @@ class MooThing : public MooObject {
 	double get_number_property(const char *name);
 	const char *get_string_property(const char *name);
 
+	/// Action Methods
 	int set_action(const char *name, MooAction *action);
 	MooAction *get_action(const char *name);
 	MooAction *get_action_partial(const char *name);
 	int do_action(MooAction *action, MooArgs *args);
 	int do_action(const char *name, MooArgs *args);
-	int do_action(const char *name, MooUser *user, MooThing *object, MooThing *target);
+	// TODO should this take more Things??
+	int do_action(const char *name, MooThing *user, MooThing *object = NULL, MooThing *target = NULL);
 
-	int cryolocker_store();
-	int cryolocker_revive();
-	int moveto(MooThing *thing, MooThing *by);
+	/// Search Methods
+	MooThing *find(const char *name);
+	MooThing *find_named(const char *name);
+	static MooThing *reference(const char *name);
+
+	/// Helper Methods
+	int command(const char *text);
+	int command(const char *action, const char *text);
+	int command(const char *action, MooThing *object, MooThing *target);
+	int command(const char *action, MooArgs *args);
+	int print(MooArgs *args, const char *text);
+	//int print(MooThing *channel, MooThing *thing, const char *text);
+	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
+	//int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
+	//int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
+	
 	virtual int notify(int type, MooThing *channel, MooThing *thing, const char *text);
 	int notify_all(int type, MooThing *channel, MooThing *thing, const char *text);
 	int notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text);
 
+	int cryolocker_store();
+	int cryolocker_revive();
+	int moveto(MooThing *thing, MooThing *by);
+
+    public:
+	/// Accessors
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent_id() { return(m_parent); }
 	inline MooThing *parent() { return(MooThing::lookup(m_parent)); }
+	inline MooThing *owner_thing() { return(MooThing::lookup(this->owner())); }
 	inline MooThing *contents() { return(m_objects); }
 	inline MooThing *next() { return(m_next); }
 	inline MooThing *location() { return(m_location); }
+	inline int is_a_thing(moo_id_t id);
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
-	inline int is_a_thing(moo_id_t id);
-
-	MooThing *find(const char *name);
-	static MooThing *reference(const char *name);
-
+	/// String Parsers
 	static int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
 	static int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);

@@ -76,8 +76,8 @@ int MooWorld::read_entry(const char *type, MooDataFile *data)
 	char buffer[STRING_SIZE];
 
 	if (!strcmp(type, "load")) {
-		data->read_attrib("ref", buffer, STRING_SIZE);
-		obj = new MooWorld(buffer, SDM_NO_ID, 0);
+		data->read_attrib_string("ref", buffer, STRING_SIZE);
+		obj = new MooWorld(buffer, MOO_NO_ID, 0);
 		if (this->add(obj) < 0) {
 			delete obj;
 			return(-1);
@@ -97,7 +97,7 @@ int MooWorld::write_data(MooDataFile *data)
 	// TODO should you have a call to MooThing::write_data(data) here?
 	if (data) {
 		data->write_begin_entry("load");
-		data->write_attrib("ref", m_filename->c_str());
+		data->write_attrib_string("ref", m_filename->c_str());
 		data->write_end_entry();
 	}
 	return(res);

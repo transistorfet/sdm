@@ -21,11 +21,12 @@
 typedef int moo_tid_t;
 
 class MooUser;
+class MooArgs;
 class MooThing;
+class MooAction;
 class MooInterface;
 
 class MooTask : public MooObject {
-	moo_id_t m_owner;
 	moo_tid_t m_tid;
 	moo_tid_t m_parent_tid;
 
@@ -50,12 +51,16 @@ class MooTask : public MooObject {
 
 	virtual int purge(MooUser *user) { return(-1); }
 
-	moo_id_t owner(moo_id_t id = -1);
+	static int elevated_do_action(MooAction *action, MooThing *thing, MooArgs *args);
+
+	/// Accessors
 	int switch_handle(MooInterface *inter, int ready);
 	static MooTask *current_task();
 	static moo_id_t current_owner();
 
     private:
+	static moo_id_t current_owner(moo_id_t id);
+	static moo_id_t current_owner(MooTask *task, moo_id_t id);
 	static int switch_task(MooTask *task);
 };
 

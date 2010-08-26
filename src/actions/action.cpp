@@ -24,22 +24,22 @@ MooObjectType moo_action_obj_type = {
 	(moo_type_create_t) NULL
 };
 
-MooAction::MooAction(const char *name, moo_id_t owner)
+MooAction::MooAction(const char *name, MooThing *thing)
 {
-	this->init(name, owner);
+	this->init(name, thing);
 }
 
 MooAction::~MooAction()
 {
-	// TODO maybe you could check the owner and make sure the action is removed???
+	// TODO maybe you could check the thing and make sure the action is removed???
 	if (m_name)
 		delete m_name;
 }
 
-void MooAction::init(const char *name, moo_id_t owner)
+void MooAction::init(const char *name, MooThing *thing)
 {
 	m_name = name ? new std::string(name) : NULL;
-	m_owner = owner;
+	m_thing = thing;
 }
 
 
@@ -75,7 +75,7 @@ int MooArgs::parse_whitespace(char *buffer)
 	return(i);
 }
 
-int MooArgs::parse_args(MooUser *user, char *buffer)
+int MooArgs::parse_args(MooThing *user, char *buffer)
 {
 	int i;
 	char *action;
@@ -87,7 +87,7 @@ int MooArgs::parse_args(MooUser *user, char *buffer)
 	return(this->parse_args(user, action, &buffer[i]));
 }
 
-int MooArgs::parse_args(MooUser *user, const char *action, char *buffer)
+int MooArgs::parse_args(MooThing *user, const char *action, char *buffer)
 {
 	int i = 0, j, k, len;
 	const char *objname;
@@ -107,14 +107,14 @@ int MooArgs::parse_args(MooUser *user, const char *action, char *buffer)
 				for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
 					;
 				buffer[k] = '\0';
-				target = user->find_thing(&buffer[i]);
+				target = user->find(&buffer[i]);
 				break;
 			}
 		}
 		for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
 			;
 	}
-	object = user->find_thing(objname);
+	object = user->find(objname);
 	
 	m_user = user;
 	m_caller = (MooThing *) user;

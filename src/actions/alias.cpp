@@ -31,7 +31,7 @@ MooObject *moo_alias_create(void)
 	return(new MooAlias());
 }
 
-MooAlias::MooAlias(const char *name, moo_id_t owner, const char *command) : MooAction(name, owner)
+MooAlias::MooAlias(const char *name, MooThing* thing, const char *command) : MooAction(name, thing)
 {
 	m_command = command ? new std::string(command) : NULL;
 }

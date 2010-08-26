@@ -16,7 +16,7 @@
 class MooAlias : public MooAction {
 	std::string *m_command;
     public:
-	MooAlias(const char *name = NULL, moo_id_t owner = -1, const char *command = NULL);
+	MooAlias(const char *name = NULL, MooThing* thing = NULL, const char *command = NULL);
 	virtual ~MooAlias();
 
 	virtual int read_entry(const char *type, MooDataFile *data);

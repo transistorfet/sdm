@@ -166,8 +166,12 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 		thing_name = thing->get_string_property("name");
 		if (channel)
 			channel_name = channel->get_string_property("name");
-		if (thing == m_user)
-			return(Msg::send(m_inter, "%s :%s\r\n", cmd, (channel && channel_name) ? channel_name : "#realm"));
+		if (thing == m_user) {
+			if (type == TNT_JOIN)
+				return(this->send_join((channel && channel_name) ? channel_name : "#realm"));
+			else
+				return(this->send_part((channel && channel_name) ? channel_name : "#realm"));
+		}
 		else
 			return(Msg::send(m_inter, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, (channel && channel_name) ? channel_name : "#realm"));
 	    case TNT_QUIT: {
@@ -287,23 +291,39 @@ int PseudoServ::dispatch(Msg *msg)
 	    case IRC_MSG_PRIVMSG: {
 		int res;
 
-		if (!msg->m_last)
+		if (!m_user)
+			return(Msg::send(m_inter, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
+		else if (!msg->m_last)
 			return(Msg::send(m_inter, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
 		else if (moo_is_channel_name(msg->m_params[0])) {
 			if (!strcmp(msg->m_params[0], "#realm")) {
-				if (!m_user)
-					return(Msg::send(m_inter, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
-				else if (msg->m_last[0] == '.')
+				if (this->not_in_realm())
+					return(Msg::send(m_inter, ":%s %03d #realm :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN));
+				if (msg->m_last[0] == '.')
 					res = m_user->command(&msg->m_last[1]);
 				else
 					res = m_user->command("say", msg->m_last);
 
 				if (res == MOO_ACTION_NOT_FOUND)
-					this->notify(TNT_STATUS, NULL, NULL, "Huh?");
+					this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
 			}
+			else {
+				if (msg->m_last[0] == '.')
+					return(this->notify(TNT_STATUS, NULL, NULL, "Sorry, commands must be entered in #realm."));
+				MooThing *channels = MooThing::reference(MOO_CHANNELS);
+				if (!channels)
+					return(this->notify(TNT_STATUS, NULL, NULL, "Sorry, channels are disabled at this time."));
+				MooThing *channel = channels->find(msg->m_params[0]);
+				// TODO I don't know if any of this would even work
+				//if (channel)
+				//	res = channel->do_action("send", &msg->m_params[0][1], msg->m_last);
+				if (res < 0)
+					return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
+			}	
 		}
 		else {
-
+			// TODO send a private message (probably by calling an action)
+			//m_user->command("tell", ???);
 		}
 		return(0);
 	    }
@@ -343,9 +363,31 @@ int PseudoServ::dispatch(Msg *msg)
 
 		if (!strcmp(msg->m_params[0], "0"))
 			;// TODO leave all channels
-		else
+		else if (!strcmp(msg->m_params[0], "#realm")) {
+			RBIT(m_bits, IRC_BF_NOT_IN_REALM);
+			return(this->send_join(msg->m_params[0]));
+		}
+		else {
+			// TODO this should find the channel and do_action join
 			// TODO parse out the possibility of multiple channels
-			return(this->join(msg->m_params[0]));
+			//return(this->send_join(msg->m_params[0]));
+			// TODO temporarily return an error
+			return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+		}
+		break;
+	    case IRC_MSG_PART:
+		if (!strcmp(msg->m_params[0], "#realm")) {
+			SBIT(m_bits, IRC_BF_NOT_IN_REALM);
+			return(this->send_part(msg->m_params[0]));
+		}
+		else {
+			// TODO this should find the channel and do_action part
+			// TODO parse out the possibility of multiple channels
+			//return(this->send_part(msg->m_params[0]));
+			// TODO temporarily return an error
+			return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+		}
+		return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
 		break;
 	    case IRC_MSG_NAMES:
 		// TODO check for ',' in channels names (a list of channels vs just one channel)
@@ -371,15 +413,10 @@ int PseudoServ::dispatch(Msg *msg)
 	}
 
 	/*
-	JOIN
-	PART
 	MODE
 	NICK
-	QUIT
 	TOPIC
-	NAMES
 	LIST
-	PRIVMSG
 	NOTICE
 	WALLOPS
 
@@ -474,13 +511,13 @@ int PseudoServ::send_welcome()
 	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
 	m_bits |= IRC_BF_WELCOMED;
 	if (m_user) {
-		this->join("#realm");
-		//m_user->notify(TNT_STATUS, NULL, NULL, "Welcome to The Realm of the Jabberwock, %s", m_nick->c_str());
+		this->send_join("#realm");
+		Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, m_nick->c_str(), m_nick->c_str());
 	}
 	return(0);
 }
 
-int PseudoServ::join(const char *name)
+int PseudoServ::send_join(const char *name)
 {
 	Msg::send(m_inter, ":%s!~%s@%s JOIN :%s\r\n", m_nick->c_str(), m_nick->c_str(), m_inter->host(), name);
 	// TODO send topic
@@ -488,9 +525,9 @@ int PseudoServ::join(const char *name)
 	return(0);
 }
 
-int PseudoServ::part(const char *name)
+int PseudoServ::send_part(const char *name)
 {
-
+	Msg::send(m_inter, ":%s!~%s@%s PART %s\r\n", m_nick->c_str(), m_nick->c_str(), m_inter->host(), name);
 	return(0);
 }
 

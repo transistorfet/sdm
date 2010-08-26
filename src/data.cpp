@@ -153,7 +153,33 @@ const char *MooDataFile::read_name()
 	return(NULL);
 }
 
-int MooDataFile::read_attrib(const char *name, char *buffer, int max)
+long int MooDataFile::read_attrib_integer(const char *name)
+{
+	xmlChar *value;
+	long int num;
+
+	if (this->current && (value = xmlGetProp(this->current, (xmlChar *) name))) {
+		num = atol((char *) value);
+		xmlFree(value);
+		return(num);
+	}
+	return(0);
+}
+
+double MooDataFile::read_attrib_float(const char *name)
+{
+	xmlChar *value;
+	double num;
+
+	if (this->current && (value = xmlGetProp(this->current, (xmlChar *) name))) {
+		num = atof((char *) value);
+		xmlFree(value);
+		return(num);
+	}
+	return(0);
+}
+
+int MooDataFile::read_attrib_string(const char *name, char *buffer, int max)
 {
 	xmlChar *value;
 
@@ -284,7 +310,21 @@ int MooDataFile::write_begin_entry(const char *name)
 	return(0);
 }
 
-int MooDataFile::write_attrib(const char *name, const char *value)
+int MooDataFile::write_attrib_integer(const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatAttribute(this->writer, (xmlChar *) name, "%ld", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int MooDataFile::write_attrib_float(const char *name, double value)
+{
+	if (xmlTextWriterWriteFormatAttribute(this->writer, (xmlChar *) name, "%f", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int MooDataFile::write_attrib_string(const char *name, const char *value)
 {
 	if (xmlTextWriterWriteAttribute(this->writer, (xmlChar *) name, (xmlChar *) value) < 0)
 		return(-1);
@@ -293,7 +333,7 @@ int MooDataFile::write_attrib(const char *name, const char *value)
 
 int MooDataFile::write_integer(long int value)
 {
-	if (xmlTextWriterWriteFormatString(this->writer, "%ld", (xmlChar *) value) < 0)
+	if (xmlTextWriterWriteFormatString(this->writer, "%ld", value) < 0)
 		return(-1);
 	return(0);
 }
@@ -307,7 +347,7 @@ int MooDataFile::write_float(double value)
 
 int MooDataFile::write_string(const char *value)
 {
-	if (xmlTextWriterWriteFormatString(this->writer, "%s", (xmlChar *) value) < 0)
+	if (xmlTextWriterWriteFormatString(this->writer, "%s", value) < 0)
 		return(-1);
 	return(0);
 }

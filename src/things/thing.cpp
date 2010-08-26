@@ -69,14 +69,14 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	//	only send the request to it's parent object
 	m_actions = new MooTree<MooAction *>(THING_ACTIONS_BITS);
 
-	/// Set the thing id and add the thing to the table.  If id = SDM_NO_ID, don't add it to a table.
-	/// If the id = SDM_NEW_ID then assign the next available id
+	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
+	/// If the id = MOO_NEW_ID then assign the next available id
 	m_id = id;
 	if (m_id >= 0) {
 		if (!moo_thing_table->set(m_id, this))
 			m_id = -1;
 	}
-	else if (m_id == SDM_NEW_ID)
+	else if (m_id == MOO_NEW_ID)
 		moo_thing_table->add(this);
 	m_parent = parent;
 	m_location = NULL;
@@ -108,16 +108,22 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
 	char buffer[STRING_SIZE];
-	MooObject *obj = NULL;
 	const MooObjectType *objtype;
 
 	if (!strcmp(type, "property")) {
-		data->read_attrib("type", buffer, STRING_SIZE);
+		MooObject *obj = NULL;
+		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
 			return(-1);
-		data->read_attrib("name", buffer, STRING_SIZE);
+		data->read_attrib_string("name", buffer, STRING_SIZE);
 		if (!(obj = moo_make_object(objtype)))
 			return(-1);
+
+		moo_id_t id = data->read_attrib_integer("owner");
+		obj->owner(id);
+		moo_perm_t perms = data->read_attrib_integer("permissions");
+		obj->permissions(perms);
+
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
@@ -134,18 +140,25 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		this->add(thing);
 	}
 	else if (!strcmp(type, "action")) {
-		data->read_attrib("type", buffer, STRING_SIZE);
+		MooAction *action = NULL;
+
+		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
-		    || !(obj = moo_make_object(objtype)))
+		    || !(action = (MooAction *) moo_make_object(objtype)))
 			return(-1);
-		data->read_attrib("name", buffer, STRING_SIZE);
-		// TODO read the owner attrib and set it
+		data->read_attrib_string("name", buffer, STRING_SIZE);
+
+		moo_id_t id = data->read_attrib_integer("owner");
+		action->owner(id);
+		moo_perm_t perms = data->read_attrib_integer("permissions");
+		action->permissions(perms);
+
 		data->read_children();
-		res = obj->read_data(data);
+		res = action->read_data(data);
 		data->read_parent();
-		if ((res < 0) || (this->set_action(buffer, (MooAction *) obj) < 0)) {
+		if ((res < 0) || (this->set_action(buffer, action) < 0)) {
 			moo_status("Error loading action, %s.", buffer);
-			delete obj;
+			delete action;
 			return(-1);
 		}
 	}
@@ -153,15 +166,23 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		moo_id_t id = data->read_integer_entry();
 		this->assign_id(id);
 	}
+	else if (!strcmp(type, "parent")) {
+		moo_id_t id = data->read_integer_entry();
+		m_parent = id;
+	}
+	else if (!strcmp(type, "owner")) {
+		moo_id_t id = data->read_integer_entry();
+		this->owner(id);
+	}
+	else if (!strcmp(type, "permissions")) {
+		moo_perm_t perms = data->read_integer_entry();
+		this->permissions(perms);
+	}
 	else if (!strcmp(type, "location")) {
 		moo_id_t id = data->read_integer_entry();
 		MooThing *thing = MooThing::lookup(id);
 		if (thing)
 			thing->add(this);
-	}
-	else if (!strcmp(type, "parent")) {
-		moo_id_t id = data->read_integer_entry();
-		m_parent = id;
 	}
 	else
 		return(MOO_NOT_HANDLED);
@@ -176,6 +197,8 @@ int MooThing::write_data(MooDataFile *data)
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
 		data->write_integer_entry("parent", m_parent);
+	data->write_integer_entry("owner", this->owner());
+	data->write_integer_entry("permissions", this->permissions());
 	if (m_location)
 		data->write_integer_entry("location", m_location->m_id);
 
@@ -183,8 +206,10 @@ int MooThing::write_data(MooDataFile *data)
 	m_properties->reset();
 	while ((hentry = m_properties->next_entry())) {
 		data->write_begin_entry("property");
-		data->write_attrib("type", hentry->m_data->type_name());
-		data->write_attrib("name", hentry->m_key);
+		data->write_attrib_string("type", hentry->m_data->type_name());
+		data->write_attrib_string("name", hentry->m_key);
+		data->write_attrib_integer("owner", hentry->m_data->owner());
+		data->write_attrib_integer("permissions", hentry->m_data->permissions());
 		hentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -193,9 +218,10 @@ int MooThing::write_data(MooDataFile *data)
 	m_actions->reset();
 	while ((tentry = m_actions->next_entry())) {
 		data->write_begin_entry("action");
-		data->write_attrib("type", tentry->m_data->type_name());
-		data->write_attrib("name", tentry->m_key);
-		// TODO write owner attrib (as well as params? permissions? ??)
+		data->write_attrib_string("type", tentry->m_data->type_name());
+		data->write_attrib_string("name", tentry->m_key);
+		data->write_attrib_integer("owner", tentry->m_data->owner());
+		data->write_attrib_integer("permissions", tentry->m_data->permissions());
 		tentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -216,18 +242,26 @@ int MooThing::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooThing::init()
+{
+	//this->permissions(THING_DEFAULT_PERMISSIONS);
+
+	/// This is a rare situation where we will use the owner of the object rather than the current owner.  This
+	/// *shouldn't* make a difference here, since normally they would be the same.
+	// TODO is this call correct?
+	this->do_action("init", this->owner_thing());
+	return(0);
+}
+
 MooThing *MooThing::create(moo_id_t parent)
 {
 	MooThing *thing;
 
-	// TODO create a new object and fully initialze it
-	thing = new MooThing(-1, parent);
 	// TODO how do we know if this fails?  we should destroy the object if it does
-	thing->set_property("owner", new MooNumber(MooTask::current_owner()));
-	//thing->permissions(THING_DEFAULT_PERMISSIONS);
-
-	//thing->moveto(user, user);
-
+	// TODO check if current task owner has create permissions
+	thing = new MooThing(-1, parent);
+	thing->init();
+	thing->moveto(thing->owner_thing(), NULL);
 	return(thing);
 }
 
@@ -235,6 +269,7 @@ MooThing *MooThing::clone()
 {
 	MooThing *thing;
 
+	// TODO check if current task owner has create permissions
 	// TODO check if the parent object is cloneable
 	thing = new MooThing(-1, m_parent);
 	// TODO how do we know if this fails?  we should destroy the object if it does
@@ -242,13 +277,14 @@ MooThing *MooThing::clone()
 	// TODO copy all properties
 	// TODO copy all actions
 
-	thing->set_property("owner", new MooNumber(MooTask::current_owner()));
 	//thing->permissions(THING_DEFAULT_PERMISSIONS);
+	// TODO do we call init at any point??
 
-	//thing->moveto(user, user);
-
+	thing->moveto(thing->owner_thing(), NULL);
 	return(thing);
 }
+
+///// Property Methods /////
 
 int MooThing::set_property(const char *name, MooObject *obj)
 {
@@ -329,6 +365,8 @@ const char *MooThing::get_string_property(const char *name)
 	return(obj->m_str);
 }
 
+///// Action Methods /////
+
 int MooThing::set_action(const char *name, MooAction *action)
 {
 	if (!name || (*name == '\0'))
@@ -337,9 +375,7 @@ int MooThing::set_action(const char *name, MooAction *action)
 	/// If the action is NULL, remove the entry from the table
 	if (!action)
 		return(m_actions->remove(name));
-	// TODO should the owner be the person currently executing this comamnd (current_owner()) or the owner of the thing? or the thing
-	//	itself???
-	action->init(name, this->m_id);
+	action->init(name, this);
 	return(m_actions->set(name, action));
 }
 
@@ -378,7 +414,8 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 		args->m_result = NULL;
 		args->m_this = this;
 		args->m_action = action;
-		// TODO should 'this' here instead be action->m_owner??
+		// TODO should 'this' here instead be action->m_thing??
+		// TODO should there be something like 'this' at all?  It should now be set in the action so we can get it from there
 		return(action->do_action(this, args));
 	}
 	catch (...) {
@@ -396,7 +433,7 @@ int MooThing::do_action(const char *name, MooArgs *args)
 	return(MOO_ACTION_NOT_FOUND);
 }
 
-int MooThing::do_action(const char *name, MooUser *user, MooThing *object, MooThing *target)
+int MooThing::do_action(const char *name, MooThing *user, MooThing *object, MooThing *target)
 {
 	MooArgs args;
 	MooAction *action;
@@ -413,146 +450,26 @@ int MooThing::do_action(const char *name, MooUser *user, MooThing *object, MooTh
 	return(MOO_ACTION_NOT_FOUND);
 }
 
-
-int MooThing::add(MooThing *obj)
-{
-	if (obj->m_location == this)
-		return(0);
-	/// If this object is in another object and it can't be removed, then we don't add it
-	if (obj->m_location && obj->m_location->remove(obj))
-		return(-1);
-	obj->m_location = this;
-	obj->m_next = NULL;
-	if (m_end_objects) {
-		m_end_objects->m_next = obj;
-		m_end_objects = obj;
-	}
-	else {
-		m_objects = obj;
-		m_end_objects = obj;
-	}
-	return(0);
-}
-
-int MooThing::remove(MooThing *obj)
-{
-	MooThing *cur, *prev;
-
-	for (prev = NULL, cur = m_objects; cur; prev = cur, cur = cur->m_next) {
-		if (cur == obj) {
-			if (prev)
-				prev->m_next = cur->m_next;
-			else
-				m_objects = cur->m_next;
-			if (m_end_objects == cur)
-				m_end_objects = prev;
-			cur->m_location = NULL;
-			return(0);
-		}
-	}
-	return(1);
-}
-
-int MooThing::cryolocker_store()
-{
-	MooThing *cryolocker;
-
-	if (!(cryolocker = MooThing::reference("/core/cryolocker")))
-		return(-1);
-	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
-	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
-	if (this->m_location != cryolocker) {
-		this->set_property("last_location", m_location ? m_location->m_id : -1);
-		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
-		//	puff of smoke" or something like that
-
-		// TODO how should the quit message thing work?  where will it come from (property?)
-		this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
-		cryolocker->add(this);
-	}
-	return(0);
-}
-
-int MooThing::cryolocker_revive()
-{
-	MooThingRef *ref;
-	MooThing *cryolocker, *thing = NULL;
-
-	if (!(cryolocker = MooThing::reference("/core/cryolocker")))
-		return(-1);
-	if (this->m_location == cryolocker) {
-		if ((ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
-			thing = MooThing::lookup(ref->m_id);
-		// TODO how the fuck does the 'by' param work?
-		if (!thing || this->moveto(thing, NULL))
-			;//this->moveto("thestartinglocationwhereeverthatis")
-	}
-	return(0);
-}
-
-/**
- * Arguments:
- *	this = thing to move
- *	thing = location to move to
- *	by = ????
- */
-int MooThing::moveto(MooThing *thing, MooThing *by)
-{
-	// TODO fill this in
-	// TODO this will check permissions of via to perform the action (??) and then
-	//	call various actions on the objects to actually do the move
-
-	// TODO this should be a setting or something in the user object
-	if (this->m_location)
-		this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
-	thing->add(this);
-	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
-	return(0);
-}
-
-int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
-{
-	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
-	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
-	return(0);
-}
-
-int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const char *text)
-{
-	MooThing *cur;
-
-	for (cur = this->contents(); cur; cur = cur->next()) {
-		cur->notify(type, channel, thing, text);
-	}
-	return(0);
-}
-
-int MooThing::notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text)
-{
-	MooThing *cur;
-
-	for (cur = this->contents(); cur; cur = cur->next()) {
-		if (cur != except)
-			cur->notify(type, channel, thing, text);
-	}
-	return(0);
-}
-
-
-int MooThing::assign_id(moo_id_t id)
-{
-	/// If the thing already has an ID, then remove it from the table
-	if (this->m_id >= 0)
-		moo_thing_table->set(m_id, NULL);
-	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
-	if (moo_thing_table->set(id, this))
-		m_id = id;
-	else
-		m_id = -1;
-	return(m_id);
-}
+///// Search Methods /////
 
 MooThing *MooThing::find(const char *name)
+{
+	MooThing *thing;
+
+	if ((thing = MooThing::reference(name)))
+		return(thing);
+	else if (!strcmp(name, "me"))
+		return(this);
+	else if (!strcmp(name, "here") && m_location)
+		return(m_location);
+	else if ((thing = this->find_named(name)))
+		return(thing);
+	else if (m_location && (thing = m_location->find_named(name)))
+		return(thing);
+	return(NULL);
+}
+
+MooThing *MooThing::find_named(const char *name)
 {
 	int len;
 	MooString *str;
@@ -605,12 +522,274 @@ MooThing *MooThing::reference(const char *name)
 		MooWorld *world = MooWorld::root();
 		if (!world)
 			return(NULL);
-		return(world->find(name));
+		return(world->find_named(name));
 	}
 	else if (name[0] == '$')
 		;// TODO do some kind of lookup by variable name (where is this table?)
 	return(NULL);
 }
+
+///// Helper Methods /////
+
+int MooThing::command(const char *text)
+{
+	int i;
+	MooArgs args;
+	char buffer[LARGE_STRING_SIZE];
+
+	strcpy(buffer, text);
+	i = args.parse_whitespace(buffer);
+	args.m_action_text = &buffer[i];
+	i += args.parse_word(buffer);
+	args.m_text = &text[i];
+	args.parse_args(this, args.m_action_text, &buffer[i]);
+	return(this->command(args.m_action_text, &args));
+}
+
+int MooThing::command(const char *action, const char *text)
+{
+	MooArgs args;
+	char buffer[LARGE_STRING_SIZE];
+
+	strcpy(buffer, text);
+	args.parse_args(this, action, buffer);
+	args.m_text = text;
+	// TODO should there be a command(&args) rather than taking the action parameter?? (i guess 2 functions)
+	//	The issue appears to be that we didn't have action_text, and that action must be looked up on each
+	//	object, since we don't have a definite 'this' at this point (could be user, location, object, target)
+	return(this->command(action, &args));
+}
+
+int MooThing::command(const char *action, MooThing *object, MooThing *target)
+{
+	MooArgs args;
+
+	// TODO change this with a MooArgs method for setting
+	args.m_user = this;
+	args.m_caller = (MooThing *) this;
+	args.m_object = object;
+	args.m_target = target;
+	args.m_text = NULL;
+	return(this->command(action, &args));
+}
+
+int MooThing::command(const char *action, MooArgs *args)
+{
+	int res;
+
+	if ((res = this->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (m_location && (res = m_location->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (args->m_object && (res = args->m_object->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	if (args->m_target && (res = args->m_target->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	return(MOO_ACTION_NOT_FOUND);
+}
+
+int MooThing::print(MooArgs *args, const char *str)
+{
+	char buffer[LARGE_STRING_SIZE];
+
+	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, str);
+	return(this->notify(TNT_STATUS, NULL, NULL, buffer));
+}
+
+/*
+int MooThing::print(MooThing *channel, MooThing *thing, const char *text)
+{
+	if (!m_task)
+		return(-1);
+	return(m_task->notify(channel, thing, TNT_SAY, text));
+}
+
+int MooThing::printf(MooThing *channel, MooThing *thing, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+	va_start(va, fmt);
+	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
+	return(m_task->print(channel, thing, buffer));
+}
+
+int MooThing::print(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt)
+{
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+	// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
+	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, fmt);
+	return(m_task->print(channel, thing, buffer));
+}
+
+int MooThing::printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...)
+{
+	va_list va;
+	char buffer2[LARGE_STRING_SIZE];
+
+	if (!m_task)
+		return(-1);
+
+	{
+		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
+		char buffer1[LARGE_STRING_SIZE];
+		va_start(va, fmt);
+		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
+		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
+	}
+	return(m_task->print(channel, thing, buffer2));
+}
+*/
+
+
+int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
+	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
+	return(0);
+}
+
+int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	MooThing *cur;
+
+	for (cur = this->contents(); cur; cur = cur->next()) {
+		cur->notify(type, channel, thing, text);
+	}
+	return(0);
+}
+
+int MooThing::notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text)
+{
+	MooThing *cur;
+
+	for (cur = this->contents(); cur; cur = cur->next()) {
+		if (cur != except)
+			cur->notify(type, channel, thing, text);
+	}
+	return(0);
+}
+
+
+int MooThing::cryolocker_store()
+{
+	MooThing *cryolocker;
+
+	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
+		return(-1);
+	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
+	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
+	if (this->m_location != cryolocker) {
+		this->set_property("last_location", m_location ? m_location->m_id : -1);
+		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
+		//	puff of smoke" or something like that
+
+		// TODO how should the quit message thing work?  where will it come from (property?)
+		this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
+		cryolocker->add(this);
+	}
+	return(0);
+}
+
+int MooThing::cryolocker_revive()
+{
+	MooThingRef *ref;
+	MooThing *cryolocker, *thing = NULL;
+
+	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
+		return(-1);
+	if (this->m_location == cryolocker) {
+		if ((ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
+			thing = MooThing::lookup(ref->m_id);
+		// TODO how the fuck does the 'by' param work?
+		if (!thing || this->moveto(thing, NULL)) {
+			if ((thing = MooThing::reference(MOO_START_ROOM)))
+				this->moveto(thing, NULL);
+		}
+	}
+	return(0);
+}
+
+/**
+ * Arguments:
+ *	this = thing to move
+ *	thing = location to move to
+ *	by = ????
+ */
+int MooThing::moveto(MooThing *thing, MooThing *by)
+{
+	// TODO fill this in
+	// TODO this will check permissions of via to perform the action (??) and then
+	//	call various actions on the objects to actually do the move
+
+	// TODO this should be a setting or something in the user object
+	if (this->m_location)
+		this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
+	thing->add(this);
+	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
+	return(0);
+}
+
+int MooThing::assign_id(moo_id_t id)
+{
+	/// If the thing already has an ID, then remove it from the table
+	if (this->m_id >= 0)
+		moo_thing_table->set(m_id, NULL);
+	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
+	if (moo_thing_table->set(id, this))
+		m_id = id;
+	else {
+		m_id = -1;
+		moo_status("Error: Attempted to reassign ID, %d", id);
+	}
+	return(m_id);
+}
+
+int MooThing::add(MooThing *obj)
+{
+	if (obj->m_location == this)
+		return(0);
+	/// If this object is in another object and it can't be removed, then we don't add it
+	if (obj->m_location && obj->m_location->remove(obj))
+		return(-1);
+	obj->m_location = this;
+	obj->m_next = NULL;
+	if (m_end_objects) {
+		m_end_objects->m_next = obj;
+		m_end_objects = obj;
+	}
+	else {
+		m_objects = obj;
+		m_end_objects = obj;
+	}
+	return(0);
+}
+
+int MooThing::remove(MooThing *obj)
+{
+	MooThing *cur, *prev;
+
+	for (prev = NULL, cur = m_objects; cur; prev = cur, cur = cur->m_next) {
+		if (cur == obj) {
+			if (prev)
+				prev->m_next = cur->m_next;
+			else
+				m_objects = cur->m_next;
+			if (m_end_objects == cur)
+				m_end_objects = prev;
+			cur->m_location = NULL;
+			return(0);
+		}
+	}
+	return(1);
+}
+
+///// String Parsers /////
 
 /**
  * Format a string using the given fmt string and place the resulting

@@ -11,6 +11,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
+#include <sdm/actions/action.h>
 #include <sdm/interfaces/interface.h>
 
 MooObjectType moo_task_obj_type = {
@@ -20,6 +21,7 @@ MooObjectType moo_task_obj_type = {
 	(moo_type_create_t) NULL
 };
 
+static moo_id_t g_current_owner = -1;
 static MooTask *g_current_task = NULL;
 static MooArray<MooTask *> *g_task_list = NULL;
 
@@ -39,19 +41,16 @@ void release_task(void)
 MooTask::MooTask()
 {
 	m_tid = g_task_list->add(this);
-	if (g_current_task) {
-		m_owner = g_current_task->m_owner;
+	if (g_current_task)
 		m_parent_tid = g_current_task->m_tid;
-	}
-	else {
-		m_owner = 0;
+	else
 		m_parent_tid = -1;
-	}
 }
 
 MooTask::~MooTask()
 {
 	if (this == g_current_task)
+		// TODO should you also modify owner?
 		g_current_task = NULL;
 	g_task_list->set(m_tid, NULL);
 }
@@ -62,13 +61,36 @@ int MooTask::bestow(MooInterface *inter)
 	return(-1);
 }
 
-moo_id_t MooTask::owner(moo_id_t id)
+int MooTask::elevated_do_action(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	if (id > 0) {
-		// TODO do check for if current task has permissions to set the owner to this
-		m_owner = id;
+	int res;
+	MooTask *prev_task;
+	moo_id_t prev_owner;
+
+	if (!action)
+		return(-1);
+	/// We save the current task and when we restore the owner, we make sure the same task is running, so that we don't
+	/// accidentally change the owner for a different task, giving it erronous permissions
+	prev_task = MooTask::current_task();
+	prev_owner = MooTask::current_owner();
+	MooTask::current_owner(action->owner());
+	try {
+		res = action->do_action(thing, args);
 	}
-	return(m_owner);
+	catch (int e) {
+		MooTask::current_owner(prev_owner);
+		throw e;
+	}
+	catch (MooException e) {
+		MooTask::current_owner(prev_owner);
+		throw e;
+	}
+	catch (...) {
+		MooTask::current_owner(prev_owner);
+		throw MooException("Error in elevated do_action");
+	}
+	MooTask::current_owner(prev_owner);
+	return(res);
 }
 
 int MooTask::switch_handle(MooInterface *inter, int ready)
@@ -84,14 +106,28 @@ MooTask *MooTask::current_task()
 
 moo_id_t MooTask::current_owner()
 {
-	if (!g_current_task)
-		return(-1);
-	return(g_current_task->m_owner);
+	return(g_current_owner);
+}
+
+moo_id_t MooTask::current_owner(moo_id_t id)
+{
+	g_current_owner = id;
+	return(g_current_owner);
+}
+
+moo_id_t MooTask::current_owner(MooTask *task, moo_id_t id)
+{
+	if (g_current_task != task)
+		return(g_current_owner);
+	g_current_owner = id;
+	return(g_current_owner);
 }
 
 int MooTask::switch_task(MooTask *task)
 {
 	g_current_task = task;
+	if (task)
+		g_current_owner = task->owner();
 	return(0);
 }
 

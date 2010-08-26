@@ -19,6 +19,8 @@ class MooThingRef : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+
+	MooThing *get() { return(MooThing::lookup(m_id)); }
 };
 
 extern MooObjectType moo_thingref_obj_type;

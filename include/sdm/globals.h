@@ -25,6 +25,15 @@ typedef int (*callback_t)(void *, void *);
 	for (; ((str)[(i)] == ' ') || ((str)[(i)] == '\t'); (i)++) ;
 
 typedef int moo_id_t;
+typedef int moo_perm_t;
+
+// TODO do remaining
+#define MOO_PERM_R		0x01
+
+#define MOO_DEFAULT_PERMS	MOO_PERM_R /* TODO what are the defaults */
+
+#define SBIT(bits, flag)	( (bits) |= (flag) )
+#define RBIT(bits, flag)	( (bits) &= ~(flag) )
 
 #endif
 

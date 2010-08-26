@@ -18,6 +18,7 @@ namespace MooIRC {
 
 #define IRC_BF_WELCOMED		0x0001
 #define IRC_BF_RECEIVED_USER	0x0002
+#define IRC_BF_NOT_IN_REALM	0x0004
 
 
 class PseudoServ : public MooTask {
@@ -52,11 +53,13 @@ class PseudoServ : public MooTask {
     protected:
 	int welcomed() { return(m_bits & IRC_BF_WELCOMED); }
 	int received_user() { return(m_bits & IRC_BF_RECEIVED_USER); }
+	int in_realm() { return(!(m_bits & IRC_BF_NOT_IN_REALM)); }
+	int not_in_realm() { return(m_bits & IRC_BF_NOT_IN_REALM); }
 
 	int login();
 	int send_welcome();
-	int join(const char *name);
-	int part(const char *name);
+	int send_join(const char *name);
+	int send_part(const char *name);
 	int send_names(const char *name);
 
 	int format(char *buffer, int max, const char *str);

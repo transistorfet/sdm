@@ -25,12 +25,10 @@ class MooUser : public MooThing {
 	std::string *m_name;
 
     public:
-	const char *name() { return(m_name->c_str()); }
-
-    public:
 	MooUser(const char *name, int bits = 0, moo_id_t id = -1, moo_id_t parent = 0);
 	virtual ~MooUser();
 	static MooUser *make_guest(const char *name);
+	int convert_guest();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -40,24 +38,18 @@ class MooUser : public MooThing {
 	int connect(MooTask *task);
 	void disconnect();
 
-	int command(const char *text);
-	int command(const char *action, const char *text);
-	int command(const char *action, MooThing *object, MooThing *target);
-	int command(const char *action, MooArgs *args);
-	MooThing *find_thing(const char *name);
-	int print(MooArgs *args, const char *text);
-	//int print(MooThing *channel, MooThing *thing, const char *text);
-	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
-	//int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
-	//int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
 	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
 
+	/// Authentication Methods
 	static int exists(const char *name);
 	static int logged_in(const char *name);
 	static int valid_username(const char *name);
-	static MooUser *register_new(const char *name, ...);
 	static MooUser *login(const char *name, const char *passwd);
 	static void encrypt_password(const char *salt, char *passwd, int max);
+
+    public:
+	/// Accessors
+	const char *name() { return(m_name->c_str()); }
 };
 
 extern MooObjectType moo_user_obj_type;

@@ -41,7 +41,6 @@ class MooArray {
 	void resize(int size);
 };
 
-
 template<typename T>
 MooArray<T>::MooArray(int size, int max, int bits)
 {

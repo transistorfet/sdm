@@ -9,7 +9,9 @@
 #include <sdm/misc.h>
 #include <sdm/hash.h>
 #include <sdm/memory.h>
+#include <sdm/globals.h>
 
+#include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
 
 #define TYPE_INIT_SIZE		32
@@ -88,6 +90,8 @@ MooObject *moo_make_object(const MooObjectType *type)
 MooObject::MooObject()
 {
 	m_delete = 0;
+	m_owner = MooTask::current_owner();
+	m_permissions = MOO_DEFAULT_PERMS;
 }
 
 const MooObjectType *MooObject::type()
@@ -147,5 +151,16 @@ int MooObject::read_data(MooDataFile *data)
 	/// We return if the file loaded incorrectly but we don't stop trying to load the file
 	return(error);
 }
+
+moo_id_t MooObject::owner(moo_id_t id)
+{
+	return(m_owner = id);
+}
+
+moo_perm_t MooObject::permissions(moo_perm_t perms)
+{
+	return(m_permissions = perms);
+}
+
 
 

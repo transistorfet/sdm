@@ -69,7 +69,7 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin(moo_action_t func, const char *name, moo_id_t owner) : MooAction(name, owner)
+MooBuiltin::MooBuiltin(moo_action_t func, const char *name, MooThing* thing) : MooAction(name, thing)
 {
 	m_func = func;
 	m_master = NULL;
