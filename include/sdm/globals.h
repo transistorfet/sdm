@@ -27,10 +27,15 @@ typedef int (*callback_t)(void *, void *);
 typedef int moo_id_t;
 typedef int moo_perm_t;
 
-// TODO do remaining
-#define MOO_PERM_R		0x01
+#define MOO_PERM_EX		0001
+#define MOO_PERM_EW		0002
+#define MOO_PERM_ER		0004
+#define MOO_PERM_OX		0010
+#define MOO_PERM_OW		0020
+#define MOO_PERM_OR		0040
+#define MOO_PERM_SUID		0100
 
-#define MOO_DEFAULT_PERMS	MOO_PERM_R /* TODO what are the defaults */
+#define MOO_DEFAULT_PERMS	0075
 
 #define SBIT(bits, flag)	( (bits) |= (flag) )
 #define RBIT(bits, flag)	( (bits) &= ~(flag) )

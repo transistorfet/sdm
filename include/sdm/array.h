@@ -22,6 +22,7 @@
 
 template<typename T>
 class MooArray : public MooObject {
+    protected:
 	int m_bits;
 	int m_size;
 	int m_max;
@@ -30,9 +31,9 @@ class MooArray : public MooObject {
 
     public:
 	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
-	~MooArray();
-	int read_entry(const char *name, MooDataFile *data);
-	int write_data(MooDataFile *data);
+	virtual ~MooArray();
+	int read_entry(const char *name, MooDataFile *data) { return(MOO_NOT_HANDLED); }
+	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int size() { return(m_size); }
 	int next_space() { return(m_next_space); }
 
@@ -45,7 +46,13 @@ class MooArray : public MooObject {
 	void resize(int size);
 };
 
-typedef MooArray<MooObject *> MooObjectArray;
+class MooObjectArray : public MooArray<MooObject *> {
+    public:
+	MooObjectArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
+
+	int read_entry(const char *name, MooDataFile *data);
+	int write_data(MooDataFile *data);
+};
 
 extern MooObjectType moo_array_obj_type;
 MooObject *moo_array_create(void);
@@ -73,21 +80,6 @@ MooArray<T>::~MooArray()
 		}
 	}
 	memory_free(m_data);
-}
-
-template<typename T>
-int MooArray<T>::read_entry(const char *name, MooDataFile *data)
-{
-	// TODO read all entries into the array
-	// <entry index="num"><value type="string" owner="93" permissions="0">VALUE</value></entry>
-	return(MOO_HANDLED);
-}
-
-template<typename T>
-int MooArray<T>::write_data(MooDataFile *data)
-{
-	// TODO write all entries in the array
-	return(0);
 }
 
 template<typename T>

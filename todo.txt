@@ -150,10 +150,8 @@
 	* create 'init' actions for user, room, etc objects
 	* should you convert some functions to using a moo_id_t rather than a thing pointer?  It would require an extra lookup in
 	  exchange for allowing error checking (NULL checks in particular) to be moved to other functions
+	* add a 'last' member to array (for looping through arrays)
 
-	* actions permissions (lambdamoo 'rwxd') property permissions??  SUID bit?
-	* we are thinking about permissions as ints directly in objects...  Lambda treats objects like dirs and prop/verbs as files,
-	  permissions-wise.
 	* fill in owner and permissions values in the existing XML files
 	* add various permissions flags and their meaning
 	* add permissions checking functions of some kind
