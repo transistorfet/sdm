@@ -6,6 +6,8 @@
   <id>50</id>
   <parent>10</parent>
   <location>1</location>
+  <owner>7</owner>
+  <permissions>075</permissions>
   <property type="string" name="name">start</property>
   <property type="string" name="description">You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</property>
   <property type="string" name="title">The Test Room</property>
@@ -13,6 +15,8 @@
    <id>51</id>
    <parent>11</parent>
    <location>50</location>
+   <owner>7</owner>
+   <permissions>075</permissions>
    <property type="string" name="title">North</property>
    <property type="thingref" name="target">55</property>
    <property type="string" name="brief">A typical looking wooden doorway</property>
@@ -24,12 +28,16 @@
   <id>55</id>
   <parent>10</parent>
   <location>1</location>
+  <owner>7</owner>
+  <permissions>075</permissions>
   <property type="string" name="description">You are in some kind of lounge area. There is an old couch against one wall with a fridge, microwave and countertop on the opposite wall.</property>
   <property type="string" name="title">The Lounge</property>
   <thing>
    <id>56</id>
    <parent>11</parent>
    <location>55</location>
+   <owner>7</owner>
+   <permissions>075</permissions>
    <property type="string" name="title">South</property>
    <property type="thingref" name="target">50</property>
    <property type="string" name="brief">A strange looking curved hallway</property>

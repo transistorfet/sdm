@@ -26,6 +26,7 @@ class MooArray : public MooObject {
 	int m_bits;
 	int m_size;
 	int m_max;
+	int m_last;
 	int m_next_space;
 	T *m_data;
 
@@ -34,8 +35,6 @@ class MooArray : public MooObject {
 	virtual ~MooArray();
 	int read_entry(const char *name, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
-	int size() { return(m_size); }
-	int next_space() { return(m_next_space); }
 
 	T operator[] (int index);
 	T get(int index);
@@ -44,6 +43,12 @@ class MooArray : public MooObject {
 	int remove(T value);
 
 	void resize(int size);
+
+    public:
+	/// Accessors
+	int size() { return(m_size); }
+	int last() { return(m_last); }
+	int next_space() { return(m_next_space); }
 };
 
 class MooObjectArray : public MooArray<MooObject *> {
@@ -63,6 +68,7 @@ MooArray<T>::MooArray(int size, int max, int bits)
 	m_bits = bits;
 	m_size = 0;
 	m_max = max;
+	m_last = 0;
 	m_next_space = 0;
 	m_data = NULL;
 	this->resize(size);
@@ -116,12 +122,20 @@ T MooArray<T>::set(int index, T value)
 	}
 	m_data[index] = value;
 
-	/// Update the next_space value accordingly
+	/// Update the next_space and last values accordingly
 	if (!value) {
 		if (index < m_next_space)
 			m_next_space = index;
+		if (index == m_last) {
+			for (; m_last > 0; m_last--) {
+				if (m_data[m_last])
+					break;
+			}
+		}
 	}
 	else {
+		if (index > m_last)
+			m_last = index;
 		for (; m_next_space < m_size; m_next_space++) {
 			if (!m_data[m_next_space])
 				break;
@@ -149,11 +163,7 @@ int MooArray<T>::remove(T value)
 
 	for (i = 0; i < m_size; i++) {
 		if (m_data[i] == value) {
-			if (m_bits & MOO_ABF_DELETE)
-				delete m_data[i];
-			m_data[i] = NULL;
-			if (i < m_next_space)
-				m_next_space = i;
+			this->set(i, NULL);
 			return(1);
 		}
 	}

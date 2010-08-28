@@ -17,6 +17,7 @@
 
 MooException moo_mem_error("Out of Memory");
 MooException moo_closed("Connection closed by remote end.");
+MooException moo_permissions("Permission denied");
 MooException moo_unknown("Unknown error");
 
 MooException::MooException(const char *msg, ...)

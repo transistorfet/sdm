@@ -53,6 +53,9 @@ class MooObject {
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
 	virtual int write_data(MooDataFile *data) = 0;
 
+	void check_throw(moo_perm_t perms);
+	int check(moo_perm_t perms);
+
     public:
 	/// Accessors
 	moo_id_t owner() { return(m_owner); }
@@ -62,9 +65,6 @@ class MooObject {
     public:
 	moo_id_t owner(moo_id_t id);
 	moo_perm_t permissions(moo_perm_t perms);
-
-	// TODO add permissions checking functions here?
-	//int check_permissions(moo_perm_t perms, moo_id_t id = -1);
 
     protected:
 	int is_deleting() { return(m_delete); }

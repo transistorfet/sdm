@@ -159,7 +159,7 @@ long int MooDataFile::read_attrib_integer(const char *name)
 	long int num;
 
 	if (this->current && (value = xmlGetProp(this->current, (xmlChar *) name))) {
-		num = atol((char *) value);
+		num = strtol((char *) value, NULL, 0);
 		xmlFree(value);
 		return(num);
 	}
@@ -172,7 +172,7 @@ double MooDataFile::read_attrib_float(const char *name)
 	double num;
 
 	if (this->current && (value = xmlGetProp(this->current, (xmlChar *) name))) {
-		num = atof((char *) value);
+		num = strtod((char *) value, NULL);
 		xmlFree(value);
 		return(num);
 	}
@@ -199,7 +199,7 @@ long int MooDataFile::read_integer()
 	long int num;
 
 	if (this->current && (str = (char *) xmlNodeListGetString(this->doc, this->current, 1))) {
-		num = atol(str);
+		num = strtol(str, NULL, 0);
 		xmlFree(str);
 		return(num);
 	}
@@ -212,7 +212,7 @@ double MooDataFile::read_float()
 	double num;
 
 	if (this->current && (str = (char *) xmlNodeListGetString(this->doc, this->current, 1))) {
-		num = atof(str);
+		num = strtod(str, NULL);
 		xmlFree(str);
 		return(num);
 	}
@@ -254,7 +254,7 @@ long int MooDataFile::read_integer_entry()
 	long int num;
 
 	if (this->current && (str = (char *) xmlNodeListGetString(this->doc, this->current->children, 1))) {
-		num = atol(str);
+		num = strtol(str, NULL, 0);
 		xmlFree(str);
 		return(num);
 	}
@@ -267,7 +267,7 @@ double MooDataFile::read_float_entry()
 	double num;
 
 	if (this->current && (str = (char *) xmlNodeListGetString(this->doc, this->current->children, 1))) {
-		num = atof(str);
+		num = strtod(str, NULL);
 		xmlFree(str);
 		return(num);
 	}

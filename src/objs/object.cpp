@@ -152,6 +152,24 @@ int MooObject::read_data(MooDataFile *data)
 	return(error);
 }
 
+void MooObject::check_throw(moo_perm_t perms)
+{
+	if (!this->check(perms))
+		throw moo_permissions;
+}
+
+int MooObject::check(moo_perm_t perms)
+{
+	int tmp;
+
+	if (m_owner == MooTask::current_owner())
+		perms <<= 3;
+	tmp = m_permissions & perms;
+	if (tmp == perms)
+		return(1);
+	return(0);
+}
+
 moo_id_t MooObject::owner(moo_id_t id)
 {
 	return(m_owner = id);
@@ -159,6 +177,10 @@ moo_id_t MooObject::owner(moo_id_t id)
 
 moo_perm_t MooObject::permissions(moo_perm_t perms)
 {
+	// TODO this really sucks.  perms of 0 are invalid.  This is here because when you load perms from XML, if the
+	//	tag is not there, it will read as 0, but if perms are not specified, we should assume default_perms
+	if (!perms)
+		perms = MOO_DEFAULT_PERMS;
 	return(m_permissions = perms);
 }
 

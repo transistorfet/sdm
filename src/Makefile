@@ -222,7 +222,7 @@ interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/objs/object.h \
 objs/array.o: objs/array.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h
+  ../include/sdm/misc.h ../include/sdm/array.h
 
 objs/config.o: objs/config.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

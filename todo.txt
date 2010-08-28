@@ -121,6 +121,15 @@
 	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
 	  behaviour of the table much.
 
+	* you could have a hash table in a property that you can easily look up values in, such that you can store all game stats
+	  in there.
+	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
+	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
+	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
+	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
+	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
+	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
+
 	* check out Smaug's system/socials.dat.  It has various premade commands for interaction which don't actually do anything
 	  other than print various messages to various people but would make a great addition.  Find out what each line is for
 	  (it's able to print different messages to different people/objects) and also what variables are available for expansion in

@@ -27,6 +27,10 @@ typedef int (*callback_t)(void *, void *);
 typedef int moo_id_t;
 typedef int moo_perm_t;
 
+#define MOO_PERM_X		0001
+#define MOO_PERM_W		0002
+#define MOO_PERM_R		0004
+
 #define MOO_PERM_EX		0001
 #define MOO_PERM_EW		0002
 #define MOO_PERM_ER		0004

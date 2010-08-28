@@ -194,6 +194,7 @@ int MooUser::notify(int type, MooThing *channel, MooThing *thing, const char *te
 {
 	if (!m_task)
 		return(-1);
+	// TODO permissions check!? I guess on task
 	return(m_task->notify(type, channel, thing, text));
 }
 

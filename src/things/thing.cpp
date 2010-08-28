@@ -408,19 +408,29 @@ MooAction *MooThing::get_action_partial(const char *name)
 int MooThing::do_action(MooAction *action, MooArgs *args)
 {
 	try {
-		// TODO add permissions checks
+		action->check_throw(MOO_PERM_X);
+
 		// TODO is this right, deleting the result if it's present?
 		if (args->m_result)
 			delete args->m_result;
 		args->m_result = NULL;
 		args->m_this = this;
 		args->m_action = action;
-		// TODO should 'this' here instead be action->m_thing??
-		// TODO should there be something like 'this' at all?  It should now be set in the action so we can get it from there
-		return(action->do_action(this, args));
+
+		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
+		//	It should now be set in the action so we can get it from there
+		if (action->permissions() & MOO_PERM_SUID)
+			return(MooTask::elevated_do_action(action, this, args));
+		else
+			return(action->do_action(this, args));
+	}
+	catch (MooException e) {
+		moo_status("ACTION: (%s) %s", action->name(), e.get());
+		// TODO should it print this message to the user, also?
+		return(-1);
 	}
 	catch (...) {
-		moo_status("%s: An unspecified error has occured", action);
+		moo_status("%s: An unspecified error has occured", action->name());
 		return(-1);
 	}
 }
@@ -650,6 +660,7 @@ int MooThing::printf(MooThing *channel, MooThing *thing, MooArgs *args, const ch
 
 int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
 {
+	// TODO permissions check!?!?
 	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
 	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
 	return(0);
