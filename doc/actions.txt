@@ -110,3 +110,18 @@ whisper
 ooc
 
 
+- look
+	look at room: "Soandso glances around the room."
+	look at exit: "Soandso glances east."
+	look at person: "Soandso checks you out."
+	look at thing: "Soandso examines a $this.name inquizitively"
+	look at self: "Soandso looks at himself, checking for spilt food."
+	- look_
+
+- move
+	should depend on the exit
+- get/put
+	should depend on the object
+	should have both failed and succeeded sets
+
+

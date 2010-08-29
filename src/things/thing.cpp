@@ -78,7 +78,7 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 			m_id = -1;
 	}
 	else if (m_id == MOO_NEW_ID)
-		moo_thing_table->add(this);
+		m_id = moo_thing_table->add(this);
 	m_parent = parent;
 	m_location = NULL;
 	m_next = NULL;
@@ -112,6 +112,8 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	const MooObjectType *objtype;
 
 	if (!strcmp(type, "property")) {
+		// TODO add status messages when loading a property fails.  It should never fail and if it does, it will
+		//	otherwise get silently 'delete' when the XML is written back
 		MooObject *obj = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
@@ -119,12 +121,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		data->read_attrib_string("name", buffer, STRING_SIZE);
 		if (!(obj = moo_make_object(objtype)))
 			return(-1);
-
-		moo_id_t id = data->read_attrib_integer("owner");
-		obj->owner(id);
-		moo_perm_t perms = data->read_attrib_integer("permissions");
-		obj->permissions(perms);
-
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
@@ -141,19 +137,14 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		this->add(thing);
 	}
 	else if (!strcmp(type, "action")) {
+		// TODO add status messages when loading a property fails.  It should never fail and if it does, it will
+		//	otherwise get silently 'delete' when the XML is written back
 		MooAction *action = NULL;
-
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
 		    || !(action = (MooAction *) moo_make_object(objtype)))
 			return(-1);
 		data->read_attrib_string("name", buffer, STRING_SIZE);
-
-		moo_id_t id = data->read_attrib_integer("owner");
-		action->owner(id);
-		moo_perm_t perms = data->read_attrib_integer("permissions");
-		action->permissions(perms);
-
 		data->read_children();
 		res = action->read_data(data);
 		data->read_parent();
@@ -171,14 +162,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		moo_id_t id = data->read_integer_entry();
 		m_parent = id;
 	}
-	else if (!strcmp(type, "owner")) {
-		moo_id_t id = data->read_integer_entry();
-		this->owner(id);
-	}
-	else if (!strcmp(type, "permissions")) {
-		moo_perm_t perms = data->read_integer_entry();
-		this->permissions(perms);
-	}
 	else if (!strcmp(type, "location")) {
 		moo_id_t id = data->read_integer_entry();
 		MooThing *thing = MooThing::lookup(id);
@@ -186,7 +169,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			thing->add(this);
 	}
 	else
-		return(MOO_NOT_HANDLED);
+		return(MooObject::read_entry(type, data));
 	return(MOO_HANDLED);
 }
 
@@ -198,8 +181,7 @@ int MooThing::write_data(MooDataFile *data)
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
 		data->write_integer_entry("parent", m_parent);
-	data->write_integer_entry("owner", this->owner());
-	data->write_integer_entry("permissions", this->permissions());
+	MooObject::write_data(data);
 	if (m_location)
 		data->write_integer_entry("location", m_location->m_id);
 
@@ -209,8 +191,6 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_begin_entry("property");
 		data->write_attrib_string("type", hentry->m_data->type_name());
 		data->write_attrib_string("name", hentry->m_key);
-		data->write_attrib_integer("owner", hentry->m_data->owner());
-		data->write_attrib_integer("permissions", hentry->m_data->permissions());
 		hentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -221,8 +201,6 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_begin_entry("action");
 		data->write_attrib_string("type", tentry->m_data->type_name());
 		data->write_attrib_string("name", tentry->m_key);
-		data->write_attrib_integer("owner", tentry->m_data->owner());
-		data->write_attrib_integer("permissions", tentry->m_data->permissions());
 		tentry->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -260,7 +238,7 @@ MooThing *MooThing::create(moo_id_t parent)
 
 	// TODO how do we know if this fails?  we should destroy the object if it does
 	// TODO check if current task owner has create permissions
-	thing = new MooThing(-1, parent);
+	thing = new MooThing(MOO_NEW_ID, parent);
 	thing->init();
 	thing->moveto(thing->owner_thing(), NULL);
 	return(thing);
@@ -272,7 +250,7 @@ MooThing *MooThing::clone()
 
 	// TODO check if current task owner has create permissions
 	// TODO check if the parent object is cloneable
-	thing = new MooThing(-1, m_parent);
+	thing = new MooThing(MOO_NEW_ID, m_parent);
 	// TODO how do we know if this fails?  we should destroy the object if it does
 
 	// TODO copy all properties
@@ -331,7 +309,7 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if (!(obj = m_properties->get(name)))
+		if (!(obj = cur->m_properties->get(name)))
 			continue;
 		if (!type || obj->is_a(type))
 			return(obj);
@@ -499,6 +477,8 @@ MooThing *MooThing::find_named(const char *name)
 			len = end - name;
 		else
 			len = strlen(name);
+		if (len <= 0)
+			return(NULL);
 		for (cur = thing->m_objects; cur; cur = cur->m_next) {
 			// TODO modify this to use the aliases list or something
 			if (!(str = (MooString *) cur->get_property("name", &moo_string_obj_type)))
@@ -637,14 +617,12 @@ int MooThing::print(MooThing *channel, MooThing *thing, MooArgs *args, const cha
 	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, fmt);
 	return(m_task->print(channel, thing, buffer));
 }
+*/
 
-int MooThing::printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...)
+int MooThing::printf(MooArgs *args, const char *fmt, ...)
 {
 	va_list va;
 	char buffer2[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
 
 	{
 		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
@@ -653,9 +631,8 @@ int MooThing::printf(MooThing *channel, MooThing *thing, MooArgs *args, const ch
 		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
 		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
 	}
-	return(m_task->print(channel, thing, buffer2));
+	return(this->notify(TNT_STATUS, NULL, NULL, buffer2));
 }
-*/
 
 
 int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
@@ -702,7 +679,8 @@ int MooThing::cryolocker_store()
 		//	puff of smoke" or something like that
 
 		// TODO how should the quit message thing work?  where will it come from (property?)
-		this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
+		if (this->m_location)
+			this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
 		cryolocker->add(this);
 	}
 	return(0);

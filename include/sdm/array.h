@@ -33,7 +33,7 @@ class MooArray : public MooObject {
     public:
 	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
 	virtual ~MooArray();
-	int read_entry(const char *name, MooDataFile *data) { return(MOO_NOT_HANDLED); }
+	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
 	T operator[] (int index);
@@ -55,7 +55,7 @@ class MooObjectArray : public MooArray<MooObject *> {
     public:
 	MooObjectArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
 
-	int read_entry(const char *name, MooDataFile *data);
+	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);
 };
 

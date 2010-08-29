@@ -24,7 +24,6 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_look_self(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_direction(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_do_leave(MooAction *action, MooThing *thing, MooArgs *args);
@@ -35,7 +34,6 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 	actions->set("room_emote", new MooBuiltin(room_emote));
 	actions->set("room_whisper", new MooBuiltin(room_whisper));
 	actions->set("room_look", new MooBuiltin(room_look));
-	actions->set("room_look_self", new MooBuiltin(room_look_self));
 	actions->set("room_direction", new MooBuiltin(room_direction));
 	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
 	actions->set("room_do_leave", new MooBuiltin(room_do_leave));
@@ -87,33 +85,12 @@ static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 {
-/*
-	// TODO should this be limited to only looking at objects that are near the user (right now, you
-	//	can specify an object number and get the view there without being in that room)
-	if (*args->text == '\0')
-		args->obj = thing;
-	else if (sdm_interpreter_parse_args(args, 1) < 0) {
-		sdm_notify(args->caller, args, "You don't see that here.\n");
-		return(0);
-	}
-	sdm_do_nil_action(args->obj, args->caller, "look_self");
-*/
-	return(0);
-}
-
-static int room_look_self(MooAction *action, MooThing *thing, MooArgs *args)
-{
-/*
-	struct sdm_thing *cur;
-
-	sdm_notify(args->caller, args, "<brightyellow>$thing.title</brightyellow>\n");
-	sdm_notify(args->caller, args, "<brightgreen>$thing.description</brightgreen>\n");
-	for (cur = thing->objects; cur; cur = cur->next) {
-		if (cur == args->caller)
-			continue;
-		sdm_do_nil_action(cur, args->caller, "tell_view");
-	}
-*/
+	// TODO check if room is dark, etc?
+	// TODO proximity check on object??? so you can't look at public things far away
+	if (!args->m_object)
+		args->m_object = args->m_this;
+	// TODO notify all the people in the room that you are looking at something (should this be here or in look_self?)
+	args->m_object->do_action("look_self", args);
 	return(0);
 }
 

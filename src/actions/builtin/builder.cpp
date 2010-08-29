@@ -13,12 +13,14 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/world.h>
 #include <sdm/actions/builtin/builtin.h>
 
 static int builder_create(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_set(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_save(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_builder_actions(MooBuiltinHash *actions)
 {
@@ -26,16 +28,10 @@ int moo_load_builder_actions(MooBuiltinHash *actions)
 	actions->set("builder_create_room", new MooBuiltin(builder_create_room));
 	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
 	actions->set("builder_set", new MooBuiltin(builder_set));
+	actions->set("builder_save", new MooBuiltin(builder_save));
 	return(0);
 }
 
-/**
- * Create a builtin object given a parent object and an optional name
- *	caller:		creator of the object
- *	thing:		not used
- *	target:		not used
- *	args:		not used
- */
 static int builder_create(MooAction *action, MooThing *thing, MooArgs *args)
 {
 /*
@@ -131,5 +127,16 @@ static int builder_set(MooAction *action, MooThing *thing, MooArgs *args)
 */
 	return(0);
 }
+
+static int builder_save(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooWorld *root;
+
+	if (!(root = MooWorld::root()))
+		return(-1);
+	root->write();
+	return(0);
+}
+
 
 

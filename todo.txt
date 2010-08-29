@@ -14,6 +14,9 @@
 	* for lua, why can't you just make a bunch of special "types" which are just tables with functions and a pointer to the raw
 	  internal data value (like MooThing *, or whatever) and the functions are c functions that get the raw pointer and do raw
 	  manipulations on it
+	* make it possible to play multiple characters at once, perhaps by having a special channel with the character's name
+	  and use it as the control, like #realm for that character.  There could be a limit of 4 or so concurrent character logins
+	  per connection.  You could be able to control a whole party through different channel windows.
 
     Discussion:
 
@@ -35,16 +38,12 @@
 
 	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
 	  on which the action was called (which m_thing would be set to in the args anyways)?
-	* we should add various checky things to MooAction like the number of args that are acceptable and stuff so that we can do
-	  checking
 	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
 	  MooObject value, or to the value embedded in the object in MooThing itself so that it is easy for C stuff to access directly
 	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
-	* you could have a function like user->tell(thing, str) or something that looks up the action and calls it (which would most
-	  likely be directed to user->print() but would allow it to be reprogrammed)
 	* should there be a function (in builtins) that creates either a special root object (for various types, like room, channel, etc)
 	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
 	  subobject which inherits from the core object?
@@ -107,19 +106,10 @@
 	  user's new status, which causes it to remove the user from the list of users and send disconnect notices to each user in
 	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
 
-	* we could have a number of methods on MooThing which directly call actions (like notify(), announce(), etc)
 	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
 
-	* at some point we should rethink about MooArgs, and the ability to pass multiple parameters, specifically, being able to
-	  have an action like notify(channel, user, type_num, string) (a static array of MooObjects??)
-
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-
-	* can array (and hash and tree, and also list) all be MooObject subclasses so that they can be ... treated like
-	  MooObjects.  I'm not entirely sure of the point of this and so on. (it would allow these to be MooThing properties, so
-	  that they can be read from/written to data files automatically and stuff.  It shouldn't actually effect the size or
-	  behaviour of the table much.
 
 	* you could have a hash table in a property that you can easily look up values in, such that you can store all game stats
 	  in there.
@@ -139,33 +129,40 @@
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
-	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
+	* implement the aliases system for names???  And sort out the whole title vs name thing
+	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
+	* make MooObjectHash and MooObjectTree, and convert MooThing to use them (and their automagic saving functionality)
 
 	* modify the handle() function to do something like close the interface if an error occurs?
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
-
 	* sort out and make better use of exceptions (in do_action in particular).  You can't catch a segfault but you can throw
 	  exceptions when certain functions would otherwise return a NULL.  You could alternativley have an TRY() macro or something
 	  which runs the function and throws -1 if it returns a value less than 0 (what about NULL...  NULLCHK() )
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
-	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
-	  preposition, target)
-	* add a 'register' and 'login' commands to basics
-	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
-	  replace object and target perhaps).  That would allow better parameter passing
-	* finish the guest user creation function
-	* create 'init' actions for user, room, etc objects
 	* should you convert some functions to using a moo_id_t rather than a thing pointer?  It would require an extra lookup in
 	  exchange for allowing error checking (NULL checks in particular) to be moved to other functions
-	* add a 'last' member to array (for looping through arrays)
+
+
+	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
+	  preposition, target)
+	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
+	  replace object and target perhaps).  That would allow better parameter passing
+	* make the world save correctly (it infinite loops when writing world)
+	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
+	* rethink the whole message printing system, in response to events.  You could probably make it super generic... Or should you
+	  even bother?
+	* parsing is kinda funny. Should it parse 'say' messages no matter what, even if it's from IRC and we know it's a 'say'??
+	* when parsing args, there must be a way so that if an object name is given but doesn't match anything, an error occurs
+	  instead of doing the action as if no object was specified ('.look foobar' current 'look's at the room)
+	* create 'init' actions for user, room, etc objects
+	* what causes the "IRSSI join to #realm was synced" message (it takes forever to appear but should appear right away)
+	* add a 'register' and 'login' commands to basics
 
 	* fill in owner and permissions values in the existing XML files
 	* add various permissions flags and their meaning
 	* add permissions checking functions of some kind
-
-	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing

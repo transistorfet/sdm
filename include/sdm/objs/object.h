@@ -47,11 +47,11 @@ class MooObject {
 	    the entry type is not loadable/recognized by the object, 0 should be returned and the caller shall
 	    call the read function of the parent in order to read the entry.  This function should not recursively
 	    call the corresponding function of it's parent object */
-	virtual int read_entry(const char *name, MooDataFile *data) = 0;
+	virtual int read_entry(const char *type, MooDataFile *data);
 	/** Write all data for the object to the given open data handle.  Only data for the immediate object will
 	    be written and not data for the object's parent.  The caller shall call the write function for the
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
-	virtual int write_data(MooDataFile *data) = 0;
+	virtual int write_data(MooDataFile *data);
 
 	void check_throw(moo_perm_t perms);
 	int check(moo_perm_t perms);

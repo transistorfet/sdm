@@ -20,39 +20,13 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-//static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
-static int item_inventory(MooAction *action, MooThing *thing, MooArgs *args);
 static int item_get(MooAction *action, MooThing *thing, MooArgs *args);
 static int item_drop(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_item_actions(MooBuiltinHash *actions)
 {
-	//actions->set("room_say", new MooBuiltin(room_say));
-	actions->set("item_inventory", new MooBuiltin(item_inventory));
 	actions->set("item_get", new MooBuiltin(item_get));
 	actions->set("item_drop", new MooBuiltin(item_drop));
-	return(0);
-}
-
-
-static int item_inventory(MooAction *action, MooThing *thing, MooArgs *args)
-{
-/*
-	const char *str;
-	struct sdm_thing *cur;
-
-	if (!thing->objects) {
-		sdm_notify(args->caller, args, "<brightgreen>You aren't carrying anything.\n");
-		return(0);
-	}
-
-	sdm_notify(args->caller, args, "<brightgreen>You are carrying:\n");
-	for (cur = thing->objects; cur; cur = cur->next) {
-		if (!(str = sdm_get_string_property(cur, "title")))
-			continue;
-		sdm_notify(args->caller, args, "<brightblue>    %s.\n", str);
-	}
-*/
 	return(0);
 }
 

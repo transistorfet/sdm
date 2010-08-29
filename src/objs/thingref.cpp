@@ -26,13 +26,18 @@ MooObject *moo_thingref_create(void)
 
 int MooThingRef::read_entry(const char *type, MooDataFile *data)
 {
-	m_id = data->read_integer();
-	return(MOO_HANDLED_ALL);
+	if (!strcmp(type, "value")) {
+		m_id = data->read_integer_entry();
+	}
+	else
+		return(MooObject::read_entry(type, data));
+	return(MOO_HANDLED);
 }
 
 int MooThingRef::write_data(MooDataFile *data)
 {
-	data->write_integer(m_id);
+	MooObject::write_data(data);
+	data->write_integer_entry("value", m_id);
 	return(0);
 }
 

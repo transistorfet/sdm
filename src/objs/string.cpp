@@ -45,16 +45,21 @@ MooString::~MooString()
 
 int MooString::read_entry(const char *type, MooDataFile *data)
 {
-	char buffer[STRING_SIZE];
+	if (!strcmp(type, "value")) {
+		char buffer[STRING_SIZE];
 
-	data->read_string(buffer, STRING_SIZE);
-	this->set(buffer);
-	return(MOO_HANDLED_ALL);
+		data->read_string_entry(buffer, STRING_SIZE);
+		this->set(buffer);
+	}
+	else
+		return(MooObject::read_entry(type, data));
+	return(MOO_HANDLED);
 }
 
 int MooString::write_data(MooDataFile *data)
 {
-	data->write_string(m_str);
+	MooObject::write_data(data);
+	data->write_string_entry("value", m_str);
 	return(0);
 }
 

@@ -8,20 +8,20 @@
   <location>1</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="name">start</property>
-  <property type="string" name="description">You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</property>
-  <property type="string" name="title">The Test Room</property>
+  <property type="string" name="name"><value>start</value></property>
+  <property type="string" name="description"><value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value></property>
+  <property type="string" name="title"><value>The Test Room</value></property>
   <thing>
    <id>51</id>
    <parent>11</parent>
    <location>50</location>
    <owner>7</owner>
    <permissions>075</permissions>
-   <property type="string" name="title">North</property>
-   <property type="thingref" name="target">55</property>
-   <property type="string" name="brief">A typical looking wooden doorway</property>
-   <property type="string" name="name">north</property>
-   <property type="string" name="description">It's a door that you don't need to open. What more do you need to know</property>
+   <property type="string" name="title"><value>North</value></property>
+   <property type="thingref" name="target"><value>55</value></property>
+   <property type="string" name="brief"><value>A typical looking wooden doorway</value></property>
+   <property type="string" name="name"><value>north</value></property>
+   <property type="string" name="description"><value>It's a door that you don't need to open. What more do you need to know</value></property>
   </thing>
  </thing>
  <thing>
@@ -30,19 +30,19 @@
   <location>1</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="description">You are in some kind of lounge area. There is an old couch against one wall with a fridge, microwave and countertop on the opposite wall.</property>
-  <property type="string" name="title">The Lounge</property>
+  <property type="string" name="description"><value>You are in some kind of lounge area. There is an old couch against one wall with a fridge, microwave and countertop on the opposite wall.</value></property>
+  <property type="string" name="title"><value>The Lounge</value></property>
   <thing>
    <id>56</id>
    <parent>11</parent>
    <location>55</location>
    <owner>7</owner>
    <permissions>075</permissions>
-   <property type="string" name="title">South</property>
-   <property type="thingref" name="target">50</property>
-   <property type="string" name="brief">A strange looking curved hallway</property>
-   <property type="string" name="name">south</property>
-   <property type="string" name="description">For some reason you are unable to see the hallway clearly</property>
+   <property type="string" name="title"><value>South</value></property>
+   <property type="thingref" name="target"><value>50</value></property>
+   <property type="string" name="brief"><value>A strange looking curved hallway</value></property>
+   <property type="string" name="name"><value>south</value></property>
+   <property type="string" name="description"><value>For some reason you are unable to see the hallway clearly</value></property>
   </thing>
  </thing>
 </world>

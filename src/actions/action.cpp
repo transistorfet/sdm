@@ -106,7 +106,11 @@ int MooArgs::parse_args(MooThing *user, const char *action, char *buffer)
 				i += len;
 				for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
 					;
-				buffer[k] = '\0';
+				/// Isolate the object name
+				if (k >= 0)
+					buffer[k] = '\0';
+				else
+					objname = "";
 				target = user->find(&buffer[i]);
 				break;
 			}
@@ -114,6 +118,7 @@ int MooArgs::parse_args(MooThing *user, const char *action, char *buffer)
 		for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
 			;
 	}
+	// TODO if a name is specified (not ""), and NULL is returned, we should error instead of continuing as normal
 	object = user->find(objname);
 	
 	m_user = user;

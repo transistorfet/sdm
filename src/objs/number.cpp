@@ -26,13 +26,18 @@ MooObject *moo_number_create(void)
 
 int MooNumber::read_entry(const char *type, MooDataFile *data)
 {
-	m_num = data->read_float();
-	return(MOO_HANDLED_ALL);
+	if (!strcmp(type, "value")) {
+		m_num = data->read_float_entry();
+	}
+	else
+		return(MOO_NOT_HANDLED);
+	return(MOO_HANDLED);
 }
 
 int MooNumber::write_data(MooDataFile *data)
 {
-	data->write_float(m_num);
+	MooObject::write_data(data);
+	data->write_float_entry("value", m_num);
 	return(0);
 }
 

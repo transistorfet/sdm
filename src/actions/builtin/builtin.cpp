@@ -77,22 +77,27 @@ MooBuiltin::MooBuiltin(moo_action_t func, const char *name, MooThing* thing) : M
 
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
 {
-	char buffer[STRING_SIZE];
+	if (!strcmp(type, "function")) {
+		char buffer[STRING_SIZE];
 
-	if (data->read_string(buffer, STRING_SIZE) < 0)
-		return(-1);
-	this->set(buffer);
-	return(MOO_HANDLED_ALL);
+		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+			return(-1);
+		this->set(buffer);
+	}
+	else
+		return(MooObject::read_entry(type, data));
+	return(MOO_HANDLED);
 }
 
 int MooBuiltin::write_data(MooDataFile *data)
 {
 	const char *name;
 
+	MooObject::write_data(data);
 	// TODO we should do this in a more stable way, since there is a chance it wont be found in the list or master will be NULL
 	if (!(name = builtin_actions->key(m_master)))
 		return(-1);
-	data->write_string(name);
+	data->write_string_entry("function", name);
 	return(0);
 }
 

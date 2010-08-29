@@ -44,19 +44,24 @@ MooAlias::~MooAlias()
 
 int MooAlias::read_entry(const char *type, MooDataFile *data)
 {
-	char buffer[STRING_SIZE];
+	if (!strcmp(type, "alias")) {
+		char buffer[STRING_SIZE];
 
-	if (data->read_string(buffer, STRING_SIZE) < 0)
-		return(-1);
-	if (m_command)
-		delete m_command;
-	m_command = new std::string(buffer);
-	return(MOO_HANDLED_ALL);
+		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+			return(-1);
+		if (m_command)
+			delete m_command;
+		m_command = new std::string(buffer);
+	}
+	else
+		return(MooObject::read_entry(type, data));
+	return(MOO_HANDLED);
 }
 
 int MooAlias::write_data(MooDataFile *data)
 {
-	data->write_string(m_command->c_str());
+	MooObject::write_data(data);
+	data->write_string_entry("alias", m_command->c_str());
 	return(0);
 }
 

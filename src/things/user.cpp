@@ -107,11 +107,13 @@ MooUser *MooUser::make_guest(const char *name)
 	if (MooUser::exists(name))
 		throw MooException("User already exists.  Cannot make guest.");
 	// TODO should these references perhaps be stored in a hash table of some kind which is searched with $thing references
-	parent = MooThing::reference(MOO_GENERIC_USER);
-	user = new MooUser(name, MOO_UBF_GUEST, -1, parent ? parent->id() : 0);
+	if (!(parent = MooThing::reference(MOO_GENERIC_USER)))
+		throw moo_thing_not_found;
+	user = new MooUser(name, MOO_UBF_GUEST, MOO_NEW_ID, parent->id());
 	user->set_property("name", name);
 	user->init();
 	user->owner(user->m_id);
+	user->set_property("description", "You see a new person who looks rather out-of-place.");
 	// TODO is this the correct way to moving a user to the starting location?
 	user->moveto(MooThing::reference(MOO_START_ROOM), NULL);
 	return(user);
@@ -183,9 +185,6 @@ int MooUser::write_data(MooDataFile *data)
 	MooThing::write_data(data);
 	data->write_string_entry("name", m_name->c_str());
 	data->write_integer_entry("lastseen", time(NULL));
-	// TODO wait, would we even need to save these things?
-	// TODO write telnet/interface settings
-	// TODO write processor settings and types
 	return(0);
 }
 

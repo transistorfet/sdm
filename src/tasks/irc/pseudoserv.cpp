@@ -27,6 +27,7 @@ MooObjectType moo_irc_pseudoserv_obj_type = {
 	(moo_type_create_t) moo_irc_pseudoserv_create
 };
 
+time_t server_start = 0;
 const char *server_name = "moo.jabberwocky.ca";
 const char *server_version = "0.1";
 
@@ -35,6 +36,8 @@ int init_irc_pseudoserv(void)
 	// TODO why wont this compile
 	extern int init_irc_msg();
 	init_irc_msg();
+
+	server_start = time(NULL);
 	return(0);
 }
 
@@ -153,7 +156,7 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 		if (type == TNT_SAY)
 			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		else
-			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION%s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION %s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		break;
 	    }
 	    case TNT_JOIN:
@@ -301,6 +304,8 @@ int PseudoServ::dispatch(Msg *msg)
 					return(Msg::send(m_inter, ":%s %03d #realm :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN));
 				if (msg->m_last[0] == '.')
 					res = m_user->command(&msg->m_last[1]);
+				else if (msg->m_last[0] == '\x01')
+					this->process_ctcp(msg);
 				else
 					res = m_user->command("say", msg->m_last);
 
@@ -330,6 +335,8 @@ int PseudoServ::dispatch(Msg *msg)
 	    case IRC_MSG_MODE:
 		if (moo_is_channel_name(msg->m_params[0])) {
 			// TODO do channel mode command processing
+			// TODO the +r here is just to send something back and should be removed later when properly implemented
+			return(Msg::send(m_inter, ":%s %03d %s %s +\r\n", server_name, IRC_RPL_CHANNELMODEIS, m_nick->c_str(), msg->m_params[0]));
 		}
 		else {
 			if (strcmp(m_nick->c_str(), msg->m_params[0]))
@@ -339,7 +346,8 @@ int PseudoServ::dispatch(Msg *msg)
 			//return(Msg::send(m_inter, ":%s %03d :Unknown MODE flag\r\n", server_name, IRC_ERR_UMODEUNKNOWNFLAG));
 
 			/// User MODE command reply
-			return(Msg::send(m_inter, ":%s %03d %s\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
+			// TODO the +i here is just to send something back and should be removed later when properly implemented
+			return(Msg::send(m_inter, ":%s %03d %s +i\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
 		}
 		break;
 	    case IRC_MSG_JOIN:
@@ -403,7 +411,9 @@ int PseudoServ::dispatch(Msg *msg)
 		delete this;
 		return(0);
 	    case IRC_MSG_WHO:
-		// TODO this message is sent by irssi when a user quits a channel
+		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
+			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+		this->send_who(msg->m_params[0]);
 		return(0);
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
@@ -476,17 +486,12 @@ int PseudoServ::login()
 			delete this;
 			return(0);
 		}
-		else if (m_user->connect(this) < 0) {
-			Msg::send(m_inter, "ERROR :Closing Link: Error when logging in to %s\r\n", m_nick->c_str());
-			delete this;
-			return(0);
-		}
-		this->owner(m_user->id());
 	}
 	else {
 		/// We received no network password so sign in as a guest
 		try {
-			m_user = MooUser::make_guest(m_nick->c_str());
+			if (!(m_user = MooUser::make_guest(m_nick->c_str())))
+				throw -1;
 		}
 		catch (...) {
 			Msg::send(m_inter, "ERROR :Closing Link: Unable to connect as guest, %s\r\n", m_nick->c_str());
@@ -494,6 +499,13 @@ int PseudoServ::login()
 			return(0);
 		}
 	}
+
+	if (m_user->connect(this) < 0) {
+		Msg::send(m_inter, "ERROR :Closing Link: Error when logging in to %s\r\n", m_nick->c_str());
+		delete this;
+		return(0);
+	}
+	this->owner(m_user->id());
 	this->send_welcome();
 	return(1);
 }
@@ -566,6 +578,41 @@ int PseudoServ::send_names(const char *name)
 		} while (cur);
 	}
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
+	return(0);
+}
+
+int PseudoServ::send_who(const char *mask)
+{
+	MooThing *cur;
+	const char *thing_name;
+
+	if (!strcmp(mask, "#realm")) {
+		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
+		//	are in the cryolocker, for example)
+		cur = m_user->location();
+		if (cur)
+			cur = cur->contents();
+		for (; cur; cur = cur->next()) {
+			// TODO we should check that things are invisible, and also add @ for wizards or something
+			if ((thing_name = cur->get_string_property("name"))) {
+				Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, m_nick->c_str(), server_name, server_name, m_nick->c_str(), m_nick->c_str());
+			}
+		}
+	}
+	Msg::send(m_inter, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, m_nick->c_str(), mask);
+	return(0);
+}
+
+int PseudoServ::process_ctcp(Msg *msg)
+{
+	if (!strncmp(&msg->m_last[1], "ACTION", 6)) {
+		char buffer[STRING_SIZE];
+		strncpy(buffer, &msg->m_last[7], STRING_SIZE);
+		int len = strlen(buffer);
+		buffer[len - 1] = '\0';
+		return(m_user->command("emote", buffer));
+	}
+	// TODO process others?? return error??
 	return(0);
 }
 

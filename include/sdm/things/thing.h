@@ -33,6 +33,7 @@ class MooThing : public MooObject {
 	moo_id_t m_id;
 	moo_id_t m_parent;
 	MooThing *m_location;
+	// TODO if you made MooObjectHash and MooObjectTree, then you could use their read_entry/write_data functions
 	MooHash<MooObject *> *m_properties;
 	MooTree<MooAction *> *m_actions;
 
@@ -83,6 +84,7 @@ class MooThing : public MooObject {
 	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
 	//int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
 	//int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
+	int printf(MooArgs *args, const char *fmt, ...);
 	
 	virtual int notify(int type, MooThing *channel, MooThing *thing, const char *text);
 	int notify_all(int type, MooThing *channel, MooThing *thing, const char *text);

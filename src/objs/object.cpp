@@ -152,6 +152,28 @@ int MooObject::read_data(MooDataFile *data)
 	return(error);
 }
 
+int MooObject::read_entry(const char *type, MooDataFile *data)
+{
+	if (!strcmp(type, "owner")) {
+		moo_id_t id = data->read_integer_entry();
+		this->owner(id);
+	}
+	else if (!strcmp(type, "permissions")) {
+		moo_perm_t perms = data->read_integer_entry();
+		this->permissions(perms);
+	}
+	else
+		return(MOO_NOT_HANDLED);
+	return(MOO_HANDLED);
+}
+
+int MooObject::write_data(MooDataFile *data)
+{
+	data->write_integer_entry("owner", this->owner());
+	data->write_integer_entry("permissions", this->permissions());
+	return(0);
+}
+
 void MooObject::check_throw(moo_perm_t perms)
 {
 	if (!this->check(perms))
@@ -162,6 +184,7 @@ int MooObject::check(moo_perm_t perms)
 {
 	int tmp;
 
+	// TODO check if wizard and if so, allow at least R and W no matter what
 	if (m_owner == MooTask::current_owner())
 		perms <<= 3;
 	tmp = m_permissions & perms;

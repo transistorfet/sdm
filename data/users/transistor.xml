@@ -3,9 +3,9 @@
  <id>100</id>
  <parent>7</parent>
  <location>12</location>
- <property type="string" name="name">transistor</property>
- <property type="string" name="description">You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</property>
- <property type="thingref" name="last_location">55</property>
+ <property type="string" name="name"><value>transistor</value></property>
+ <property type="string" name="description"><value>You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</value></property>
+ <property type="thingref" name="last_location"><value>55</value></property>
  <name>transistor</name>
  <lastseen>1243104757</lastseen>
 </user>
