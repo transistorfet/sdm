@@ -137,7 +137,7 @@ actions/builtin/builder.o: actions/builtin/builder.cpp \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/actions/builtin/builtin.h
+  ../include/sdm/things/world.h ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
@@ -187,7 +187,7 @@ actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
   ../include/sdm/array.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/references.h \
+  ../include/sdm/things/references.h ../include/sdm/actions/builtin/mud.h \
   ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/user.o: actions/builtin/user.cpp ../include/sdm/misc.h \

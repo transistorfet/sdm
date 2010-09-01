@@ -18,8 +18,10 @@
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/actions/builtin/mud.h>
 #include <sdm/actions/builtin/builtin.h>
 
+static int room_init(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
@@ -30,6 +32,7 @@ static int room_do_leave(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_room_actions(MooBuiltinHash *actions)
 {
+	actions->set("room_init", new MooBuiltin(room_init));
 	actions->set("room_say", new MooBuiltin(room_say));
 	actions->set("room_emote", new MooBuiltin(room_emote));
 	actions->set("room_whisper", new MooBuiltin(room_whisper));
@@ -40,12 +43,18 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 	return(0);
 }
 
+static int room_init(MooAction *action, MooThing *thing, MooArgs *args)
+{
+
+	return(0);
+}
 
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	//MooThing *cur;
 
 	// TODO Check if room silence bit is set for this room
+	//if (CAN_SPEAK(args->m_this, args->m_user))		// TODO is user correct here??
 
 	if (*args->m_text == '\0')
 		return(-1);

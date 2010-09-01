@@ -72,3 +72,25 @@ room:can_leave(obj)
 		
 
 
+
+
+SMAUG PSEUDOCODE:
+
+	if IS_DRUNK(2) and position < POS_SHOVE (not shove or drag)
+		you are drunk
+	check nuisance
+	if drunk or nuisance
+		do something...
+	if IS_NPC and is ACT_MOUNTED
+		return (???)
+	if no exit or no to-room
+		if drunk and !POS_MOUNTED and (various water conditions of the room)
+			print various drunken messages depending on drunkenness
+		else if nuisance
+			print message to self (???)
+		else if drunk (any other situatnion???)
+			print message to self
+		else
+			print "Alas, you cannot go that way"
+	
+

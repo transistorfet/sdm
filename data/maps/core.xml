@@ -2,147 +2,360 @@
 <world>
  <id>2</id>
  <parent>0</parent>
- <location>1</location>
  <owner>7</owner>
  <permissions>075</permissions>
- <property type="string" name="name"><value>core</value></property>
+ <location>1</location>
+ <property type="string" name="name">
+  <owner>-1</owner>
+  <permissions>075</permissions>
+  <value>core</value>
+ </property>
  <thing>
   <id>3</id>
   <parent>1</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>something</value></property>
-  <property type="string" name="name"><value>thing</value></property>
-  <property type="string" name="description"><value>You're not sure what it is.</value></property>
-  <property type="string" name="looked_at"><value>$user.name examines $this.title.</value></property>
-  <action type="builtin" name="look_self"><function>basics_look_self</function></action>
-  <action type="builtin" name="print_view"><function>basics_print_view</function></action>
+  <location>2</location>
+  <property type="string" name="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name examines $this.title.</value>
+  </property>
+  <property type="string" name="description">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You're not sure what it is.</value>
+  </property>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>thing</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>something</value>
+  </property>
+  <action type="builtin" name="look_self">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>basics_look_self</function>
+  </action>
+  <action type="builtin" name="print_view">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>basics_print_view</function>
+  </action>
  </thing>
  <thing>
   <id>4</id>
   <parent>3</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="name"><value>container</value></property>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>container</value>
+  </property>
  </thing>
  <thing>
   <id>5</id>
   <parent>4</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>a creature</value></property>
-  <property type="string" name="name"><value>mobile</value></property>
-  <property type="string" name="self_look_at"><value>$this.name looks at himself, quizically.</value></property>
-  <property type="string" name="look_at"><value>$user.name looks at you, menicingly.</value></property>
-  <property type="string" name="looked_at"><value>$user.name looks at $this.name.</value></property>
+  <location>2</location>
+  <property type="string" name="self_look_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$this.name looks at himself, quizically.</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>a creature</value>
+  </property>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>mobile</value>
+  </property>
+  <property type="string" name="look_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks at you, menicingly.</value>
+  </property>
+  <property type="string" name="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks at $this.name.</value>
+  </property>
  </thing>
  <thing>
   <id>6</id>
   <parent>5</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>someone</value></property>
-  <property type="string" name="name"><value>user</value></property>
-  <action type="builtin" name="init"><function>user_init</function></action>
-  <action type="builtin" name="passwd"><function>user_passwd</function></action>
-  <action type="builtin" name="inv"><function>user_inventory</function></action>
-  <!-- <action type="builtin" name="describe"><function>basics_describe</function></action> -->
-  <!-- <action type="builtin" name="whereami"><function>basics_whereami</function></action> -->
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>user</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>someone</value>
+  </property>
+  <action type="builtin" name="init">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>user_init</function>
+  </action>
+  <action type="builtin" name="passwd">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>user_passwd</function>
+  </action>
+  <action type="builtin" name="inv">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>user_inventory</function>
+  </action>
  </thing>
  <thing>
   <id>7</id>
   <parent>6</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>a powerful wizard</value></property>
-  <property type="string" name="name"><value>wizard</value></property>
-  <action type="builtin" name="teleport"><function>basics_teleport</function></action>
-  <action type="builtin" name="@create"><function>builder_create</function></action>
-  <action type="builtin" name="@add_exit"><function>builder_add_exit</function></action>
-  <action type="builtin" name="@create_room"><function>builder_create_room</function></action>
-  <action type="builtin" name="@set"><function>builder_set</function></action>
-  <action type="builtin" name="@save"><function>builder_save</function></action>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>wizard</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>a powerful wizard</value>
+  </property>
+  <action type="builtin" name="teleport">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_teleport</function>
+  </action>
+  <action type="builtin" name="@create">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_create</function>
+  </action>
+  <action type="builtin" name="@add_exit">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_add_exit</function>
+  </action>
+  <action type="builtin" name="@create_room">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_create_room</function>
+  </action>
+  <action type="builtin" name="@set">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_set</function>
+  </action>
+  <action type="builtin" name="@save">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>builder_save</function>
+  </action>
  </thing>
  <thing>
   <id>8</id>
   <parent>3</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="name"><value>item</value></property>
-  <action type="builtin" name="get"><function>item_get</function></action>
-  <action type="builtin" name="drop"><function>item_drop</function></action>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>item</value>
+  </property>
+  <action type="builtin" name="get">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>item_get</function>
+  </action>
+  <action type="builtin" name="drop">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>item_drop</function>
+  </action>
  </thing>
  <thing>
   <id>10</id>
   <parent>4</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>someplace</value></property>
-  <property type="string" name="name"><value>room</value></property>
-  <property type="string" name="looked_at"><value>$user.name looks around the room.</value></property>
-  <action type="builtin" name="n"><function>room_direction</function></action>
-  <action type="builtin" name="e"><function>room_direction</function></action>
-  <action type="builtin" name="d"><function>room_direction</function></action>
-  <action type="builtin" name="do_enter"><function>room_do_enter</function></action>
-  <action type="builtin" name="do_leave"><function>room_do_leave</function></action>
-  <action type="builtin" name="look"><function>room_look</function></action>
-  <action type="builtin" name="emote"><function>room_emote</function></action>
-  <action type="builtin" name="s"><function>room_direction</function></action>
-  <action type="builtin" name="w"><function>room_direction</function></action>
-  <action type="builtin" name="u"><function>room_direction</function></action>
-  <action type="builtin" name="say"><function>room_say</function></action>
-  <action type="builtin" name="whisper"><function>room_whisper</function></action>
+  <location>2</location>
+  <property type="string" name="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks around the room.</value>
+  </property>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>room</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>someplace</value>
+  </property>
+  <action type="builtin" name="n">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="e">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="d">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="do_enter">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_do_enter</function>
+  </action>
+  <action type="builtin" name="do_leave">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_do_leave</function>
+  </action>
+  <action type="builtin" name="look">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_look</function>
+  </action>
+  <action type="builtin" name="emote">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_emote</function>
+  </action>
+  <action type="builtin" name="s">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="w">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="u">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_direction</function>
+  </action>
+  <action type="builtin" name="say">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_say</function>
+  </action>
+  <action type="builtin" name="whisper">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>room_whisper</function>
+  </action>
  </thing>
  <thing>
   <id>11</id>
   <parent>3</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>an exit</value></property>
-  <property type="string" name="name"><value>exit</value></property>
-  <action type="builtin" name="go"><function>basics_go</function></action>
-  <action type="builtin" name="move"><function>basics_go</function></action>
-  <action type="builtin" name="print_view"><function>exit_print_view</function></action>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>exit</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>an exit</value>
+  </property>
+  <action type="builtin" name="go">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>basics_go</function>
+  </action>
+  <action type="builtin" name="move">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>basics_go</function>
+  </action>
+  <action type="builtin" name="print_view">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </action>
  </thing>
  <thing>
   <id>12</id>
   <parent>10</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="title"><value>The Cryolocker</value></property>
-  <property type="string" name="name"><value>cryolocker</value></property>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>cryolocker</value>
+  </property>
+  <property type="string" name="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>The Cryolocker</value>
+  </property>
  </thing>
  <thing>
   <id>13</id>
   <parent>1</parent>
-  <location>2</location>
   <owner>7</owner>
   <permissions>075</permissions>
-  <property type="string" name="name"><value>channels</value></property>
+  <location>2</location>
+  <property type="string" name="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>channels</value>
+  </property>
   <thing>
    <id>14</id>
    <parent>13</parent>
-   <location>13</location>
    <owner>7</owner>
    <permissions>075</permissions>
-   <property type="string" name="name"><value>help</value></property>
+   <location>13</location>
+   <property type="string" name="name">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>help</value>
+   </property>
   </thing>
   <thing>
    <id>15</id>
    <parent>13</parent>
-   <location>13</location>
    <owner>7</owner>
    <permissions>075</permissions>
-   <property type="string" name="name"><value>wartalk</value></property>
+   <location>13</location>
+   <property type="string" name="name">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>wartalk</value>
+   </property>
   </thing>
  </thing>
 </world>

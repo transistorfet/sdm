@@ -16,6 +16,17 @@
 #include <sdm/things/world.h>
 #include <sdm/actions/builtin/builtin.h>
 
+
+/**
+
+teleport <destination>
+@dig <room-name>
+@addexit [<room>] <direction> <target>
+
+*/
+
+
+static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args);
@@ -24,11 +35,22 @@ static int builder_save(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_builder_actions(MooBuiltinHash *actions)
 {
+	actions->set("builder_teleport", new MooBuiltin(builder_teleport));
 	actions->set("builder_create", new MooBuiltin(builder_create));
 	actions->set("builder_create_room", new MooBuiltin(builder_create_room));
 	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
 	actions->set("builder_set", new MooBuiltin(builder_set));
 	actions->set("builder_save", new MooBuiltin(builder_save));
+	return(0);
+}
+
+static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	// TODO what permissions would control teleporting other than wizard
+	if (args->m_user->is_wizard()) {
+		// TODO how do we know the object is correct, etc
+		args->m_user->moveto(args->m_object, NULL);
+	}
 	return(0);
 }
 

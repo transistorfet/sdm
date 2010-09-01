@@ -11,6 +11,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/things/thing.h>
 #include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
 
@@ -170,7 +171,7 @@ int MooObject::read_entry(const char *type, MooDataFile *data)
 int MooObject::write_data(MooDataFile *data)
 {
 	data->write_integer_entry("owner", this->owner());
-	data->write_integer_entry("permissions", this->permissions());
+	data->write_octal_entry("permissions", this->permissions());
 	return(0);
 }
 
@@ -183,8 +184,11 @@ void MooObject::check_throw(moo_perm_t perms)
 int MooObject::check(moo_perm_t perms)
 {
 	int tmp;
+	moo_id_t current;
 
-	// TODO check if wizard and if so, allow at least R and W no matter what
+	current = MooTask::current_owner();
+	if (MooThing::is_wizard(current))
+		return(1);
 	if (m_owner == MooTask::current_owner())
 		perms <<= 3;
 	tmp = m_permissions & perms;

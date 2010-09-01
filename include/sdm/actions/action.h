@@ -55,6 +55,7 @@ class MooArgs {
 
 	static int parse_word(char *buffer);
 	static int parse_whitespace(char *buffer);
+	int parse_words(char *buffer);
 	int parse_args(MooThing *user, char *buffer);
 	int parse_args(MooThing *user, const char *action, char *buffer);
 };

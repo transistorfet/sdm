@@ -24,12 +24,15 @@
 #define MOO_NO_ID		-1
 #define MOO_NEW_ID		-2
 
+#define MOO_TBF_WIZARD		0x01
+
 class MooUser;
 
 extern MooArray<MooThing *> *moo_thing_table;
 
 class MooThing : public MooObject {
     protected:
+	int m_bits;
 	moo_id_t m_id;
 	moo_id_t m_parent;
 	MooThing *m_location;
@@ -93,6 +96,9 @@ class MooThing : public MooObject {
 	int cryolocker_store();
 	int cryolocker_revive();
 	int moveto(MooThing *thing, MooThing *by);
+
+	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
+	static int is_wizard(moo_id_t id);
 
     public:
 	/// Accessors

@@ -72,6 +72,7 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 
 	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
 	/// If the id = MOO_NEW_ID then assign the next available id
+	m_bits = 0;
 	m_id = id;
 	if (m_id >= 0) {
 		if (!moo_thing_table->set(m_id, this))
@@ -130,7 +131,12 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		}
 	}
 	else if (!strcmp(type, "thing")) {
-		MooThing *thing = new MooThing();
+		MooThing *thing = NULL;
+		data->read_attrib_string("type", buffer, STRING_SIZE);
+		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "thing", &moo_thing_obj_type)))
+			return(-1);
+		if (!(thing = (MooThing *) moo_make_object(objtype)))
+			return(-1);
 		data->read_children();
 		thing->read_data(data);
 		data->read_parent();
@@ -153,6 +159,10 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			delete action;
 			return(-1);
 		}
+	}
+	else if (!strcmp(type, "bits")) {
+		int bits = data->read_integer_entry();
+		m_bits = bits;
 	}
 	else if (!strcmp(type, "id")) {
 		moo_id_t id = data->read_integer_entry();
@@ -181,6 +191,8 @@ int MooThing::write_data(MooDataFile *data)
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
 		data->write_integer_entry("parent", m_parent);
+	if (m_bits != 0)
+		data->write_hex_entry("bits", m_bits);
 	MooObject::write_data(data);
 	if (m_location)
 		data->write_integer_entry("location", m_location->m_id);
@@ -214,6 +226,8 @@ int MooThing::write_data(MooDataFile *data)
 		}
 		else {
 			data->write_begin_entry("thing");
+			if (tentry->m_data->type() != &moo_thing_obj_type)
+				data->write_attrib_string("type", tentry->m_data->type_name());
 			cur->write_data(data);
 			data->write_end_entry();
 		}
@@ -713,16 +727,27 @@ int MooThing::cryolocker_revive()
  */
 int MooThing::moveto(MooThing *thing, MooThing *by)
 {
+	// TODO perhaps this should really just be a do_action on the object which calls a moveto function
 	// TODO fill this in
 	// TODO this will check permissions of via to perform the action (??) and then
 	//	call various actions on the objects to actually do the move
 
 	// TODO this should be a setting or something in the user object
 	if (this->m_location)
+		// TODO these can't be here because this might be a teleport command...
 		this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
 	thing->add(this);
 	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
 	return(0);
+}
+
+int MooThing::is_wizard(moo_id_t id)
+{
+	MooThing *thing;
+
+	if (!(thing = MooThing::lookup(id)))
+		return(0);
+	return(thing->is_wizard());
 }
 
 int MooThing::assign_id(moo_id_t id)

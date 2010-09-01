@@ -59,6 +59,8 @@ class MooDataFile {
 	int write_current();
 
 	int write_integer_entry(const char *name, long int value);
+	int write_octal_entry(const char *name, long int value);
+	int write_hex_entry(const char *name, long int value);
 	int write_float_entry(const char *name, double value);
 	int write_string_entry(const char *name, const char *value);
 };

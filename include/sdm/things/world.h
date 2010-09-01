@@ -16,6 +16,8 @@
 
 class MooWorld : public MooThing {
 	std::string *m_filename;
+	int m_writing;
+	int m_written;
     public:
 	MooWorld();
 	MooWorld(const char *file);

@@ -30,7 +30,7 @@ int MooNumber::read_entry(const char *type, MooDataFile *data)
 		m_num = data->read_float_entry();
 	}
 	else
-		return(MOO_NOT_HANDLED);
+		return(MooObject::read_entry(type, data));
 	return(MOO_HANDLED);
 }
 

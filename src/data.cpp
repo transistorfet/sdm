@@ -56,6 +56,7 @@ int moo_data_file_exists(const char *file)
 
 MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 {
+	this->filename = NULL;
 	this->doc = NULL;
 	this->root = NULL;
 	this->current = NULL;
@@ -386,6 +387,20 @@ int MooDataFile::write_current()
 int MooDataFile::write_integer_entry(const char *name, long int value)
 {
 	if (xmlTextWriterWriteFormatElement(this->writer, (xmlChar *) name, "%ld", (xmlChar *) value) < 0)
+		return(-1);
+	return(0);
+}
+
+int MooDataFile::write_octal_entry(const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatElement(this->writer, (xmlChar *) name, "%#lo", (xmlChar *) value) < 0)
+		return(-1);
+	return(0);
+}
+
+int MooDataFile::write_hex_entry(const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatElement(this->writer, (xmlChar *) name, "%#lx", (xmlChar *) value) < 0)
 		return(-1);
 	return(0);
 }

@@ -53,11 +53,15 @@ MooObject *moo_world_create(void)
 MooWorld::MooWorld()
 {
 	m_filename = NULL;
+	m_writing = 0;
+	m_written = 0;
 }
 
 MooWorld::MooWorld(const char *file, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
 	m_filename = new std::string(file);
+	m_writing = 0;
+	m_written = 0;
 	this->read_file(m_filename->c_str(), "world");
 }
 
@@ -93,19 +97,34 @@ int MooWorld::write_data(MooDataFile *data)
 {
 	int res;
 
-	res = this->write();
-	// TODO should you have a call to MooThing::write_data(data) here?
-	if (data) {
-		data->write_begin_entry("load");
-		data->write_attrib_string("ref", m_filename->c_str());
-		data->write_end_entry();
+	if (m_writing) {
+		if (m_written)
+			return(-1);
+		m_written = 1;
+		res = MooThing::write_data(data);
+	}
+	else {
+		if (data) {
+			data->write_begin_entry("load");
+			data->write_attrib_string("ref", m_filename->c_str());
+			data->write_end_entry();
+		}
+		res = this->write();
 	}
 	return(res);
 }
 
 int MooWorld::write()
 {
-	return(this->write_file(m_filename->c_str(), "world"));
+	int res;
+
+	if (m_writing)
+		return(-1);
+	m_writing = 1;
+	m_written = 0;
+	res = this->write_file(m_filename->c_str(), "world");
+	m_writing = 0;
+	return(res);
 }
 
 MooWorld *MooWorld::root()

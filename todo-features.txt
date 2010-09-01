@@ -1,0 +1,15 @@
+
+GAME FEATURES TODO:
+	- drunkenness (and high? and various other effects?)
+	- ability to ride horses/mounts
+	- fatigue, sleep/rest/stand/sit/wake/etc
+	- ability to silence a character (for a spell)
+	- lighting levels (rooms that are dark)
+	- torches, light sources
+	- have stores for buying and selling
+
+	- make it possible for players to sell their own items from stores (they can make an object and sell it)
+	- have pegboards everywhere (like at area/world markers) so that people can leave comments (thus enriching the social
+	  space without there necessarily being people online at the same time in the same area.
+
+

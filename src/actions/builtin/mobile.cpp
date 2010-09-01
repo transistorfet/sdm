@@ -20,27 +20,27 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-//static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
+static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_mobile_actions(MooBuiltinHash *actions)
 {
-	//actions->set("room_say", new MooBuiltin(room_say));
+	actions->set("mobile_init", new MooBuiltin(mobile_init));
 	return(0);
 }
 
 
-static int mobile_something(MooAction *action, MooThing *thing, MooArgs *args)
+static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	//MooThing *cur;
 
 	// TODO Check if room silence bit is set for this room
 
-	if (*args->m_text == '\0')
-		return(-1);
+	//if (*args->m_text == '\0')
+	//	return(-1);
 	// TODO for each user/npc/whatever
 	//		if ignoring bit set, don't send message
 	//		perhaps if the person trying to speak is special (immortal) then speak despite ignore bit
-	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
+	//args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
 
 	// TODO check for room/object/mobile triggers based on speech
 

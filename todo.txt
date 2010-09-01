@@ -16,7 +16,10 @@
 	  manipulations on it
 	* make it possible to play multiple characters at once, perhaps by having a special channel with the character's name
 	  and use it as the control, like #realm for that character.  There could be a limit of 4 or so concurrent character logins
-	  per connection.  You could be able to control a whole party through different channel windows.
+	  per connection.  You could be able to control a whole party through different channel windows.  Perhaps there could be a
+	  number of 'characters' in the user object, and the user object can be in a different special non-playing area for social
+	  MUDing, while his/her characters can be in various parts of the game area.  So maybe it should be #realm even, maybe
+	  #social, and #realm-char can be used for each character
 
     Discussion:
 
@@ -105,6 +108,8 @@
 	  the channel central object (which has a list of all channels) and it then calls actions on each channel to notify it of the
 	  user's new status, which causes it to remove the user from the list of users and send disconnect notices to each user in
 	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
+	* should there be a way to be in more than one place at the same time (and be the same person, rather than having multiple
+	  characters) other than just through channels?
 
 	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
@@ -129,9 +134,9 @@
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
-	* implement the aliases system for names???  And sort out the whole title vs name thing
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
-	* make MooObjectHash and MooObjectTree, and convert MooThing to use them (and their automagic saving functionality)
+	* make MooObjectHash and MooObjectTree, and convert MooThing to use them for prop and action tables (and their automagic saving
+	  functionality)
 
 	* modify the handle() function to do something like close the interface if an error occurs?
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
@@ -141,28 +146,28 @@
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
-	* should you convert some functions to using a moo_id_t rather than a thing pointer?  It would require an extra lookup in
-	  exchange for allowing error checking (NULL checks in particular) to be moved to other functions
 
 
 	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
 	  preposition, target)
 	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
 	  replace object and target perhaps).  That would allow better parameter passing
-	* make the world save correctly (it infinite loops when writing world)
-	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* rethink the whole message printing system, in response to events.  You could probably make it super generic... Or should you
 	  even bother?
 	* parsing is kinda funny. Should it parse 'say' messages no matter what, even if it's from IRC and we know it's a 'say'??
 	* when parsing args, there must be a way so that if an object name is given but doesn't match anything, an error occurs
 	  instead of doing the action as if no object was specified ('.look foobar' current 'look's at the room)
-	* create 'init' actions for user, room, etc objects
+
+	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* what causes the "IRSSI join to #realm was synced" message (it takes forever to appear but should appear right away)
 	* add a 'register' and 'login' commands to basics
 
-	* fill in owner and permissions values in the existing XML files
-	* add various permissions flags and their meaning
-	* add permissions checking functions of some kind
+	* add permissions checking functions of some kind to all applicable locations
+	* if a property (or action?) exists on a parent of the object, perhaps it should modify the value in the parent, subject to the
+	  permissions of that property (or action?).  This way, an object cannot override a value in order to skirt permissions.
+
+	* make a mobile-equivallent of logarithm
+	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, go fish??
 
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing

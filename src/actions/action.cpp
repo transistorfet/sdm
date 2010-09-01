@@ -75,6 +75,12 @@ int MooArgs::parse_whitespace(char *buffer)
 	return(i);
 }
 
+int MooArgs::parse_words(char *buffer)
+{
+	// TODO should there be a char array in the args? or passed to this function?
+	// TODO should this get the buffer? or should the buffer be automatically added and handled by MooArgs? (stored in m_buffer)
+}
+
 int MooArgs::parse_args(MooThing *user, char *buffer)
 {
 	int i;
