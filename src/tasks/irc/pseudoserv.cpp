@@ -139,7 +139,8 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 	    case TNT_STATUS: {
 		char buffer[LARGE_STRING_SIZE];
 		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
-		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :%s\r\n", server_name, buffer));
+		// TODO if realm became a channel, might this instead be used to send notices to the user?
+		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
 	    }
 	    case TNT_SAY:
 	    case TNT_EMOTE: {

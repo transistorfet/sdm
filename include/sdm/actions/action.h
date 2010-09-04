@@ -43,6 +43,7 @@ class MooArgs {
 	const char *m_action_text;
 	MooObject *m_result;
 	MooThing *m_user;
+	MooThing *m_channel;
 	MooThing *m_caller;
 	MooThing *m_this;
 	MooThing *m_object;

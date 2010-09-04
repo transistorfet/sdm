@@ -49,6 +49,7 @@ MooArgs::MooArgs()
 	m_action_text = NULL;
 	m_result = NULL;
 	m_user = NULL;
+	m_channel = NULL;
 	m_caller = NULL;
 	m_this = NULL;
 	m_object = NULL;

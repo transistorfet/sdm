@@ -11,6 +11,8 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 
+// TODO should there be a message that produces a similar output to EMOTE but is printed to the user as well (for times when a
+//	command produces similar output).  It would make it appear as if it came from the user rather than having TheRealm say it
 #define TNT_STATUS	0x01
 #define TNT_JOIN	0x02
 #define TNT_LEAVE	0x03

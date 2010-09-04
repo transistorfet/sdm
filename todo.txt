@@ -20,6 +20,8 @@
 	  number of 'characters' in the user object, and the user object can be in a different special non-playing area for social
 	  MUDing, while his/her characters can be in various parts of the game area.  So maybe it should be #realm even, maybe
 	  #social, and #realm-char can be used for each character
+	* what are the merits of a disk-based thing database rather than having all objects in memory?  If we were to add this, it
+	  could probably be done transparently to the existing code
 
     Discussion:
 
@@ -34,6 +36,8 @@
 	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
 	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
 	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
+	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
+	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
 	* think about multithreading possibilities
 
 	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
@@ -67,52 +71,32 @@
 	* the #<numeric> channels idea would require the object number corresponding to the intended target.  If it's the user object,
 	  it's sent to the user directly as a privmsg (whisper would be like this).  If it's something else (like a room) then it's sent
 	  to the user as coming from that channel.
-	* pseudoserver works fine with the new talk() function for other channel data, but for the realm channel, there is still an issue
-	  with how the data sent to the function is formatted.  If it is formatted the same as would be used in the telnet or irc client
-	  methods, then the data would have to be sent from TheRealm user, or to #realm channel, as if it were direct status messages.
-	  (eg. $timestamp <TheRealm> chanser says, "You're weird"  \  <TheRealm> Rabbit whispers, "Hey man"  \  <TheRealm> Rabbit picks
-	  up a short sword from the ground.)  It would look kind of weird but it gets the job done.  This would require only the
-	  formatted string text to be sent to the function.  Alternately, if you want to make it appear like 
-	  eg. $timestamp <chanser> You're weird  \  PM->$timestamp <Rabbit> Hey man  \  * Rabbit picks up a short sword from the ground.
-	  This would require the action name called (say, whisper, etc) and the user object who says or does the thing.  If you got
-	  (rabbit, "says", "Hey man"), it would print that as a privmsg (channel speech vs pm could be determined with a channel param.
-	  see below note for details).  If you needed to print something like "You see a strange goat here", you could either be
-	  bold and send (you, "see" "a strange goat here"), or you could be less bold and say (TheRealm, NULL, "You see a strange goat
-	  here") which would appear as $timestamp <TheRealm> *** You see a strange goat here
-	* Either of the pseudoserv function solutions mentioned above will need a MooThing *channel parameter to also be compatible with
-	  the #<numeric> method.
-	* also, how will join/quit and channel membership be stored?  It could be a list in properties of user references.  How
-	  would the list be maintained though
-	* there is yet another option for everything: when someone talks in the realm (in a room, as normal speech) then the data
-	  is sent by calling talk(root_world, user, "Hey") and when displaying anything else (like actions, etc) it is sent
-	  as print(thing, "You see a goose"), where thing is the room or whatever that it originates from (for use by the #<numeric>
-	  method).  talk() could simply check for root_world and print it however it should be in the root world ("$user.name says Hey"
-	  if it's a client/telnet, or :$user.name PRIVMSG $channel.name :Hey for IRC.  You could also handle the ':' emote in the same
-	  way.
 	* #<numeric> doesn't work with the number being the room id.  It only works if the channel is a special custom channel for
 	  that user.  This would not require the forcejoin method.  It doesn't work because again, you have no way to print status
 	  messages, just like #realm in a multiserver irc system.  With this in mind, the "realm" messages don't need a channel
 	  identifier, since the data always goes to the same user-specific channel
-	* we could have print(thing, "text") and if thing is NULL, then it's just a direct status message (to come from TheRealm) and
-	  if user is something, then it's identical to the talk() function (where direct text is "say" data, and ':' text is "emote"
-	  data, for that user).  Since we don't need the channel id, we might even be able to use talk() with channel set to NULL
-	  being equivallent to print() (thus unifying back into a single function with multiplexing based on params)
-	* should all everything (actions, all code that prints) call do_action on user, which would call a function which calls the
-	  task's API, rather than directly calling user->print() or whatever?  This would all redirection of the I/O calls
-	* how will a task notify objects of a join/leave/quit event?  How will an object do the same to tasks?  I actually don't think
-	  we need task to notify objects, since everything will be done via actions on objects
-	* We can make use of the single unified task notify() function if we want since the interface will be hidden by methods on
-	  MooUser (i think).  We will still have user->print, and perhaps user->talk which then calls methods on task.
 
 	* for channel management, it is possible to have user call an action on itself when it connects/disconnects, which can then call
 	  the channel central object (which has a list of all channels) and it then calls actions on each channel to notify it of the
 	  user's new status, which causes it to remove the user from the list of users and send disconnect notices to each user in
 	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
-	* should there be a way to be in more than one place at the same time (and be the same person, rather than having multiple
-	  characters) other than just through channels?
+	* every channel could be the same basic structure but have different rules for different rooms or whatever.  You would have to
+	  be able to be in multiple objects (channels) at the same time, or however channel membership would be determined.  Or no, this
+	  isn't what i really mean.  I mean a channel object for each channel (including one for each player character being used in
+	  the real world (which right now we are just allowing one)).
+	* make various actions in channel.cpp for the maintenance of all channels, suhc that they are added for the channel manager
 
-	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
-	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
+	* we should seriously look into the loading and saving of things to various XML files based on things inside things.  The
+	  problem might come with objects that that aren't *in* anything (but is this really possible? everythnig can be in the root
+	  object, at least.
+	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
+	  quota system such that each object has a certain range of IDs from which it can create new objects.  You could even have
+	  limit inheritence such that it looks for the object with the first defined min ID and the first max ID from which it gets
+	  its range when creating a new things.  It might still be possible to have overlapping IDs and anyways, you might still have
+	  references to objects in other files.  It would improve some things though, and it would allow programming access with limits
+	  and you could even contemplate a "relocatable" format, such that it automatically adjusts all IDs (like all thing refs could
+	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
+	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
 
@@ -124,6 +108,10 @@
 	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
+	* it would be possible to have multiple characters by having each character an object of it's own that is *owned* by tho user
+	  object, such that the character object can move around the world without affecting the user object.  The user object would
+	  be like an ethereal body that can be in multiple places at once (or perhaps its position is never used, and instead every
+	  thing is received as channels, including #realm
 
 	* check out Smaug's system/socials.dat.  It has various premade commands for interaction which don't actually do anything
 	  other than print various messages to various people but would make a great addition.  Find out what each line is for
@@ -148,6 +136,8 @@
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 
 
+	* should you throw type_error in functions that read a specific type (like array->get_number() etc) and also, you should throw
+	  some kind of exception during functions that return numbers rather than returning 0 as an error =/
 	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
 	  preposition, target)
 	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would

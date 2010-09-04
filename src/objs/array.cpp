@@ -10,6 +10,10 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/thingref.h>
+#include <sdm/things/thing.h>
 #include <sdm/array.h>
 
 struct MooObjectType moo_array_obj_type = {
@@ -69,6 +73,46 @@ int MooObjectArray::write_data(MooDataFile *data)
 		}
 	}
 	return(0);
+}
+
+MooObject *MooObjectArray::get(int index, MooObjectType *type)
+{
+	MooObject *obj;
+
+	if (!(obj = MooArray<MooObject *>::get(index)))
+		return(NULL);
+	if (!obj->is_a(type))
+		return(NULL);
+	return(obj);
+}
+
+double MooObjectArray::get_number(int index)
+{
+	MooNumber *obj;
+
+	// TODO should this throw an exception rather than just return 0 on error??
+	if (!(obj = (MooNumber *) this->get(index, &moo_number_obj_type)))
+		return(0);
+	return(obj->m_num);
+}
+
+const char *MooObjectArray::get_string(int index)
+{
+	MooString *obj;
+
+	// TODO should this throw an exception rather than just return NULL on error??
+	if (!(obj = (MooString *) this->get(index, &moo_string_obj_type)))
+		return(NULL);
+	return(obj->m_str);
+}
+
+MooThing *MooObjectArray::get_thing(int index)
+{
+	MooThingRef *obj;
+
+	if (!(obj = (MooThingRef *) this->get(index, &moo_thingref_obj_type)))
+		return(NULL);
+	return(obj->get());
 }
 
 

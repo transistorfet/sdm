@@ -16,10 +16,12 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/thingref.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
+static int channel_init(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_join(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args);
@@ -30,10 +32,20 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	// TODO should this specify various defaults of these actions?
 	// TODO should there be a function that creates either a special root object with props and actions set, or
 	//	possibly a function which creates an equally appropriate subobject which inherits from a core object?
+	actions->set("channel_init", new MooBuiltin(channel_init));
 	actions->set("channel_join", new MooBuiltin(channel_join));
 	actions->set("channel_leave", new MooBuiltin(channel_leave));
 	actions->set("channel_announce", new MooBuiltin(channel_announce));
 	actions->set("channel_say", new MooBuiltin(channel_say));
+	return(0);
+}
+
+static int channel_init(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	// TODO set channel name
+	// TODO create list of users object
+	// TODO add object to list of channels (which is used for distributing quit messages)???  (or possibly you
+	//	make it "inside" the channels list object)
 	return(0);
 }
 
@@ -54,16 +66,15 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
+	MooObjectArray *users;
 
-	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-		// TODO should this actually omit the user, or due to the non-formatted text dispatch, should it be ok?
-		if (cur != args->m_user) {
-			//sdm_notify(cur, args, "%s", args->text);
-			//cur->talk(args->m_this, args->m_user, "%s", args->m_text);
-			// TODO ^^ what the fuck?  Would MooThing have talk? Or do you need to do this as an action...
-			//cur->do_action("notify", "say", args->m_this, args->m_user, "%s", args->m_text);
-			// TODO ^^ this is even more bizzare.  How will these params map to MooArgs??
-		}
+	// TODO should this function actually take TNT_SAY as an argument so that it can also be used for TNT_EMOTE?
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	// TODO should there be an easier way to traverse a list of things?
+	for (int i = 0; i < users->last(); i++) {
+		if ((cur = users->get_thing(i)))
+			cur->notify(TNT_SAY, args->m_this, args->m_user, args->m_text);
 	}
 	return(0);
 }
@@ -72,10 +83,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	if (*args->m_text == '\0')
 		return(-1);
-	//user->printf(args, "You say \"$text\"");
-	//channel_announce(thing, args, "$user.name says \"$text\"");
-	//args->m_this->do_action("announce", args->m_user, ???, args->m_text);
-	return(0);
+	return(channel_announce(action, thing, args));
 }
 
 

@@ -597,6 +597,9 @@ int MooThing::print(MooArgs *args, const char *str)
 {
 	char buffer[LARGE_STRING_SIZE];
 
+	// TODO with the new channel system, you would use args->m_channel as the channel
+	// TODO would you use args->m_user as the user or should it be left blank?  The type (TNT_STATUS) should be enough to
+	//	say that it's a system message rather than talking
 	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, str);
 	return(this->notify(TNT_STATUS, NULL, NULL, buffer));
 }
@@ -660,6 +663,9 @@ int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *t
 int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const char *text)
 {
 	MooThing *cur;
+
+	// TODO with the new channel system, this would be different depending on the type of channel...  Should both types
+	//	of channels be defined in C++? or a common channel C++ object with the specifics and actions different?
 
 	for (cur = this->contents(); cur; cur = cur->next()) {
 		cur->notify(type, channel, thing, text);

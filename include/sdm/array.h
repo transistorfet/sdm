@@ -20,6 +20,8 @@
 #define MOO_ARRAY_DEFAULT_SIZE		32
 #define MOO_ARRAY_GROWTH_FACTOR		1.75
 
+class MooThing;
+
 template<typename T>
 class MooArray : public MooObject {
     protected:
@@ -57,6 +59,11 @@ class MooObjectArray : public MooArray<MooObject *> {
 
 	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);
+
+	MooObject *get(int index, MooObjectType *type);
+	double get_number(int index);
+	const char *get_string(int index);
+	MooThing *get_thing(int index);
 };
 
 extern MooObjectType moo_array_obj_type;

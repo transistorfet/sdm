@@ -7,9 +7,14 @@ GAME FEATURES TODO:
 	- lighting levels (rooms that are dark)
 	- torches, light sources
 	- have stores for buying and selling
+	- have days/nights and time.
 
 	- make it possible for players to sell their own items from stores (they can make an object and sell it)
 	- have pegboards everywhere (like at area/world markers) so that people can leave comments (thus enriching the social
 	  space without there necessarily being people online at the same time in the same area.
+	- you could have certain things be random encounter type stuff, like vampires that might infect you, or strange random
+	  deaths that you can encounter.
+	- vampire (by random) such that if you are one, you can't go outside (room marked outdoors) while it's daytime
+	- you could have a channel where you control your own little pets or sims (maybe kinda like the sims)
 
 
