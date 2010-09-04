@@ -157,7 +157,7 @@
 	  permissions of that property (or action?).  This way, an object cannot override a value in order to skirt permissions.
 
 	* make a mobile-equivallent of logarithm
-	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, go fish??
+	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing

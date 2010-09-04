@@ -314,6 +314,8 @@ int PseudoServ::dispatch(Msg *msg)
 					this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
 			}
 			else {
+				// TODO you could have this instead send . commands to a special action in the channel which forwards it
+				//	on to the correct object (or returns the error message from there)
 				if (msg->m_last[0] == '.')
 					return(this->notify(TNT_STATUS, NULL, NULL, "Sorry, commands must be entered in #realm."));
 				MooThing *channels = MooThing::reference(MOO_CHANNELS);

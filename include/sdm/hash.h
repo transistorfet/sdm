@@ -7,8 +7,10 @@
 #ifndef _SDM_HASH_H
 #define _SDM_HASH_H
 
+#include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/object.h>
 
 #define MOO_HBF_NO_ADD			0x0001		/// No entries can be added
 #define MOO_HBF_REPLACE			0x0002		/// Allow new elements to replace existing elements at the same index
@@ -21,6 +23,8 @@
 #define MOO_HASH_LOAD_FACTOR		0.75
 #define MOO_HASH_GROWTH_FACTOR		1.75
 
+class MooThing;
+
 template<typename T>
 class MooHashEntry {
     public:
@@ -30,7 +34,7 @@ class MooHashEntry {
 };
 
 template<typename T>
-class MooHash {
+class MooHash : public MooObject {
     protected:
 	int m_bits;
 	int m_traverse_index;
@@ -43,6 +47,8 @@ class MooHash {
     public:
 	MooHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS);
 	~MooHash();
+	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
+	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
 	int set(const char *key, T data);
 	int remove(const char *key);
@@ -56,6 +62,21 @@ class MooHash {
 	T next();
 };
 
+class MooObjectHash : public MooHash<MooObject *> {
+    public:
+	MooObjectHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS);
+
+	int read_entry(const char *type, MooDataFile *data);
+	int write_data(MooDataFile *data);
+
+	MooObject *get(const char *key, MooObjectType *type);
+	double get_number(const char *key);
+	const char *get_string(const char *key);
+	MooThing *get_thing(const char *key);
+};
+
+extern MooObjectType moo_hash_obj_type;
+MooObject *moo_hash_create(void);
 
 #define LOWERCASE(ch) \
 	( (ch >= 0x41 && ch <= 0x5a) ? ch + 0x20 : ch )
