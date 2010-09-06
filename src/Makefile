@@ -38,6 +38,7 @@ OBJS =	data.o	\
 	tasks/task.o	\
 	tasks/irc/msg.o	\
 	tasks/irc/pseudoserv.o	\
+	things/channel.o	\
 	things/thing.o	\
 	things/user.o	\
 	things/world.o
@@ -315,6 +316,15 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/things/world.h
+
+things/channel.o: things/channel.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/things/channel.h
 
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/data.h ../include/sdm/globals.h \

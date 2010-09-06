@@ -113,15 +113,17 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	const MooObjectType *objtype;
 
 	if (!strcmp(type, "property")) {
-		// TODO add status messages when loading a property fails.  It should never fail and if it does, it will
-		//	otherwise get silently 'delete' when the XML is written back
 		MooObject *obj = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL)))
+		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL))) {
+			moo_status("THING: Unable to find property type, %d", buffer);
 			return(-1);
+		}
 		data->read_attrib_string("name", buffer, STRING_SIZE);
-		if (!(obj = moo_make_object(objtype)))
+		if (!(obj = moo_make_object(objtype))) {
+			moo_status("THING: Error loading property, %d", buffer);
 			return(-1);
+		}
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
@@ -133,29 +135,33 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	else if (!strcmp(type, "thing")) {
 		MooThing *thing = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "thing", &moo_thing_obj_type)))
+		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "thing", &moo_thing_obj_type))) {
+			moo_status("THING: Unable to find thing type, %d", buffer);
 			return(-1);
-		if (!(thing = (MooThing *) moo_make_object(objtype)))
+		}
+		if (!(thing = (MooThing *) moo_make_object(objtype))) {
+			moo_status("THING: Error loading thing.");
 			return(-1);
+		}
 		data->read_children();
 		thing->read_data(data);
 		data->read_parent();
 		this->add(thing);
 	}
 	else if (!strcmp(type, "action")) {
-		// TODO add status messages when loading a property fails.  It should never fail and if it does, it will
-		//	otherwise get silently 'delete' when the XML is written back
 		MooAction *action = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
-		    || !(action = (MooAction *) moo_make_object(objtype)))
+		    || !(action = (MooAction *) moo_make_object(objtype))) {
+			moo_status("THING: Unable to find action type, %d", buffer);
 			return(-1);
+		}
 		data->read_attrib_string("name", buffer, STRING_SIZE);
 		data->read_children();
 		res = action->read_data(data);
 		data->read_parent();
 		if ((res < 0) || (this->set_action(buffer, action) < 0)) {
-			moo_status("Error loading action, %s.", buffer);
+			moo_status("THING: Error loading action, %s.", buffer);
 			delete action;
 			return(-1);
 		}
@@ -226,8 +232,8 @@ int MooThing::write_data(MooDataFile *data)
 		}
 		else {
 			data->write_begin_entry("thing");
-			if (tentry->m_data->type() != &moo_thing_obj_type)
-				data->write_attrib_string("type", tentry->m_data->type_name());
+			if (cur->type() != &moo_thing_obj_type)
+				data->write_attrib_string("type", cur->type_name());
 			cur->write_data(data);
 			data->write_end_entry();
 		}
@@ -397,8 +403,54 @@ MooAction *MooThing::get_action_partial(const char *name)
 	return(NULL);
 }
 
-int MooThing::do_action(MooAction *action, MooArgs *args)
+int MooThing::do_action(MooThing *user, const char *text, MooObject **result)
 {
+	MooArgs args;
+	MooAction *action;
+	char buffer[LARGE_STRING_SIZE];
+
+	args.parse_args(user, buffer, LARGE_STRING_SIZE, text);
+	if ((action = this->get_action(args.m_action_text)))
+		return(this->do_action(action, &args, result));
+	return(MOO_ACTION_NOT_FOUND);
+}
+
+int MooThing::do_action(const char *name, MooThing *user, const char *text, MooObject **result)
+{
+	MooArgs args;
+	MooAction *action;
+	char buffer[LARGE_STRING_SIZE];
+
+	args.parse_args(user, buffer, LARGE_STRING_SIZE, name, text);
+	if ((action = this->get_action(name)))
+		return(this->do_action(action, &args, result));
+	return(MOO_ACTION_NOT_FOUND);
+}
+
+int MooThing::do_action(const char *name, MooThing *user, MooThing *object, MooThing *target, MooObject **result)
+{
+	MooArgs args;
+	MooAction *action;
+
+	args.parse_args(user, object, target);
+	if ((action = this->get_action(name)))
+		return(this->do_action(action, &args, result));
+	return(MOO_ACTION_NOT_FOUND);
+}
+
+int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
+{
+	MooAction *action;
+
+	if ((action = this->get_action(name)))
+		return(this->do_action(action, args, result));
+	return(MOO_ACTION_NOT_FOUND);
+}
+
+int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
+{
+	int res;
+
 	try {
 		action->check_throw(MOO_PERM_X);
 
@@ -412,9 +464,15 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
 		//	It should now be set in the action so we can get it from there
 		if (action->permissions() & MOO_PERM_SUID)
-			return(MooTask::elevated_do_action(action, this, args));
+			res = MooTask::elevated_do_action(action, this, args);
 		else
-			return(action->do_action(this, args));
+			res = action->do_action(this, args);
+
+		/// Set the result if we were given a pointer
+		if (result) {
+			*result = args->m_result;
+			args->m_result = NULL;
+		}
 	}
 	catch (MooException e) {
 		moo_status("ACTION: (%s) %s", action->name(), e.get());
@@ -425,32 +483,6 @@ int MooThing::do_action(MooAction *action, MooArgs *args)
 		moo_status("%s: An unspecified error has occured", action->name());
 		return(-1);
 	}
-}
-
-int MooThing::do_action(const char *name, MooArgs *args)
-{
-	MooAction *action;
-
-	if ((action = this->get_action(name)))
-		return(this->do_action(action, args));
-	return(MOO_ACTION_NOT_FOUND);
-}
-
-int MooThing::do_action(const char *name, MooThing *user, MooThing *object, MooThing *target)
-{
-	MooArgs args;
-	MooAction *action;
-
-	// TODO change this with a MooArgs method for setting
-	args.m_user = user;
-	args.m_caller = (MooThing *) user;
-	args.m_object = object;
-	args.m_target = target;
-	args.m_text = NULL;
-
-	if ((action = this->get_action(name)))
-		return(this->do_action(action, &args));
-	return(MOO_ACTION_NOT_FOUND);
 }
 
 ///// Search Methods /////
@@ -538,16 +570,10 @@ MooThing *MooThing::reference(const char *name)
 
 int MooThing::command(const char *text)
 {
-	int i;
 	MooArgs args;
 	char buffer[LARGE_STRING_SIZE];
 
-	strcpy(buffer, text);
-	i = args.parse_whitespace(buffer);
-	args.m_action_text = &buffer[i];
-	i += args.parse_word(buffer);
-	args.m_text = &text[i];
-	args.parse_args(this, args.m_action_text, &buffer[i]);
+	args.parse_args(this, buffer, LARGE_STRING_SIZE, text);
 	return(this->command(args.m_action_text, &args));
 }
 
@@ -556,25 +582,15 @@ int MooThing::command(const char *action, const char *text)
 	MooArgs args;
 	char buffer[LARGE_STRING_SIZE];
 
-	strcpy(buffer, text);
-	args.parse_args(this, action, buffer);
-	args.m_text = text;
-	// TODO should there be a command(&args) rather than taking the action parameter?? (i guess 2 functions)
-	//	The issue appears to be that we didn't have action_text, and that action must be looked up on each
-	//	object, since we don't have a definite 'this' at this point (could be user, location, object, target)
-	return(this->command(action, &args));
+	args.parse_args(this, buffer, LARGE_STRING_SIZE, action, text);
+	return(this->command(args.m_action_text, &args));
 }
 
 int MooThing::command(const char *action, MooThing *object, MooThing *target)
 {
 	MooArgs args;
 
-	// TODO change this with a MooArgs method for setting
-	args.m_user = this;
-	args.m_caller = (MooThing *) this;
-	args.m_object = object;
-	args.m_target = target;
-	args.m_text = NULL;
+	args.parse_args(this, object, target);
 	return(this->command(action, &args));
 }
 
@@ -762,12 +778,16 @@ int MooThing::assign_id(moo_id_t id)
 	if (this->m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
 	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
-	if (moo_thing_table->set(id, this))
-		m_id = id;
-	else {
-		m_id = -1;
-		moo_status("Error: Attempted to reassign ID, %d", id);
+	m_id = -1;
+	if (id >= 0) {
+		if (moo_thing_table->set(id, this))
+			m_id = id;
 	}
+	else
+		// TODO should this only assign if the ID is -2 (MOO_NEW_ID)
+		m_id = moo_thing_table->add(this);
+	if (m_id < 0)
+		moo_status("Error: Attempted to reassign ID, %d", id);
 	return(m_id);
 }
 

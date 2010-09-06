@@ -51,9 +51,10 @@ MooTask::MooTask()
 
 MooTask::~MooTask()
 {
-	if (this == g_current_task)
-		// TODO should you also modify owner?
+	if (this == g_current_task) {
 		g_current_task = NULL;
+		g_current_owner = -1;
+	}
 	g_task_list->set(m_tid, NULL);
 }
 
@@ -109,6 +110,13 @@ MooTask *MooTask::current_task()
 moo_id_t MooTask::current_owner()
 {
 	return(g_current_owner);
+}
+
+moo_id_t MooTask::current_user()
+{
+	if (!g_current_task)
+		return(-1);
+	return(g_current_task->owner());
 }
 
 moo_id_t MooTask::current_owner(moo_id_t id)

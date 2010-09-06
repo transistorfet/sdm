@@ -26,6 +26,8 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
+static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
+static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_channel_actions(MooBuiltinHash *actions)
 {
@@ -37,6 +39,8 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("channel_leave", new MooBuiltin(channel_leave));
 	actions->set("channel_announce", new MooBuiltin(channel_announce));
 	actions->set("channel_say", new MooBuiltin(channel_say));
+	actions->set("channel_names", new MooBuiltin(channel_names));
+	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
 	return(0);
 }
 
@@ -51,8 +55,19 @@ static int channel_init(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	// TODO send message to all users
-	// TODO add user to list
+	MooThing *cur;
+	MooObjectArray *users;
+
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	// TODO should this maybe use an object sent as an arg so that none-users can join the channel?
+	// TODO check if the user is already in the channel and don't allow a duplicate entry
+	users->add(new MooThingRef(args->m_user->id()));
+	// TODO should there be an easier way to traverse a list of things?
+	for (int i = 0; i < users->last() + 1; i++) {
+		if ((cur = users->get_thing(i)))
+			cur->notify(TNT_JOIN, args->m_this, args->m_user, NULL);
+	}
 	return(0);
 }
 
@@ -72,7 +87,7 @@ static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
-	for (int i = 0; i < users->last(); i++) {
+	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_SAY, args->m_this, args->m_user, args->m_text);
 	}
@@ -86,5 +101,35 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 	return(channel_announce(action, thing, args));
 }
 
+static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	int j = 0;
+	MooThing *cur;
+	MooObjectArray *users;
+	char buffer[LARGE_STRING_SIZE];
 
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	// TODO should there be an easier way to traverse a list of things?
+	for (int i = 0; i < users->last() + 1; i++) {
+		if ((cur = users->get_thing(i)) && cur->is_a(&moo_user_obj_type)) {
+			strncpy(&buffer[j], ((MooUser *) cur)->name(), LARGE_STRING_SIZE - j);
+			j += strlen(((MooUser *) cur)->name());
+			if (j >= LARGE_STRING_SIZE)
+				break;
+			buffer[j++] = ' ';
+		}
+	}
+	if (j > 0)
+		buffer[--j] = '\0';
+	args->m_result = new MooString(buffer);
+	return(0);
+}
+
+static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	// TODO you could also just print a message like "Commands are not supported in this channel"
+	// TODO should you check to make sure this doesn't loop?
+	return(args->m_user->command(args->m_text));
+}
 

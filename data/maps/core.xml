@@ -333,29 +333,59 @@
    <permissions>075</permissions>
    <value>channels</value>
   </property>
-  <thing>
+  <action type="builtin" name="join">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_join</function>
+  </action>
+  <action type="builtin" name="say">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_say</function>
+  </action>
+  <action type="builtin" name="names">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_names</function>
+  </action>
+  <action type="builtin" name="evaluate">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_evaluate</function>
+  </action>
+  <thing type="channel">
    <id>14</id>
    <parent>13</parent>
    <owner>7</owner>
    <permissions>075</permissions>
    <location>13</location>
+   <property type="array" name="users">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+   </property>
    <property type="string" name="name">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <value>help</value>
+    <value>#help</value>
    </property>
+   <name>#help</name>
   </thing>
-  <thing>
+  <thing type="channel">
    <id>15</id>
    <parent>13</parent>
    <owner>7</owner>
    <permissions>075</permissions>
    <location>13</location>
+   <property type="array" name="users">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+   </property>
    <property type="string" name="name">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <value>wartalk</value>
+    <value>#wartalk</value>
    </property>
+   <name>#wartalk</name>
   </thing>
  </thing>
 </world>

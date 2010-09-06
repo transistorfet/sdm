@@ -59,6 +59,7 @@ class MooTask : public MooObject {
 	int switch_handle(MooInterface *inter, int ready);
 	static MooTask *current_task();
 	static moo_id_t current_owner();
+	static moo_id_t current_user();
 
     private:
 	static moo_id_t current_owner(moo_id_t id);

@@ -57,6 +57,12 @@ MooArgs::MooArgs()
 	m_text = NULL;
 }
 
+MooArgs::~MooArgs()
+{
+	if (m_result)
+		delete m_result;
+}
+
 int MooArgs::parse_word(char *buffer)
 {
 	int i;
@@ -82,7 +88,27 @@ int MooArgs::parse_words(char *buffer)
 	// TODO should this get the buffer? or should the buffer be automatically added and handled by MooArgs? (stored in m_buffer)
 }
 
-int MooArgs::parse_args(MooThing *user, char *buffer)
+int MooArgs::parse_args(MooThing *user, char *buffer, int max, const char *action, const char *text)
+{
+	int i;
+	int res;
+
+	if (text) {
+		strncpy(buffer, text, max);
+		buffer[max - 1] = '\0';
+		res = this->parse_args(user, action, buffer);
+		m_text = text;
+	}
+	else {
+		strncpy(buffer, action, max);
+		buffer[max - 1] = '\0';
+		res = this->parse_args(user, buffer, &i);
+		m_text = &action[i];
+	}
+	return(res);
+}
+
+int MooArgs::parse_args(MooThing *user, char *buffer, int *argpos)
 {
 	int i;
 	char *action;
@@ -91,6 +117,8 @@ int MooArgs::parse_args(MooThing *user, char *buffer)
 	i = this->parse_whitespace(buffer);
 	action = &buffer[i];
 	i += this->parse_word(&buffer[i]);
+	if (argpos)
+		*argpos = i;
 	return(this->parse_args(user, action, &buffer[i]));
 }
 
@@ -133,6 +161,21 @@ int MooArgs::parse_args(MooThing *user, const char *action, char *buffer)
 	m_action_text = action;
 	m_object = object;
 	m_target = target;
+	return(0);
+}
+
+int MooArgs::parse_args(MooThing *user, MooThing *object, MooThing *target)
+{
+	// TODO this assumes the current task is owned by the appropriate user
+	//	this would be useful for when you don't want to take a user param...
+	//m_user = MooThing::lookup(MooTask::current_user());
+
+	m_user = user;
+	// TODO this isn't really correct
+	m_caller = user;
+	m_object = object;
+	m_target = target;
+	m_text = NULL;
 	return(0);
 }
 

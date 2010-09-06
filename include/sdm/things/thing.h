@@ -66,11 +66,15 @@ class MooThing : public MooObject {
 	/// Action Methods
 	int set_action(const char *name, MooAction *action);
 	MooAction *get_action(const char *name);
+	// TODO will we ever use this?  Where would it be used?
 	MooAction *get_action_partial(const char *name);
-	int do_action(MooAction *action, MooArgs *args);
-	int do_action(const char *name, MooArgs *args);
-	// TODO should this take more Things??
-	int do_action(const char *name, MooThing *user, MooThing *object = NULL, MooThing *target = NULL);
+	int do_action(MooThing *user, const char *text, MooObject **result = NULL);
+	int do_action(const char *name, MooThing *user, const char *text, MooObject **result = NULL);
+	// TODO should this take user, or should it assume it based on the current task??
+	// TODO should this take a channel parameter?
+	int do_action(const char *name, MooThing *user, MooThing *object = NULL, MooThing *target = NULL, MooObject **result = NULL);
+	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
+	int do_action(MooAction *action, MooArgs *args, MooObject **result = NULL);
 
 	/// Search Methods
 	MooThing *find(const char *name);

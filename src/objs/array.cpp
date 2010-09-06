@@ -40,6 +40,7 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 	char buffer[STRING_SIZE];
 	const MooObjectType *objtype;
 
+	// TODO read/write the other values?? like max?
 	if (!strcmp(type, "entry")) {
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type(buffer, NULL)))

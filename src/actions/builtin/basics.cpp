@@ -73,7 +73,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		if (cur == args->m_caller || cur == args->m_user)
 			continue;
-		cur->do_action("print_view", args->m_user, NULL, NULL);
+		cur->do_action("print_view", args->m_user);
 	}
 
 	// TODO you should print a different set of messages if the look failed

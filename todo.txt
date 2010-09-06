@@ -134,6 +134,9 @@
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
+	* add a 'splice' operation to array so that removing an entry strinks the array
+	* make channel name matching case insensitive (somehow)
+	* the first time you do a join, it seems to fail silently
 
 
 	* should you throw type_error in functions that read a specific type (like array->get_number() etc) and also, you should throw

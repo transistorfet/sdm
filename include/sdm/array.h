@@ -75,7 +75,7 @@ MooArray<T>::MooArray(int size, int max, int bits)
 	m_bits = bits;
 	m_size = 0;
 	m_max = max;
-	m_last = 0;
+	m_last = -1;
 	m_next_space = 0;
 	m_data = NULL;
 	this->resize(size);

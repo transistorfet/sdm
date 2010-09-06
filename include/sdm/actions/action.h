@@ -51,14 +51,17 @@ class MooArgs {
 	const char *m_text;
 
 	MooArgs();
+	~MooArgs();
 
 	int set(MooThing *thing, const char *text);
 
 	static int parse_word(char *buffer);
 	static int parse_whitespace(char *buffer);
 	int parse_words(char *buffer);
-	int parse_args(MooThing *user, char *buffer);
+	int parse_args(MooThing *user, char *buffer, int max, const char *action, const char *text = NULL);
+	int parse_args(MooThing *user, char *buffer, int *argpos = NULL);
 	int parse_args(MooThing *user, const char *action, char *buffer);
+	int parse_args(MooThing *user, MooThing *object, MooThing *target);
 };
 
 

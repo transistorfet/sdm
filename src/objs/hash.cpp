@@ -18,7 +18,7 @@
 
 struct MooObjectType moo_hash_obj_type = {
 	NULL,
-	"array",
+	"hash",
 	typeid(MooObjectHash).name(),
 	(moo_type_create_t) moo_hash_create
 };

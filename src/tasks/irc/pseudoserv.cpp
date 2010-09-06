@@ -15,6 +15,7 @@
 
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/channel.h>
 #include <sdm/things/world.h>
 
 #include <sdm/misc.h>
@@ -314,19 +315,18 @@ int PseudoServ::dispatch(Msg *msg)
 					this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
 			}
 			else {
-				// TODO you could have this instead send . commands to a special action in the channel which forwards it
-				//	on to the correct object (or returns the error message from there)
-				if (msg->m_last[0] == '.')
-					return(this->notify(TNT_STATUS, NULL, NULL, "Sorry, commands must be entered in #realm."));
-				MooThing *channels = MooThing::reference(MOO_CHANNELS);
-				if (!channels)
-					return(this->notify(TNT_STATUS, NULL, NULL, "Sorry, channels are disabled at this time."));
-				MooThing *channel = channels->find(msg->m_params[0]);
-				// TODO I don't know if any of this would even work
-				//if (channel)
-				//	res = channel->do_action("send", &msg->m_params[0][1], msg->m_last);
-				if (res < 0)
+				// TODO will the channel list eventually become part of an object?
+				//MooThing *channels = MooThing::reference(MOO_CHANNELS);
+				MooChannel *channel = MooChannel::get(msg->m_params[0]);
+				if (!channel)
 					return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
+				if (msg->m_last[0] == '.')
+					channel->send(m_user, &msg->m_last[1]);
+				// TODO implement emotes later
+				//else if (msg->m_last[0] == '\x01')
+				//	this->process_ctcp(msg);
+				else
+					channel->send(m_user, "say", msg->m_last);
 			}	
 		}
 		else {
@@ -379,11 +379,11 @@ int PseudoServ::dispatch(Msg *msg)
 			return(this->send_join(msg->m_params[0]));
 		}
 		else {
-			// TODO this should find the channel and do_action join
 			// TODO parse out the possibility of multiple channels
-			//return(this->send_join(msg->m_params[0]));
-			// TODO temporarily return an error
-			return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+			MooChannel *channel = MooChannel::get(msg->m_params[0]);
+			if (!channel)
+				return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, msg->m_params[0]));
+			return(channel->send(m_user, "join"));
 		}
 		break;
 	    case IRC_MSG_PART:
@@ -556,7 +556,6 @@ int PseudoServ::send_names(const char *name)
 	if (!m_user)
 		return(-1);
 
-	// TODO we still don't have a way of finding a channel by name
 	if (!strcmp(name, "#realm")) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
@@ -579,6 +578,16 @@ int PseudoServ::send_names(const char *name)
 			// TODO the '=' should be different depending on if it's a secret, private, or public channel
 			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, buffer);
 		} while (cur);
+	}
+	else {
+		MooObject *result = NULL;
+		MooChannel *channel = MooChannel::get(name);
+		if (!channel)
+			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+		channel->do_action(m_user, "names", &result);
+		if (result && result->is_a(&moo_string_obj_type))
+			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
+
 	}
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
 	return(0);

@@ -13,6 +13,30 @@ THING(3) --- CONTAINER(4) --- ROOM(10)
 
 
 
+ACTIONS CALLED BY THE CORE:
+
+thing:init
+	Called when an object is first created.  For allowing a parent thing to set up it's child.
+
+channel:join
+	Joins the object to the channel.  Called by users-servering tasks.
+
+channel:say
+	Send a message to all users in the channel.  Called by user-serving tasks
+
+channel:names
+	Returns a string of the list of names of users in the channel
+
+ACTIONS CALLED BY BULTINIS:
+
+
+
+ACTIONS CALLED BY OTHER ACTIONS:
+
+
+
+
+
 container:addobj(obj, exit)
 	obj.location:can_leave(obj) -> to make sure the object can leave it's location
 	room:can_enter(obj) -> to make sure the object can enter this room

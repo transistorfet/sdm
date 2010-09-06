@@ -24,6 +24,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/objs/config.h>
+#include <sdm/things/channel.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
 
@@ -60,6 +61,8 @@ int init_moo(void)
 	moo_object_register_type(&moo_number_obj_type);
 	moo_object_register_type(&moo_string_obj_type);
 	moo_object_register_type(&moo_thingref_obj_type);
+	moo_object_register_type(&moo_array_obj_type);
+	moo_object_register_type(&moo_hash_obj_type);
 
 	moo_object_register_type(&moo_tcp_obj_type);
 	moo_object_register_type(&moo_rpc_obj_type);
@@ -67,6 +70,8 @@ int init_moo(void)
 	moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 	if (init_thing() < 0)
+		return(-1);
+	if (init_channel() < 0)
 		return(-1);
 	if (init_world() < 0)
 		return(-1);
@@ -83,6 +88,7 @@ void release_moo(void)
 {
 	release_user();
 	release_world();
+	release_channel();
 	release_thing();
 
 	release_builtin();
