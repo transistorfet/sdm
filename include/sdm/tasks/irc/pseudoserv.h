@@ -56,6 +56,9 @@ class PseudoServ : public MooTask {
 	int in_realm() { return(!(m_bits & IRC_BF_NOT_IN_REALM)); }
 	int not_in_realm() { return(m_bits & IRC_BF_NOT_IN_REALM); }
 
+	int handle_join(const char *name);
+	int handle_leave(const char *name);
+
 	int login();
 	int send_welcome();
 	int send_join(const char *name);

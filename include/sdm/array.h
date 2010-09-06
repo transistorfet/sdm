@@ -38,13 +38,22 @@ class MooArray : public MooObject {
 	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
+	void clear();
 	T operator[] (int index);
 	T get(int index);
 	T set(int index, T value);
 	int add(T value);
 	int remove(T value);
 
-	void resize(int size);
+	int push(T value);
+	T pop();
+	T shift();
+	int unshift(T value);
+	int insert(int index, T value);
+	T splice(int index);
+	// TODO perhaps add a function which does splice() but also deletes the value appropriately without returning it
+
+	int resize(int size);
 
     public:
 	/// Accessors
@@ -93,6 +102,21 @@ MooArray<T>::~MooArray()
 		}
 	}
 	memory_free(m_data);
+}
+
+template<typename T>
+void MooArray<T>::clear()
+{
+	int i;
+
+	if (m_bits & MOO_ABF_DELETE) {
+		for (i = 0; i < m_size; i++) {
+			if (m_data[i])
+				delete m_data[i];
+		}
+	}
+	m_last = -1;
+	m_next_space = 0;
 }
 
 template<typename T>
@@ -156,6 +180,7 @@ int MooArray<T>::add(T value)
 {
 	int space = m_next_space;
 
+	// TODO is this resize correct?  Should it be limited to a max increase after a certain size?
 	if (space >= m_size && m_bits & MOO_ABF_RESIZE)
 		this->resize((int) (m_size * MOO_ARRAY_GROWTH_FACTOR));
 	if (this->set(space, value))
@@ -178,21 +203,83 @@ int MooArray<T>::remove(T value)
 }
 
 template<typename T>
-void MooArray<T>::resize(int size)
+int MooArray<T>::push(T value)
+{
+	return(this->insert(m_last + 1, value));
+}
+
+template<typename T>
+T MooArray<T>::pop()
+{
+	return(this->splice(m_last));
+}
+
+template<typename T>
+T MooArray<T>::shift()
+{
+	return(this->splice(0));
+}
+
+template<typename T>
+int MooArray<T>::unshift(T value)
+{
+	return(this->insert(0, value));
+}
+
+template<typename T>
+int MooArray<T>::insert(int index, T value)
+{
+	if (index < 0 || index > m_last + 1)
+		return(-1);
+	/// Resize the array if required
+	if ((m_last + 1 >= m_size) && this->resize((int) (m_size * MOO_ARRAY_GROWTH_FACTOR)))
+		return(-1);
+	for (int i = m_last; i >= index; i--)
+		m_data[i + 1] = m_data[i];
+	m_data[index] = value;
+	m_last++;
+	for (; m_next_space < m_size; m_next_space++) {
+		if (!m_data[m_next_space])
+			break;
+	}
+	return(0);
+}
+
+template<typename T>
+T MooArray<T>::splice(int index)
+{
+	T ret;
+
+	if (index < 0 || index > m_last)
+		return(NULL);
+	ret = m_data[index];
+	for (int i = index; i < m_last; i++)
+		m_data[i] = m_data[i + 1];
+	m_data[m_last] = NULL;
+	if (m_last < m_next_space)
+		m_next_space = m_last;
+	m_last--;
+	return(ret);
+}
+
+
+template<typename T>
+int MooArray<T>::resize(int size)
 {
 	T *newdata;
 
 	if (m_max > 0 && size > m_max)
 		size = m_max;
 	if (size == m_size)
-		throw -1;
+		return(-1);
 
 	if (!(newdata = (T *) memory_realloc(m_data, size * sizeof(T))))
-		throw -1;
+		throw moo_mem_error;
 	m_data = newdata;
 	memset(&m_data[m_size], '\0', (size - m_size) * sizeof(T));
 	m_next_space = m_size;
 	m_size = size;
+	return(0);
 }
 
 #endif

@@ -20,14 +20,11 @@
 
 using namespace MooIRC;
 
-#define IRC_MAX_MSG		512
-
 MooException irc_unmarshal_error("Malformed message received");
 static MooHash<MsgCommand *> *cmd_list = NULL;
 
 Msg::Msg()
 {
-	m_msg = NULL;
 	this->clear();
 }
 
@@ -38,8 +35,6 @@ Msg::~Msg()
 
 void Msg::clear()
 {
-	if (m_msg)
-		delete m_msg;
 	m_nick = NULL;
 	m_host = NULL;
 	m_cmdtext = NULL;
@@ -47,6 +42,7 @@ void Msg::clear()
 	m_numparams = 0;
 	m_last = NULL;
 	m_time = 0;
+	m_buffer[0] = '\0';
 
 	memset(m_params, '\0', sizeof(char *) * IRC_MAX_ARGS);
 }
@@ -56,21 +52,6 @@ int Msg::need_more_params()
 	if (m_cmd && m_numparams < m_cmd->m_min)
 		return(1);
 	return(0);
-}
-
-Msg *Msg::read(MooTCP *inter)
-{
-	int size;
-	Msg *msg;
-	char buffer[IRC_MAX_MSG];
-
-	if ((size = inter->receive(buffer, IRC_MAX_MSG, '\n')) <= 0)
-		return(NULL);
-	//moo_status("IRC: RCVD DEBUG: %s", buffer);
-	msg = new Msg();
-	if (msg->unmarshal(buffer, size) < 0)
-		return(NULL);
-	return(msg);
 }
 
 int Msg::send(MooTCP *inter, const char *fmt, ...)
@@ -86,15 +67,34 @@ int Msg::send(MooTCP *inter, const char *fmt, ...)
 	return(inter->send(buffer));
 }
 
+int Msg::receive(MooTCP *inter)
+{
+	int size;
+
+	if ((size = inter->receive(m_buffer, IRC_MAX_MSG, '\n')) <= 0)
+		return(1);
+	//moo_status("IRC: RCVD DEBUG: %s", m_buffer);
+	if (this->unmarshal(m_buffer, size) < 0)
+		return(-1);
+	return(0);
+}
+
+Msg *Msg::read(MooTCP *inter)
+{
+	Msg *msg;
+
+	msg = new Msg();
+	if (msg->receive(inter)) {
+		delete msg;
+		return(NULL);
+	}
+	return(msg);
+}
+
 
 int Msg::unmarshal(char *str, int size)
 {
 	int i = 0;
-
-	if (m_msg)
-		this->clear();
-	m_msg = new char[size + 1];
-	strcpy(m_msg, str);
 
 	// Parse the nick and server if it exists
 	if (str[i] == ':') {

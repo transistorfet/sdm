@@ -473,6 +473,7 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 			*result = args->m_result;
 			args->m_result = NULL;
 		}
+		return(res);
 	}
 	catch (MooException e) {
 		moo_status("ACTION: (%s) %s", action->name(), e.get());

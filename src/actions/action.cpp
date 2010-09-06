@@ -94,13 +94,13 @@ int MooArgs::parse_args(MooThing *user, char *buffer, int max, const char *actio
 	int res;
 
 	if (text) {
-		strncpy(buffer, text, max);
+		strncpy(buffer, text, max - 1);
 		buffer[max - 1] = '\0';
 		res = this->parse_args(user, action, buffer);
 		m_text = text;
 	}
 	else {
-		strncpy(buffer, action, max);
+		strncpy(buffer, action, max - 1);
 		buffer[max - 1] = '\0';
 		res = this->parse_args(user, buffer, &i);
 		m_text = &action[i];

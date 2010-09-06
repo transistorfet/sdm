@@ -14,18 +14,19 @@
 namespace MooIRC {
 
 #define IRC_MAX_ARGS		14
+#define IRC_MAX_MSG		512
 
 class Msg {
     public:
-	char *m_msg;
-	const char *m_nick;
-	const char *m_host;
-	const char *m_cmdtext;
+	char *m_nick;
+	char *m_host;
+	char *m_cmdtext;
 	MsgCommand *m_cmd;
-	const char *m_params[IRC_MAX_ARGS];
+	char *m_params[IRC_MAX_ARGS];
 	int m_numparams;
-	const char *m_last;
+	char *m_last;
 	time_t m_time;
+	char m_buffer[IRC_MAX_MSG];
 
     public:
 	Msg();
@@ -37,6 +38,7 @@ class Msg {
 	int need_more_params();
 
 	int send(MooTCP *inter);
+	int receive(MooTCP *inter);
 
 	static Msg *read(MooTCP *inter);
 	static int send(MooTCP *inter, const char *fmt, ...);

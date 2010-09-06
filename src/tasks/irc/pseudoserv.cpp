@@ -198,16 +198,14 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 
 int PseudoServ::handle(MooInterface *inter, int ready)
 {
-	Msg *msg;
+	Msg msg;
 
 	if (!(ready & IO_READY_READ))
 		return(-1);
 	try {
-		msg = Msg::read(dynamic_cast<MooTCP *>(inter));
-		if (!msg)
+		if (msg.receive(dynamic_cast<MooTCP *>(inter)))
 			return(1);
-		this->dispatch(msg);
-		delete msg;
+		this->dispatch(&msg);
 	}
 	catch (MooException e) {
 		moo_status("IRC: %s", e.get());
@@ -335,8 +333,11 @@ int PseudoServ::dispatch(Msg *msg)
 		}
 		return(0);
 	    }
-	    case IRC_MSG_MODE:
+	    case IRC_MSG_MODE: {
 		if (moo_is_channel_name(msg->m_params[0])) {
+			// TODO temporary, to satisfy irssi
+			if (msg->m_numparams > 1 && msg->m_params[1][0] == 'b')
+				return(Msg::send(m_inter, ":%s %03d %s %s :End of channel ban list\r\n", server_name, IRC_RPL_ENDOFBANLIST, m_nick->c_str(), msg->m_params[0]));
 			// TODO do channel mode command processing
 			// TODO the +r here is just to send something back and should be removed later when properly implemented
 			return(Msg::send(m_inter, ":%s %03d %s %s +\r\n", server_name, IRC_RPL_CHANNELMODEIS, m_nick->c_str(), msg->m_params[0]));
@@ -353,71 +354,61 @@ int PseudoServ::dispatch(Msg *msg)
 			return(Msg::send(m_inter, ":%s %03d %s +i\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
 		}
 		break;
-	    case IRC_MSG_JOIN:
-		// TODO check for invite only??
-		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+i)\r\n", server_name, IRC_ERR_INVITEONLYCHAN, msg->m_params[0]));
-		// TODO check for channel limit? is there one?
-		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+l)\r\n", server_name, IRC_ERR_CHANNELISFULL, msg->m_params[0]));
-		// TODO check for too many channels joined?
-		//	return(Msg::send(m_inter, ":%s %03d %s :You have joined too many channels\r\n", server_name, IRC_ERR_TOOMANYCHANNELS, msg->m_params[0]));
-		// TODO check for banned??
-		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+b)\r\n", server_name, IRC_ERR_BANNEDFROMCHAN, msg->m_params[0]));
-
-		// TODO what are these messages for??
-		//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+k)\r\n", server_name, IRC_ERR_BADCHANNELKEY, msg->m_params[0]));
-		//	return(Msg::send(m_inter, ":%s %03d %s :Bad channel mask\r\n", server_name, IRC_ERR_BADCHANMASK, msg->m_params[0]));
-		//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
-		//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
-
-		// TODO check for invalid channel name
-		//	return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, msg->m_params[0]));
-
+	    }
+	    case IRC_MSG_JOIN: {
 		if (!strcmp(msg->m_params[0], "0"))
 			;// TODO leave all channels
-		else if (!strcmp(msg->m_params[0], "#realm")) {
-			RBIT(m_bits, IRC_BF_NOT_IN_REALM);
-			return(this->send_join(msg->m_params[0]));
-		}
 		else {
-			// TODO parse out the possibility of multiple channels
-			MooChannel *channel = MooChannel::get(msg->m_params[0]);
-			if (!channel)
-				return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, msg->m_params[0]));
-			return(channel->send(m_user, "join"));
+			/// Cycle through the comma-seperated list of channels to join
+			char *name = &msg->m_params[0][0];
+			for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
+				if (msg->m_params[0][i] == ',') {
+					msg->m_params[0][i] = '\0';
+					this->handle_join(name);
+					msg->m_params[0][i] = ',';
+					name = &msg->m_params[0][i + 1];
+				}
+			}
+			this->handle_join(name);
 		}
 		break;
-	    case IRC_MSG_PART:
-		if (!strcmp(msg->m_params[0], "#realm")) {
-			SBIT(m_bits, IRC_BF_NOT_IN_REALM);
-			return(this->send_part(msg->m_params[0]));
+	    }
+	    case IRC_MSG_PART: {
+		/// Cycle through the comma-seperated list of channels to leave
+		char *name = &msg->m_params[0][0];
+		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
+			if (msg->m_params[0][i] == ',') {
+				msg->m_params[0][i] = '\0';
+				this->handle_leave(name);
+				msg->m_params[0][i] = ',';
+				name = &msg->m_params[0][i + 1];
+			}
 		}
-		else {
-			// TODO this should find the channel and do_action part
-			// TODO parse out the possibility of multiple channels
-			//return(this->send_part(msg->m_params[0]));
-			// TODO temporarily return an error
-			return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
-		}
-		return(Msg::send(m_inter, ":%s %03d %s :Only the #realm channel is supported at this time.\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+		this->handle_leave(name);
 		break;
-	    case IRC_MSG_NAMES:
+	    }
+	    case IRC_MSG_NAMES: {
 		// TODO check for ',' in channels names (a list of channels vs just one channel)
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
 			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
 		this->send_names(msg->m_params[0]);
 		return(0);
-	    case IRC_MSG_WHOIS:
+	    }
+	    case IRC_MSG_WHOIS: {
 		// TODO do rest of whois
 		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
-	    case IRC_MSG_QUIT:
+	    }
+	    case IRC_MSG_QUIT: {
 		Msg::send(m_inter, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_inter->host());
 		delete this;
 		return(0);
-	    case IRC_MSG_WHO:
+	    }
+	    case IRC_MSG_WHO: {
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
 			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
 		this->send_who(msg->m_params[0]);
 		return(0);
+	    }
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
 		return(Msg::send(m_inter, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
@@ -468,6 +459,50 @@ int PseudoServ::dispatch(Msg *msg)
 	*/
 
 	return(0);
+}
+
+int PseudoServ::handle_join(const char *name)
+{
+	// TODO check for invite only??
+	//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+i)\r\n", server_name, IRC_ERR_INVITEONLYCHAN, msg->m_params[0]));
+	// TODO check for channel limit? is there one?
+	//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+l)\r\n", server_name, IRC_ERR_CHANNELISFULL, msg->m_params[0]));
+	// TODO check for too many channels joined?
+	//	return(Msg::send(m_inter, ":%s %03d %s :You have joined too many channels\r\n", server_name, IRC_ERR_TOOMANYCHANNELS, msg->m_params[0]));
+	// TODO check for banned??
+	//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+b)\r\n", server_name, IRC_ERR_BANNEDFROMCHAN, msg->m_params[0]));
+
+	// TODO what are these messages for??
+	//	return(Msg::send(m_inter, ":%s %03d %s :Cannot join channel (+k)\r\n", server_name, IRC_ERR_BADCHANNELKEY, msg->m_params[0]));
+	//	return(Msg::send(m_inter, ":%s %03d %s :Bad channel mask\r\n", server_name, IRC_ERR_BADCHANMASK, msg->m_params[0]));
+	//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
+	//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+
+	if (!strcmp(name, "#realm")) {
+		RBIT(m_bits, IRC_BF_NOT_IN_REALM);
+		return(this->send_join(name));
+	}
+	else {
+		MooChannel *channel = MooChannel::get(name);
+		if (!channel)
+			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+		return(channel->send(m_user, "join"));
+	}
+}
+
+int PseudoServ::handle_leave(const char *name)
+{
+	if (!strcmp(name, "#realm")) {
+		SBIT(m_bits, IRC_BF_NOT_IN_REALM);
+		return(this->send_part(name));
+	}
+	else {
+		// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
+		MooChannel *channel = MooChannel::get(name);
+		if (!channel)
+			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+		return(channel->send(m_user, "leave"));
+	}
 }
 
 int PseudoServ::login()
@@ -607,7 +642,7 @@ int PseudoServ::send_who(const char *mask)
 		for (; cur; cur = cur->next()) {
 			// TODO we should check that things are invisible, and also add @ for wizards or something
 			if ((thing_name = cur->get_string_property("name"))) {
-				Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, m_nick->c_str(), server_name, server_name, m_nick->c_str(), m_nick->c_str());
+				Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
 			}
 		}
 	}

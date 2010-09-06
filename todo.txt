@@ -97,8 +97,11 @@
 	  and you could even contemplate a "relocatable" format, such that it automatically adjusts all IDs (like all thing refs could
 	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
+	* make it so that you can have a script (either of MooCode or commands or both) such that you can program an entire initial
+	  system.  When the code is run, it generates the database which can then be saved as the core database.
 
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
+	* you need an object garbage collection system, and possible an any-MooObject collection system
 
 	* you could have a hash table in a property that you can easily look up values in, such that you can store all game stats
 	  in there.

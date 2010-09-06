@@ -60,9 +60,13 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
-	// TODO should this maybe use an object sent as an arg so that none-users can join the channel?
-	// TODO check if the user is already in the channel and don't allow a duplicate entry
-	users->add(new MooThingRef(args->m_user->id()));
+	/// If the user is already in the channel, then just return
+	for (int i = 0; i < users->last() + 1; i++) {
+		if (users->get_thing(i) == args->m_user)
+			return(0);
+	}
+	// TODO should this maybe use an object sent as an arg so that non-users can join the channel?
+	users->push(new MooThingRef(args->m_user->id()));
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
