@@ -10,6 +10,14 @@
 
 #include <sdm/objs/object.h>
 
+/**
+TODO What kind of argument patterns are there:
+	- single string
+	- list of strings
+	- list of MooObjects
+
+*/
+
 class MooArgs;
 class MooUser;
 class MooThing;

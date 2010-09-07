@@ -21,6 +21,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/world.h>
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
@@ -127,7 +128,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();
-		if ((res < 0) || (this->set_property(buffer, obj) < 0)) {
+		if ((res < 0) || (m_properties->set(buffer, obj) < 0)) {
 			delete obj;
 			return(-1);
 		}
@@ -160,7 +161,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		data->read_children();
 		res = action->read_data(data);
 		data->read_parent();
-		if ((res < 0) || (this->set_action(buffer, action) < 0)) {
+		if ((res < 0) || (m_actions->set(buffer, action) < 0)) {
 			moo_status("THING: Error loading action, %s.", buffer);
 			delete action;
 			return(-1);
@@ -181,7 +182,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	else if (!strcmp(type, "location")) {
 		moo_id_t id = data->read_integer_entry();
 		MooThing *thing = MooThing::lookup(id);
-		if (thing)
+		if (thing && this != thing)
 			thing->add(this);
 	}
 	else
@@ -287,15 +288,33 @@ MooThing *MooThing::clone()
 
 int MooThing::set_property(const char *name, MooObject *obj)
 {
-	// TODO do permissions check??
+	MooObject *cur;
+	MooThing *thing;
+
+	// TODO should there be a way to store the property in the local object
 	if (!name || (*name == '\0'))
 		return(-1);
 	/// If the object is NULL, remove the entry from the table
-	if (!obj) {
-		m_properties->remove(name);
-		return(1);
+	if ((cur = this->get_property_raw(name, &thing))) {
+		if (!obj) {
+			thing->check_throw(MOO_PERM_W);
+			thing->m_properties->remove(name);
+			return(1);
+		}
+		else {
+			cur->check_throw(MOO_PERM_W);
+			obj->owner(cur->owner());
+			obj->permissions(cur->permissions());
+			// TODO you could also do a check here for the type (only allow the same type to overwrite)
+			return(thing->m_properties->set(name, obj));
+		}
 	}
-	return(m_properties->set(name, obj));
+	else {
+		if (!obj)
+			return(1);
+		this->check_throw(MOO_PERM_W);
+		return(m_properties->set(name, obj));
+	}
 }
 
 int MooThing::set_property(const char *name, moo_id_t id)
@@ -324,15 +343,28 @@ int MooThing::set_property(const char *name, const char *str)
 
 MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 {
+	MooObject *obj;
+
+	if (!(obj = this->get_property_raw(name, NULL)))
+		return(NULL);
+	// TODO add permissions check
+	//obj->check_throw(MOO_PERM_R);
+	if (!type || obj->is_a(type))
+		return(obj);
+	return(NULL);
+}
+
+MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
+{
 	MooThing *cur;
 	MooObject *obj;
 
-	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if (!(obj = cur->m_properties->get(name)))
-			continue;
-		if (!type || obj->is_a(type))
+		if ((obj = cur->m_properties->get(name))) {
+			if (thing)
+				*thing = cur;
 			return(obj);
+		}
 	}
 	return(NULL);
 }
@@ -764,6 +796,23 @@ int MooThing::moveto(MooThing *thing, MooThing *by)
 	return(0);
 }
 
+int MooThing::attach_orphans()
+{
+	MooThing *cur;
+	MooThing *root;
+
+	if (!(root = MooWorld::root()))
+		return(-1);
+	for (int i = 0; i < moo_thing_table->last(); i++) {
+		if ((cur = moo_thing_table->get(i))) {
+			if (!cur->m_location)
+				root->add(cur);
+		}
+	}
+	return(0);
+}
+
+
 int MooThing::is_wizard(moo_id_t id)
 {
 	MooThing *thing;
@@ -796,6 +845,14 @@ int MooThing::add(MooThing *obj)
 {
 	if (obj->m_location == this)
 		return(0);
+	/// Make sure this addition doesn't create a loop
+	for (MooThing *cur = this; cur; cur = cur->m_location) {
+		if (cur == obj) {
+			moo_status("THING: Adding thing will create loop, %d", obj->id());
+			return(-1);
+		}
+	}
+
 	/// If this object is in another object and it can't be removed, then we don't add it
 	if (obj->m_location && obj->m_location->remove(obj))
 		return(-1);

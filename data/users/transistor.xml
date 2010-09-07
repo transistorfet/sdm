@@ -6,15 +6,15 @@
  <owner>100</owner>
  <permissions>075</permissions>
  <location>12</location>
- <property type="string" name="name">
-  <owner>-1</owner>
-  <permissions>075</permissions>
-  <value>transistor</value>
- </property>
  <property type="string" name="description">
   <owner>-1</owner>
   <permissions>075</permissions>
   <value>You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</value>
+ </property>
+ <property type="string" name="name">
+  <owner>-1</owner>
+  <permissions>075</permissions>
+  <value>transistor</value>
  </property>
  <property type="thingref" name="last_location">
   <owner>100</owner>
@@ -22,5 +22,5 @@
   <value>55</value>
  </property>
  <name>transistor</name>
- <lastseen>1283804050</lastseen>
+ <lastseen>1283831661</lastseen>
 </user>

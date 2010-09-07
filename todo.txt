@@ -19,9 +19,24 @@
 	  per connection.  You could be able to control a whole party through different channel windows.  Perhaps there could be a
 	  number of 'characters' in the user object, and the user object can be in a different special non-playing area for social
 	  MUDing, while his/her characters can be in various parts of the game area.  So maybe it should be #realm even, maybe
-	  #social, and #realm-char can be used for each character
+	  #social, and #realm-char can be used for each character.  It is possible to make #realm just a channel and use the evaluate
+	  action to implement all world manipulation
 	* what are the merits of a disk-based thing database rather than having all objects in memory?  If we were to add this, it
 	  could probably be done transparently to the existing code
+
+	* by making a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
+	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
+	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
+	  write to user, can be redirected over an RPC connection, and come out the other side, just as the other side of the function
+	  call.  Therefore, we need to work on the RPC system, the IRC system, and the telnet system =P
+	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
+	  directly printed, exactly the same as it would appear on telnet (more or less), -OR- server based, either the same as the
+	  client (but with services-like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
+	  since all users associated with that channel will receive the same text, so everyone will recieve everyone else's private
+	  traffic.  #realm could be use for only talking, with notices being sent for status messages, but that would get really
+	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
+	  or something like that would still be possible (channels could be +si or something, so that you can only join if you are
+	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
 
     Discussion:
 
@@ -55,40 +70,18 @@
 	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
 	  subobject which inherits from the core object?
 
-	* by make a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
-	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
-	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
-	  write to user, can be redirected over an RPC connection, and come out the other side, just as the other side of the function
-	  call.  Therefore, we need to work on the RPC system, the IRC system, and the telnet system =P
-	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
-	  directly printed, exactly the same as it would appear on telnet (more or less), -OR- server based, either the same as the
-	  client (but with services-like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
-	  since all users associated with that channel will receive the same text, so everyone will recieve everyone else's private
-	  traffic.  #realm could be use for only talking, with notices being sent for status messages, but that would get really
-	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
-	  or something like that would still be possible (channels could be +si or something, so that you can only join if you are
-	  forcejoin'd by TheRealm.)
-	* the #<numeric> channels idea would require the object number corresponding to the intended target.  If it's the user object,
-	  it's sent to the user directly as a privmsg (whisper would be like this).  If it's something else (like a room) then it's sent
-	  to the user as coming from that channel.
-	* #<numeric> doesn't work with the number being the room id.  It only works if the channel is a special custom channel for
-	  that user.  This would not require the forcejoin method.  It doesn't work because again, you have no way to print status
-	  messages, just like #realm in a multiserver irc system.  With this in mind, the "realm" messages don't need a channel
-	  identifier, since the data always goes to the same user-specific channel
-
-	* for channel management, it is possible to have user call an action on itself when it connects/disconnects, which can then call
-	  the channel central object (which has a list of all channels) and it then calls actions on each channel to notify it of the
-	  user's new status, which causes it to remove the user from the list of users and send disconnect notices to each user in
-	  that channel.  Ok, here's a new problem.  How do you notify the clients of user connect/disconnect/join/part/etc??
-	* every channel could be the same basic structure but have different rules for different rooms or whatever.  You would have to
-	  be able to be in multiple objects (channels) at the same time, or however channel membership would be determined.  Or no, this
-	  isn't what i really mean.  I mean a channel object for each channel (including one for each player character being used in
-	  the real world (which right now we are just allowing one)).
-	* make various actions in channel.cpp for the maintenance of all channels, suhc that they are added for the channel manager
-
 	* we should seriously look into the loading and saving of things to various XML files based on things inside things.  The
 	  problem might come with objects that that aren't *in* anything (but is this really possible? everythnig can be in the root
 	  object, at least.
+	* we could possibly avoid this problem by passing over the thing database and looking for objects with a location set to NULL.
+	  We would have to think about world's... or wait... If world has a location of NULL, and all other objects do too, you could
+	  just write all objects that have a location of NULL.  All other objects will have location set to something, unless there are
+	  loops but we should check for that and disallow that anyways.  Also, certain objects (like rooms and exits) should be
+	  specifically added to the "inner most world object".  They wont be *in* eachother as a member, just pointed to by other
+	  lists in the properties, but they will all be written to the same file, and they will all be written even without taking
+	  properties into account.
+	* the only issue with thingrefs in properties is when it comes to garbage collection, but it's not so bad since thingref is a
+	  special type rather than just a number
 	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
 	  quota system such that each object has a certain range of IDs from which it can create new objects.  You could even have
 	  limit inheritence such that it looks for the object with the first defined min ID and the first max ID from which it gets
@@ -103,18 +96,12 @@
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
 	* you need an object garbage collection system, and possible an any-MooObject collection system
 
-	* you could have a hash table in a property that you can easily look up values in, such that you can store all game stats
-	  in there.
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
 	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
 	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
-	* it would be possible to have multiple characters by having each character an object of it's own that is *owned* by tho user
-	  object, such that the character object can move around the world without affecting the user object.  The user object would
-	  be like an ethereal body that can be in multiple places at once (or perhaps its position is never used, and instead every
-	  thing is received as channels, including #realm
 
 	* check out Smaug's system/socials.dat.  It has various premade commands for interaction which don't actually do anything
 	  other than print various messages to various people but would make a great addition.  Find out what each line is for
@@ -128,19 +115,16 @@
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 	* make MooObjectHash and MooObjectTree, and convert MooThing to use them for prop and action tables (and their automagic saving
 	  functionality)
-
-	* modify the handle() function to do something like close the interface if an error occurs?
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
+	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
+	  some place they aren't supposed to be
+
 	* sort out and make better use of exceptions (in do_action in particular).  You can't catch a segfault but you can throw
 	  exceptions when certain functions would otherwise return a NULL.  You could alternativley have an TRY() macro or something
 	  which runs the function and throws -1 if it returns a value less than 0 (what about NULL...  NULLCHK() )
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
-	* add a 'splice' operation to array so that removing an entry strinks the array
-	* make channel name matching case insensitive (somehow)
-	* the first time you do a join, it seems to fail silently
-
 
 	* should you throw type_error in functions that read a specific type (like array->get_number() etc) and also, you should throw
 	  some kind of exception during functions that return numbers rather than returning 0 as an error =/
@@ -155,7 +139,6 @@
 	  instead of doing the action as if no object was specified ('.look foobar' current 'look's at the room)
 
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
-	* what causes the "IRSSI join to #realm was synced" message (it takes forever to appear but should appear right away)
 	* add a 'register' and 'login' commands to basics
 
 	* add permissions checking functions of some kind to all applicable locations
@@ -165,6 +148,7 @@
 	* make a mobile-equivallent of logarithm
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 
+	* implement client quit in the channels
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing
 

@@ -333,15 +333,30 @@
    <permissions>075</permissions>
    <value>channels</value>
   </property>
+  <action type="builtin" name="init">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_init</function>
+  </action>
   <action type="builtin" name="join">
    <owner>-1</owner>
    <permissions>075</permissions>
    <function>channel_join</function>
   </action>
+  <action type="builtin" name="leave">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_leave</function>
+  </action>
   <action type="builtin" name="say">
    <owner>-1</owner>
    <permissions>075</permissions>
    <function>channel_say</function>
+  </action>
+  <action type="builtin" name="emote">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <function>channel_emote</function>
   </action>
   <action type="builtin" name="names">
    <owner>-1</owner>

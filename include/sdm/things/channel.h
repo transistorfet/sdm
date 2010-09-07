@@ -28,6 +28,7 @@ class MooChannel : public MooThing {
 
 	int send(MooThing *user, const char *action, const char *text = NULL);
 	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
+	static int quit(MooThing *user);
 
 	/// Authentication Methods
 	static int exists(const char *name);

@@ -149,7 +149,13 @@ int MooUser::connect(MooTask *task)
 {
 	if (m_task)
 		return(-1);
-	this->cryolocker_revive();
+
+	try {
+		this->cryolocker_revive();
+	}
+	catch (...) {
+		moo_status("USER: Error reviving user from cryolocker, %s", m_name->c_str());
+	}
 
 	/// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
 	m_task = task;
@@ -158,14 +164,24 @@ int MooUser::connect(MooTask *task)
 
 void MooUser::disconnect()
 {
-	this->cryolocker_store();
-
-	/// Save the user information to the user's file only if we were already connected
-	if (m_task) {
-		this->save();
-		m_task->purge(this);
+	try {
+		this->cryolocker_store();
 	}
-	m_task = NULL;
+	catch (...) {
+		moo_status("USER: Error storing user in cryolocker, %s", m_name->c_str());
+	}
+
+	try {
+		/// Save the user information to the user's file only if we were already connected
+		if (m_task) {
+			this->save();
+			m_task->purge(this);
+		}
+		m_task = NULL;
+	}
+	catch (...) {
+		moo_status("USER: Error saving user data, %s", m_name->c_str());
+	}
 }
 
 

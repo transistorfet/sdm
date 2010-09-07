@@ -14,12 +14,13 @@
 
 #include <sdm/tasks/irc/msg.h>
 
+class MooChannel;
+
 namespace MooIRC {
 
 #define IRC_BF_WELCOMED		0x0001
 #define IRC_BF_RECEIVED_USER	0x0002
 #define IRC_BF_NOT_IN_REALM	0x0004
-
 
 class PseudoServ : public MooTask {
     protected:
@@ -65,7 +66,7 @@ class PseudoServ : public MooTask {
 	int send_part(const char *name);
 	int send_names(const char *name);
 	int send_who(const char *mask);
-	int process_ctcp(Msg *msg);
+	int process_ctcp(Msg *msg, MooChannel *channel);
 
 	int format(char *buffer, int max, const char *str);
 	int write_attrib(char *buffer, int max, const char *attrib);

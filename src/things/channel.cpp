@@ -151,6 +151,19 @@ int MooChannel::notify(int type, MooThing *channel, MooThing *thing, const char 
 */
 }
 
+int MooChannel::quit(MooThing *user)
+{
+	MooHashEntry<MooChannel *> *entry;
+
+	// TODO this isn't right!  It will send multiple quit messages.  Each client should only recieve one quit message and only
+	//	if that user is in a channel with the user that is quitting
+	channel_list->reset();
+	while ((entry = channel_list->next_entry())) {
+		//entry->m_data->send(user, "quit");
+	}
+	return(0);
+}
+
 
 int MooChannel::exists(const char *name)
 {

@@ -100,6 +100,7 @@ class MooThing : public MooObject {
 	int cryolocker_store();
 	int cryolocker_revive();
 	int moveto(MooThing *thing, MooThing *by);
+	static int attach_orphans();
 
 	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
 	static int is_wizard(moo_id_t id);
@@ -116,8 +117,6 @@ class MooThing : public MooObject {
 	inline int is_a_thing(moo_id_t id);
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
-	// TODO do you need an "is_a_wizard()" method here, to be used by MooObject->check_permissions()
-
 	/// String Parsers
 	static int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
@@ -130,6 +129,7 @@ class MooThing : public MooObject {
 
 	int add(MooThing *thing);
 	int remove(MooThing *thing);
+	MooObject *get_property_raw(const char *name, MooThing **thing);
 };
 
 extern MooObjectType moo_thing_obj_type;

@@ -24,8 +24,8 @@
 static int channel_init(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_join(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
+static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
@@ -37,8 +37,8 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("channel_init", new MooBuiltin(channel_init));
 	actions->set("channel_join", new MooBuiltin(channel_join));
 	actions->set("channel_leave", new MooBuiltin(channel_leave));
-	actions->set("channel_announce", new MooBuiltin(channel_announce));
 	actions->set("channel_say", new MooBuiltin(channel_say));
+	actions->set("channel_emote", new MooBuiltin(channel_emote));
 	actions->set("channel_names", new MooBuiltin(channel_names));
 	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
 	return(0);
@@ -77,17 +77,33 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	// TODO send message to all users
-	// TODO remove user from list
+	MooThing *cur;
+	MooObject *ref;
+	MooObjectArray *users;
+
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	for (int i = 0; i < users->last() + 1; i++) {
+		if (users->get_thing(i) == args->m_user) {
+			for (int j = 0; j < users->last() + 1; j++) {
+				if ((cur = users->get_thing(j)))
+					cur->notify(TNT_LEAVE, args->m_this, args->m_user, NULL);
+			}
+			ref = users->splice(i);
+			delete ref;
+			return(0);
+		}
+	}
 	return(0);
 }
 
-static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
 	MooObjectArray *users;
 
-	// TODO should this function actually take TNT_SAY as an argument so that it can also be used for TNT_EMOTE?
+	if (*args->m_text == '\0')
+		return(-1);
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
@@ -98,11 +114,21 @@ static int channel_announce(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	MooThing *cur;
+	MooObjectArray *users;
+
 	if (*args->m_text == '\0')
 		return(-1);
-	return(channel_announce(action, thing, args));
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	// TODO should there be an easier way to traverse a list of things?
+	for (int i = 0; i < users->last() + 1; i++) {
+		if ((cur = users->get_thing(i)))
+			cur->notify(TNT_EMOTE, args->m_this, args->m_user, args->m_text);
+	}
+	return(0);
 }
 
 static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
@@ -133,7 +159,9 @@ static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
 static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	// TODO you could also just print a message like "Commands are not supported in this channel"
+	args->m_user->notify(TNT_STATUS, NULL, NULL, "Commands are not supported in this channel.");
+
 	// TODO should you check to make sure this doesn't loop?
-	return(args->m_user->command(args->m_text));
+	//return(args->m_user->command(args->m_text));
 }
 

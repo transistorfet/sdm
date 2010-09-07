@@ -73,6 +73,7 @@ PseudoServ::PseudoServ()
 PseudoServ::~PseudoServ()
 {
 	// TODO do all deletey stuff like log user out, remove from channels, etc
+	MooChannel::quit(m_user);
 
 	this->set_delete();
 	if (m_nick)
@@ -305,7 +306,7 @@ int PseudoServ::dispatch(Msg *msg)
 				if (msg->m_last[0] == '.')
 					res = m_user->command(&msg->m_last[1]);
 				else if (msg->m_last[0] == '\x01')
-					this->process_ctcp(msg);
+					this->process_ctcp(msg, NULL);
 				else
 					res = m_user->command("say", msg->m_last);
 
@@ -320,9 +321,8 @@ int PseudoServ::dispatch(Msg *msg)
 					return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 				if (msg->m_last[0] == '.')
 					channel->send(m_user, &msg->m_last[1]);
-				// TODO implement emotes later
-				//else if (msg->m_last[0] == '\x01')
-				//	this->process_ctcp(msg);
+				else if (msg->m_last[0] == '\x01')
+					this->process_ctcp(msg, channel);
 				else
 					channel->send(m_user, "say", msg->m_last);
 			}	
@@ -650,14 +650,17 @@ int PseudoServ::send_who(const char *mask)
 	return(0);
 }
 
-int PseudoServ::process_ctcp(Msg *msg)
+int PseudoServ::process_ctcp(Msg *msg, MooChannel *channel)
 {
 	if (!strncmp(&msg->m_last[1], "ACTION", 6)) {
 		char buffer[STRING_SIZE];
 		strncpy(buffer, &msg->m_last[7], STRING_SIZE);
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
-		return(m_user->command("emote", buffer));
+		if (channel)
+			return(channel->send(m_user, "emote", buffer));
+		else
+			return(m_user->command("emote", buffer));
 	}
 	// TODO process others?? return error??
 	return(0);
