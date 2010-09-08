@@ -57,7 +57,7 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO this should only print this if $this.title exists (use $this.name if it's not there)
 	if (!(name = (MooString *) args->m_this->get_property("title", &moo_string_obj_type)))
 		name = (MooString *) args->m_this->get_property("name", &moo_string_obj_type);
-	args->m_user->printf(args, "<brightblue>You see %s here.", name->m_str);
+	args->m_user->printf(args, "<b><lightblue>You see %s here.", name->m_str);
 	return(0);
 }
 
@@ -67,8 +67,8 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	MooString *str;
 
 	// TODO this should somehow check if title and description exist and don't print the message if it doesn't exist
-	args->m_user->print(args, "<brightyellow>$this.title");
-	args->m_user->print(args, "<brightgreen>$this.description");
+	args->m_user->print(args, "<yellow>$this.title");
+	args->m_user->print(args, "<lightgreen>$this.description");
 	/// Print the views of all objects contained in the target
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		if (cur == args->m_caller || cur == args->m_user)

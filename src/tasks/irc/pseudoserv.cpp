@@ -19,6 +19,7 @@
 #include <sdm/things/world.h>
 
 #include <sdm/misc.h>
+#include <sdm/colours.h>
 #include <sdm/globals.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
@@ -140,7 +141,7 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 	switch (type) {
 	    case TNT_STATUS: {
 		char buffer[LARGE_STRING_SIZE];
-		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
+		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		// TODO if realm became a channel, might this instead be used to send notices to the user?
 		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
 	    }
@@ -155,7 +156,7 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 
 		if (channel)
 			channel_name = channel->get_string_property("name");
-		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
+		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
 			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
 		else
@@ -186,7 +187,7 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 		if (!thing)
 			return(0);
 		thing_name = thing->get_string_property("name");
-		PseudoServ::format(buffer, LARGE_STRING_SIZE, str);
+		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (thing != m_user)
 			return(Msg::send(m_inter, ":%s!~%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
 		break;
@@ -666,147 +667,84 @@ int PseudoServ::process_ctcp(Msg *msg, MooChannel *channel)
 	return(0);
 }
 
-// TODO should this be a generic function somewhere else, with a function pointer passed to it for converting a specific tag
-//	to the necessary colour escape codes (so that all interface mechanisms can use it)
-int PseudoServ::format(char *buffer, int max, const char *str)
-{
-	int i, j, k;
-
-	for (i = 0, j = 0; (j < max) && (str[i] != '\0'); i++) {
-		switch (str[i]) {
-		    case '\n': {
-			buffer[j++] = '\020';
-			buffer[j++] = 'n';
-			break;
-		    }
-		    case '<': {
-			k = i + 1;
-			if (str[i] == '/')
-				k++;
-			k = PseudoServ::write_attrib(&buffer[j], max - j - 1, &str[k]);
-			/// If a recognized tag was not found, then copy it through to the output
-			if (!k)
-				buffer[j++] = '<';
-			else {
-				j = k;
-				for (; str[i] != '\0' && str[i] != '>'; i++)
-					;
-			}
-			break;
-		    }
-		    case '&': {
-			if (!strncmp(&str[i + 1], "lt;", 3)) {
-				buffer[j++] = '<';
-				i += 3;
-			}
-			else if (!strncmp(&str[i + 1], "gt;", 3)) {
-				buffer[j++] = '>';
-				i += 3;
-			}
-			else if (!strncmp(&str[i + 1], "amp;", 4)) {
-				buffer[j++] = '&';
-				i += 4;
-			}
-			else if (!strncmp(&str[i + 1], "quot;", 5)) {
-				buffer[j++] = '\"';
-				i += 5;
-			}
-			else
-				buffer[j++] = '&';
-			break;
-		    }
-		    default: {
-			if (str[i] >= 0x20)
-				buffer[j++] = str[i];
-			break;
-		    }
-		}
-	}
-	buffer[j] = '\0';
-	return(j);
-}
-
-int PseudoServ::write_attrib(char *buffer, int max, const char *attrib)
+int irc_write_attrib(int type, char *buffer, int max)
 {
 	int j = 0;
 
-	if (attrib[0] == 'b') {
-		if (attrib[1] == '>')
-			buffer[j++] = '\x02';
-		else if (attrib[1] == 'l') {
-			if (!strncmp(&attrib[2], "ack>", 4)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-			}
-			else if (!strncmp(&attrib[2], "ue>", 3)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-			}
+	if (type & MOO_A_FLASH)
+		buffer[j++] = '\x06';
+	if (type & MOO_A_BOLD)
+		buffer[j++] = '\x02';
+	if (type & MOO_A_UNDER)
+		buffer[j++] = '\x1F';
+	if (type & MOO_A_ITALIC)
+		buffer[j++] = '\x09';
+	if (type & MOO_A_REVERSE)
+		buffer[j++] = '\x22';
+	if (type & MOO_A_COLOUR) {
+		buffer[j++] = '\x03';
+		switch (type & MOO_COLOUR_NUM) {
+		    case MOO_C_NORMAL:
+			buffer[j++] = '\x30';
+			break;
+		    case MOO_C_BLACK:
+			buffer[j++] = '\x31';
+			break;
+		    case MOO_C_BLUE:
+			buffer[j++] = '\x32';
+			break;
+		    case MOO_C_GREEN:
+			buffer[j++] = '\x33';
+			break;
+		    case MOO_C_LIGHTRED:
+			buffer[j++] = '\x34';
+			break;
+		    case MOO_C_RED:
+			buffer[j++] = '\x35';
+			break;
+		    case MOO_C_PURPLE:
+			buffer[j++] = '\x36';
+			break;
+		    case MOO_C_ORANGE:
+			buffer[j++] = '\x37';
+			break;
+		    case MOO_C_YELLOW:
+			buffer[j++] = '\x38';
+			break;
+		    case MOO_C_LIGHTGREEN:
+			buffer[j++] = '\x39';
+			break;
+		    case MOO_C_TEAL:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x30';
+			break;
+		    case MOO_C_CYAN:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x31';
+			break;
+		    case MOO_C_LIGHTBLUE:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x32';
+			break;
+		    case MOO_C_MAGENTA:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x33';
+			break;
+		    case MOO_C_DARKGREY:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x34';
+			break;
+		    case MOO_C_GREY:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x35';
+			break;
+		    case MOO_C_WHITE:
+			buffer[j++] = '\x31';
+			buffer[j++] = '\x36';
+			break;
+		    default:
+			break;
 		}
-		else if (!strncmp(&attrib[1], "right", 5)) {
-			if (!strncmp(&attrib[6], "blue>", 5)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-				buffer[j++] = '\x32';
-			}
-			else if (!strncmp(&attrib[6], "cyan>", 5)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-				buffer[j++] = '\x31';
-			}
-			else if (!strncmp(&attrib[6], "green>", 6)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x39';
-			}
-			else if (!strncmp(&attrib[6], "magenta>", 8)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-				buffer[j++] = '\x33';
-			}
-			else if (!strncmp(&attrib[6], "red>", 4)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x34';
-			}
-			else if (!strncmp(&attrib[6], "white>", 6)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x31';
-				buffer[j++] = '\x35';
-			}
-			else if (!strncmp(&attrib[6], "yellow>", 7)) {
-				buffer[j++] = '\x03';
-				buffer[j++] = '\x38';
-			}
-		}
-	}
-	else if (!strncmp(attrib, "blue>", 5)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x32';
-	}
-	else if (!strncmp(attrib, "cyan>", 5)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x31';
-		buffer[j++] = '\x31';
-	}
-	else if (!strncmp(attrib, "green>", 6)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x33';
-	}
-	else if (!strncmp(attrib, "magenta>", 8)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x36';
-	}
-	else if (!strncmp(attrib, "red>", 4)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x35';
-	}
-	else if (!strncmp(attrib, "white>", 6)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x31';
-		buffer[j++] = '\x34';
-	}
-	else if (!strncmp(attrib, "yellow>", 7)) {
-		buffer[j++] = '\x03';
-		buffer[j++] = '\x37';
 	}
 	return(j);
 }

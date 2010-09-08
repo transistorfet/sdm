@@ -19,6 +19,7 @@
 #define MOO_ARRAY_DEFAULT_BITS		MOO_ABF_RESIZE
 #define MOO_ARRAY_DEFAULT_SIZE		32
 #define MOO_ARRAY_GROWTH_FACTOR		1.75
+#define MOO_OBJECT_ARRAY_DEFAULT_BITS	MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE
 
 class MooThing;
 
@@ -64,7 +65,7 @@ class MooArray : public MooObject {
 
 class MooObjectArray : public MooArray<MooObject *> {
     public:
-	MooObjectArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
+	MooObjectArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_OBJECT_ARRAY_DEFAULT_BITS);
 
 	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);

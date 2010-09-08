@@ -118,6 +118,7 @@
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
+	* can you convert init/release functions to be constructor/destructor of a singleton class?
 
 	* sort out and make better use of exceptions (in do_action in particular).  You can't catch a segfault but you can throw
 	  exceptions when certain functions would otherwise return a NULL.  You could alternativley have an TRY() macro or something

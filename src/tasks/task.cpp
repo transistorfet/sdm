@@ -81,18 +81,18 @@ int MooTask::elevated_do_action(MooAction *action, MooThing *thing, MooArgs *arg
 		res = action->do_action(thing, args);
 	}
 	catch (int e) {
-		MooTask::current_owner(prev_owner);
+		MooTask::current_owner(prev_task, prev_owner);
 		throw e;
 	}
 	catch (MooException e) {
-		MooTask::current_owner(prev_owner);
+		MooTask::current_owner(prev_task, prev_owner);
 		throw e;
 	}
 	catch (...) {
-		MooTask::current_owner(prev_owner);
+		MooTask::current_owner(prev_task, prev_owner);
 		throw MooException("Error in elevated do_action");
 	}
-	MooTask::current_owner(prev_owner);
+	MooTask::current_owner(prev_task, prev_owner);
 	return(res);
 }
 

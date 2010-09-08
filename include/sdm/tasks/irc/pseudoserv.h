@@ -67,9 +67,6 @@ class PseudoServ : public MooTask {
 	int send_names(const char *name);
 	int send_who(const char *mask);
 	int process_ctcp(Msg *msg, MooChannel *channel);
-
-	int format(char *buffer, int max, const char *str);
-	int write_attrib(char *buffer, int max, const char *attrib);
 };
 
 }
@@ -79,6 +76,8 @@ extern MooObjectType moo_irc_pseudoserv_obj_type;
 int init_irc_pseudoserv(void);
 void release_irc_pseudoserv(void);
 MooObject *moo_irc_pseudoserv_create(void);
+
+int irc_write_attrib(int type, char *buffer, int max);
 
 #endif
 

@@ -8,7 +8,8 @@
 ROOT = ..
 TARGET = ../bin/moo
 
-OBJS =	data.o	\
+OBJS =	colours.o	\
+	data.o	\
 	exception.o	\
 	main.o	\
 	misc.o	\
@@ -72,6 +73,8 @@ $(LIB_TARGET): builds $(OBJS)
 clean:
 	$(RM) $(OBJS)
 
+colours.o: colours.cpp
+
 data.o: data.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
   ../include/sdm/memory.h
@@ -92,7 +95,8 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/things/references.h ../include/sdm/tasks/irc/msg.h \
   ../include/sdm/tasks/irc/commands.h ../include/sdm/actions/alias.h \
   ../include/sdm/actions/builtin/builtin.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/objs/config.h ../include/sdm/things/world.h
+  ../include/sdm/objs/config.h ../include/sdm/things/channel.h \
+  ../include/sdm/things/world.h
 
 misc.o: misc.cpp ../include/sdm/misc.h ../include/sdm/memory.h
 
@@ -145,7 +149,7 @@ actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/actions/action.h \
+  ../include/sdm/actions/action.h ../include/sdm/array.h \
   ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/channel.o: actions/builtin/channel.cpp \
@@ -315,16 +319,17 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp \
   ../include/sdm/memory.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/things/channel.h ../include/sdm/things/world.h \
+  ../include/sdm/colours.h
 
 things/channel.o: things/channel.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
-  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/channel.h
+  ../include/sdm/objs/object.h ../include/sdm/tasks/task.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h ../include/sdm/things/channel.h
 
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/data.h ../include/sdm/globals.h \

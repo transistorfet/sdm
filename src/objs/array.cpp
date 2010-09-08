@@ -25,7 +25,7 @@ struct MooObjectType moo_array_obj_type = {
 
 MooObject *moo_array_create(void)
 {
-	return(new MooObjectArray(MOO_ARRAY_DEFAULT_SIZE, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE));
+	return(new MooObjectArray(MOO_ARRAY_DEFAULT_SIZE, -1, MOO_OBJECT_ARRAY_DEFAULT_BITS));
 }
 
 MooObjectArray::MooObjectArray(int size, int max, int bits) : MooArray<MooObject *>(size, max, bits)

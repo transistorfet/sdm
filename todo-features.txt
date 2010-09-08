@@ -1,20 +1,29 @@
 
 GAME FEATURES TODO:
-	- drunkenness (and high? and various other effects?)
-	- ability to ride horses/mounts
-	- fatigue, sleep/rest/stand/sit/wake/etc
-	- ability to silence a character (for a spell)
-	- lighting levels (rooms that are dark)
-	- torches, light sources
-	- have stores for buying and selling
-	- have days/nights and time
-	- mobiles (players) who can fly (like pixies)
+	* drunkenness (and high? and various other effects?)
+	* ability to ride horses/mounts
+	* fatigue, sleep/rest/stand/sit/wake/etc
+	* ability to silence a character (for a spell)
+	* lighting levels (rooms that are dark)
+	* torches, light sources
+	* have stores for buying and selling
+	* have days/nights and time
+	* mobiles (players) who can fly (like pixies)
 
-	- make it possible for players to sell their own items from stores (they can make an object and sell it)
-	- have pegboards everywhere (like at area/world markers) so that people can leave comments (thus enriching the social
-	  space without there necessarily being people online at the same time in the same area.
-	- you could have certain things be random encounter type stuff, like vampires that might infect you, or strange random
-	  deaths that you can encounter.
-	- vampire (by random) such that if you are one, you can't go outside (room marked outdoors) while it's daytime
-	- you could have a channel where you control your own little pets or sims (maybe kinda like the sims)
+	* make it possible for players to sell their own items from stores (they can make an object and sell it)
+	* have pegboards everywhere (like at area/world markers) so that people can leave comments (thus enriching the social
+	* space without there necessarily being people online at the same time in the same area.
+	* you could have certain things be random encounter type stuff, like vampires that might infect you, or strange random
+	* deaths that you can encounter.
+	* vampire (by random) such that if you are one, you can't go outside (room marked outdoors) while it's daytime
+	* you could have a channel where you control your own little pets or sims (maybe kinda like the sims)
+	* make *liberal* use of colours and highlighting in the actual text.  Highlight key words so that they stand out, making
+	  it *very* easy to skim the description, or see important alerts.  Make use of coloured backgrounds (fire text, and various
+	  effects.  Perhaps you could make a whole library for encoding text colour patterns).
+	* have 'emotion/feel/atmosphere' messages printed at random, to set the scene and make people aware of where they are.  It helps
+	  with the emersion, which offsets the fact that it's all just text.  Messages could be printed more frequently and in brighter
+	  colours when they are important, like when in impednding danger, or slow with soft colours, like describing a tranquil scene.
+	  "A wisp of mist floats in the distance", "You hear the distance call of the loon."
+	* real time stuff should be on the slowish side perhaps (or perhaps even settable by the user, a user selected difficulty
+	  level!  With reduced XP for the easy difficulty.
 

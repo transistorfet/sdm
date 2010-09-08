@@ -52,6 +52,11 @@ MooArgs::MooArgs()
 	m_channel = NULL;
 	m_caller = NULL;
 	m_this = NULL;
+
+	// TODO in future, can we get the default size from the caller?  We know exactly what it should be if we are just about to
+	//	eval an action
+	m_args = new MooObjectArray();
+
 	m_object = NULL;
 	m_target = NULL;
 	m_text = NULL;
@@ -61,6 +66,8 @@ MooArgs::~MooArgs()
 {
 	if (m_result)
 		delete m_result;
+	if (m_args)
+		delete m_args;
 }
 
 int MooArgs::parse_word(char *buffer)
