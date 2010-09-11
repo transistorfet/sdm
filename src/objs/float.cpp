@@ -1,6 +1,6 @@
 /*
- * Object Name:	number.c
- * Description:	Number Object
+ * Object Name:	float.c
+ * Description:	Float Object
  */
 
 #include <stdio.h>
@@ -10,21 +10,21 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
 
-struct MooObjectType moo_number_obj_type = {
+struct MooObjectType moo_float_obj_type = {
 	NULL,
-	"number",
-	typeid(MooNumber).name(),
-	(moo_type_create_t) moo_number_create
+	"float",
+	typeid(MooFloat).name(),
+	(moo_type_create_t) moo_float_create
 };
 
-MooObject *moo_number_create(void)
+MooObject *moo_float_create(void)
 {
-	return(new MooNumber(0));
+	return(new MooFloat(0));
 }
 
-int MooNumber::read_entry(const char *type, MooDataFile *data)
+int MooFloat::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {
 		m_num = data->read_float_entry();
@@ -34,14 +34,14 @@ int MooNumber::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooNumber::write_data(MooDataFile *data)
+int MooFloat::write_data(MooDataFile *data)
 {
 	MooObject::write_data(data);
 	data->write_float_entry("value", m_num);
 	return(0);
 }
 
-int MooNumber::parse_arg(MooThing *user, MooThing *channel, char *text)
+int MooFloat::parse_arg(MooThing *user, MooThing *channel, char *text)
 {
 	char *remain;
 
@@ -49,7 +49,7 @@ int MooNumber::parse_arg(MooThing *user, MooThing *channel, char *text)
 	return(remain - text);
 }
 
-int MooNumber::to_string(char *buffer, int max)
+int MooFloat::to_string(char *buffer, int max)
 {
 	return(snprintf(buffer, max, "%f", m_num));
 }

@@ -11,7 +11,8 @@
 #include <sdm/exception.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
@@ -98,11 +99,20 @@ MooObject *MooObjectArray::get(int index, MooObjectType *type)
 	return(obj);
 }
 
-double MooObjectArray::get_number(int index)
+long int MooObjectArray::get_integer(int index)
 {
-	MooNumber *obj;
+	MooInteger *obj;
 
-	if (!(obj = (MooNumber *) this->get(index, &moo_number_obj_type)))
+	if (!(obj = (MooInteger *) this->get(index, &moo_integer_obj_type)))
+		return(0);
+	return(obj->m_num);
+}
+
+double MooObjectArray::get_float(int index)
+{
+	MooFloat *obj;
+
+	if (!(obj = (MooFloat *) this->get(index, &moo_float_obj_type)))
 		return(0);
 	return(obj->m_num);
 }

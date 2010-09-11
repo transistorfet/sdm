@@ -20,7 +20,8 @@
 #include <sdm/actions/alias.h>
 #include <sdm/actions/builtin/builtin.h>
 
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/objs/config.h>
@@ -58,7 +59,8 @@ int init_moo(void)
 
 	moo_object_register_type(&moo_alias_obj_type);
 
-	moo_object_register_type(&moo_number_obj_type);
+	moo_object_register_type(&moo_float_obj_type);
+	moo_object_register_type(&moo_integer_obj_type);
 	moo_object_register_type(&moo_string_obj_type);
 	moo_object_register_type(&moo_thingref_obj_type);
 	moo_object_register_type(&moo_array_obj_type);

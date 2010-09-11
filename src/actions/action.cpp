@@ -12,7 +12,8 @@
 #include <sdm/exception.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/user.h>
@@ -179,7 +180,7 @@ int MooArgs::match_args(const char *params)
 	int i;
 	MooObject *obj;
 
-	for (i = 0; i < m_args->last() + 1; i++) {
+	for (i = 0; i <= m_args->last(); i++) {
 		if (params[i] == '\0')
 			return(-1);
 		if (!(obj = m_args->get(i, NULL)))
@@ -204,10 +205,9 @@ const MooObjectType *MooArgs::get_type(char param)
 	    case 's':
 		return(&moo_string_obj_type);
 	    case 'i':
-		// TODO implement integer type
-		return(NULL);
+		return(&moo_integer_obj_type);
 	    case 'f':
-		return(&moo_number_obj_type);
+		return(&moo_float_obj_type);
 	    case 't':
 		return(&moo_thingref_obj_type);
 	    case 'a':

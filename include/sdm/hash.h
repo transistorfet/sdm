@@ -72,7 +72,8 @@ class MooObjectHash : public MooHash<MooObject *> {
 	int to_string(char *buffer, int max);
 
 	MooObject *get(const char *key, MooObjectType *type);
-	double get_number(const char *key);
+	long int get_integer(const char *key);
+	double get_float(const char *key);
 	const char *get_string(const char *key);
 	MooThing *get_thing(const char *key);
 };

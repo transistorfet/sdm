@@ -11,7 +11,8 @@
 #include <sdm/exception.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
@@ -100,11 +101,20 @@ MooObject *MooObjectHash::get(const char *key, MooObjectType *type)
 	return(obj);
 }
 
-double MooObjectHash::get_number(const char *key)
+long int MooObjectHash::get_integer(const char *key)
 {
-	MooNumber *obj;
+	MooInteger *obj;
 
-	if (!(obj = (MooNumber *) this->get(key, &moo_number_obj_type)))
+	if (!(obj = (MooInteger *) this->get(key, &moo_integer_obj_type)))
+		return(0);
+	return(obj->m_num);
+}
+
+double MooObjectHash::get_float(const char *key)
+{
+	MooFloat *obj;
+
+	if (!(obj = (MooFloat *) this->get(key, &moo_float_obj_type)))
 		return(0);
 	return(obj->m_num);
 }

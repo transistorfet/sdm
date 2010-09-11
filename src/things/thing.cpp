@@ -17,7 +17,8 @@
 #include <sdm/things/world.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
@@ -326,11 +327,19 @@ int MooThing::set_property(const char *name, moo_id_t id)
 	return(this->set_property(name, obj));
 }
 
+int MooThing::set_property(const char *name, long int num)
+{
+	MooInteger *obj;
+
+	obj = new MooInteger(num);
+	return(this->set_property(name, obj));
+}
+
 int MooThing::set_property(const char *name, double num)
 {
-	MooNumber *obj;
+	MooFloat *obj;
 
-	obj = new MooNumber(num);
+	obj = new MooFloat(num);
 	return(this->set_property(name, obj));
 }
 
@@ -379,11 +388,20 @@ moo_id_t MooThing::get_thing_property(const char *name)
 	return(obj->m_id);
 }
 
-double MooThing::get_number_property(const char *name)
+long int MooThing::get_integer_property(const char *name)
 {
-	MooNumber *obj;
+	MooInteger *obj;
 
-	if (!(obj = (MooNumber *) this->get_property(name, &moo_number_obj_type)))
+	if (!(obj = (MooInteger *) this->get_property(name, &moo_integer_obj_type)))
+		return(0);
+	return(obj->m_num);
+}
+
+double MooThing::get_float_property(const char *name)
+{
+	MooFloat *obj;
+
+	if (!(obj = (MooFloat *) this->get_property(name, &moo_float_obj_type)))
 		return(0);
 	return(obj->m_num);
 }
@@ -758,7 +776,7 @@ int MooThing::attach_orphans()
 
 	if (!(root = MooWorld::root()))
 		return(-1);
-	for (int i = 0; i < moo_thing_table->last(); i++) {
+	for (int i = 0; i <= moo_thing_table->last(); i++) {
 		if ((cur = moo_thing_table->get(i))) {
 			if (!cur->m_location)
 				root->add(cur);

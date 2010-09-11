@@ -15,8 +15,6 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/tasks/task.h>
-#include <sdm/objs/number.h>
-#include <sdm/objs/string.h>
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>

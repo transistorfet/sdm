@@ -29,8 +29,9 @@ OBJS =	colours.o	\
 	interfaces/tcp.o	\
 	objs/array.o	\
 	objs/config.o	\
+	objs/float.o	\
 	objs/hash.o	\
-	objs/number.o	\
+	objs/integer.o	\
 	objs/object.o	\
 	objs/string.o	\
 	objs/thingref.o	\
@@ -73,7 +74,7 @@ $(LIB_TARGET): builds $(OBJS)
 clean:
 	$(RM) $(OBJS)
 
-colours.o: colours.cpp
+colours.o: colours.cpp ../include/sdm/colours.h
 
 data.o: data.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
@@ -90,35 +91,35 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/tasks/rpc-server.h ../include/sdm/tasks/irc/pseudoserv.h \
   ../include/sdm/things/user.h ../include/sdm/things/thing.h \
   ../include/sdm/hash.h ../include/sdm/memory.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
   ../include/sdm/things/references.h ../include/sdm/tasks/irc/msg.h \
   ../include/sdm/tasks/irc/commands.h ../include/sdm/actions/alias.h \
-  ../include/sdm/actions/builtin/builtin.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/objs/config.h ../include/sdm/things/channel.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/actions/builtin/builtin.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h ../include/sdm/objs/config.h \
+  ../include/sdm/things/channel.h ../include/sdm/things/world.h
 
 misc.o: misc.cpp ../include/sdm/misc.h ../include/sdm/memory.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h
 
-actions/action.o: actions/action.cpp ../include/sdm/memory.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/references.h
+actions/action.o: actions/action.cpp ../include/sdm/hash.h \
+  ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/misc.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/array.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h ../include/sdm/things/user.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h
 
 actions/alias.o: actions/alias.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/actions/alias.h
@@ -127,85 +128,91 @@ actions/builtin/basics.o: actions/builtin/basics.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/array.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/world.h ../include/sdm/actions/builtin/builtin.h
+  ../include/sdm/tree.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h ../include/sdm/things/world.h \
+  ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/builder.o: actions/builtin/builder.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/world.h ../include/sdm/actions/builtin/builtin.h
+  ../include/sdm/objs/float.h ../include/sdm/objs/integer.h \
+  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h ../include/sdm/things/world.h \
+  ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/builtin.o: actions/builtin/builtin.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/actions/action.h ../include/sdm/array.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h \
   ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/channel.o: actions/builtin/channel.cpp \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h \
+  ../include/sdm/objs/float.h ../include/sdm/objs/integer.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/thingref.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
+  ../include/sdm/things/references.h ../include/sdm/things/user.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/actions/builtin/builtin.h
 
 actions/builtin/item.o: actions/builtin/item.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/references.h \
-  ../include/sdm/actions/builtin/builtin.h
-
-actions/builtin/mobile.o: actions/builtin/mobile.cpp \
-  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/actions/builtin/builtin.h
 
-actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
-  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/memory.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/actions/action.h \
-  ../include/sdm/things/references.h ../include/sdm/actions/builtin/mud.h \
-  ../include/sdm/actions/builtin/builtin.h
-
-actions/builtin/user.o: actions/builtin/user.cpp ../include/sdm/misc.h \
-  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/memory.h \
-  ../include/sdm/objs/object.h ../include/sdm/objs/number.h \
+actions/builtin/mobile.o: actions/builtin/mobile.cpp \
+  ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/memory.h ../include/sdm/objs/object.h \
+  ../include/sdm/objs/float.h ../include/sdm/objs/integer.h \
   ../include/sdm/objs/string.h ../include/sdm/things/user.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
   ../include/sdm/array.h ../include/sdm/actions/action.h \
   ../include/sdm/things/references.h \
+  ../include/sdm/actions/builtin/builtin.h
+
+actions/builtin/room.o: actions/builtin/room.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/builtin/mud.h \
+  ../include/sdm/actions/builtin/builtin.h
+
+actions/builtin/user.o: actions/builtin/user.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/actions/builtin/builtin.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/array.h \
@@ -229,10 +236,10 @@ interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/objs/object.h \
 objs/array.o: objs/array.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/misc.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h
 
 objs/config.o: objs/config.cpp ../include/sdm/memory.h \
@@ -242,26 +249,30 @@ objs/config.o: objs/config.cpp ../include/sdm/memory.h \
   ../include/sdm/tasks/listener.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h
 
+objs/float.o: objs/float.cpp ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/misc.h ../include/sdm/objs/float.h
+
 objs/hash.o: objs/hash.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/things/thing.h ../include/sdm/hash.h \
-  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/misc.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
+  ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h
 
-objs/number.o: objs/number.cpp ../include/sdm/memory.h \
+objs/integer.o: objs/integer.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/number.h
+  ../include/sdm/misc.h ../include/sdm/objs/integer.h
 
 objs/object.o: objs/object.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/tasks/task.h
 
@@ -276,7 +287,6 @@ objs/thingref.o: objs/thingref.cpp ../include/sdm/memory.h \
   ../include/sdm/misc.h ../include/sdm/objs/thingref.h \
   ../include/sdm/things/thing.h ../include/sdm/hash.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h
 
 tasks/listener.o: tasks/listener.cpp ../include/sdm/misc.h \
@@ -317,18 +327,17 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp \
   ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/things/user.h \
   ../include/sdm/things/thing.h ../include/sdm/hash.h \
   ../include/sdm/memory.h ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/channel.h ../include/sdm/things/world.h \
-  ../include/sdm/colours.h
+  ../include/sdm/objs/float.h ../include/sdm/objs/integer.h \
+  ../include/sdm/objs/string.h ../include/sdm/things/channel.h \
+  ../include/sdm/things/world.h ../include/sdm/colours.h
 
 things/channel.o: things/channel.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/tasks/task.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/array.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/actions/action.h \
+  ../include/sdm/array.h ../include/sdm/actions/action.h \
   ../include/sdm/things/references.h ../include/sdm/things/channel.h
 
 things/thing.o: things/thing.cpp ../include/sdm/hash.h \
@@ -338,15 +347,15 @@ things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/tasks/task.h ../include/sdm/things/user.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/world.h ../include/sdm/objs/thingref.h
+  ../include/sdm/things/world.h ../include/sdm/objs/float.h \
+  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h
 
 things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/misc.h ../include/sdm/hash.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
@@ -357,7 +366,6 @@ things/world.o: things/world.cpp ../include/sdm/data.h \
   ../include/sdm/misc.h ../include/sdm/memory.h \
   ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
   ../include/sdm/hash.h ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/things/world.h
 

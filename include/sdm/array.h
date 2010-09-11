@@ -73,7 +73,8 @@ class MooObjectArray : public MooArray<MooObject *> {
 	int to_string(char *buffer, int max);
 
 	MooObject *get(int index, MooObjectType *type);
-	double get_number(int index);
+	long int get_integer(int index);
+	double get_float(int index);
 	const char *get_string(int index);
 	MooThing *get_thing(int index);
 };

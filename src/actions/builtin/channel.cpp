@@ -13,7 +13,8 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/number.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thingref.h>
@@ -63,14 +64,14 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	/// If the user is already in the channel, then just return
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if (users->get_thing(i) == args->m_user)
 			return(0);
 	}
 	// TODO should this maybe use an object sent as an arg so that non-users can join the channel?
 	users->push(new MooThingRef(args->m_user->id()));
 	// TODO should there be an easier way to traverse a list of things?
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
 	}
@@ -85,7 +86,7 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if (users->get_thing(i) == args->m_user) {
 			for (int j = 0; j < users->last() + 1; j++) {
 				if ((cur = users->get_thing(j)))
@@ -111,7 +112,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_SAY, args->m_user, args->m_this, text);
 	}
@@ -130,7 +131,7 @@ static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_EMOTE, args->m_user, args->m_this, text);
 	}
@@ -147,7 +148,7 @@ static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
-	for (int i = 0; i < users->last() + 1; i++) {
+	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)) && cur->is_a(&moo_user_obj_type)) {
 			strncpy(&buffer[j], ((MooUser *) cur)->name(), LARGE_STRING_SIZE - j);
 			j += strlen(((MooUser *) cur)->name());

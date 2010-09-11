@@ -14,8 +14,6 @@
 #include <sdm/data.h>
 #include <sdm/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/number.h>
-#include <sdm/objs/string.h>
 #include <sdm/actions/action.h>
 #include <sdm/things/references.h>
 
@@ -54,11 +52,13 @@ class MooThing : public MooObject {
 	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
 	int set_property(const char *name, moo_id_t id);
+	int set_property(const char *name, long int num);
 	int set_property(const char *name, double num);
 	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
 	moo_id_t get_thing_property(const char *name);
-	double get_number_property(const char *name);
+	long int get_integer_property(const char *name);
+	double get_float_property(const char *name);
 	const char *get_string_property(const char *name);
 
 	/// Action Methods

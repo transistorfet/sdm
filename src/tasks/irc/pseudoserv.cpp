@@ -13,6 +13,10 @@
 #include <sdm/tasks/irc/msg.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
+#include <sdm/objs/float.h>
+#include <sdm/objs/integer.h>
+#include <sdm/objs/string.h>
+
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/channel.h>
