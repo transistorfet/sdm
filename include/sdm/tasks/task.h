@@ -45,7 +45,7 @@ class MooTask : public MooObject {
 	 * the realm, otherwise it is from a specific channel.  If thing is NULL, then it's from a status
 	 * message from the realm.  Type determines the type of message (eg. say, emote, join, part, quit,
 	 * etc).  The str may be used or not depending on type. */
-	virtual int notify(int type, MooThing *channel, MooThing *thing, const char *str) { return(-1); }
+	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *str) { return(-1); }
 
 	virtual int handle(MooInterface *inter, int ready) = 0;
 	virtual int bestow(MooInterface *inter);

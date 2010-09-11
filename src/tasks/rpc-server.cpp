@@ -87,7 +87,7 @@ int MooRPCServer::release()
 	return(0);
 }
 
-int MooRPCServer::notify(int type, MooThing *channel, MooThing *thing, const char *str)
+int MooRPCServer::notify(int type, MooThing *thing, MooThing *channel, const char *str)
 {
 	// TODO process the messages and send responses back to the other end
 	return(0);

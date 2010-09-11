@@ -41,7 +41,7 @@ class PseudoServ : public MooTask {
 	int idle();
 	int release();
 
-	int notify(int type, MooThing *channel, MooThing *thing, const char *str);
+	int notify(int type, MooThing *thing, MooThing *channel, const char *str);
 
 	int handle(MooInterface *inter, int ready);
 	int bestow(MooInterface *inter);

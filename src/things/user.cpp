@@ -204,12 +204,12 @@ int MooUser::write_data(MooDataFile *data)
 }
 
 
-int MooUser::notify(int type, MooThing *channel, MooThing *thing, const char *text)
+int MooUser::notify(int type, MooThing *thing, MooThing *channel, const char *text)
 {
 	if (!m_task)
 		return(-1);
 	// TODO permissions check!? I guess on task
-	return(m_task->notify(type, channel, thing, text));
+	return(m_task->notify(type, thing, channel, text));
 }
 
 

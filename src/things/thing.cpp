@@ -440,7 +440,7 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *text, Moo
 {
 	char action[STRING_SIZE];
 
-	text = MooArgs::parse_action(action, STRING_SIZE, text);
+	text = MooArgs::parse_word(action, STRING_SIZE, text);
 	return(this->do_action(user, channel, action, text, result));
 }
 
@@ -460,8 +460,7 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, con
 	}
 	catch (MooException e) {
 		moo_status("ACTION: (%s) %s", action->name(), e.get());
-		// TODO should channel here be NULL?  That i guess would make sure it's a notice
-		user->notify(TNT_STATUS, user, NULL, e.get());
+		user->notify(TNT_STATUS, NULL, NULL, e.get());
 		return(-1);
 	}
 }
@@ -606,71 +605,50 @@ MooThing *MooThing::reference(const char *name)
 int MooThing::command(MooThing *user, MooThing *channel, const char *action, const char *text)
 {
 	int res;
+	MooThingRef *ref;
 	char buffer[STRING_SIZE];
 
 	if (!text) {
-		text = MooArgs::parse_action(buffer, STRING_SIZE, action);
+		text = MooArgs::parse_word(buffer, STRING_SIZE, action);
 		action = buffer;
 	}
 
-	// TODO with the new arg system, this largely wouldn't work, although you can pass the unparsed string to everythnig
-	//	except the last 2, and then parse it using a standardized argument format (tst - thing string thing), and
-	//	use the found objects 
 	if ((res = this->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
 	if (m_location && (res = m_location->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	//if (args->m_object && (res = args->m_object->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
-	//	return(res);
-	//if (args->m_target && (res = args->m_target->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
-	//	return(res);
+	try {
+		MooThing *thing;
+		ref = new MooThingRef();
+
+		{
+			char buffer[STRING_SIZE];
+			text = MooArgs::parse_word(buffer, STRING_SIZE, text);
+			if (ref->parse_arg(user, channel, buffer) <= 0)
+				throw -1;
+		}
+		thing = ref->get();
+		if (thing && (res = thing->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+			throw -1;
+		// TODO how will this one work?  it's a bit harder
+		//if (args->m_target && (res = args->m_target->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+		//	throw -1;
+	}
+	catch (...) { }
+	delete ref;
 	return(MOO_ACTION_NOT_FOUND);
 }
 
-int MooThing::print(MooArgs *args, const char *str)
-{
-	char buffer[LARGE_STRING_SIZE];
 
-	// TODO with the new channel system, you would use args->m_channel as the channel
-	// TODO would you use args->m_user as the user or should it be left blank?  The type (TNT_STATUS) should be enough to
-	//	say that it's a system message rather than talking
-	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, str);
-	return(this->notify(TNT_STATUS, NULL, NULL, buffer));
+int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
+{
+	// TODO permissions check!?!?
+	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
+	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
+	return(0);
 }
 
-/*
-int MooThing::print(MooThing *channel, MooThing *thing, const char *text)
-{
-	if (!m_task)
-		return(-1);
-	return(m_task->notify(channel, thing, TNT_SAY, text));
-}
-
-int MooThing::printf(MooThing *channel, MooThing *thing, const char *fmt, ...)
-{
-	va_list va;
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-	va_start(va, fmt);
-	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
-	return(m_task->print(channel, thing, buffer));
-}
-
-int MooThing::print(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt)
-{
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!m_task)
-		return(-1);
-	// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
-	MooThing::expand_str(buffer, LARGE_STRING_SIZE, args, fmt);
-	return(m_task->print(channel, thing, buffer));
-}
-*/
-
-int MooThing::printf(MooArgs *args, const char *fmt, ...)
+int MooThing::notify(int type, MooArgs *args, const char *fmt, ...)
 {
 	va_list va;
 	char buffer2[LARGE_STRING_SIZE];
@@ -682,19 +660,10 @@ int MooThing::printf(MooArgs *args, const char *fmt, ...)
 		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
 		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
 	}
-	return(this->notify(TNT_STATUS, NULL, NULL, buffer2));
+	return(this->notify(type, args->m_user, args->m_channel, buffer2));
 }
 
-
-int MooThing::notify(int type, MooThing *channel, MooThing *thing, const char *text)
-{
-	// TODO permissions check!?!?
-	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
-	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
-	return(0);
-}
-
-int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const char *text)
+int MooThing::notify_all(int type, MooThing *thing, MooThing *channel, const char *text)
 {
 	MooThing *cur;
 
@@ -702,18 +671,18 @@ int MooThing::notify_all(int type, MooThing *channel, MooThing *thing, const cha
 	//	of channels be defined in C++? or a common channel C++ object with the specifics and actions different?
 
 	for (cur = this->contents(); cur; cur = cur->next()) {
-		cur->notify(type, channel, thing, text);
+		cur->notify(type, thing, channel, text);
 	}
 	return(0);
 }
 
-int MooThing::notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text)
+int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text)
 {
 	MooThing *cur;
 
 	for (cur = this->contents(); cur; cur = cur->next()) {
 		if (cur != except)
-			cur->notify(type, channel, thing, text);
+			cur->notify(type, thing, channel, text);
 	}
 	return(0);
 }
@@ -733,8 +702,9 @@ int MooThing::cryolocker_store()
 		//	puff of smoke" or something like that
 
 		// TODO how should the quit message thing work?  where will it come from (property?)
+		// TODO this is totally wrong, this should be sent via some other means
 		if (this->m_location)
-			this->m_location->notify_all(TNT_QUIT, NULL, this, "disappears in a puff of smoke.");
+			this->m_location->notify_all(TNT_QUIT, this, NULL, "disappears in a puff of smoke.");
 		cryolocker->add(this);
 	}
 	return(0);
@@ -775,7 +745,7 @@ int MooThing::moveto(MooThing *thing, MooThing *by)
 	// TODO this should be a setting or something in the user object
 	if (this->m_location)
 		// TODO these can't be here because this might be a teleport command...
-		this->m_location->notify_all(TNT_LEAVE, NULL, this, "runs off in the distance.");
+		this->m_location->notify_all(TNT_LEAVE, this, NULL, "runs off in the distance.");
 	thing->add(this);
 	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
 	return(0);

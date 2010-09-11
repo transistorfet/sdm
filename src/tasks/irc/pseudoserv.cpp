@@ -132,18 +132,27 @@ int PseudoServ::release()
 	return(0);
 }
 
-int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char *str)
+int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char *str)
 {
 	const char *cmd;
 	const char *thing_name;
 	const char *channel_name;
+
+	if (thing)
+		thing_name = thing->get_string_property("name");
+	if (channel)
+		channel_name = channel->get_string_property("name");
 
 	switch (type) {
 	    case TNT_STATUS: {
 		char buffer[LARGE_STRING_SIZE];
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		// TODO if realm became a channel, might this instead be used to send notices to the user?
+		//return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
+		if (!channel && !thing)
+			return(Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, m_nick->c_str(), buffer));
 		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
+		//Msg *msg = new Msg();
 	    }
 	    case TNT_SAY:
 	    case TNT_EMOTE: {
@@ -152,10 +161,6 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 		/// We don't send a message if it was said by our user, since the IRC client will echo that message itself
 		if (!thing || thing == m_user)
 			return(0);
-		thing_name = thing->get_string_property("name");
-
-		if (channel)
-			channel_name = channel->get_string_property("name");
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
 			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
@@ -170,9 +175,6 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 			cmd = "PART";
 		if (!thing)
 			return(0);
-		thing_name = thing->get_string_property("name");
-		if (channel)
-			channel_name = channel->get_string_property("name");
 		if (thing == m_user) {
 			if (type == TNT_JOIN)
 				return(this->send_join((channel && channel_name) ? channel_name : "#realm"));
@@ -186,7 +188,6 @@ int PseudoServ::notify(int type, MooThing *channel, MooThing *thing, const char 
 
 		if (!thing)
 			return(0);
-		thing_name = thing->get_string_property("name");
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (thing != m_user)
 			return(Msg::send(m_inter, ":%s!~%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));

@@ -83,8 +83,8 @@ class MooArgs {
 
 	static int find_whitespace(const char *text);
 	static int find_character(const char *text);
-	static const char *parse_action(char *buffer, int max, const char *text);
-	static char *parse_action(char *buffer);
+	static const char *parse_word(char *buffer, int max, const char *text);
+	static char *parse_word(char *buffer);
 
 	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text);
 	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer);

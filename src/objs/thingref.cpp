@@ -21,7 +21,7 @@ struct MooObjectType moo_thingref_obj_type = {
 
 MooObject *moo_thingref_create(void)
 {
-	return(new MooThingRef(-1));
+	return(new MooThingRef());
 }
 
 int MooThingRef::read_entry(const char *type, MooDataFile *data)
@@ -43,18 +43,14 @@ int MooThingRef::write_data(MooDataFile *data)
 
 int MooThingRef::parse_arg(MooThing *user, MooThing *channel, char *text)
 {
-	int i;
-	char ch;
 	MooThing *thing;
+	const char *remain;
 
-	i = MooArgs::find_whitespace(text);
-	ch = text[i];
-	text[i] = '\0';
+	remain = MooArgs::parse_word(text);
 	if (!(thing = user->find(text)))
 		return(0);
 	m_id = thing->id();
-	text[i] = ch;
-	return(i);
+	return(remain - text);
 }
 
 int MooThingRef::to_string(char *buffer, int max)

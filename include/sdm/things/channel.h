@@ -26,7 +26,7 @@ class MooChannel : public MooThing {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
+	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 	static int quit(MooThing *user);
 
 	/// Authentication Methods

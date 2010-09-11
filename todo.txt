@@ -127,7 +127,6 @@
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 
 	* allow for variable arguments (and variable length string params)
-	* add support for "" strings in commands
 	* seperate number into float and integer
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations

@@ -40,7 +40,7 @@ static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO for each user/npc/whatever
 	//		if ignoring bit set, don't send message
 	//		perhaps if the person trying to speak is special (immortal) then speak despite ignore bit
-	//args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
+	//args->m_user->location()->notify_all(TNT_SAY, args->m_user, args->m_channel, args->m_text);
 
 	// TODO check for room/object/mobile triggers based on speech
 

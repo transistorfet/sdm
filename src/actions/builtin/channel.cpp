@@ -72,7 +72,7 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_JOIN, args->m_this, args->m_user, NULL);
+			cur->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
 	}
 	return(0);
 }
@@ -89,7 +89,7 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 		if (users->get_thing(i) == args->m_user) {
 			for (int j = 0; j < users->last() + 1; j++) {
 				if ((cur = users->get_thing(j)))
-					cur->notify(TNT_LEAVE, args->m_this, args->m_user, NULL);
+					cur->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
 			}
 			ref = users->splice(i);
 			delete ref;
@@ -113,7 +113,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_SAY, args->m_this, args->m_user, text);
+			cur->notify(TNT_SAY, args->m_user, args->m_this, text);
 	}
 	return(0);
 }
@@ -132,7 +132,7 @@ static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_EMOTE, args->m_this, args->m_user, text);
+			cur->notify(TNT_EMOTE, args->m_user, args->m_this, text);
 	}
 	return(0);
 }

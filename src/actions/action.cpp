@@ -101,33 +101,36 @@ int MooArgs::find_character(const char *text)
 	return(i);
 }
 
-const char *MooArgs::parse_action(char *buffer, int max, const char *text)
+const char *MooArgs::parse_word(char *buffer, int max, const char *text)
 {
-	int i, j;
+	char *remain;
 
-	/// Get rid of any whitespace at the start of the string (??)
-	i = MooArgs::find_character(text);
-	/// Find the first word, ending in a space, and isolate it
-	j = MooArgs::find_whitespace(&text[i]);
-	strncpy(buffer, &text[i], j);
-	buffer[j] = '\0';
-	/// Find the start of the next word and return this as the arguments string
-	i += j;
-	i += MooArgs::find_character(&text[i]);
-	return(&text[i]);
+	strncpy(buffer, text, max);
+	buffer[max - 1] = '\0';
+	remain = MooArgs::parse_word(buffer);
+	return(&text[remain - buffer]);
 }
 
-char *MooArgs::parse_action(char *buffer)
+char *MooArgs::parse_word(char *buffer)
 {
 	int i;
 
 	/// Get rid of any whitespace at the start of the string (??)
 	i = MooArgs::find_character(buffer);
-	/// Find the first word, ending in a space, and isolate it
-	i += MooArgs::find_whitespace(&buffer[i]);
-	buffer[i++] = '\0';
-	/// Find the start of the next word and return this as the arguments string
-	i += MooArgs::find_character(&buffer[i]);
+	if (buffer[i] == '\"') {
+		for (i++; buffer[i] != '\0' && buffer[i] != '\"'; i++)
+			;
+	}
+	else {
+		/// Find the first word, ending in a space, and isolate it
+		i += MooArgs::find_whitespace(&buffer[i]);
+	}
+
+	if (buffer[i] != '\0') {
+		buffer[i++] = '\0';
+		/// Find the start of the next word and return this as the arguments string
+		i += MooArgs::find_character(&buffer[i]);
+	}
 	return(&buffer[i]);
 }
 

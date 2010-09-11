@@ -80,16 +80,10 @@ class MooThing : public MooObject {
 
 	/// Helper Methods
 	int command(MooThing *user, MooThing *channel, const char *action, const char *text = NULL);
-	int print(MooArgs *args, const char *text);
-	//int print(MooThing *channel, MooThing *thing, const char *text);
-	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
-	//int print(MooThing *channel, MooThing *thing, MooArgs *args, const char *text);
-	//int printf(MooThing *channel, MooThing *thing, MooArgs *args, const char *fmt, ...);
-	int printf(MooArgs *args, const char *fmt, ...);
-	
-	virtual int notify(int type, MooThing *channel, MooThing *thing, const char *text);
-	int notify_all(int type, MooThing *channel, MooThing *thing, const char *text);
-	int notify_all_except(MooThing *except, int type, MooThing *channel, MooThing *thing, const char *text);
+	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *text);
+	int notify(int type, MooArgs *args, const char *fmt, ...);
+	int notify_all(int type, MooThing *thing, MooThing *channel, const char *text);
+	int notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text);
 
 	int cryolocker_store();
 	int cryolocker_revive();

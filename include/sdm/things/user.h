@@ -38,7 +38,7 @@ class MooUser : public MooThing {
 	int connect(MooTask *task);
 	void disconnect();
 
-	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
+	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 
 	/// Authentication Methods
 	static int exists(const char *name);

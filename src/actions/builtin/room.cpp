@@ -63,7 +63,7 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO for each user/npc/whatever
 	//		if ignoring bit set, don't send message
 	//		perhaps if the person trying to speak is special (immortal) then speak despite ignore bit
-	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, text);
+	args->m_user->location()->notify_all(TNT_SAY, args->m_user, args->m_channel, text);
 
 	// TODO check for room/object/mobile triggers based on speech
 
@@ -79,7 +79,7 @@ static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	text = args->m_args->get_string(0);
 	if (*text == '\0')
 		return(-1);
-	args->m_user->location()->notify_all(TNT_EMOTE, NULL, args->m_user, text);
+	args->m_user->location()->notify_all(TNT_EMOTE, args->m_user, args->m_channel, text);
 	return(0);
 }
 

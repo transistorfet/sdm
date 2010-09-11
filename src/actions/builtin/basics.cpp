@@ -50,7 +50,7 @@ static int basics_print(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	// TODO should this be the typical way you reference arguments?
 	// TODO i don't really like this, with the type reference...
-	args->m_user->print(args, args->m_args->get_string(0));
+	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
 	return(0);
 }
 
@@ -60,7 +60,7 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO this should only print this if $this.title exists (use $this.name if it's not there)
 	if (!(name = (MooString *) args->m_this->get_property("title", &moo_string_obj_type)))
 		name = (MooString *) args->m_this->get_property("name", &moo_string_obj_type);
-	args->m_user->printf(args, "<b><lightblue>You see %s here.", name->m_str);
+	args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name->m_str);
 	return(0);
 }
 
@@ -70,8 +70,8 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	MooString *str;
 
 	// TODO this should somehow check if title and description exist and don't print the message if it doesn't exist
-	args->m_user->print(args, "<yellow>$this.title");
-	args->m_user->print(args, "<lightgreen>$this.description");
+	args->m_user->notify(TNT_STATUS, args, "<yellow>$this.title");
+	args->m_user->notify(TNT_STATUS, args, "<lightgreen>$this.description");
 	/// Print the views of all objects contained in the target
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		if (cur == args->m_caller || cur == args->m_user)
@@ -101,7 +101,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 			//This comes from the object being looked at
 			str = (MooString *) args->m_this->get_property("looked_at", &moo_string_obj_type);
 		if (str)
-			cur->print(args, str->m_str);
+			cur->notify(TNT_STATUS, args, str->m_str);
 	}
 	return(0);
 }
