@@ -666,6 +666,16 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 	return(0);
 }
 
+int MooThing::notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...)
+{
+	va_list va;
+	char buffer[LARGE_STRING_SIZE];
+
+	va_start(va, fmt);
+	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
+	return(this->notify(type, thing, channel, buffer));
+}
+
 int MooThing::notify(int type, MooArgs *args, const char *fmt, ...)
 {
 	va_list va;

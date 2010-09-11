@@ -31,6 +31,7 @@ static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_info(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_set(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_save(MooAction *action, MooThing *thing, MooArgs *args);
 
@@ -40,6 +41,7 @@ int moo_load_builder_actions(MooBuiltinHash *actions)
 	actions->set("builder_create", new MooBuiltin(builder_create));
 	actions->set("builder_create_room", new MooBuiltin(builder_create_room));
 	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
+	actions->set("builder_info", new MooBuiltin(builder_info));
 	actions->set("builder_set", new MooBuiltin(builder_set));
 	actions->set("builder_save", new MooBuiltin(builder_save));
 	return(0);
@@ -124,6 +126,20 @@ static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args)
 	sdm_notify(args->caller, args, "<green>Object #%d created successfully.\n", obj->id);
 	//args->result = SDM_OBJECT(obj);
 */
+	return(0);
+}
+
+static int builder_info(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooThing *object, *tmp;
+
+	if (!(object = args->m_args->get_thing(0)))
+		object = args->m_this;
+	// TODO display all detailed information
+	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>ID: #%d", object->id());
+	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>PARENT: #%d", object->parent_id());
+	if (tmp = object->location())
+		args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>LOCATION: #%d", tmp->id());
 	return(0);
 }
 

@@ -155,7 +155,8 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 		//return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
 		if (!channel && !thing)
 			return(Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, m_nick->c_str(), buffer));
-		return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
+		else
+			return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name ? channel_name : "#realm", buffer));
 		//Msg *msg = new Msg();
 	    }
 	    case TNT_SAY:

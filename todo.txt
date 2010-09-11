@@ -5,6 +5,7 @@
 	* focus on chatting/social rather than game (for now)
 	* make it possible, one way or another, for bots (external programs) to connect and act like players (npcs)
 	* include a fully functional editor/construction kit, which could even save the word automatically
+	* make a seperate program that can generate a visualization of some kind of parts of the database, so that you can make maps
 	* you could have a protocol that would allow object based RPC (via xmlrpc or a custom system or something) such that you could
 	  implement both a client connection (calling actions (methods) on the user thing object through which everything can be done)
 	  or controlling other objects allowing out of process extensions
@@ -70,16 +71,6 @@
 	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
 	  subobject which inherits from the core object?
 
-	* we should seriously look into the loading and saving of things to various XML files based on things inside things.  The
-	  problem might come with objects that that aren't *in* anything (but is this really possible? everythnig can be in the root
-	  object, at least.
-	* we could possibly avoid this problem by passing over the thing database and looking for objects with a location set to NULL.
-	  We would have to think about world's... or wait... If world has a location of NULL, and all other objects do too, you could
-	  just write all objects that have a location of NULL.  All other objects will have location set to something, unless there are
-	  loops but we should check for that and disallow that anyways.  Also, certain objects (like rooms and exits) should be
-	  specifically added to the "inner most world object".  They wont be *in* eachother as a member, just pointed to by other
-	  lists in the properties, but they will all be written to the same file, and they will all be written even without taking
-	  properties into account.
 	* the only issue with thingrefs in properties is when it comes to garbage collection, but it's not so bad since thingref is a
 	  special type rather than just a number
 	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
@@ -121,16 +112,15 @@
 	* can you convert init/release functions to be constructor/destructor of a singleton class?
 
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
-	* sort out and make better use of exceptions (in do_action in particular).
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 
+	* make the cryolocker stuff be used by the realm channel when joining and leaving it.  It would mean a user can be connected
+	  and be in the cryolocker, but he can also not be in the world by just not joining #realm
 	* allow for variable arguments (and variable length string params)
-	* seperate number into float and integer
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations
-	* add a function to array, like last() but +1, to use in for loops
 	* make it automatically print .look when you enter #realm
 
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)

@@ -81,6 +81,7 @@ class MooThing : public MooObject {
 	/// Helper Methods
 	int command(MooThing *user, MooThing *channel, const char *action, const char *text = NULL);
 	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *text);
+	int notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...);
 	int notify(int type, MooArgs *args, const char *fmt, ...);
 	int notify_all(int type, MooThing *thing, MooThing *channel, const char *text);
 	int notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text);

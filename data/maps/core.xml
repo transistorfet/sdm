@@ -168,6 +168,12 @@
    <params></params>
    <function>builder_create_room</function>
   </action>
+  <action type="builtin" name="@info">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>t</params>
+   <function>builder_info</function>
+  </action>
   <action type="builtin" name="@set">
    <owner>-1</owner>
    <permissions>075</permissions>
