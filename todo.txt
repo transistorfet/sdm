@@ -116,6 +116,9 @@
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 
+	* make a do_action which does not catch exceptions, so that they can be passed on.  What will we use to differentiate the 2 types
+	  of functions?  How will we differentiate in general?
+
 	* make the cryolocker stuff be used by the realm channel when joining and leaving it.  It would mean a user can be connected
 	  and be in the cryolocker, but he can also not be in the world by just not joining #realm
 	* allow for variable arguments (and variable length string params)

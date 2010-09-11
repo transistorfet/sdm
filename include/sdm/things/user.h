@@ -46,6 +46,7 @@ class MooUser : public MooThing {
 	static int valid_username(const char *name);
 	static MooUser *login(const char *name, const char *passwd);
 	static void encrypt_password(const char *salt, char *passwd, int max);
+	static MooUser *get(const char *name);
 
     public:
 	/// Accessors

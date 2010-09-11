@@ -871,6 +871,22 @@ int MooThing::remove(MooThing *obj)
 	return(1);
 }
 
+///// Accessors /////
+
+const char *MooThing::name()
+{
+	const char *name = NULL;
+
+	try {
+		name = this->get_string_property("name");
+	}
+	catch (...) { }
+
+	if (!name)
+		return("???");
+	return(name);
+}
+
 ///// String Parsers /////
 
 /**

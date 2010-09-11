@@ -136,10 +136,12 @@ static int builder_info(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(object = args->m_args->get_thing(0)))
 		object = args->m_this;
 	// TODO display all detailed information
-	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>ID: #%d", object->id());
-	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>PARENT: #%d", object->parent_id());
-	if (tmp = object->location())
-		args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>LOCATION: #%d", tmp->id());
+	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>ID: %s (#%d)", object->name(), object->id());
+	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>PARENT: %s (#%d)", object->parent()->name(), object->parent_id());
+	if ((tmp = object->owner_thing()))
+		args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>OWNER: %s (#%d)", tmp->name(), tmp->id());
+	if ((tmp = object->location()))
+		args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>LOCATION: %s (#%d)", tmp->name(), tmp->id());
 	return(0);
 }
 

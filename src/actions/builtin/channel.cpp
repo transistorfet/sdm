@@ -29,6 +29,10 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_join(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_say(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_channel_actions(MooBuiltinHash *actions)
@@ -43,6 +47,10 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("channel_emote", new MooBuiltin(channel_emote));
 	actions->set("channel_names", new MooBuiltin(channel_names));
 	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
+	actions->set("realm_join", new MooBuiltin(realm_join));
+	actions->set("realm_leave", new MooBuiltin(realm_leave));
+	actions->set("realm_say", new MooBuiltin(realm_say));
+	actions->set("realm_emote", new MooBuiltin(realm_emote));
 	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
 	return(0);
 }
@@ -70,7 +78,6 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 	}
 	// TODO should this maybe use an object sent as an arg so that non-users can join the channel?
 	users->push(new MooThingRef(args->m_user->id()));
-	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
@@ -111,7 +118,6 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 		return(-1);
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
-	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_SAY, args->m_user, args->m_this, text);
@@ -130,7 +136,6 @@ static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 		return(-1);
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
-	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
 			cur->notify(TNT_EMOTE, args->m_user, args->m_this, text);
@@ -147,7 +152,6 @@ static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
 
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
-	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)) && cur->is_a(&moo_user_obj_type)) {
 			strncpy(&buffer[j], ((MooUser *) cur)->name(), LARGE_STRING_SIZE - j);
@@ -170,6 +174,42 @@ static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 
 	// TODO should you check to make sure this doesn't loop?
 	//return(args->m_user->command(args->m_text));
+	return(0);
+}
+
+
+///// Realm Actions /////
+
+static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	if (channel_join(action, thing, args) < 0)
+		return(-1);
+	// TODO do cryolocker retrieval
+	// TODO do a look action
+	return(0);
+}
+
+static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	if (channel_leave(action, thing, args) < 0)
+		return(-1);
+	// TODO do cryolocker store
+	return(0);
+}
+
+static int realm_say(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooThing *location = args->m_user->location();
+	if (location)
+		return(location->do_action("say", args));
+	return(0);
+}
+
+static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooThing *location = args->m_user->location();
+	if (location)
+		return(location->do_action("emote", args));
 	return(0);
 }
 

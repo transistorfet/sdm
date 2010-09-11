@@ -19,7 +19,7 @@
   <property type="string" name="looked_at">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>$user.name examines $this.title.</value>
+   <value>$user.name examines $this.name.</value>
   </property>
   <property type="string" name="description">
    <owner>-1</owner>
@@ -455,15 +455,39 @@
    <property type="string" name="name">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <value>#realm2</value>
+    <value>#realm</value>
    </property>
+   <action type="builtin" name="join">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params></params>
+    <function>realm_join</function>
+   </action>
+   <action type="builtin" name="leave">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params></params>
+    <function>realm_leave</function>
+   </action>
+   <action type="builtin" name="say">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params>s</params>
+    <function>realm_say</function>
+   </action>
+   <action type="builtin" name="emote">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params>s</params>
+    <function>realm_emote</function>
+   </action>
    <action type="builtin" name="evaluate">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
     <function>realm_evaluate</function>
    </action>
-   <name>#realm2</name>
+   <name>#realm</name>
   </thing>
  </thing>
 </world>

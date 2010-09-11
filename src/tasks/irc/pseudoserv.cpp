@@ -139,38 +139,35 @@ int PseudoServ::release()
 int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char *str)
 {
 	const char *cmd;
-	const char *thing_name;
-	const char *channel_name;
+	const char *thing_name = NULL;
+	const char *channel_name = NULL;
 
 	if (thing)
-		thing_name = thing->get_string_property("name");
+		thing_name = thing->name();
 	if (channel)
-		channel_name = channel->get_string_property("name");
+		channel_name = channel->name();
 
 	switch (type) {
 	    case TNT_STATUS: {
 		char buffer[LARGE_STRING_SIZE];
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
-		// TODO if realm became a channel, might this instead be used to send notices to the user?
-		//return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG #realm :*** %s\r\n", server_name, buffer));
-		if (!channel && !thing)
+		if (!channel_name)
 			return(Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, m_nick->c_str(), buffer));
 		else
-			return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name ? channel_name : "#realm", buffer));
-		//Msg *msg = new Msg();
+			return(Msg::send(m_inter, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name, buffer));
 	    }
 	    case TNT_SAY:
 	    case TNT_EMOTE: {
 		char buffer[LARGE_STRING_SIZE];
 
 		/// We don't send a message if it was said by our user, since the IRC client will echo that message itself
-		if (!thing || thing == m_user)
+		if (!thing || thing == m_user || !channel_name)
 			return(0);
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
-			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
 		else
-			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION %s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, (channel && channel_name) ? channel_name : "#realm", buffer));
+			return(Msg::send(m_inter, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION %s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
 		break;
 	    }
 	    case TNT_JOIN:
@@ -178,16 +175,16 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 	    case TNT_LEAVE:
 		if (type != TNT_JOIN)
 			cmd = "PART";
-		if (!thing)
+		if (!thing || !channel_name)
 			return(0);
 		if (thing == m_user) {
 			if (type == TNT_JOIN)
-				return(this->send_join((channel && channel_name) ? channel_name : "#realm"));
+				return(this->send_join(channel_name));
 			else
-				return(this->send_part((channel && channel_name) ? channel_name : "#realm"));
+				return(this->send_part(channel_name));
 		}
 		else
-			return(Msg::send(m_inter, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, (channel && channel_name) ? channel_name : "#realm"));
+			return(Msg::send(m_inter, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, channel_name));
 	    case TNT_QUIT: {
 		char buffer[LARGE_STRING_SIZE];
 
@@ -306,40 +303,26 @@ int PseudoServ::dispatch(Msg *msg)
 			return(Msg::send(m_inter, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
 		else if (!msg->m_last)
 			return(Msg::send(m_inter, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
-		else if (moo_is_channel_name(msg->m_params[0])) {
-			if (!strcmp(msg->m_params[0], "#realm")) {
-				if (this->not_in_realm())
-					return(Msg::send(m_inter, ":%s %03d #realm :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN));
-				if (msg->m_last[0] == '.')
-					res = m_user->command(m_user, NULL, &msg->m_last[1]);
-				else if (msg->m_last[0] == '\x01')
-					this->process_ctcp(msg, NULL);
-				else
-					res = m_user->command(m_user, NULL, "say", msg->m_last);
+		else {
+			MooThing *channel;
 
+			// TODO will the channel list eventually become part of an object?
+			if (moo_is_channel_name(msg->m_params[0]))
+				channel = MooChannel::get(msg->m_params[0]);
+			else
+				channel = MooUser::get(msg->m_params[0]);
+
+			if (!channel)
+				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
+			if (msg->m_last[0] == '.') {
+				res = channel->do_action(m_user, channel, "evaluate", &msg->m_last[1]);
 				if (res == MOO_ACTION_NOT_FOUND)
 					this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
 			}
-			else {
-				// TODO will the channel list eventually become part of an object?
-				//MooThing *channels = MooThing::reference(MOO_CHANNELS);
-				MooChannel *channel = MooChannel::get(msg->m_params[0]);
-				if (!channel)
-					return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
-				if (msg->m_last[0] == '.') {
-					res = channel->do_action(m_user, channel, "evaluate", &msg->m_last[1]);
-					if (res == MOO_ACTION_NOT_FOUND)
-						this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
-				}
-				else if (msg->m_last[0] == '\x01')
-					this->process_ctcp(msg, channel);
-				else
-					channel->do_action(m_user, channel, "say", msg->m_last);
-			}	
-		}
-		else {
-			// TODO send a private message (probably by calling an action)
-			//m_user->command(m_user, NULL, "tell", ???);
+			else if (msg->m_last[0] == '\x01')
+				this->process_ctcp(msg, channel);
+			else
+				channel->do_action(m_user, channel, "say", msg->m_last);
 		}
 		return(0);
 	    }
@@ -488,31 +471,19 @@ int PseudoServ::handle_join(const char *name)
 	//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
 	//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
 
-	if (!strcmp(name, "#realm")) {
-		RBIT(m_bits, IRC_BF_NOT_IN_REALM);
-		return(this->send_join(name));
-	}
-	else {
-		MooChannel *channel = MooChannel::get(name);
-		if (!channel)
-			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-		return(channel->do_action(m_user, channel, "join"));
-	}
+	MooChannel *channel = MooChannel::get(name);
+	if (!channel)
+		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	return(channel->do_action(m_user, channel, "join"));
 }
 
 int PseudoServ::handle_leave(const char *name)
 {
-	if (!strcmp(name, "#realm")) {
-		SBIT(m_bits, IRC_BF_NOT_IN_REALM);
-		return(this->send_part(name));
-	}
-	else {
-		// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
-		MooChannel *channel = MooChannel::get(name);
-		if (!channel)
-			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-		return(channel->do_action(m_user, channel, "leave"));
-	}
+	// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
+	MooChannel *channel = MooChannel::get(name);
+	if (!channel)
+		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	return(channel->do_action(m_user, channel, "leave"));
 }
 
 int PseudoServ::login()
@@ -571,7 +542,7 @@ int PseudoServ::send_welcome()
 	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
 	m_bits |= IRC_BF_WELCOMED;
 	if (m_user) {
-		this->send_join("#realm");
+		this->handle_join("#realm");
 		Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, m_nick->c_str(), m_nick->c_str());
 	}
 	return(0);
@@ -601,6 +572,7 @@ int PseudoServ::send_names(const char *name)
 	if (!m_user)
 		return(-1);
 
+/*
 	if (!strcmp(name, "#realm")) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
@@ -611,7 +583,7 @@ int PseudoServ::send_names(const char *name)
 			j = 0;
 			for (int i = 0; cur && i < 20; i++, cur = cur->next()) {
 				// TODO we should check that things are invisible, and also add @ for wizards or something
-				if ((thing_name = cur->get_string_property("name"))) {
+				if ((thing_name = cur->name())) {
 					strcpy(&buffer[j], thing_name);
 					j += strlen(thing_name);
 					buffer[j++] = ' ';
@@ -624,16 +596,15 @@ int PseudoServ::send_names(const char *name)
 			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, buffer);
 		} while (cur);
 	}
-	else {
-		MooObject *result = NULL;
-		MooChannel *channel = MooChannel::get(name);
-		if (!channel)
-			return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-		channel->do_action(m_user, channel, "names", NULL, &result);
-		if (result && result->is_a(&moo_string_obj_type))
-			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
-
-	}
+*/
+	MooObject *result = NULL;
+	MooChannel *channel = MooChannel::get(name);
+	if (!channel)
+		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	// TODO change this to a throwing do_action so that if an error occurs, it can recover
+	channel->do_action(m_user, channel, "names", NULL, &result);
+	if (result && result->is_a(&moo_string_obj_type))
+		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
 	return(0);
 }
@@ -643,6 +614,7 @@ int PseudoServ::send_who(const char *mask)
 	MooThing *cur;
 	const char *thing_name;
 
+	// TODO convert this to a generic channel method
 	if (!strcmp(mask, "#realm")) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
@@ -651,7 +623,7 @@ int PseudoServ::send_who(const char *mask)
 			cur = cur->contents();
 		for (; cur; cur = cur->next()) {
 			// TODO we should check that things are invisible, and also add @ for wizards or something
-			if ((thing_name = cur->get_string_property("name"))) {
+			if ((thing_name = cur->name())) {
 				Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
 			}
 		}
@@ -660,7 +632,7 @@ int PseudoServ::send_who(const char *mask)
 	return(0);
 }
 
-int PseudoServ::process_ctcp(Msg *msg, MooChannel *channel)
+int PseudoServ::process_ctcp(Msg *msg, MooThing *channel)
 {
 	if (!strncmp(&msg->m_last[1], "ACTION", 6)) {
 		char buffer[STRING_SIZE];

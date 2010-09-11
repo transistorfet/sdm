@@ -57,11 +57,11 @@ static int basics_print(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	MooString *name;
-	// TODO this should only print this if $this.title exists (use $this.name if it's not there)
-	if (!(name = (MooString *) args->m_this->get_property("title", &moo_string_obj_type)))
-		name = (MooString *) args->m_this->get_property("name", &moo_string_obj_type);
-	args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name->m_str);
+	const char *name;
+
+	// TODO make this use different colours for different types of things
+	if (name = args->m_this->name());
+		args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name);
 	return(0);
 }
 

@@ -284,4 +284,8 @@ void MooUser::encrypt_password(const char *salt, char *passwd, int max)
 	strncpy(passwd, enc, max);
 }
 
+MooUser *MooUser::get(const char *name)
+{
+	return(user_list->get(name));
+}
 
