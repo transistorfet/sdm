@@ -69,6 +69,8 @@ class MooObjectArray : public MooArray<MooObject *> {
 
 	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);
+	int parse_arg(MooThing *user, MooThing *channel, char *text);
+	int to_string(char *buffer, int max);
 
 	MooObject *get(int index, MooObjectType *type);
 	double get_number(int index);

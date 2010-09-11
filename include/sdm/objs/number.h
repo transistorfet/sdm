@@ -20,6 +20,8 @@ class MooNumber : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
+	virtual int to_string(char *buffer, int max);
 };
 
 extern MooObjectType moo_number_obj_type;

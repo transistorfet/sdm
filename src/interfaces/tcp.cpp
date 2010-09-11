@@ -66,21 +66,12 @@ MooTCP::~MooTCP()
 
 int MooTCP::read_entry(const char *type, MooDataFile *data)
 {
-	//if (!strcmp(type, "load")) {
-		// TODO what could you read in here?
-	//}
-	//else
-		return(MOO_NOT_HANDLED);
-	return(MOO_HANDLED);
+	return(MOO_NOT_HANDLED);
 }
 
 
 int MooTCP::write_data(MooDataFile *data)
 {
-	// TODO what could you write here?
-	//data->write_begin_entry("load");
-	//data->write_attrib_string("ref", m_filename);
-	//data->write_end_entry();
 	return(0);
 }
 

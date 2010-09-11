@@ -52,16 +52,18 @@ static int room_init(MooAction *action, MooThing *thing, MooArgs *args)
 static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	//MooThing *cur;
+	const char *text;
 
 	// TODO Check if room silence bit is set for this room
 	//if (CAN_SPEAK(args->m_this, args->m_user))		// TODO is user correct here??
 
-	if (*args->m_text == '\0')
+	text = args->m_args->get_string(0);
+	if (*text == '\0')
 		return(-1);
 	// TODO for each user/npc/whatever
 	//		if ignoring bit set, don't send message
 	//		perhaps if the person trying to speak is special (immortal) then speak despite ignore bit
-	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, args->m_text);
+	args->m_user->location()->notify_all(TNT_SAY, NULL, args->m_user, text);
 
 	// TODO check for room/object/mobile triggers based on speech
 
@@ -71,11 +73,13 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	//MooThing *cur;
+	const char *text;
 
 	// TODO check room_say for modification suggestions
-	if (*args->m_text == '\0')
+	text = args->m_args->get_string(0);
+	if (*text == '\0')
 		return(-1);
-	args->m_user->location()->notify_all(TNT_EMOTE, NULL, args->m_user, args->m_text);
+	args->m_user->location()->notify_all(TNT_EMOTE, NULL, args->m_user, text);
 	return(0);
 }
 
@@ -94,12 +98,14 @@ static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	MooThing *object;
+
 	// TODO check if room is dark, etc?
 	// TODO proximity check on object??? so you can't look at public things far away
-	if (!args->m_object)
-		args->m_object = args->m_this;
+	if (!(object = args->m_args->get_thing(0)))
+		object = args->m_this;
 	// TODO notify all the people in the room that you are looking at something (should this be here or in look_self?)
-	args->m_object->do_action("look_self", args);
+	object->do_action("look_self", args);
 	return(0);
 }
 

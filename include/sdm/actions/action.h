@@ -21,6 +21,11 @@ TODO What kind of argument patterns are there:
 
 	- not all verbs could be called from the command line...
 
+	s	single string
+	s*	string broken into words
+	?	anything
+	[?*]	list of anything
+
 
 
 	perhaps an array of MooObject, and an array of parameter types/etc.  Depending on the defined parameter list, the args can be
@@ -30,14 +35,18 @@ TODO What kind of argument patterns are there:
 
 */
 
+#define MOO_PARAM_STRING_SIZE		16
+
 class MooArgs;
 class MooUser;
 class MooThing;
 class MooAction;
+class MooChannel;
 
 class MooAction : public MooObject {
 	std::string *m_name;
 	MooThing *m_thing;
+	char m_params[MOO_PARAM_STRING_SIZE];
 
     public:
 	MooAction(const char *name = NULL, MooThing *thing = NULL);
@@ -55,6 +64,7 @@ class MooAction : public MooObject {
     public:
 	const char *name() { return(m_name->c_str()); }
 	MooThing *thing() { return(m_thing); }
+	const char *params(const char *params = NULL);
 };
 
 class MooArgs {
@@ -68,25 +78,20 @@ class MooArgs {
 	MooThing *m_this;
 	MooObjectArray *m_args;		// TODO better name!??
 
-	// TODO these may be removed, in place of a MooObjectArray
-	MooThing *m_object;
-	MooThing *m_target;
-	const char *m_text;
-
 	MooArgs();
 	~MooArgs();
 
-	int set(MooThing *thing, const char *text);
+	static int find_whitespace(const char *text);
+	static int find_character(const char *text);
+	static const char *parse_action(char *buffer, int max, const char *text);
+	static char *parse_action(char *buffer);
 
-	static int parse_word(char *buffer);
-	static int parse_whitespace(char *buffer);
-	int parse_words(char *buffer);
-	int parse_args(MooThing *user, char *buffer, int max, const char *action, const char *text = NULL);
-	int parse_args(MooThing *user, char *buffer, int *argpos = NULL);
-	int parse_args(MooThing *user, const char *action, char *buffer);
-	int parse_args(MooThing *user, MooThing *object, MooThing *target);
+	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text);
+	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer);
+	int match_args(const char *params);
+	void match_args_throw(const char *params);
+	const MooObjectType *get_type(char param);
 };
-
 
 extern MooObjectType moo_action_obj_type;
 

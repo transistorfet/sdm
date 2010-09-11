@@ -120,29 +120,23 @@
 	  some place they aren't supposed to be
 	* can you convert init/release functions to be constructor/destructor of a singleton class?
 
-	* sort out and make better use of exceptions (in do_action in particular).  You can't catch a segfault but you can throw
-	  exceptions when certain functions would otherwise return a NULL.  You could alternativley have an TRY() macro or something
-	  which runs the function and throws -1 if it returns a value less than 0 (what about NULL...  NULLCHK() )
+	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
+	* sort out and make better use of exceptions (in do_action in particular).
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
 
-	* should you throw type_error in functions that read a specific type (like array->get_number() etc) and also, you should throw
-	  some kind of exception during functions that return numbers rather than returning 0 as an error =/
-	* think about adding param checks to do_action, (lambdamoo uses this, any, none as values for each of 3 parameters, object,
-	  preposition, target)
-	* should you/could you just have a fixed array of like 6 elements of MooObject or something as arguments in MooArgs (which would
-	  replace object and target perhaps).  That would allow better parameter passing
-	* rethink the whole message printing system, in response to events.  You could probably make it super generic... Or should you
-	  even bother?
-	* parsing is kinda funny. Should it parse 'say' messages no matter what, even if it's from IRC and we know it's a 'say'??
-	* when parsing args, there must be a way so that if an object name is given but doesn't match anything, an error occurs
-	  instead of doing the action as if no object was specified ('.look foobar' current 'look's at the room)
+	* allow for variable arguments (and variable length string params)
+	* add support for "" strings in commands
+	* seperate number into float and integer
+	* fix thing->command() (object/target do_actions are disabled atm)
+	* add permissions checking functions of some kind to all applicable locations
+	* add a function to array, like last() but +1, to use in for loops
+	* make it automatically print .look when you enter #realm
 
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* add a 'register' and 'login' commands to basics
 
-	* add permissions checking functions of some kind to all applicable locations
 	* if a property (or action?) exists on a parent of the object, perhaps it should modify the value in the parent, subject to the
 	  permissions of that property (or action?).  This way, an object cannot override a value in order to skirt permissions.
 

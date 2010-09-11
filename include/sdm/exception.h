@@ -19,6 +19,7 @@ extern MooException moo_mem_error;
 extern MooException moo_closed;
 extern MooException moo_permissions;
 extern MooException moo_type_error;
+extern MooException moo_args_error;
 extern MooException moo_thing_not_found;
 extern MooException moo_unknown;
 

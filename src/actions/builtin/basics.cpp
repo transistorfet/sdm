@@ -10,6 +10,7 @@
 #include <sdm/misc.h>
 #include <sdm/hash.h>
 #include <sdm/data.h>
+#include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
@@ -47,7 +48,9 @@ static int basics_register(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int basics_print(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	args->m_user->print(args, args->m_text);
+	// TODO should this be the typical way you reference arguments?
+	// TODO i don't really like this, with the type reference...
+	args->m_user->print(args, args->m_args->get_string(0));
 	return(0);
 }
 
@@ -73,7 +76,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 		if (cur == args->m_caller || cur == args->m_user)
 			continue;
-		cur->do_action("print_view", args->m_user);
+		cur->do_action(args->m_user, args->m_channel, "print_view");
 	}
 
 	// TODO you should print a different set of messages if the look failed

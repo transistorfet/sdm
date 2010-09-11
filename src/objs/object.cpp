@@ -83,7 +83,7 @@ MooObject *moo_make_object(const MooObjectType *type)
 		return(NULL);
 	try {
 		return(type->m_create());
-	} catch(int e) {
+	} catch(...) {
 		return(NULL);
 	}
 }

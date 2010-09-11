@@ -8,6 +8,7 @@
 
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/exception.h>
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/number.h>
@@ -76,14 +77,24 @@ int MooObjectArray::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooObjectArray::parse_arg(MooThing *user, MooThing *channel, char *text)
+{
+
+}
+
+int MooObjectArray::to_string(char *buffer, int max)
+{
+
+}
+
 MooObject *MooObjectArray::get(int index, MooObjectType *type)
 {
 	MooObject *obj;
 
 	if (!(obj = MooArray<MooObject *>::get(index)))
 		return(NULL);
-	if (!obj->is_a(type))
-		return(NULL);
+	if (type && !obj->is_a(type))
+		throw moo_type_error;
 	return(obj);
 }
 
@@ -91,7 +102,6 @@ double MooObjectArray::get_number(int index)
 {
 	MooNumber *obj;
 
-	// TODO should this throw an exception rather than just return 0 on error??
 	if (!(obj = (MooNumber *) this->get(index, &moo_number_obj_type)))
 		return(0);
 	return(obj->m_num);
@@ -101,7 +111,6 @@ const char *MooObjectArray::get_string(int index)
 {
 	MooString *obj;
 
-	// TODO should this throw an exception rather than just return NULL on error??
 	if (!(obj = (MooString *) this->get(index, &moo_string_obj_type)))
 		return(NULL);
 	return(obj->m_str);

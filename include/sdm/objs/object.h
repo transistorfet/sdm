@@ -23,6 +23,8 @@ typedef struct MooObjectType {
 	moo_type_create_t m_create;
 } MooObjectType;
 
+class MooThing;
+
 class MooObject {
     protected:
 	int m_delete;
@@ -52,6 +54,9 @@ class MooObject {
 	    be written and not data for the object's parent.  The caller shall call the write function for the
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
 	virtual int write_data(MooDataFile *data);
+
+	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
+	virtual int to_string(char *buffer, int max) { return(0); }
 
 	void check_throw(moo_perm_t perms);
 	int check(moo_perm_t perms);

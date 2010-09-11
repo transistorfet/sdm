@@ -70,7 +70,7 @@ int MooAlias::do_action(MooThing *thing, MooArgs *args)
 	char buffer[STRING_SIZE];
 
 	MooThing::expand_str(buffer, STRING_SIZE, args, m_command->c_str());
-	return(args->m_user->command(buffer));
+	return(args->m_user->command(args->m_user, args->m_channel, buffer));
 }
 
 

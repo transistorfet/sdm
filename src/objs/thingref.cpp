@@ -41,3 +41,24 @@ int MooThingRef::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooThingRef::parse_arg(MooThing *user, MooThing *channel, char *text)
+{
+	int i;
+	char ch;
+	MooThing *thing;
+
+	i = MooArgs::find_whitespace(text);
+	ch = text[i];
+	text[i] = '\0';
+	if (!(thing = user->find(text)))
+		return(0);
+	m_id = thing->id();
+	text[i] = ch;
+	return(i);
+}
+
+int MooThingRef::to_string(char *buffer, int max)
+{
+	return(snprintf(buffer, max, "#%d", m_id));
+}
+

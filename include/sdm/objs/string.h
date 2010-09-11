@@ -20,6 +20,8 @@ class MooString : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
+	virtual int to_string(char *buffer, int max);
 
 	// TODO should all fault conditions throw an exception instead of returning an int?
 	int set(const char *str);

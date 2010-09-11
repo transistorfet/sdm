@@ -161,6 +161,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		data->read_children();
 		res = action->read_data(data);
 		data->read_parent();
+		action->init(buffer, this);
 		if ((res < 0) || (m_actions->set(buffer, action) < 0)) {
 			moo_status("THING: Error loading action, %s.", buffer);
 			delete action;
@@ -249,7 +250,7 @@ int MooThing::init()
 	/// This is a rare situation where we will use the owner of the object rather than the current owner.  This
 	/// *shouldn't* make a difference here, since normally they would be the same.
 	// TODO is this call correct?
-	this->do_action("init", this->owner_thing());
+	this->do_action(this->owner_thing(), NULL, "init");
 	return(0);
 }
 
@@ -435,48 +436,45 @@ MooAction *MooThing::get_action_partial(const char *name)
 	return(NULL);
 }
 
-int MooThing::do_action(MooThing *user, const char *text, MooObject **result)
+int MooThing::do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result)
+{
+	char action[STRING_SIZE];
+
+	text = MooArgs::parse_action(action, STRING_SIZE, text);
+	return(this->do_action(user, channel, action, text, result));
+}
+
+int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result)
 {
 	MooArgs args;
 	MooAction *action;
 	char buffer[LARGE_STRING_SIZE];
 
-	args.parse_args(user, buffer, LARGE_STRING_SIZE, text);
-	if ((action = this->get_action(args.m_action_text)))
+	if (!(action = this->get_action(name)))
+		return(MOO_ACTION_NOT_FOUND);
+	try {
+		args.parse_args(action->params(), user, channel, buffer, LARGE_STRING_SIZE, text ? text : "");
+		// TODO should i remove action_text entirely?
+		args.m_action_text = name;
 		return(this->do_action(action, &args, result));
-	return(MOO_ACTION_NOT_FOUND);
-}
-
-int MooThing::do_action(const char *name, MooThing *user, const char *text, MooObject **result)
-{
-	MooArgs args;
-	MooAction *action;
-	char buffer[LARGE_STRING_SIZE];
-
-	args.parse_args(user, buffer, LARGE_STRING_SIZE, name, text);
-	if ((action = this->get_action(name)))
-		return(this->do_action(action, &args, result));
-	return(MOO_ACTION_NOT_FOUND);
-}
-
-int MooThing::do_action(const char *name, MooThing *user, MooThing *object, MooThing *target, MooObject **result)
-{
-	MooArgs args;
-	MooAction *action;
-
-	args.parse_args(user, object, target);
-	if ((action = this->get_action(name)))
-		return(this->do_action(action, &args, result));
-	return(MOO_ACTION_NOT_FOUND);
+	}
+	catch (MooException e) {
+		moo_status("ACTION: (%s) %s", action->name(), e.get());
+		// TODO should channel here be NULL?  That i guess would make sure it's a notice
+		user->notify(TNT_STATUS, user, NULL, e.get());
+		return(-1);
+	}
 }
 
 int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 {
 	MooAction *action;
 
-	if ((action = this->get_action(name)))
-		return(this->do_action(action, args, result));
-	return(MOO_ACTION_NOT_FOUND);
+	if (!(action = this->get_action(name)))
+		return(MOO_ACTION_NOT_FOUND);
+	// TODO should i remove action_text entirely?
+	args->m_action_text = name;
+	return(this->do_action(action, args, result));
 }
 
 int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
@@ -492,6 +490,9 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		args->m_result = NULL;
 		args->m_this = this;
 		args->m_action = action;
+
+		// TODO should this only be in the above function (since parse_args should have gotten this correct already)
+		args->match_args_throw(action->params());
 
 		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
 		//	It should now be set in the action so we can get it from there
@@ -509,7 +510,8 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 	}
 	catch (MooException e) {
 		moo_status("ACTION: (%s) %s", action->name(), e.get());
-		// TODO should it print this message to the user, also?
+		// TODO should channel here be NULL?  That i guess would make sure it's a notice
+		args->m_user->notify(TNT_STATUS, args->m_user, NULL, e.get());
 		return(-1);
 	}
 	catch (...) {
@@ -601,44 +603,27 @@ MooThing *MooThing::reference(const char *name)
 
 ///// Helper Methods /////
 
-int MooThing::command(const char *text)
-{
-	MooArgs args;
-	char buffer[LARGE_STRING_SIZE];
-
-	args.parse_args(this, buffer, LARGE_STRING_SIZE, text);
-	return(this->command(args.m_action_text, &args));
-}
-
-int MooThing::command(const char *action, const char *text)
-{
-	MooArgs args;
-	char buffer[LARGE_STRING_SIZE];
-
-	args.parse_args(this, buffer, LARGE_STRING_SIZE, action, text);
-	return(this->command(args.m_action_text, &args));
-}
-
-int MooThing::command(const char *action, MooThing *object, MooThing *target)
-{
-	MooArgs args;
-
-	args.parse_args(this, object, target);
-	return(this->command(action, &args));
-}
-
-int MooThing::command(const char *action, MooArgs *args)
+int MooThing::command(MooThing *user, MooThing *channel, const char *action, const char *text)
 {
 	int res;
+	char buffer[STRING_SIZE];
 
-	if ((res = this->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+	if (!text) {
+		text = MooArgs::parse_action(buffer, STRING_SIZE, action);
+		action = buffer;
+	}
+
+	// TODO with the new arg system, this largely wouldn't work, although you can pass the unparsed string to everythnig
+	//	except the last 2, and then parse it using a standardized argument format (tst - thing string thing), and
+	//	use the found objects 
+	if ((res = this->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (m_location && (res = m_location->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
+	if (m_location && (res = m_location->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (args->m_object && (res = args->m_object->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	if (args->m_target && (res = args->m_target->do_action(action, args)) != MOO_ACTION_NOT_FOUND)
-		return(res);
+	//if (args->m_object && (res = args->m_object->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+	//	return(res);
+	//if (args->m_target && (res = args->m_target->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+	//	return(res);
 	return(MOO_ACTION_NOT_FOUND);
 }
 
@@ -962,7 +947,7 @@ int MooThing::expand_reference(char *buffer, int max, MooArgs *args, const char 
 	else
 		delim = ' ';
 
-	for (k = 0;(str[i] != '\0') && (str[i] != delim) && IS_VALID_CHAR(str[i]) && (k < max - 1);k++, i++)
+	for (k = 0; (str[i] != '\0') && (str[i] != delim) && IS_VALID_CHAR(str[i]) && (k < max - 1); k++, i++)
 		buffer[k] = str[i];
 	buffer[k] = '\0';
 	if (MooThing::resolve_reference(value, STRING_SIZE, args, buffer) >= 0) {
@@ -990,7 +975,7 @@ int MooThing::expand_reference(char *buffer, int max, MooArgs *args, const char 
  */
 int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char *ref)
 {
-	int i;
+	int i, j;
 	char *name;
 	MooThing *thing;
 	MooObject *result = NULL;
@@ -1003,13 +988,7 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 	else
 		i = strlen(ref);
 
-	if (!strncmp(ref, "text", i)) {
-		// TODO we are ignoring the rest of the reference for now ($text.prop <=> $text)
-		strncpy(buffer, args->m_text, max);
-		buffer[max] = '\0';
-		return(strlen(args->m_text));
-	}
-	else if (!strncmp(ref, "action", i)) {
+	if (!strncmp(ref, "action", i)) {
 		// TODO we are ignoring the rest of the reference for now ($action.owner, $action.name)
 		strncpy(buffer, args->m_action->name(), max);
 		buffer[max] = '\0';
@@ -1021,12 +1000,16 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 		thing = args->m_this;
 	else if (!strncmp(ref, "caller", i))
 		thing = args->m_caller;
-	else if (!strncmp(ref, "object", i))
-		thing = args->m_object;
-	else if (!strncmp(ref, "target", i))
-		thing = args->m_target;
 	else if (!strncmp(ref, "result", i))
 		result = args->m_result;
+	else if (ref[0] > '0' && ref[0] < '9') {
+		char *remain;
+		j = strtol(ref, &remain, 10);
+		// TODO should we do anything more severe here?
+		if (remain - ref != i)
+			return(0);
+		result = args->m_args->get(j, NULL);
+	}
 	else
 		thing = MooThing::reference(ref);
 
@@ -1041,25 +1024,7 @@ int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char
 		buffer[i] = '\0';
 		return(i);
 	}
-
-	if (result->is_a(&moo_string_obj_type)) {
-		strncpy(buffer, ((MooString *) result)->m_str, max);
-		return(((MooString *) result)->m_len);
-	}
-	else if (result->is_a(&moo_number_obj_type)) {
-		if ((i = snprintf(buffer, max, "%f", ((MooNumber *) result)->m_num)) < 0)
-			return(0);
-		buffer[i] = '\0';
-		return(i);
-	}
-	else if (result->is_a(&moo_thingref_obj_type)) {
-		if ((i = snprintf(buffer, max, "#%d", ((MooThingRef *) result)->m_id)) < 0)
-			return(0);
-		buffer[i] = '\0';
-		return(i);
-	}
-	// TODO should you check for the array type and print it??
-	return(0);
+	return(result->to_string(buffer, max));
 }
 
 
@@ -1092,7 +1057,7 @@ int MooThing::escape_char(const char *str, char *buffer)
 				number[0] = str[1];
 				number[1] = str[2];
 				number[2] = '\0';
-				buffer[0] = MooThing::atoi(number, 16);
+				buffer[0] = strtol(number, NULL, 16);
 			}
 			return(3);
 		default:
@@ -1115,36 +1080,4 @@ int MooThing::escape_char(const char *str, char *buffer)
 	return(1);
 }
 
-/**
- * Convert a string of the given radix to an interger.
- */
-int MooThing::atoi(const char *str, int radix)
-{
-	int i = -1, ret = 0, mul = 1;
-
-	if (!str)
-		return(0);
-
-	while (str[++i] == ' ' || str[i] == '\t' || str[i] == '\n')
-		if (str[i] == '\0')
-			return(0);
-
-	if (str[i] == '-') {
-		mul = -1;
-		i++;
-	}
-
-	for (;str[i] != '\0';i++) {
-		ret *= radix;
-		if (str[i] >= 0x30 && str[i] <= 0x39)
-			ret += (str[i] - 0x30);
-		else if (str[i] >= 0x41 && str[i] <= 0x5a)
-			ret += (str[i] - 0x37);
-		else if (str[i] >= 0x61 && str[i] <= 0x7a)
-			ret += (str[i] - 0x57);
-		else
-			break;
-	}
-	return(ret * mul);
-}
 

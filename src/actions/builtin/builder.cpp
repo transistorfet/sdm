@@ -49,7 +49,7 @@ static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args)
 	// TODO what permissions would control teleporting other than wizard
 	if (args->m_user->is_wizard()) {
 		// TODO how do we know the object is correct, etc
-		args->m_user->moveto(args->m_object, NULL);
+		//args->m_user->moveto(args->m_object, NULL);
 	}
 	return(0);
 }

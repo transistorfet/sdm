@@ -39,11 +39,13 @@
   <action type="builtin" name="look_self">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>t</params>
    <function>basics_look_self</function>
   </action>
   <action type="builtin" name="print_view">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>basics_print_view</function>
   </action>
  </thing>
@@ -110,16 +112,19 @@
   <action type="builtin" name="init">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>user_init</function>
   </action>
   <action type="builtin" name="passwd">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>user_passwd</function>
   </action>
   <action type="builtin" name="inv">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>user_inventory</function>
   </action>
  </thing>
@@ -142,31 +147,37 @@
   <action type="builtin" name="teleport">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>t</params>
    <function>builder_teleport</function>
   </action>
   <action type="builtin" name="@create">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>builder_create</function>
   </action>
   <action type="builtin" name="@add_exit">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>builder_add_exit</function>
   </action>
   <action type="builtin" name="@create_room">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>builder_create_room</function>
   </action>
   <action type="builtin" name="@set">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>builder_set</function>
   </action>
   <action type="builtin" name="@save">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>builder_save</function>
   </action>
  </thing>
@@ -184,11 +195,13 @@
   <action type="builtin" name="get">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>item_get</function>
   </action>
   <action type="builtin" name="drop">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>item_drop</function>
   </action>
  </thing>
@@ -216,61 +229,73 @@
   <action type="builtin" name="n">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="e">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="d">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="do_enter">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_do_enter</function>
   </action>
   <action type="builtin" name="do_leave">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_do_leave</function>
   </action>
   <action type="builtin" name="look">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>t</params>
    <function>room_look</function>
   </action>
   <action type="builtin" name="emote">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>room_emote</function>
   </action>
   <action type="builtin" name="s">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="w">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="u">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>room_direction</function>
   </action>
   <action type="builtin" name="say">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>room_say</function>
   </action>
   <action type="builtin" name="whisper">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>room_whisper</function>
   </action>
  </thing>
@@ -293,11 +318,13 @@
   <action type="builtin" name="go">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>t</params>
    <function>basics_go</function>
   </action>
   <action type="builtin" name="move">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>t</params>
    <function>basics_go</function>
   </action>
   <action type="builtin" name="print_view">
@@ -336,36 +363,43 @@
   <action type="builtin" name="init">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>channel_init</function>
   </action>
   <action type="builtin" name="join">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>channel_join</function>
   </action>
   <action type="builtin" name="leave">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>channel_leave</function>
   </action>
   <action type="builtin" name="say">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>channel_say</function>
   </action>
   <action type="builtin" name="emote">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>channel_emote</function>
   </action>
   <action type="builtin" name="names">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params></params>
    <function>channel_names</function>
   </action>
   <action type="builtin" name="evaluate">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params>s</params>
    <function>channel_evaluate</function>
   </action>
   <thing type="channel">
@@ -401,6 +435,29 @@
     <value>#wartalk</value>
    </property>
    <name>#wartalk</name>
+  </thing>
+  <thing type="channel">
+   <id>16</id>
+   <parent>13</parent>
+   <owner>7</owner>
+   <permissions>075</permissions>
+   <location>13</location>
+   <property type="array" name="users">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+   </property>
+   <property type="string" name="name">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>#realm2</value>
+   </property>
+   <action type="builtin" name="evaluate">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params>s</params>
+    <function>realm_evaluate</function>
+   </action>
+   <name>#realm2</name>
   </thing>
  </thing>
 </world>

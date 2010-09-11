@@ -63,6 +63,23 @@ int MooString::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooString::parse_arg(MooThing *user, MooThing *channel, char *text)
+{
+	// TODO this is a maximum capturing.  Should we either match minimally, or take a param for what to do?
+	this->set(text);
+	return(m_len);
+}
+
+int MooString::to_string(char *buffer, int max)
+{
+	strncpy(buffer, m_str, max);
+	if (m_len >= max) {
+		buffer[max] = '\0';
+		return(max);
+	}
+	return(m_len);
+}
+
 
 int MooString::set(const char *str)
 {

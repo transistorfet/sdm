@@ -14,6 +14,7 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 
+#include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
@@ -69,10 +70,12 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin(moo_action_t func, const char *name, MooThing* thing) : MooAction(name, thing)
+MooBuiltin::MooBuiltin(moo_action_t func, const char *params, const char *name, MooThing *thing) : MooAction(name, thing)
 {
 	m_func = func;
 	m_master = NULL;
+	if (params)
+		this->params(params);
 }
 
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
@@ -83,6 +86,13 @@ int MooBuiltin::read_entry(const char *type, MooDataFile *data)
 		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
 		this->set(buffer);
+	}
+	else if (!strcmp(type, "params")) {
+		char buffer[STRING_SIZE];
+
+		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+			return(-1);
+		this->params(buffer);
 	}
 	else
 		return(MooObject::read_entry(type, data));
@@ -98,6 +108,7 @@ int MooBuiltin::write_data(MooDataFile *data)
 	if (!(name = builtin_actions->key(m_master)))
 		return(-1);
 	data->write_string_entry("function", name);
+	data->write_string_entry("params", this->params());
 	return(0);
 }
 

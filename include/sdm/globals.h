@@ -6,7 +6,6 @@
 #ifndef _SDM_GLOBALS_H
 #define _SDM_GLOBALS_H
 
-#include <string.h>
 #include <sdm/exception.h>
 
 #define STRING_SIZE		512
@@ -20,9 +19,6 @@ typedef int (*compare_t)(void *, void *);
 typedef int (*callback_t)(void *, void *);
 
 #define DECLARE_UNUSED(arg)	((void) arg)
-
-#define TRIM_WHITESPACE(str, i) \
-	for (; ((str)[(i)] == ' ') || ((str)[(i)] == '\t'); (i)++) ;
 
 typedef int moo_id_t;
 typedef int moo_perm_t;

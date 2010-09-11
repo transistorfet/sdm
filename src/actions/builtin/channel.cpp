@@ -28,6 +28,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_channel_actions(MooBuiltinHash *actions)
 {
@@ -41,6 +42,7 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("channel_emote", new MooBuiltin(channel_emote));
 	actions->set("channel_names", new MooBuiltin(channel_names));
 	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
+	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
 	return(0);
 }
 
@@ -100,16 +102,18 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
+	const char *text;
 	MooObjectArray *users;
 
-	if (*args->m_text == '\0')
+	text = args->m_args->get_string(0);
+	if (*text == '\0')
 		return(-1);
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_SAY, args->m_this, args->m_user, args->m_text);
+			cur->notify(TNT_SAY, args->m_this, args->m_user, text);
 	}
 	return(0);
 }
@@ -117,16 +121,18 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	MooThing *cur;
+	const char *text;
 	MooObjectArray *users;
 
-	if (*args->m_text == '\0')
+	text = args->m_args->get_string(0);
+	if (*text == '\0')
 		return(-1);
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	// TODO should there be an easier way to traverse a list of things?
 	for (int i = 0; i < users->last() + 1; i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_EMOTE, args->m_this, args->m_user, args->m_text);
+			cur->notify(TNT_EMOTE, args->m_this, args->m_user, text);
 	}
 	return(0);
 }
@@ -163,5 +169,16 @@ static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 
 	// TODO should you check to make sure this doesn't loop?
 	//return(args->m_user->command(args->m_text));
+	return(0);
+}
+
+static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	const char *text;
+
+	text = args->m_args->get_string(0);
+	// TODO should you check to make sure this doesn't loop? (ie. the command isn't evaluate)
+	return(args->m_user->command(args->m_user, args->m_channel, text));
+	return(0);
 }
 

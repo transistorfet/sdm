@@ -26,8 +26,6 @@
 
 #define MOO_TBF_WIZARD		0x01
 
-class MooUser;
-
 extern MooArray<MooThing *> *moo_thing_table;
 
 class MooThing : public MooObject {
@@ -68,11 +66,10 @@ class MooThing : public MooObject {
 	MooAction *get_action(const char *name);
 	// TODO will we ever use this?  Where would it be used?
 	MooAction *get_action_partial(const char *name);
-	int do_action(MooThing *user, const char *text, MooObject **result = NULL);
-	int do_action(const char *name, MooThing *user, const char *text, MooObject **result = NULL);
-	// TODO should this take user, or should it assume it based on the current task??
-	// TODO should this take a channel parameter?
-	int do_action(const char *name, MooThing *user, MooThing *object = NULL, MooThing *target = NULL, MooObject **result = NULL);
+	// TODO should these take user, or should it assume it based on the current task??
+	// TODO should these take a channel parameter?
+	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
+	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
 	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
 	int do_action(MooAction *action, MooArgs *args, MooObject **result = NULL);
 
@@ -82,10 +79,7 @@ class MooThing : public MooObject {
 	static MooThing *reference(const char *name);
 
 	/// Helper Methods
-	int command(const char *text);
-	int command(const char *action, const char *text);
-	int command(const char *action, MooThing *object, MooThing *target);
-	int command(const char *action, MooArgs *args);
+	int command(MooThing *user, MooThing *channel, const char *action, const char *text = NULL);
 	int print(MooArgs *args, const char *text);
 	//int print(MooThing *channel, MooThing *thing, const char *text);
 	//int printf(MooThing *channel, MooThing *thing, const char *fmt, ...);
@@ -122,7 +116,6 @@ class MooThing : public MooObject {
 	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
 	static int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);
 	static int escape_char(const char *str, char *buffer);
-	static int atoi(const char *str, int radix);
 
     protected:
 	int assign_id(moo_id_t id);

@@ -26,7 +26,6 @@ class MooChannel : public MooThing {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int send(MooThing *user, const char *action, const char *text = NULL);
 	int notify(int type, MooThing *channel, MooThing *thing, const char *text);
 	static int quit(MooThing *user);
 

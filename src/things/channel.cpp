@@ -124,23 +124,6 @@ int MooChannel::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooChannel::send(MooThing *user, const char *action, const char *text)
-{
-	int res;
-
-	if (text)
-		res = this->do_action(action, user, text);
-	else
-		res = this->do_action(user, action);
-
-	// TODO this is totally wrong.  It wont work if text is not NULL
-	if (res == MOO_ACTION_NOT_FOUND && !text && (res = this->do_action("evaluate", user, action)))
-		return(res);
-	if (res ==  MOO_ACTION_NOT_FOUND)
-		user->notify(TNT_STATUS, NULL, NULL, "Pardon?");
-	return(res);
-}
-
 int MooChannel::notify(int type, MooThing *channel, MooThing *thing, const char *text)
 {
 /*
@@ -159,7 +142,7 @@ int MooChannel::quit(MooThing *user)
 	//	if that user is in a channel with the user that is quitting
 	channel_list->reset();
 	while ((entry = channel_list->next_entry())) {
-		//entry->m_data->send(user, "quit");
+		//entry->m_data->do_action(user, channel, "quit");
 	}
 	return(0);
 }

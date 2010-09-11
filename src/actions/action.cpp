@@ -5,10 +5,16 @@
 
 #include <stdarg.h>
 
+#include <sdm/hash.h>
+#include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/exception.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/thingref.h>
 #include <sdm/things/user.h>
 #include <sdm/actions/action.h>
 
@@ -27,6 +33,7 @@ MooObjectType moo_action_obj_type = {
 MooAction::MooAction(const char *name, MooThing *thing)
 {
 	this->init(name, thing);
+	m_params[0] = '\0';
 }
 
 MooAction::~MooAction()
@@ -42,6 +49,16 @@ void MooAction::init(const char *name, MooThing *thing)
 	m_thing = thing;
 }
 
+const char *MooAction::params(const char *params)
+{
+	if (params) {
+		strncpy(m_params, params, MOO_PARAM_STRING_SIZE);
+		m_params[MOO_PARAM_STRING_SIZE - 1] = '\0';
+	}
+	return(m_params);
+}
+
+
 
 MooArgs::MooArgs()
 {
@@ -56,10 +73,6 @@ MooArgs::MooArgs()
 	// TODO in future, can we get the default size from the caller?  We know exactly what it should be if we are just about to
 	//	eval an action
 	m_args = new MooObjectArray();
-
-	m_object = NULL;
-	m_target = NULL;
-	m_text = NULL;
 }
 
 MooArgs::~MooArgs()
@@ -70,119 +83,136 @@ MooArgs::~MooArgs()
 		delete m_args;
 }
 
-int MooArgs::parse_word(char *buffer)
+int MooArgs::find_whitespace(const char *text)
 {
 	int i;
 
-	for (i = 0; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
+	for (i = 0; text[i] != '\0' && !MOO_IS_WHITESPACE(text[i]); i++)
 		;
+	return(i);
+}
+
+int MooArgs::find_character(const char *text)
+{
+	int i;
+
+	for (i = 0; text[i] != '\0' && MOO_IS_WHITESPACE(text[i]); i++)
+		;
+	return(i);
+}
+
+const char *MooArgs::parse_action(char *buffer, int max, const char *text)
+{
+	int i, j;
+
+	/// Get rid of any whitespace at the start of the string (??)
+	i = MooArgs::find_character(text);
+	/// Find the first word, ending in a space, and isolate it
+	j = MooArgs::find_whitespace(&text[i]);
+	strncpy(buffer, &text[i], j);
+	buffer[j] = '\0';
+	/// Find the start of the next word and return this as the arguments string
+	i += j;
+	i += MooArgs::find_character(&text[i]);
+	return(&text[i]);
+}
+
+char *MooArgs::parse_action(char *buffer)
+{
+	int i;
+
+	/// Get rid of any whitespace at the start of the string (??)
+	i = MooArgs::find_character(buffer);
+	/// Find the first word, ending in a space, and isolate it
+	i += MooArgs::find_whitespace(&buffer[i]);
 	buffer[i++] = '\0';
-	return(i);
+	/// Find the start of the next word and return this as the arguments string
+	i += MooArgs::find_character(&buffer[i]);
+	return(&buffer[i]);
 }
 
-int MooArgs::parse_whitespace(char *buffer)
+int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text)
 {
-	int i;
-
-	for (i = 0; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-		;
-	return(i);
+	strncpy(buffer, text, max);
+	return(this->parse_args(params, user, channel, buffer));
 }
 
-int MooArgs::parse_words(char *buffer)
+int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer)
 {
-	// TODO should there be a char array in the args? or passed to this function?
-	// TODO should this get the buffer? or should the buffer be automatically added and handled by MooArgs? (stored in m_buffer)
-}
+	int j = 0, k;
+	MooObject *obj;
+	const MooObjectType *type;
 
-int MooArgs::parse_args(MooThing *user, char *buffer, int max, const char *action, const char *text)
-{
-	int i;
-	int res;
-
-	if (text) {
-		strncpy(buffer, text, max - 1);
-		buffer[max - 1] = '\0';
-		res = this->parse_args(user, action, buffer);
-		m_text = text;
-	}
-	else {
-		strncpy(buffer, action, max - 1);
-		buffer[max - 1] = '\0';
-		res = this->parse_args(user, buffer, &i);
-		m_text = &action[i];
-	}
-	return(res);
-}
-
-int MooArgs::parse_args(MooThing *user, char *buffer, int *argpos)
-{
-	int i;
-	char *action;
-
-	/// Parse out the action string
-	i = this->parse_whitespace(buffer);
-	action = &buffer[i];
-	i += this->parse_word(&buffer[i]);
-	if (argpos)
-		*argpos = i;
-	return(this->parse_args(user, action, &buffer[i]));
-}
-
-int MooArgs::parse_args(MooThing *user, const char *action, char *buffer)
-{
-	int i = 0, j, k, len;
-	const char *objname;
-	MooThing *object = NULL, *target = NULL;
-
-	// TODO we need to get m_text somehow (string without the action) but since we cut up this buffer, we need another buffer
-	//	The main trouble is that we'd have to parse out the action twice
-	objname = &buffer[i];
-	while (buffer[i] != '\0') {
-		for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-			;
-		k = i - 1;
-		for (j = 0; moo_prepositions[j] != NULL; j++) {
-			len = strlen(moo_prepositions[j]);
-			if (!strncmp(&buffer[i], moo_prepositions[j], len) && MOO_IS_WHITESPACE(buffer[i + len])) {
-				i += len;
-				for (; buffer[i] != '\0' && MOO_IS_WHITESPACE(buffer[i]); i++)
-					;
-				/// Isolate the object name
-				if (k >= 0)
-					buffer[k] = '\0';
-				else
-					objname = "";
-				target = user->find(&buffer[i]);
-				break;
-			}
-		}
-		for (; buffer[i] != '\0' && !MOO_IS_WHITESPACE(buffer[i]); i++)
-			;
-	}
-	// TODO if a name is specified (not ""), and NULL is returned, we should error instead of continuing as normal
-	object = user->find(objname);
-	
 	m_user = user;
-	m_caller = (MooThing *) user;
-	m_action_text = action;
-	m_object = object;
-	m_target = target;
+	m_channel = channel;
+	// TODO should this even be used?
+	//m_caller = (MooThing *) user;
+
+	j += MooArgs::find_character(&buffer[j]);
+	for (int i = 0; params[i] != '\0'; i++) {
+		if (&buffer[j] == '\0')
+			throw MooException("Error: Not enough arguments");
+		if (!(type = MooArgs::get_type(params[i])))
+			throw moo_args_error;
+		if (!(obj = moo_make_object(type)))
+			throw moo_mem_error;
+		k = obj->parse_arg(user, channel, &buffer[j]);
+		if (!k)
+			throw MooException("Error parsing argument (%s)", type->m_name);
+		j += k;
+		m_args->set(i, obj);
+		k = MooArgs::find_character(&buffer[j]);
+		if (!k && buffer[j] != '\0')
+			throw MooException("Error: Invalid argument (%s)", type->m_name);
+		j += k;
+	}
+	if (buffer[j] != '\0')
+		throw MooException("Error: Too many arguments");
 	return(0);
 }
 
-int MooArgs::parse_args(MooThing *user, MooThing *object, MooThing *target)
+int MooArgs::match_args(const char *params)
 {
-	// TODO this assumes the current task is owned by the appropriate user
-	//	this would be useful for when you don't want to take a user param...
-	//m_user = MooThing::lookup(MooTask::current_user());
+	int i;
+	MooObject *obj;
 
-	m_user = user;
-	// TODO this isn't really correct
-	m_caller = user;
-	m_object = object;
-	m_target = target;
-	m_text = NULL;
+	for (i = 0; i < m_args->last() + 1; i++) {
+		if (params[i] == '\0')
+			return(-1);
+		if (!(obj = m_args->get(i, NULL)))
+			return(-1);
+		if (obj->type() != MooArgs::get_type(params[i]))
+			return(-1);
+	}
+	if (params[i] != '\0')
+		return(-1);
 	return(0);
+}
+
+void MooArgs::match_args_throw(const char *params)
+{
+	if (this->match_args(params) < 0)
+		throw moo_args_error;
+}
+
+const MooObjectType *MooArgs::get_type(char param)
+{
+	switch (param) {
+	    case 's':
+		return(&moo_string_obj_type);
+	    case 'i':
+		// TODO implement integer type
+		return(NULL);
+	    case 'f':
+		return(&moo_number_obj_type);
+	    case 't':
+		return(&moo_thingref_obj_type);
+	    case 'a':
+		return(&moo_array_obj_type);
+	    case 'h':
+		return(&moo_hash_obj_type);
+	    default:
+		return(NULL);
+	}
 }
 

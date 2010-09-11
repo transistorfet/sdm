@@ -15,10 +15,11 @@
 #define EXCEPTION_STRING	256
 #define STRING_MAX_SIZE		1024
 
-MooException moo_mem_error("Out of Memory");
+MooException moo_mem_error("Out of memory");
 MooException moo_closed("Connection closed by remote end.");
 MooException moo_permissions("Permission denied");
-MooException moo_type_error("Invalid Type");
+MooException moo_type_error("Invalid type");
+MooException moo_args_error("Invalid arguments");
 MooException moo_thing_not_found("Required thing not found");
 MooException moo_unknown("Unknown error");
 
