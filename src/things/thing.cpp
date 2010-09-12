@@ -731,8 +731,8 @@ int MooThing::cryolocker_store()
 
 		// TODO how should the quit message thing work?  where will it come from (property?)
 		// TODO this is totally wrong, this should be sent via some other means
-		if (this->m_location)
-			this->m_location->notify_all(TNT_QUIT, this, NULL, "disappears in a puff of smoke.");
+		//if (this->m_location)
+		//	this->m_location->notify_all(TNT_QUIT, this, NULL, "disappears in a puff of smoke.");
 		cryolocker->add(this);
 	}
 	return(0);

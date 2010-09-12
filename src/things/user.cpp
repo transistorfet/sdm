@@ -19,6 +19,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/channel.h>
 #include <sdm/things/user.h>
 
 #define USER_INIT_SIZE		64
@@ -147,14 +148,6 @@ int MooUser::connect(MooTask *task)
 {
 	if (m_task)
 		return(-1);
-
-	try {
-		this->cryolocker_revive();
-	}
-	catch (...) {
-		moo_status("USER: Error reviving user from cryolocker, %s", m_name->c_str());
-	}
-
 	/// If an error occurs and we return early, m_task will not be set, so if disconnect() is called, we wont save the user
 	m_task = task;
 	return(0);
@@ -163,13 +156,9 @@ int MooUser::connect(MooTask *task)
 void MooUser::disconnect()
 {
 	try {
-		this->cryolocker_store();
-	}
-	catch (...) {
-		moo_status("USER: Error storing user in cryolocker, %s", m_name->c_str());
-	}
+		/// Remove the user from all channels
+		MooChannel::quit(this);
 
-	try {
 		/// Save the user information to the user's file only if we were already connected
 		if (m_task) {
 			this->save();

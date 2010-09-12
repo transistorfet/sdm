@@ -124,25 +124,15 @@ int MooChannel::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooChannel::notify(int type, MooThing *thing, MooThing *channel, const char *text)
-{
-/*
-	if (!m_task)
-		return(-1);
-	// TODO permissions check!? I guess on task
-	return(m_task->notify(type, thing, channel, text));
-*/
-}
-
 int MooChannel::quit(MooThing *user)
 {
 	MooHashEntry<MooChannel *> *entry;
 
-	// TODO this isn't right!  It will send multiple quit messages.  Each client should only recieve one quit message and only
-	//	if that user is in a channel with the user that is quitting
 	channel_list->reset();
 	while ((entry = channel_list->next_entry())) {
-		//entry->m_data->do_action(user, channel, "quit");
+		// TODO quit works except for printing the quit message (only once) to all appropriate users
+		//entry->m_data->do_action(user, entry->m_data, "quit");
+		entry->m_data->do_action(user, entry->m_data, "leave");
 	}
 	return(0);
 }

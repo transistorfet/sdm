@@ -25,12 +25,14 @@
 static int channel_init(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_join(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args);
+static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
 static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_join(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
@@ -43,12 +45,14 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("channel_init", new MooBuiltin(channel_init));
 	actions->set("channel_join", new MooBuiltin(channel_join));
 	actions->set("channel_leave", new MooBuiltin(channel_leave));
+	actions->set("channel_quit", new MooBuiltin(channel_quit));
 	actions->set("channel_say", new MooBuiltin(channel_say));
 	actions->set("channel_emote", new MooBuiltin(channel_emote));
 	actions->set("channel_names", new MooBuiltin(channel_names));
 	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
 	actions->set("realm_join", new MooBuiltin(realm_join));
 	actions->set("realm_leave", new MooBuiltin(realm_leave));
+	actions->set("realm_quit", new MooBuiltin(realm_quit));
 	actions->set("realm_say", new MooBuiltin(realm_say));
 	actions->set("realm_emote", new MooBuiltin(realm_emote));
 	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
@@ -99,6 +103,23 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 				if ((cur = users->get_thing(j)))
 					cur->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
 			}
+			ref = users->splice(i);
+			delete ref;
+			return(0);
+		}
+	}
+	return(0);
+}
+
+static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	MooObject *ref;
+	MooObjectArray *users;
+
+	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+		return(-1);
+	for (int i = 0; i <= users->last(); i++) {
+		if (users->get_thing(i) == args->m_user) {
 			ref = users->splice(i);
 			delete ref;
 			return(0);
@@ -184,7 +205,13 @@ static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	if (channel_join(action, thing, args) < 0)
 		return(-1);
-	// TODO do cryolocker retrieval
+	try {
+		args->m_user->cryolocker_revive();
+	}
+	catch (...) {
+		moo_status("USER: Error reviving user from cryolocker, %s", args->m_user->name());
+	}
+
 	// TODO do a look action
 	return(0);
 }
@@ -193,7 +220,27 @@ static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	if (channel_leave(action, thing, args) < 0)
 		return(-1);
-	// TODO do cryolocker store
+
+	try {
+		args->m_user->cryolocker_store();
+	}
+	catch (...) {
+		moo_status("USER: Error storing user in cryolocker, %s", args->m_user->name());
+	}
+	return(0);
+}
+
+static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	if (channel_quit(action, thing, args) < 0)
+		return(-1);
+
+	try {
+		args->m_user->cryolocker_store();
+	}
+	catch (...) {
+		moo_status("USER: Error storing user in cryolocker, %s", args->m_user->name());
+	}
 	return(0);
 }
 

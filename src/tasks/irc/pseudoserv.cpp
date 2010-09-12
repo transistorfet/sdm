@@ -77,9 +77,6 @@ PseudoServ::PseudoServ()
 
 PseudoServ::~PseudoServ()
 {
-	// TODO do all deletey stuff like log user out, remove from channels, etc
-	MooChannel::quit(m_user);
-
 	this->set_delete();
 	if (m_nick)
 		delete m_nick;
@@ -564,45 +561,18 @@ int PseudoServ::send_part(const char *name)
 
 int PseudoServ::send_names(const char *name)
 {
-	int j;
-	MooThing *cur;
-	const char *thing_name;
-	char buffer[STRING_SIZE];
+	MooChannel *channel;
+	MooObject *result = NULL;
 
 	if (!m_user)
 		return(-1);
-
-/*
-	if (!strcmp(name, "#realm")) {
-		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
-		//	are in the cryolocker, for example)
-		cur = m_user->location();
-		if (cur)
-			cur = cur->contents();
-		do {
-			j = 0;
-			for (int i = 0; cur && i < 20; i++, cur = cur->next()) {
-				// TODO we should check that things are invisible, and also add @ for wizards or something
-				if ((thing_name = cur->name())) {
-					strcpy(&buffer[j], thing_name);
-					j += strlen(thing_name);
-					buffer[j++] = ' ';
-				}
-			}
-			if (buffer[j] == ' ')
-				j--;
-			buffer[j] = '\0';
-			// TODO the '=' should be different depending on if it's a secret, private, or public channel
-			Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, buffer);
-		} while (cur);
-	}
-*/
-	MooObject *result = NULL;
-	MooChannel *channel = MooChannel::get(name);
+	channel = MooChannel::get(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	// TODO change this to a throwing do_action so that if an error occurs, it can recover
 	channel->do_action(m_user, channel, "names", NULL, &result);
+	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
+	// TODO the '=' should be different depending on if it's a secret, private, or public channel
 	if (result && result->is_a(&moo_string_obj_type))
 		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);

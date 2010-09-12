@@ -384,6 +384,12 @@
    <params></params>
    <function>channel_leave</function>
   </action>
+  <action type="builtin" name="quit">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <function>channel_quit</function>
+  </action>
   <action type="builtin" name="say">
    <owner>-1</owner>
    <permissions>075</permissions>
@@ -468,6 +474,12 @@
     <permissions>075</permissions>
     <params></params>
     <function>realm_leave</function>
+   </action>
+   <action type="builtin" name="quit">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params></params>
+    <function>realm_quit</function>
    </action>
    <action type="builtin" name="say">
     <owner>-1</owner>
