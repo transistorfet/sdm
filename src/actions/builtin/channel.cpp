@@ -37,6 +37,9 @@ static int realm_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
+static int cryolocker_store(MooThing *thing);
+static int cryolocker_revive(MooThing *thing);
+
 int moo_load_channel_actions(MooBuiltinHash *actions)
 {
 	// TODO should this specify various defaults of these actions?
@@ -206,7 +209,7 @@ static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
 	if (channel_join(action, thing, args) < 0)
 		return(-1);
 	try {
-		args->m_user->cryolocker_revive();
+		cryolocker_revive(args->m_user);
 	}
 	catch (...) {
 		moo_status("USER: Error reviving user from cryolocker, %s", args->m_user->name());
@@ -222,7 +225,7 @@ static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
 		return(-1);
 
 	try {
-		args->m_user->cryolocker_store();
+		cryolocker_store(args->m_user);
 	}
 	catch (...) {
 		moo_status("USER: Error storing user in cryolocker, %s", args->m_user->name());
@@ -236,7 +239,7 @@ static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args)
 		return(-1);
 
 	try {
-		args->m_user->cryolocker_store();
+		cryolocker_store(args->m_user);
 	}
 	catch (...) {
 		moo_status("USER: Error storing user in cryolocker, %s", args->m_user->name());
@@ -269,4 +272,48 @@ static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 	return(args->m_user->command(args->m_user, args->m_channel, text));
 	return(0);
 }
+
+
+static int cryolocker_store(MooThing *thing)
+{
+	MooThing *cryolocker;
+
+	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
+		return(-1);
+	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
+	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
+	if (thing->location() != cryolocker) {
+		thing->set_property("last_location", thing->location()->id());
+		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
+		//	puff of smoke" or something like that
+
+		// TODO how should the quit message thing work?  where will it come from (property?)
+		// TODO this is totally wrong, this should be sent via some other means
+		//if (this->m_location)
+		//	this->m_location->notify_all(TNT_QUIT, this, NULL, "disappears in a puff of smoke.");
+		// TODO what happens if this isn't allow? like if you are fighting
+		thing->moveto(cryolocker, NULL);
+	}
+	return(0);
+}
+
+static int cryolocker_revive(MooThing *thing)
+{
+	MooThingRef *ref;
+	MooThing *cryolocker, *location;
+
+	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
+		return(-1);
+	if (thing->location() == cryolocker) {
+		if (!(location = thing->get_thing_property("last_location")))
+			return(-1);
+		// TODO how the fuck does the 'by' param work?
+		if (thing->moveto(location, NULL)) {
+			if ((location = MooThing::reference(MOO_START_ROOM)))
+				thing->moveto(location, NULL);
+		}
+	}
+	return(0);
+}
+
 

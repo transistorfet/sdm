@@ -379,13 +379,13 @@ MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
 	return(NULL);
 }
 
-moo_id_t MooThing::get_thing_property(const char *name)
+MooThing *MooThing::get_thing_property(const char *name)
 {
 	MooThingRef *obj;
 
 	if (!(obj = (MooThingRef *) this->get_property(name, &moo_thingref_obj_type)))
-		return(-1);
-	return(obj->m_id);
+		return(NULL);
+	return(MooThing::lookup(obj->m_id));
 }
 
 long int MooThing::get_integer_property(const char *name)
@@ -711,48 +711,6 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, Moo
 	for (cur = this->contents(); cur; cur = cur->next()) {
 		if (cur != except)
 			cur->notify(type, thing, channel, text);
-	}
-	return(0);
-}
-
-
-int MooThing::cryolocker_store()
-{
-	MooThing *cryolocker;
-
-	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
-		return(-1);
-	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
-	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
-	if (this->m_location != cryolocker) {
-		this->set_property("last_location", m_location ? m_location->m_id : -1);
-		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
-		//	puff of smoke" or something like that
-
-		// TODO how should the quit message thing work?  where will it come from (property?)
-		// TODO this is totally wrong, this should be sent via some other means
-		//if (this->m_location)
-		//	this->m_location->notify_all(TNT_QUIT, this, NULL, "disappears in a puff of smoke.");
-		cryolocker->add(this);
-	}
-	return(0);
-}
-
-int MooThing::cryolocker_revive()
-{
-	MooThingRef *ref;
-	MooThing *cryolocker, *thing = NULL;
-
-	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
-		return(-1);
-	if (this->m_location == cryolocker) {
-		if ((ref = (MooThingRef *) this->get_property("last_location", &moo_thingref_obj_type)))
-			thing = MooThing::lookup(ref->m_id);
-		// TODO how the fuck does the 'by' param work?
-		if (!thing || this->moveto(thing, NULL)) {
-			if ((thing = MooThing::reference(MOO_START_ROOM)))
-				this->moveto(thing, NULL);
-		}
 	}
 	return(0);
 }

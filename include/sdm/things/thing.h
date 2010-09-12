@@ -56,7 +56,7 @@ class MooThing : public MooObject {
 	int set_property(const char *name, double num);
 	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
-	moo_id_t get_thing_property(const char *name);
+	MooThing *get_thing_property(const char *name);
 	long int get_integer_property(const char *name);
 	double get_float_property(const char *name);
 	const char *get_string_property(const char *name);
@@ -86,8 +86,6 @@ class MooThing : public MooObject {
 	int notify_all(int type, MooThing *thing, MooThing *channel, const char *text);
 	int notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text);
 
-	int cryolocker_store();
-	int cryolocker_revive();
 	int moveto(MooThing *thing, MooThing *by);
 	static int attach_orphans();
 

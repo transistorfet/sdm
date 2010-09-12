@@ -51,7 +51,8 @@ int init_user(void)
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
 			data->read_attrib_string("name", buffer, STRING_SIZE);
 			user = new MooUser(buffer);
-			user->cryolocker_store();
+			// TODO should this be fixed?
+			//user->cryolocker_store();
 		}
 	} while (data->read_next());
 	delete data;
