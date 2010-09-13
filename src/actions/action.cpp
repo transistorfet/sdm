@@ -167,11 +167,17 @@ int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, c
 		else {
 			if (&buffer[j] == '\0')
 				break;
-			if (!(type = MooArgs::get_type(params[i])))
-				throw moo_args_error;
-			if (!(obj = moo_make_object(type)))
-				throw moo_mem_error;
-			k = obj->parse_arg(user, channel, &buffer[j]);
+			if (params[i] == 's') {
+				obj = new MooString(&buffer[j]);
+				k = ((MooString *) obj)->m_len;
+			}
+			else {
+				if (!(type = MooArgs::get_type(params[i])))
+					throw moo_args_error;
+				if (!(obj = moo_make_object(type)))
+					throw moo_mem_error;
+				k = obj->parse_arg(user, channel, &buffer[j]);
+			}
 			if (!k) {
 				delete obj;
 				if (stack[sp] == ']') {
@@ -234,7 +240,7 @@ void MooArgs::match_args_throw(const char *params)
 const MooObjectType *MooArgs::get_type(char param)
 {
 	switch (param) {
-	    case 's':
+	    case 'w':
 		return(&moo_string_obj_type);
 	    case 'i':
 		return(&moo_integer_obj_type);

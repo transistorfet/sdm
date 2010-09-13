@@ -49,11 +49,14 @@ int moo_load_builder_actions(MooBuiltinHash *actions)
 
 static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	MooThing *to;
+
 	// TODO what permissions would control teleporting other than wizard
 	if (args->m_user->is_wizard()) {
-		// TODO how do we know the object is correct, etc
-		//args->m_user->moveto(args->m_object, NULL);
+		if ((to = args->get_thing(0)))
+			return(args->m_user->moveto(args->m_user, args->m_channel, to));
 	}
+	args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, "Unable to teleport to that location");
 	return(0);
 }
 

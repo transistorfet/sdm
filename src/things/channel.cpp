@@ -94,7 +94,7 @@ MooChannel *MooChannel::make_channel(const char *name)
 	channel->owner(channel->m_id);
 	channel->set_property("description", "You see a new person who looks rather out-of-place.");
 	// TODO is this the correct way to moving a channel to the starting location?
-	channel->moveto(MooThing::reference(MOO_START_ROOM), NULL);
+	channel->moveto(MooThing::reference(MOO_START_ROOM));
 */
 	return(channel);
 }

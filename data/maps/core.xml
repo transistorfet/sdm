@@ -250,6 +250,12 @@
    <params></params>
    <function>room_direction</function>
   </action>
+  <action type="builtin" name="accept">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <function>room_accept</function>
+  </action>
   <action type="builtin" name="do_enter">
    <owner>-1</owner>
    <permissions>075</permissions>
@@ -260,12 +266,12 @@
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
-   <function>room_do_leave</function>
+   <function>room_do_exit</function>
   </action>
   <action type="builtin" name="look">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params>[t]</params>
+   <params>[s]</params>
    <function>room_look</function>
   </action>
   <action type="builtin" name="emote">

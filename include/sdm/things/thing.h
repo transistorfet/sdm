@@ -85,7 +85,7 @@ class MooThing : public MooObject {
 	int notify_all(int type, MooThing *thing, MooThing *channel, const char *text);
 	int notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text);
 
-	int moveto(MooThing *thing, MooThing *by);
+	int moveto(MooThing *user, MooThing *channel, MooThing *to);
 	static int attach_orphans();
 
 	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }

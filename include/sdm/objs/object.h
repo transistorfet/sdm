@@ -58,6 +58,11 @@ class MooObject {
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
 
+	virtual long int get_integer() { throw moo_type_error; }
+	virtual double get_float() { throw moo_type_error; }
+	virtual const char *get_string() { throw moo_type_error; }
+	virtual MooThing *get_thing() { throw moo_type_error; }
+
 	void check_throw(moo_perm_t perms);
 	int check(moo_perm_t perms);
 

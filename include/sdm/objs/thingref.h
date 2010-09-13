@@ -22,6 +22,8 @@ class MooThingRef : public MooObject {
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
 
+	virtual MooThing *get_thing() { return(this->get()); }
+
 	MooThing *get() { return(MooThing::lookup(m_id)); }
 };
 

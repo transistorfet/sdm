@@ -576,6 +576,8 @@ int PseudoServ::send_names(const char *name)
 	if (result && result->is_a(&moo_string_obj_type))
 		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
+	if (result)
+		delete result;
 	return(0);
 }
 

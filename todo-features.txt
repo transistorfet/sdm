@@ -27,3 +27,8 @@ GAME FEATURES TODO:
 	* real time stuff should be on the slowish side perhaps (or perhaps even settable by the user, a user selected difficulty
 	  level!  With reduced XP for the easy difficulty.
 
+	* there *MUST* be an automatic map system so you can easily find out where you are (like the complete world name/realm/etc
+	  and an ASCII map of the rooms in the nearby area (but then we'd have to keep track of if the user has visited.  Alternatively,
+	  we could do a map or just compass directions list of the major landmarks in the distance.  Like "Towards the east is the town
+	  of somethings" "Towards the southwest are the mountains of garakch"
+

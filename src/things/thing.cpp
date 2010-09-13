@@ -255,6 +255,8 @@ int MooThing::init()
 	return(0);
 }
 
+/*
+// TODO you should probably move these to basics.cpp or builder.cpp, or make them accept user/channel args
 MooThing *MooThing::create(moo_id_t parent)
 {
 	MooThing *thing;
@@ -263,7 +265,7 @@ MooThing *MooThing::create(moo_id_t parent)
 	// TODO check if current task owner has create permissions
 	thing = new MooThing(MOO_NEW_ID, parent);
 	thing->init();
-	thing->moveto(thing->owner_thing(), NULL);
+	thing->moveto(thing->owner_thing());
 	return(thing);
 }
 
@@ -282,9 +284,10 @@ MooThing *MooThing::clone()
 	//thing->permissions(THING_DEFAULT_PERMISSIONS);
 	// TODO do we call init at any point??
 
-	thing->moveto(thing->owner_thing(), NULL);
+	thing->moveto(thing->owner_thing());
 	return(thing);
 }
+*/
 
 ///// Property Methods /////
 
@@ -716,7 +719,7 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, Moo
 	return(0);
 }
 
-int MooThing::moveto(MooThing *thing, MooThing *by)
+int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 {
 	// TODO perhaps this should really just be a do_action on the object which calls a moveto function
 	// TODO fill this in
@@ -724,12 +727,47 @@ int MooThing::moveto(MooThing *thing, MooThing *by)
 	//	call various actions on the objects to actually do the move
 
 	// TODO this should be a setting or something in the user object
-	if (this->m_location)
+	//if (this->m_location)
 		// TODO these can't be here because this might be a teleport command...
-		this->m_location->notify_all(TNT_LEAVE, this, NULL, "runs off in the distance.");
-	thing->add(this);
-	thing->notify_all(TNT_JOIN, NULL, this, "appears from through the mist.");
-	return(0);
+	//	this->m_location->notify_all(TNT_LEAVE, this, NULL, "runs off in the distance.");
+
+	int res;
+	MooObject *result;
+
+	if (!to)
+		return(-1);
+	try {
+		// TODO all these do_actions are wrong because they should pass the thing being moved in to as an argument
+		if (to->do_action(user, channel, "accept", &result) < 0)
+			return(-1);
+		res = result ? result->get_integer() : 0;
+		if (result)
+			delete result;
+		if (res != 1)
+			return(1);
+
+		if (m_location) {
+			result = NULL;
+			if (m_location->do_action(user, channel, "do_exit", &result) < 0)
+				return(-1);
+			res = result ? result->get_integer() : 0;
+			if (result)
+				delete result;
+			if (res < 0)
+				return(1);
+		}
+
+		if (to->add(this) < 0)
+			return(1);
+
+		if (m_location)
+			return(m_location->do_action(user, channel, "do_enter"));
+		return(0);
+	}
+	catch (...) {
+		// TODO print error
+		return(-1);
+	}
 }
 
 int MooThing::attach_orphans()

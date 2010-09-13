@@ -22,6 +22,8 @@ class MooFloat : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
+
+	virtual double get_float() { return(m_num); }
 };
 
 extern MooObjectType moo_float_obj_type;

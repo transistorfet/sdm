@@ -115,7 +115,7 @@ MooUser *MooUser::make_guest(const char *name)
 	user->owner(user->m_id);
 	user->set_property("description", "You see a new person who looks rather out-of-place.");
 	// TODO is this the correct way to moving a user to the starting location?
-	user->moveto(MooThing::reference(MOO_START_ROOM), NULL);
+	user->moveto(user, NULL, MooThing::reference(MOO_START_ROOM));
 	return(user);
 }
 

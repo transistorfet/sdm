@@ -28,8 +28,9 @@ static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_direction(MooAction *action, MooThing *thing, MooArgs *args);
+static int room_accept(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_do_leave(MooAction *action, MooThing *thing, MooArgs *args);
+static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args);
 
 int moo_load_room_actions(MooBuiltinHash *actions)
 {
@@ -39,8 +40,9 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 	actions->set("room_whisper", new MooBuiltin(room_whisper));
 	actions->set("room_look", new MooBuiltin(room_look));
 	actions->set("room_direction", new MooBuiltin(room_direction));
+	actions->set("room_accept", new MooBuiltin(room_accept));
 	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
-	actions->set("room_do_leave", new MooBuiltin(room_do_leave));
+	actions->set("room_do_exit", new MooBuiltin(room_do_exit));
 	return(0);
 }
 
@@ -99,14 +101,20 @@ static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	const char *name;
 	MooThing *object;
 
 	// TODO check if room is dark, etc?
 	// TODO proximity check on object??? so you can't look at public things far away
-	if (!(object = args->m_args->get_thing(0)))
+	if ((name = args->m_args->get_string(0)))
+		object = args->m_user->find(name);
+	else
 		object = args->m_this;
 	// TODO notify all the people in the room that you are looking at something (should this be here or in look_self?)
-	object->do_action(args->m_user, args->m_channel, "look_self");
+	if (object)
+		object->do_action(args->m_user, args->m_channel, "look_self");
+	else
+		args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, "You don't see that here");
 	return(0);
 }
 
@@ -121,6 +129,12 @@ static int room_direction(MooAction *action, MooThing *thing, MooArgs *args)
 	}
 	sdm_do_nil_action(exit, args->caller, "go");
 */
+	return(0);
+}
+
+static int room_accept(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	args->m_result = new MooInteger(1);
 	return(0);
 }
 
@@ -154,7 +168,7 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_do_leave(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args)
 {
 /*
 	const char *exitname;

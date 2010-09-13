@@ -111,8 +111,10 @@
 	  notifies to that user
 
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
-	* figure out moving
-	* allow for variable arguments (and variable length string params)
+	* should you make a macro or something to simplying notifying to the user from an action?
+	* implement variable argument *matching* function
+	* when .look gets an argument but it doesn't match an object, it says too many arguments, which is incorrect.  It should instead
+	  say "object not found"
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations
 	* make it automatically print .look when you enter #realm

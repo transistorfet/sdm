@@ -12,6 +12,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
+#include <sdm/actions/action.h>
 
 MooObjectType moo_string_obj_type = {
 	NULL,
@@ -65,7 +66,7 @@ int MooString::write_data(MooDataFile *data)
 
 int MooString::parse_arg(MooThing *user, MooThing *channel, char *text)
 {
-	// TODO this is a maximum capturing.  Should we either match minimally, or take a param for what to do?
+	MooArgs::parse_word(text);
 	this->set(text);
 	return(m_len);
 }
