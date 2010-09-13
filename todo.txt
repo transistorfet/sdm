@@ -56,9 +56,6 @@
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
 	* think about multithreading possibilities
 
-	* when using the 'go' command, or otherwise trying to teleport directly to a specific room, there should be a check such that
-	  only wizards (or owners of the room??) can do this for most room except a few with a special flag that allows it
-
 	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
 	  on which the action was called (which m_thing would be set to in the args anyways)?
 	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
@@ -67,12 +64,10 @@
 	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
 	  easier to manipulate in C) (???)
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
-	* should there be a function (in builtins) that creates either a special root object (for various types, like room, channel, etc)
-	  with props and actions set to appropriate default values, or possibly a function which creates an equally appropriate
-	  subobject which inherits from the core object?
 
-	* the only issue with thingrefs in properties is when it comes to garbage collection, but it's not so bad since thingref is a
-	  special type rather than just a number
+	* you need a 'thing' garbage collection system, and possible an any-MooObject collection system
+	* make it so that you can have a script (either of MooCode or commands or both) such that you can program an entire initial
+	  system.  When the code is run, it generates the database which can then be saved as the core database.
 	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
 	  quota system such that each object has a certain range of IDs from which it can create new objects.  You could even have
 	  limit inheritence such that it looks for the object with the first defined min ID and the first max ID from which it gets
@@ -81,11 +76,6 @@
 	  and you could even contemplate a "relocatable" format, such that it automatically adjusts all IDs (like all thing refs could
 	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
-	* make it so that you can have a script (either of MooCode or commands or both) such that you can program an entire initial
-	  system.  When the code is run, it generates the database which can then be saved as the core database.
-
-	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-	* you need an object garbage collection system, and possible an any-MooObject collection system
 
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
@@ -110,34 +100,31 @@
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
 	* can you convert init/release functions to be constructor/destructor of a singleton class?
-
-	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
+	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
+	* make a do_action which does not catch exceptions, so that they can be passed on.  What will we use to differentiate the 2 types
+	  of functions?  How will we differentiate in general?
 	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
 	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
 	  you can specify an action with <action type="builtin">basics_look</action>. 
+	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
+	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
+	  notifies to that user
 
-	* make a do_action which does not catch exceptions, so that they can be passed on.  What will we use to differentiate the 2 types
-	  of functions?  How will we differentiate in general?
-
-	* make the cryolocker stuff be used by the realm channel when joining and leaving it.  It would mean a user can be connected
-	  and be in the cryolocker, but he can also not be in the world by just not joining #realm
+	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
+	* figure out moving
 	* allow for variable arguments (and variable length string params)
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations
 	* make it automatically print .look when you enter #realm
-
-	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
+	* add support for notices from clients to other clients
 	* add a 'register' and 'login' commands to basics
-
-	* if a property (or action?) exists on a parent of the object, perhaps it should modify the value in the parent, subject to the
-	  permissions of that property (or action?).  This way, an object cannot override a value in order to skirt permissions.
+	* implement client quit in the channels
 
 	* make a mobile-equivallent of logarithm
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
-
-	* implement client quit in the channels
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing
+
 
 
 

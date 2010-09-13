@@ -78,7 +78,7 @@ class MooArgs {
 	MooThing *m_this;
 	MooObjectArray *m_args;		// TODO better name!??
 
-	MooArgs();
+	MooArgs(int init_size = 5, MooThing *user = NULL, MooThing *channel = NULL);
 	~MooArgs();
 
 	static int find_whitespace(const char *text);
@@ -86,11 +86,21 @@ class MooArgs {
 	static const char *parse_word(char *buffer, int max, const char *text);
 	static char *parse_word(char *buffer);
 
+	void init(MooThing *user, MooThing *channel);
 	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text);
 	int parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer);
 	int match_args(const char *params);
 	void match_args_throw(const char *params);
 	const MooObjectType *get_type(char param);
+
+	/// Accessors
+	inline MooObject *get(int index, MooObjectType *type) { return(m_args->get(index, type)); }
+	inline long int get_integer(int index) { return(m_args->get_integer(index)); }
+	inline double get_float(int index) { return(m_args->get_float(index)); }
+	inline const char *get_string(int index) { return(m_args->get_string(index)); }
+	inline MooThing *get_thing(int index) { return(m_args->get_thing(index)); }
+
+	inline int set(int index, MooObject *obj) { if (!m_args->set(index, obj)) return(-1); return(0); }
 };
 
 extern MooObjectType moo_action_obj_type;

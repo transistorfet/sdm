@@ -78,14 +78,14 @@ PseudoServ::PseudoServ()
 PseudoServ::~PseudoServ()
 {
 	this->set_delete();
+	if (m_user)
+		m_user->disconnect();
 	if (m_nick)
 		delete m_nick;
 	if (m_pass)
 		delete m_pass;
 	if (m_inter)
 		delete m_inter;
-	if (m_user)
-		m_user->disconnect();
 }
 
 int PseudoServ::read_entry(const char *type, MooDataFile *data)

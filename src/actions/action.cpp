@@ -61,19 +61,16 @@ const char *MooAction::params(const char *params)
 
 
 
-MooArgs::MooArgs()
+MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
 	m_action = NULL;
 	m_action_text = NULL;
 	m_result = NULL;
-	m_user = NULL;
-	m_channel = NULL;
+	m_user = user;
+	m_channel = channel;
 	m_caller = NULL;
 	m_this = NULL;
-
-	// TODO in future, can we get the default size from the caller?  We know exactly what it should be if we are just about to
-	//	eval an action
-	m_args = new MooObjectArray();
+	m_args = new MooObjectArray(init_size);
 }
 
 MooArgs::~MooArgs()
@@ -135,40 +132,74 @@ char *MooArgs::parse_word(char *buffer)
 	return(&buffer[i]);
 }
 
+void MooArgs::init(MooThing *user, MooThing *channel)
+{
+	m_user = user;
+	m_channel = channel;
+	// TODO should this even be used?
+	//m_caller = (MooThing *) user;
+}
+
 int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text)
 {
 	strncpy(buffer, text, max);
 	return(this->parse_args(params, user, channel, buffer));
 }
 
+#define MAX_STACK	10
+
 int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer)
 {
-	int j = 0, k;
+	int i, j = 0, k, sp = 0, ap = 0;
 	MooObject *obj;
 	const MooObjectType *type;
+	char stack[MAX_STACK];
 
-	m_user = user;
-	m_channel = channel;
-	// TODO should this even be used?
-	//m_caller = (MooThing *) user;
+	this->init(user, channel);
 
+	stack[sp] = '\0';
 	j += MooArgs::find_character(&buffer[j]);
-	for (int i = 0; params[i] != '\0'; i++) {
-		if (&buffer[j] == '\0')
+	for (i = 0; params[i] != '\0'; i++) {
+		if (params[i] == stack[sp])
+			sp--;
+		else if (params[i] == '[')
+			stack[++sp] = ']';
+		else {
+			if (&buffer[j] == '\0')
+				break;
+			if (!(type = MooArgs::get_type(params[i])))
+				throw moo_args_error;
+			if (!(obj = moo_make_object(type)))
+				throw moo_mem_error;
+			k = obj->parse_arg(user, channel, &buffer[j]);
+			if (!k) {
+				delete obj;
+				if (stack[sp] == ']') {
+					while (params[i] != '\0' && params[i] != stack[sp])
+						i++;
+				}
+				else
+					throw MooException("Error parsing argument (%s)", type->m_name);
+			}
+			else {
+				j += k;
+				m_args->set(ap++, obj);
+				/// Trim any whitespace before next argument
+				k = MooArgs::find_character(&buffer[j]);
+				/// If we didn't find any whitespace then the argument was invalid
+				if (!k && buffer[j] != '\0')
+					throw MooException("Error: Invalid argument (%s)", type->m_name);
+				j += k;
+			}
+		}
+	}
+	for (; params[i] != '\0'; i++) {
+		if (params[i] == stack[sp])
+			sp--;
+		else if (params[i] == '[')
+			stack[++sp] = ']';
+		else if (sp <= 0)
 			throw MooException("Error: Not enough arguments");
-		if (!(type = MooArgs::get_type(params[i])))
-			throw moo_args_error;
-		if (!(obj = moo_make_object(type)))
-			throw moo_mem_error;
-		k = obj->parse_arg(user, channel, &buffer[j]);
-		if (!k)
-			throw MooException("Error parsing argument (%s)", type->m_name);
-		j += k;
-		m_args->set(i, obj);
-		k = MooArgs::find_character(&buffer[j]);
-		if (!k && buffer[j] != '\0')
-			throw MooException("Error: Invalid argument (%s)", type->m_name);
-		j += k;
 	}
 	if (buffer[j] != '\0')
 		throw MooException("Error: Too many arguments");
@@ -180,6 +211,7 @@ int MooArgs::match_args(const char *params)
 	int i;
 	MooObject *obj;
 
+	// TODO fix this so that it supports variable args parsing
 	for (i = 0; i <= m_args->last(); i++) {
 		if (params[i] == '\0')
 			return(-1);

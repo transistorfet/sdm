@@ -299,7 +299,6 @@ static int cryolocker_store(MooThing *thing)
 
 static int cryolocker_revive(MooThing *thing)
 {
-	MooThingRef *ref;
 	MooThing *cryolocker, *location;
 
 	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))

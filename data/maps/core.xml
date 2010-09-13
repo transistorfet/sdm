@@ -39,7 +39,7 @@
   <action type="builtin" name="look_self">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params>t</params>
+   <params></params>
    <function>basics_look_self</function>
   </action>
   <action type="builtin" name="print_view">
@@ -162,11 +162,11 @@
    <params></params>
    <function>builder_add_exit</function>
   </action>
-  <action type="builtin" name="@create_room">
+  <action type="builtin" name="@dig">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
-   <function>builder_create_room</function>
+   <function>builder_dig</function>
   </action>
   <action type="builtin" name="@info">
    <owner>-1</owner>
@@ -265,7 +265,7 @@
   <action type="builtin" name="look">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params>t</params>
+   <params>[t]</params>
    <function>room_look</function>
   </action>
   <action type="builtin" name="emote">

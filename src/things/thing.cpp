@@ -357,8 +357,7 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 
 	if (!(obj = this->get_property_raw(name, NULL)))
 		return(NULL);
-	// TODO add permissions check
-	//obj->check_throw(MOO_PERM_R);
+	obj->check_throw(MOO_PERM_R);
 	if (!type || obj->is_a(type))
 		return(obj);
 	return(NULL);
@@ -478,7 +477,7 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, con
 	}
 	catch (MooException e) {
 		moo_status("ACTION: (%s) %s", action->name(), e.get());
-		user->notify(TNT_STATUS, NULL, NULL, e.get());
+		user->notify(TNT_STATUS, user, channel, e.get());
 		return(-1);
 	}
 }
@@ -491,7 +490,15 @@ int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 		return(MOO_ACTION_NOT_FOUND);
 	// TODO should i remove action_text entirely?
 	args->m_action_text = name;
-	return(this->do_action(action, args, result));
+	try {
+		args->match_args_throw(action->params());
+		return(this->do_action(action, args, result));
+	}
+	catch (MooException e) {
+		moo_status("ACTION: (%s) %s", action->name(), e.get());
+		args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, e.get());
+		return(-1);
+	}
 }
 
 int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
@@ -508,9 +515,6 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		args->m_this = this;
 		args->m_action = action;
 
-		// TODO should this only be in the above function (since parse_args should have gotten this correct already)
-		args->match_args_throw(action->params());
-
 		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
 		//	It should now be set in the action so we can get it from there
 		if (action->permissions() & MOO_PERM_SUID)
@@ -526,14 +530,10 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		return(res);
 	}
 	catch (MooException e) {
-		moo_status("ACTION: (%s) %s", action->name(), e.get());
-		// TODO should channel here be NULL?  That i guess would make sure it's a notice
-		args->m_user->notify(TNT_STATUS, args->m_user, NULL, e.get());
-		return(-1);
+		throw e;
 	}
 	catch (...) {
-		moo_status("%s: An unspecified error has occured", action->name());
-		return(-1);
+		throw MooException("An unspecified error has occurred");
 	}
 }
 
@@ -660,10 +660,11 @@ int MooThing::command(MooThing *user, MooThing *channel, const char *action, con
 
 int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
 {
-	// TODO permissions check!?!?
-	// TODO this would call an action, but since MooUser overrides this virtual function, we will either do nothing if it's
-	//	a MooThing, or we'll call the m_task notify function if it's a MooUser
-	return(0);
+	MooArgs args(2, thing, channel);
+
+	args.set(0, new MooInteger(type));
+	args.set(1, new MooString(text));
+	return(this->do_action("notify", &args));
 }
 
 int MooThing::notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...)
@@ -715,12 +716,6 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, Moo
 	return(0);
 }
 
-/**
- * Arguments:
- *	this = thing to move
- *	thing = location to move to
- *	by = ????
- */
 int MooThing::moveto(MooThing *thing, MooThing *by)
 {
 	// TODO perhaps this should really just be a do_action on the object which calls a moveto function

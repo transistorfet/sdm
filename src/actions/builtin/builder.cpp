@@ -29,7 +29,7 @@ teleport <destination>
 
 static int builder_teleport(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_create(MooAction *action, MooThing *thing, MooArgs *args);
-static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args);
+static int builder_dig(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_add_exit(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_info(MooAction *action, MooThing *thing, MooArgs *args);
 static int builder_set(MooAction *action, MooThing *thing, MooArgs *args);
@@ -39,7 +39,7 @@ int moo_load_builder_actions(MooBuiltinHash *actions)
 {
 	actions->set("builder_teleport", new MooBuiltin(builder_teleport));
 	actions->set("builder_create", new MooBuiltin(builder_create));
-	actions->set("builder_create_room", new MooBuiltin(builder_create_room));
+	actions->set("builder_dig", new MooBuiltin(builder_dig));
 	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
 	actions->set("builder_info", new MooBuiltin(builder_info));
 	actions->set("builder_set", new MooBuiltin(builder_set));
@@ -80,8 +80,11 @@ static int builder_create(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int builder_create_room(MooAction *action, MooThing *thing, MooArgs *args)
+static int builder_dig(MooAction *action, MooThing *thing, MooArgs *args)
 {
+
+	// @dig "Name"
+
 /*
 	struct sdm_thing *obj;
 	struct sdm_thing *room;

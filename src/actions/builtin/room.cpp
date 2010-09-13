@@ -106,7 +106,7 @@ static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 	if (!(object = args->m_args->get_thing(0)))
 		object = args->m_this;
 	// TODO notify all the people in the room that you are looking at something (should this be here or in look_self?)
-	object->do_action("look_self", args);
+	object->do_action(args->m_user, args->m_channel, "look_self");
 	return(0);
 }
 

@@ -71,7 +71,6 @@ class MooThing : public MooObject {
 	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
 	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
 	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
-	int do_action(MooAction *action, MooArgs *args, MooObject **result = NULL);
 
 	/// Search Methods
 	MooThing *find(const char *name);
@@ -117,6 +116,7 @@ class MooThing : public MooObject {
 
 	int add(MooThing *thing);
 	int remove(MooThing *thing);
+	int do_action(MooAction *action, MooArgs *args, MooObject **result = NULL);
 	MooObject *get_property_raw(const char *name, MooThing **thing);
 };
 
