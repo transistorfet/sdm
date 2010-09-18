@@ -255,9 +255,9 @@ int PseudoServ::dispatch(Msg *msg)
 	/// Process messages that are common for pre and post registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PING:
-		if (msg->m_numparams != 1 || strcmp(msg->m_params[0], server_name))
+		if (msg->m_numparams != 1)
 			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[0]));
-		Msg::send(m_inter, ":%s PONG %s :%s\r\n", server_name, server_name, server_name);
+		Msg::send(m_inter, ":%s PONG %s :%s\r\n", server_name, server_name, msg->m_params[0]);
 		return(0);
 	    default:
 		break;
@@ -314,7 +314,7 @@ int PseudoServ::dispatch(Msg *msg)
 			if (msg->m_last[0] == '.') {
 				res = channel->do_action(m_user, channel, "evaluate", &msg->m_last[1]);
 				if (res == MOO_ACTION_NOT_FOUND)
-					this->notify(TNT_STATUS, NULL, NULL, "Pardon?");
+					this->notify(TNT_STATUS, NULL, channel, "Pardon?");
 			}
 			else if (msg->m_last[0] == '\x01')
 				this->process_ctcp(msg, channel);

@@ -253,19 +253,19 @@
   <action type="builtin" name="accept">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params>t</params>
    <function>room_accept</function>
   </action>
   <action type="builtin" name="do_enter">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params>t</params>
    <function>room_do_enter</function>
   </action>
   <action type="builtin" name="do_leave">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params>t</params>
    <function>room_do_exit</function>
   </action>
   <action type="builtin" name="look">

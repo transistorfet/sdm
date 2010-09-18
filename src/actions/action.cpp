@@ -60,7 +60,6 @@ const char *MooAction::params(const char *params)
 }
 
 
-
 MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
 	m_action = NULL;
@@ -73,12 +72,34 @@ MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 	m_args = new MooObjectArray(init_size);
 }
 
+MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
+{
+	m_action = NULL;
+	m_action_text = NULL;
+	m_result = NULL;
+	m_user = user;
+	m_channel = channel;
+	m_caller = NULL;
+	m_this = NULL;
+
+	m_args = args;
+	args = NULL;
+}
+
 MooArgs::~MooArgs()
 {
 	if (m_result)
 		delete m_result;
 	if (m_args)
 		delete m_args;
+}
+
+void MooArgs::set_args(MooObjectArray *&args)
+{
+	if (m_args)
+		delete m_args;
+	m_args = args;
+	args = NULL;
 }
 
 int MooArgs::find_whitespace(const char *text)
@@ -240,6 +261,7 @@ void MooArgs::match_args_throw(const char *params)
 const MooObjectType *MooArgs::get_type(char param)
 {
 	switch (param) {
+	    case 's':
 	    case 'w':
 		return(&moo_string_obj_type);
 	    case 'i':

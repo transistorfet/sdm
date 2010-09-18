@@ -71,6 +71,7 @@ class MooThing : public MooObject {
 	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
 	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
 	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
+	static int convert_result(MooObject *&result, int def = 0);
 
 	/// Search Methods
 	MooThing *find(const char *name);

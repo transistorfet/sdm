@@ -26,6 +26,13 @@ GAME FEATURES TODO:
 	  "A wisp of mist floats in the distance", "You hear the distance call of the loon."
 	* real time stuff should be on the slowish side perhaps (or perhaps even settable by the user, a user selected difficulty
 	  level!  With reduced XP for the easy difficulty.
+	* have multiroom boss fights, monsters that occupy multiple rooms and that you have to fight through the rooms (like fight the
+	  head to get to the room with the body where you can fight to eventually kill it)
+	* have monster growth and evolution.  New monsters can be created with a low level and in a small form and over time they
+	  grow to become large monsters that take a lot more effort to kill.  This is instead of having areas just automagically
+	  regenerate once a player or group has been through and killed everything
+	* you could have simulated people in towns that might move, marry, die, build houses, etc.  It would give people some
+	  incentive to play even when there are no other humans playing
 
 	* there *MUST* be an automatic map system so you can easily find out where you are (like the complete world name/realm/etc
 	  and an ASCII map of the rooms in the nearby area (but then we'd have to keep track of if the user has visited.  Alternatively,

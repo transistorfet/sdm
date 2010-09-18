@@ -540,6 +540,21 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 	}
 }
 
+int MooThing::convert_result(MooObject *&result, int def)
+{
+	int res;
+
+	if (result) {
+		res = result->get_integer();
+		delete result;
+		result = NULL;
+	}
+	else
+		res = def;
+	return(res);
+}
+
+
 ///// Search Methods /////
 
 MooThing *MooThing::find(const char *name)
@@ -721,47 +736,39 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, Moo
 
 int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 {
-	// TODO perhaps this should really just be a do_action on the object which calls a moveto function
-	// TODO fill this in
-	// TODO this will check permissions of via to perform the action (??) and then
-	//	call various actions on the objects to actually do the move
-
-	// TODO this should be a setting or something in the user object
-	//if (this->m_location)
-		// TODO these can't be here because this might be a teleport command...
-	//	this->m_location->notify_all(TNT_LEAVE, this, NULL, "runs off in the distance.");
-
-	int res;
 	MooObject *result;
 
 	if (!to)
 		return(-1);
+	if (to == m_location)
+		return(0);
 	try {
-		// TODO all these do_actions are wrong because they should pass the thing being moved in to as an argument
-		if (to->do_action(user, channel, "accept", &result) < 0)
-			return(-1);
-		res = result ? result->get_integer() : 0;
-		if (result)
-			delete result;
-		if (res != 1)
-			return(1);
+		{
+			MooArgs args(1, user, channel);
+			args.set(0, new MooThingRef(m_id));
+			if (to->do_action("accept", &args, &result) < 0)
+				return(-1);
+			if (MooThing::convert_result(result) != 1)
+				return(1);
+		}
 
 		if (m_location) {
-			result = NULL;
-			if (m_location->do_action(user, channel, "do_exit", &result) < 0)
+			MooArgs args(1, user, channel);
+			args.set(0, new MooThingRef(m_id));
+			if (m_location->do_action("do_exit", &args, &result) < 0)
 				return(-1);
-			res = result ? result->get_integer() : 0;
-			if (result)
-				delete result;
-			if (res < 0)
+			if (MooThing::convert_result(result) < 0)
 				return(1);
 		}
 
 		if (to->add(this) < 0)
 			return(1);
 
-		if (m_location)
-			return(m_location->do_action(user, channel, "do_enter"));
+		if (m_location) {
+			MooArgs args(1, user, channel);
+			args.set(0, new MooThingRef(m_id));
+			return(m_location->do_action("do_enter", &args));
+		}
 		return(0);
 	}
 	catch (...) {

@@ -166,6 +166,10 @@ void MooUser::disconnect()
 			m_task->purge(this);
 		}
 		m_task = NULL;
+
+		if (m_bits & MOO_UBF_GUEST) {
+			// TODO if user is a guest, delete the 'thing'
+		}
 	}
 	catch (...) {
 		moo_status("USER: Error saving user data, %s", m_name->c_str());

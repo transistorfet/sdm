@@ -79,7 +79,9 @@ class MooArgs {
 	MooObjectArray *m_args;		// TODO better name!??
 
 	MooArgs(int init_size = 5, MooThing *user = NULL, MooThing *channel = NULL);
+	MooArgs(MooObjectArray *&args, MooThing *user = NULL, MooThing *channel = NULL);
 	~MooArgs();
+	void set_args(MooObjectArray *&args);
 
 	static int find_whitespace(const char *text);
 	static int find_character(const char *text);

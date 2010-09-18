@@ -60,7 +60,7 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
 	const char *name;
 
 	// TODO make this use different colours for different types of things
-	if (name = args->m_this->name());
+	if ((name = args->m_this->name()))
 		args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name);
 	return(0);
 }
@@ -121,4 +121,37 @@ static int basics_go(MooAction *action, MooThing *thing, MooArgs *args)
 */
 	return(0);
 }
+
+/*
+static int basics_respond(MooAction *action, MooThing *thing, MooArgs *args)
+{
+
+
+	/// Print a message to all objects in the room that someone is looking at something
+	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
+		if (!victim) {
+			if (cur == args->m_user)
+				str = responses->get_string(MOO_STR_NULL_SELF);
+			else
+				str = responses->get_string(MOO_STR_NULL_OTHERS);
+		}
+		else if (victim == args->m_user) {
+			if (cur == args->m_user)
+				str = responses->get_string(MOO_STR_AUTO_SELF);
+			else
+				str = responses->get_string(MOO_STR_AUTO_OTHERS);
+		}
+		else {
+			if (cur == args->m_user)
+				str = responses->get_string(MOO_STR_VICT_SELF);
+			else if (cur == victim)
+				str = responses->get_string(MOO_STR_VICT_VICT);
+			else
+				str = responses->get_string(MOO_STR_VICT_OTHERS);
+		}
+		if (str && *str != '\0')
+			cur->notify(TNT_STATUS, args, str);
+	}
+}
+*/
 

@@ -140,6 +140,18 @@ static int room_accept(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	MooThing *cur;
+
+	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
+		if (cur != args->m_user)
+			cur->notify(TNT_STATUS, args, "<blue>$user.name wanders in.");
+	}
+
+	// TODO check what kind of object is entering and act accordingly
+	args->m_this->do_action(args->m_user, args->m_channel, "look_self");
+	// TODO print status message to everything in the room
+
+
 /*
 	const char *exitname;
 
@@ -170,6 +182,13 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args)
 {
+	MooThing *cur;
+
+	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
+		if (cur != args->m_user)
+			cur->notify(TNT_STATUS, args, "<blue>$user.name runs off in a hurry.");
+	}
+
 /*
 	const char *exitname;
 

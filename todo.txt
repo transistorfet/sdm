@@ -110,18 +110,22 @@
 	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
 	  notifies to that user
 
+	* change it so that when in the #realm channel, you only see yourself and TheRealm
+	* add object recycle (delete) function and command
+	* make the accept() function of non-room objects say something (to user and everyone else) like "$user tries to climb into $thing
+	  but fails miserably"
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
 	* should you make a macro or something to simplying notifying to the user from an action?
 	* implement variable argument *matching* function
-	* when .look gets an argument but it doesn't match an object, it says too many arguments, which is incorrect.  It should instead
-	  say "object not found"
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations
-	* make it automatically print .look when you enter #realm
 	* add support for notices from clients to other clients
 	* add a 'register' and 'login' commands to basics
 	* implement client quit in the channels
 
+	* everything should use actions that return a value rather than direct values for information, so that the action can do
+	  processing and adapt its output
+	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 	* add irc server-to-client pinging & connection timeouts
