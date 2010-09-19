@@ -499,6 +499,12 @@
     <params>s</params>
     <function>realm_emote</function>
    </action>
+   <action type="builtin" name="names">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params></params>
+    <function>realm_names</function>
+   </action>
    <action type="builtin" name="evaluate">
     <owner>-1</owner>
     <permissions>075</permissions>

@@ -109,6 +109,8 @@
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
 	  notifies to that user
+	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
+	  functions intended for internal use be inaccessible from the command line?
 
 	* change it so that when in the #realm channel, you only see yourself and TheRealm
 	* add object recycle (delete) function and command

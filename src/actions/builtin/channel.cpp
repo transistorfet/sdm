@@ -35,6 +35,7 @@ static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args);
+static int realm_names(MooAction *action, MooThing *thing, MooArgs *args);
 static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
 
 static int cryolocker_store(MooThing *user, MooThing *channel);
@@ -43,8 +44,6 @@ static int cryolocker_revive(MooThing *user, MooThing *channel);
 int moo_load_channel_actions(MooBuiltinHash *actions)
 {
 	// TODO should this specify various defaults of these actions?
-	// TODO should there be a function that creates either a special root object with props and actions set, or
-	//	possibly a function which creates an equally appropriate subobject which inherits from a core object?
 	actions->set("channel_init", new MooBuiltin(channel_init));
 	actions->set("channel_join", new MooBuiltin(channel_join));
 	actions->set("channel_leave", new MooBuiltin(channel_leave));
@@ -58,6 +57,7 @@ int moo_load_channel_actions(MooBuiltinHash *actions)
 	actions->set("realm_quit", new MooBuiltin(realm_quit));
 	actions->set("realm_say", new MooBuiltin(realm_say));
 	actions->set("realm_emote", new MooBuiltin(realm_emote));
+	actions->set("realm_names", new MooBuiltin(realm_names));
 	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
 	return(0);
 }
@@ -119,6 +119,7 @@ static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args)
 	MooObject *ref;
 	MooObjectArray *users;
 
+	// TODO how will other users receive the quit message
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
@@ -171,15 +172,17 @@ static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
 {
 	int j = 0;
 	MooThing *cur;
+	const char *name;
 	MooObjectArray *users;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
-		if ((cur = users->get_thing(i)) && cur->is_a(&moo_user_obj_type)) {
-			strncpy(&buffer[j], ((MooUser *) cur)->name(), LARGE_STRING_SIZE - j);
-			j += strlen(((MooUser *) cur)->name());
+		if ((cur = users->get_thing(i))) {
+			name = cur->name();
+			strncpy(&buffer[j], name, LARGE_STRING_SIZE - j);
+			j += strlen(name);
 			if (j >= LARGE_STRING_SIZE)
 				break;
 			buffer[j++] = ' ';
@@ -204,10 +207,13 @@ static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 
 ///// Realm Actions /////
 
+// TODO move these all to a separate file (since we probably wont need to call any channel functions directly)
 static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	if (channel_join(action, thing, args) < 0)
-		return(-1);
+	// TODO should the realm channel bother maintaining a user list?
+	//if (channel_join(action, thing, args) < 0)
+	//	return(-1);
+	args->m_user->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
 	try {
 		cryolocker_revive(args->m_user, args->m_channel);
 	}
@@ -221,8 +227,9 @@ static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	if (channel_leave(action, thing, args) < 0)
-		return(-1);
+	//if (channel_leave(action, thing, args) < 0)
+	//	return(-1);
+	args->m_user->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
 
 	try {
 		cryolocker_store(args->m_user, args->m_channel);
@@ -235,8 +242,8 @@ static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	if (channel_quit(action, thing, args) < 0)
-		return(-1);
+	//if (channel_quit(action, thing, args) < 0)
+	//	return(-1);
 
 	try {
 		cryolocker_store(args->m_user, args->m_channel);
@@ -260,6 +267,16 @@ static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	MooThing *location = args->m_user->location();
 	if (location)
 		return(location->do_action("emote", args));
+	return(0);
+}
+
+static int realm_names(MooAction *action, MooThing *thing, MooArgs *args)
+{
+	const char *name;
+
+	if (!(name = args->m_user->name()))
+		return(-1);
+	args->m_result = new MooString(name);
 	return(0);
 }
 
