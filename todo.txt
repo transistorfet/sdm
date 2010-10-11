@@ -22,6 +22,11 @@
 	  MUDing, while his/her characters can be in various parts of the game area.  So maybe it should be #realm even, maybe
 	  #social, and #realm-char can be used for each character.  It is possible to make #realm just a channel and use the evaluate
 	  action to implement all world manipulation
+	* it might be possible to do multiple characters such that you just make an object with all the same basic actions on it
+	  as a user object such that they forward the calls on to the user object accordingly.  The user would then direct all possible
+	  output to the character object by calling actions in a certain channel (possibly the character itself... is this possible??)
+	  Mighten this require the use of child/parent object linking (perhaps even just a property list of the child objects, which
+	  could be maintained by the clone function or something).
 	* what are the merits of a disk-based thing database rather than having all objects in memory?  If we were to add this, it
 	  could probably be done transparently to the existing code
 
@@ -56,6 +61,8 @@
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
 	* think about multithreading possibilities
 
+	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
+	  directly.  Objects could still have an ID but it just wont be used internally as much.
 	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
 	  on which the action was called (which m_thing would be set to in the args anyways)?
 	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
@@ -112,7 +119,7 @@
 	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
 	  functions intended for internal use be inaccessible from the command line?
 
-	* change it so that when in the #realm channel, you only see yourself and TheRealm
+	* add stuff for this new global table and integrate it better
 	* add object recycle (delete) function and command
 	* make the accept() function of non-room objects say something (to user and everyone else) like "$user tries to climb into $thing
 	  but fails miserably"
@@ -124,6 +131,7 @@
 	* add support for notices from clients to other clients
 	* add a 'register' and 'login' commands to basics
 	* implement client quit in the channels
+	* perhaps add "TheRealm" to any channel users list (names)
 
 	* everything should use actions that return a value rather than direct values for information, so that the action can do
 	  processing and adapt its output

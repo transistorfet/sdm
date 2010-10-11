@@ -27,7 +27,7 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_look(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_direction(MooAction *action, MooThing *thing, MooArgs *args);
+static int room_go(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_accept(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args);
 static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args);
@@ -39,7 +39,7 @@ int moo_load_room_actions(MooBuiltinHash *actions)
 	actions->set("room_emote", new MooBuiltin(room_emote));
 	actions->set("room_whisper", new MooBuiltin(room_whisper));
 	actions->set("room_look", new MooBuiltin(room_look));
-	actions->set("room_direction", new MooBuiltin(room_direction));
+	actions->set("room_go", new MooBuiltin(room_go));
 	actions->set("room_accept", new MooBuiltin(room_accept));
 	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
 	actions->set("room_do_exit", new MooBuiltin(room_do_exit));
@@ -118,17 +118,10 @@ static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_direction(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_go(MooAction *action, MooThing *thing, MooArgs *args)
 {
-/*
-	struct sdm_thing *exit;
-
-	if (!(exit = sdm_interpreter_find_thing(thing, args->action))) {
-		sdm_notify(args->caller, args, "You can't go in that direction.\n");
-		return(0);
-	}
-	sdm_do_nil_action(exit, args->caller, "go");
-*/
+	// TODO search this.exits for an exit matching the given name
+	// TODO call exit:invoke()
 	return(0);
 }
 
@@ -140,16 +133,24 @@ static int room_accept(MooAction *action, MooThing *thing, MooArgs *args)
 
 static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	MooThing *cur;
+	const char *msg;
+	MooThing *cur, *obj;
+
+	if (!(obj = args->get_thing(0)))
+		return(-1);
+	// TODO how the hell do you tell these things?
+	if (1) //obj->is_a_thing(MooThing::reference(MOO_GENERIC_MOBILE)))
+		msg = "<blue>$user.name wanders in.";
+	else
+		msg = "<b><blue>$user.name drops $0.name here.";
 
 	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
 		if (cur != args->m_user)
-			cur->notify(TNT_STATUS, args, "<blue>$user.name wanders in.");
+			cur->notify(TNT_STATUS, args, msg);
 	}
 
-	// TODO check what kind of object is entering and act accordingly
-	args->m_this->do_action(args->m_user, args->m_channel, "look_self");
-	// TODO print status message to everything in the room
+	if (obj == args->m_user)
+		args->m_this->do_action(args->m_user, args->m_channel, "look_self");
 
 
 /*

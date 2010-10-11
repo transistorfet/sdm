@@ -82,6 +82,14 @@ int init_moo(void)
 	if (load_global_config())
 		return(-1);
 
+	MooThing::add_global("start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
+	MooThing::add_global("user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
+	MooThing::add_global("room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
+	MooThing::add_global("exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
+	MooThing::add_global("mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
+	MooThing::add_global("cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
+	MooThing::add_global("channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
+
 	signal(SIGINT, handle_sigint);
 	return(0);
 }

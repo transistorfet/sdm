@@ -22,6 +22,7 @@
 #define MOO_HASH_DEFAULT_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL
 #define MOO_HASH_LOAD_FACTOR		0.75
 #define MOO_HASH_GROWTH_FACTOR		1.75
+#define MOO_OBJECT_HASH_DEFAULT_BITS	MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETE | MOO_HBF_DELETEALL
 
 class MooThing;
 
@@ -64,7 +65,7 @@ class MooHash : public MooObject {
 
 class MooObjectHash : public MooHash<MooObject *> {
     public:
-	MooObjectHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS);
+	MooObjectHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_OBJECT_HASH_DEFAULT_BITS);
 
 	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);

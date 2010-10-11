@@ -48,6 +48,7 @@ class MooThing : public MooObject {
 	int init();
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
+	static void add_global(const char *name, MooObject *obj);
 
 	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
@@ -66,10 +67,9 @@ class MooThing : public MooObject {
 	MooAction *get_action(const char *name);
 	// TODO will we ever use this?  Where would it be used?
 	MooAction *get_action_partial(const char *name);
-	// TODO should these take user, or should it assume it based on the current task??
-	// TODO should these take a channel parameter?
 	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
 	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
+	int do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result = NULL, MooObject *arg0 = NULL, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL, MooObject *arg4 = NULL, MooObject *arg5 = NULL);
 	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
 	static int convert_result(MooObject *&result, int def = 0);
 
@@ -102,6 +102,7 @@ class MooThing : public MooObject {
 	inline MooThing *next() { return(m_next); }
 	inline MooThing *location() { return(m_location); }
 	inline int is_a_thing(moo_id_t id);
+	inline int is_a_thing(const char *name);
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
 	const char *name();

@@ -24,6 +24,11 @@ OBJS =	colours.o	\
 	actions/builtin/mobile.o	\
 	actions/builtin/room.o	\
 	actions/builtin/user.o	\
+	actions/code/code.o	\
+	actions/code/event.o	\
+	actions/code/expr.o	\
+	actions/code/parser.o	\
+	actions/code/thread.o	\
 	interfaces/interface.o	\
 	interfaces/rpc.o	\
 	interfaces/tcp.o	\
@@ -215,6 +220,49 @@ actions/builtin/user.o: actions/builtin/user.cpp ../include/sdm/misc.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
   ../include/sdm/actions/builtin/builtin.h
 
+actions/code/code.o: actions/code/code.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/code/code.h actions/code/expr.h
+
+actions/code/event.o: actions/code/event.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/code/code.h actions/code/expr.h \
+  actions/code/event.h actions/code/thread.h
+
+actions/code/expr.o: actions/code/expr.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/code/code.h actions/code/expr.h
+
+actions/code/parser.o: actions/code/parser.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/code/code.h actions/code/expr.h \
+  actions/code/event.h actions/code/thread.h
+
+actions/code/thread.o: actions/code/thread.cpp ../include/sdm/misc.h \
+  ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/memory.h \
+  ../include/sdm/objs/object.h ../include/sdm/things/thing.h \
+  ../include/sdm/tree.h ../include/sdm/array.h \
+  ../include/sdm/actions/action.h ../include/sdm/things/references.h \
+  ../include/sdm/actions/code/code.h actions/code/expr.h \
+  actions/code/thread.h actions/code/event.h
+
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/array.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
@@ -279,7 +327,8 @@ objs/object.o: objs/object.cpp ../include/sdm/misc.h \
 objs/string.o: objs/string.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
-  ../include/sdm/misc.h ../include/sdm/objs/string.h
+  ../include/sdm/misc.h ../include/sdm/objs/string.h \
+  ../include/sdm/actions/action.h ../include/sdm/array.h
 
 objs/thingref.o: objs/thingref.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -359,7 +408,7 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/things/references.h \
-  ../include/sdm/things/user.h
+  ../include/sdm/things/channel.h ../include/sdm/things/user.h
 
 things/world.o: things/world.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

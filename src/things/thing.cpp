@@ -40,6 +40,7 @@ MooObjectType moo_thing_obj_type = {
 	(moo_type_create_t) moo_thing_create
 };
 
+MooObjectHash *moo_global_table = NULL;
 MooArray<MooThing *> *moo_thing_table = NULL;
 
 int init_thing(void)
@@ -48,12 +49,16 @@ int init_thing(void)
 		return(1);
 	if (moo_object_register_type(&moo_thing_obj_type) < 0)
 		return(-1);
+	// TODO should the global table be read/written to a file?
+	moo_global_table = new MooObjectHash();
 	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
 	return(0);
 }
 
 void release_thing(void)
 {
+	if (moo_global_table)
+		delete moo_global_table;
 	if (moo_thing_table)
 		delete moo_thing_table;
 	moo_object_deregister_type(&moo_thing_obj_type);
@@ -289,6 +294,11 @@ MooThing *MooThing::clone()
 }
 */
 
+void MooThing::add_global(const char *name, MooObject *obj)
+{
+	moo_global_table->set(name, obj);
+}
+
 ///// Property Methods /////
 
 int MooThing::set_property(const char *name, MooObject *obj)
@@ -484,6 +494,28 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, con
 		return(-1);
 	}
 }
+int MooThing::do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result, MooObject *arg0, MooObject *arg1, MooObject *arg2, MooObject *arg3, MooObject *arg4, MooObject *arg5)
+{
+	MooArgs args(6, user, channel);
+	if (arg0) {
+		args.set(0, arg0);
+		if (arg1) {
+			args.set(1, arg1);
+			if (arg2) {
+				args.set(2, arg2);
+				if (arg3) {
+					args.set(3, arg3);
+					if (arg4) {
+						args.set(4, arg4);
+						if (arg5)
+							args.set(5, arg5);
+					}
+				}
+			}
+		}
+	}
+	return(this->do_action(name, &args, result));
+}
 
 int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 {
@@ -631,8 +663,13 @@ MooThing *MooThing::reference(const char *name)
 			return(NULL);
 		return(world->find_named(name));
 	}
-	else if (name[0] == '$')
-		;// TODO do some kind of lookup by variable name (where is this table?)
+	else if (name[0] == '$') {
+		// TODO should we break up the reference??
+		MooThingRef *ref = (MooThingRef *) moo_global_table->get(&name[1], &moo_thingref_obj_type);
+		if (!ref)
+			return(NULL);
+		return(ref->get());
+	}
 	return(NULL);
 }
 
