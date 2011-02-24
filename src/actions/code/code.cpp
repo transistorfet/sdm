@@ -13,52 +13,44 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/thingref.h>
 
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
 #include <sdm/actions/code/code.h>
 
 #include "expr.h"
-
-//#define BUILTIN_LIST_SIZE	32
-//#define BUILTIN_LIST_BITS	MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
+#include "frame.h"
+#include "parser.h"
 
 MooObjectType moo_code_obj_type = {
 	&moo_action_obj_type,
-	"builtin",
+	"moocode",
 	typeid(MooCode).name(),
 	(moo_type_create_t) moo_code_create
 };
 
-//static MooCodeHash *builtin_actions = NULL;
+static MooObjectHash *global_env = NULL;
+
+extern int moo_load_code_basic(MooObjectHash *env);
 
 int init_moo_code(void)
 {
 	if (moo_object_register_type(&moo_code_obj_type) < 0)
 		return(-1);
-/*
-	if (builtin_actions)
+	global_env = new MooObjectHash();
+	if (global_env)
 		return(1);
-	builtin_actions = new MooCodeHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
-	moo_load_basic_actions(builtin_actions);
-	moo_load_builder_actions(builtin_actions);
-	moo_load_channel_actions(builtin_actions);
-	moo_load_item_actions(builtin_actions);
-	moo_load_mobile_actions(builtin_actions);
-	moo_load_room_actions(builtin_actions);
-	moo_load_user_actions(builtin_actions);
-*/
+	moo_load_code_basic(global_env);
 	return(0);
 }
 
 void release_moo_code(void)
 {
-/*
-	if (!builtin_actions)
+	if (!global_env)
 		return;
-	delete builtin_actions;
-	builtin_actions = NULL;
-*/
+	delete global_env;
+	global_env = NULL;
 	moo_object_deregister_type(&moo_code_obj_type);
 }
 
@@ -97,8 +89,6 @@ int MooCode::read_entry(const char *type, MooDataFile *data)
 
 int MooCode::write_data(MooDataFile *data)
 {
-	const char *name;
-
 	MooObject::write_data(data);
 	// TODO write the code to the file
 	//data->write_string_entry("code", name);
@@ -108,19 +98,42 @@ int MooCode::write_data(MooDataFile *data)
 
 int MooCode::do_action(MooThing *thing, MooArgs *args)
 {
-/*
-	if (!m_func)
-		return(-1);
-	return(m_func(this, thing, args));
-*/
+	int ret;
+	MooObjectHash *env;
+	MooCodeFrame frame;
+
+	env = frame.env();
+	// TODO add args to the environment (as MooArgs, or as something else?)
+	//env->set("args", args);
+	env->set("parent", new MooThingRef(thing));
+	frame.add_block(m_code);
+	ret = frame.run();
+	args->m_result = frame.get_return();
+	return(ret);
+
+	/****
+
+	we need a thread in order to execute the code we have.  If a thread is also a task, we can't be sure if the
+	current task is a thread (it probably isn't in fact).  We definitely don't want to make a new thread for
+	each action call, but then again, if it was lightweight enough, I suppose we could, in which case it would
+	be more like a stack frame than a thread.  We also don't want a dedicated thread for each action, which not
+	only would mean a lot of threads sitting around, but would make it quite complicated during execution of
+	nested action calls and so on.
+
+	A thread should be called a frame instead.  It can be stored in each action or allocated when an action is
+	executed.  A reference to a global environment could be included in the action itself.  The current task
+	will "run" the frame/thread.
+
+
+	*/
 }
 
-int MooCode::set(const char *name)
+int MooCode::set(const char *code)
 {
-	// TODO wtf
-	//m_code = MooCodeParser::parse(name);
+	MooCodeParser parser;
+
+	m_code = parser.parse(code);
 	return(0);
 }
-
 
 

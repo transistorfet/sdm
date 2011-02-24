@@ -13,9 +13,33 @@
 
 #include "expr.h"
 
-class MooCodeThread;
+#define TT_OPEN		1
+#define TT_CLOSE	2
+#define TT_STRING	3
+#define TT_WORD		4
 
+#define MAX_TOKEN_LEN		512
 
+class MooCodeParser {
+	int m_line;
+	int m_col;
+	int m_pos;
+	const char *m_input;
+
+	int m_type;
+	int m_len;
+	char m_token[MAX_TOKEN_LEN];
+
+    public:
+	MooCodeParser();
+
+	MooCodeExpr *parse(const char *str);
+
+	MooCodeExpr *parse_list();
+	MooCodeExpr *parse_token();
+	int read_token();
+	
+};
 
 #endif
 

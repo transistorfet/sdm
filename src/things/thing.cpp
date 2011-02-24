@@ -123,12 +123,12 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		MooObject *obj = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL))) {
-			moo_status("THING: Unable to find property type, %d", buffer);
+			moo_status("THING: Unable to find property type, %s", buffer);
 			return(-1);
 		}
 		data->read_attrib_string("name", buffer, STRING_SIZE);
 		if (!(obj = moo_make_object(objtype))) {
-			moo_status("THING: Error loading property, %d", buffer);
+			moo_status("THING: Error loading property, %s", buffer);
 			return(-1);
 		}
 		data->read_children();
@@ -143,7 +143,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		MooThing *thing = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "thing", &moo_thing_obj_type))) {
-			moo_status("THING: Unable to find thing type, %d", buffer);
+			moo_status("THING: Unable to find thing type, %s", buffer);
 			return(-1);
 		}
 		if (!(thing = (MooThing *) moo_make_object(objtype))) {
@@ -160,7 +160,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		data->read_attrib_string("type", buffer, STRING_SIZE);
 		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
 		    || !(action = (MooAction *) moo_make_object(objtype))) {
-			moo_status("THING: Unable to find action type, %d", buffer);
+			moo_status("THING: Unable to find action type, %s", buffer);
 			return(-1);
 		}
 		data->read_attrib_string("name", buffer, STRING_SIZE);

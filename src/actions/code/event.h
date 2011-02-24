@@ -14,44 +14,53 @@
 #include "expr.h"
 
 class MooCodeEvent;
-class MooCodeThread;
-
-typedef int (MooCodeEvent::*moo_event_func_t)(MooCodeThread *thread);
+class MooCodeFrame;
 
 class MooCodeEvent {
     public:
-	moo_event_func_t m_func;
+	MooObjectHash *m_env;
 	MooCodeExpr *m_expr;
 	MooArgs *m_args;
 
-	MooCodeEvent(MooCodeExpr *expr, MooArgs *args = NULL);
-	MooCodeEvent(moo_event_func_t func = NULL, MooCodeExpr *expr = NULL, MooArgs *args = NULL);
+	MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr = NULL, MooArgs *args = NULL);
 	virtual ~MooCodeEvent();
 	void set_args(MooArgs *args);
 
-	virtual int do_event(MooCodeThread *thread);
-
-	int evaluate_expr(MooCodeThread *thread);
-	int evaluate_expr_list(MooCodeThread *thread);
-	int append_return(MooCodeThread *thread);
+	virtual int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventEvalExpr : public MooCodeEvent {
     public:
-	MooCodeEventEvalExpr(MooCodeExpr *expr, MooArgs *args = NULL) : MooCodeEvent(expr, args) { };
-	int do_event(MooCodeThread *thread);
+	MooCodeEventEvalExpr(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, expr) { };
+	int do_event(MooCodeFrame *frame);
 };
 
-class MooCodeEventEvalExprList : public MooCodeEvent {
+class MooCodeEventEvalBlock : public MooCodeEvent {
     public:
-	MooCodeEventEvalExprList(MooCodeExpr *expr, MooArgs *args = NULL) : MooCodeEvent(expr, args) { };
-	int do_event(MooCodeThread *thread);
+	MooCodeEventEvalBlock(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, expr) { };
+	int do_event(MooCodeFrame *frame);
+};
+
+
+class MooCodeEventDoAction : public MooCodeEvent {
+	MooThing *m_thing;
+	std::string *m_action;
+    public:
+	MooCodeEventDoAction(MooObjectHash *env, MooThing *thing, const char *action, MooArgs *args);
+	virtual ~MooCodeEventDoAction();
+	int do_event(MooCodeFrame *frame);
+};
+
+class MooCodeEventEvalArgs : public MooCodeEvent {
+    public:
+	MooCodeEventEvalArgs(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args) : MooCodeEvent(env, expr, args) { };
+	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventAppendReturn : public MooCodeEvent {
     public:
-	MooCodeEventAppendReturn(MooCodeExpr *expr, MooArgs *args = NULL) : MooCodeEvent(expr, args) { };
-	int do_event(MooCodeThread *thread);
+	MooCodeEventAppendReturn(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, NULL, args) { };
+	int do_event(MooCodeFrame *frame);
 };
 
 #endif

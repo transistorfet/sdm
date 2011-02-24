@@ -48,6 +48,12 @@
    <params></params>
    <function>basics_print_view</function>
   </action>
+  <action type="moocode" name="print_hi">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code>(print "hey")</code>
+  </action>
  </thing>
  <thing>
   <id>4</id>

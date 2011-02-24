@@ -13,6 +13,9 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/float.h>
+#include <sdm/objs/string.h>
+#include <sdm/objs/integer.h>
 
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
@@ -20,210 +23,137 @@
 
 #include "expr.h"
 #include "event.h"
-#include "thread.h"
+#include "frame.h"
+#include "parser.h"
 
-/*
-MooCodeEvent::MooCodeEvent(moo_event_func_t func, MooCodeExpr *expr, MooArgs *args)
-{
-	m_func = func;
-	m_expr = expr;
-	m_args = args;
-}
-
-MooCodeEvent::~MooCodeEvent()
-{
-	// TODO destroy references??
-}
-
-void MooCodeEvent::set_args(MooArgs *args)
-{
-	// TODO should this instead make the args?
-	if (m_args)
-		delete m_args;
-	m_args = args;
-}
-
-int MooCodeEvent::do_event(MooCodeThread *thread)
-{
-	if (!m_func)
-		return(-1);
-	return(this->m_func(thread));
-}
-
-int MooCodeEvent::evaluate_expr(MooCodeThread *thread)
-{
-	if (!m_expr)
-		return(-1);
-	return(m_expr->eval(thread));
-}
-
-int MooCodeEvent::evaluate_expr_list(MooCodeThread *thread)
-{
-	MooCodeExpr *remain;
-	MooCodeEvent *event;
-
-	if (!m_expr)
-		return(-1);
-	remain = m_expr->next();
-
-	if (remain) {
-		event = new MooCodeEvent(MooCodeEvent::evaluate_expr_list, remain);
-		thread->push_event(event);
-	}
-
-	event = new MooCodeEvent(MooCodeEvent::append_return, NULL, m_args);
-	thread->push_event(event);
-
-	event = new MooCodeEvent(MooCodeEvent::evaluate_expr, m_expr);
-	thread->push_event(event);
-	return(0);
-}
-
-int MooCodeEvent::append_return(MooCodeThread *thread)
-{
-	if (!m_args)
-		return(-1);
-	return(m_args->m_args->push(thread->get_return()));
-}
-*/
-
-
-#define LISPY_MAX_NUMBER		128
-#define LISPY_MAX_STRING		1024
-
-static MooCodeExpr *lispy_parse_input(sdMachine *, sdType *, int, sdInput *);
-static MooCodeExpr *lispy_parse_expr(sdMachine *, sdType *, int, sdInput *);
-static MooCodeExpr *lispy_parse_number(sdMachine *, sdType *, sdInput *, char, linenumber_t);
-static MooCodeExpr *lispy_parse_string(sdMachine *, sdType *, sdInput *, char, linenumber_t);
-static MooCodeExpr *lispy_parse_identifier(sdMachine *, sdType *, sdInput *, char, linenumber_t);
-static int lispy_get_next_char(sdInput *);
 static inline int lispy_is_identifier(char);
 static inline int lispy_is_digit(char);
 static inline int lispy_is_whitespace(char);
 static inline int lispy_is_word(char);
 static inline char lispy_escape_char(char);
 
-MooCodeExpr *moo_lispy_parse(const char *code)
+MooCodeParser::MooCodeParser()
 {
-	return(lispy_parse_input(mach, &sdExprTypeDef, 0, input));
+
 }
 
-///// Local Functions /////
-
-sdExpr *lispy_parse_input(sdMachine *mach, sdType *type, int openfunc, sdInput *input)
+MooCodeExpr *MooCodeParser::parse(const char *str)
 {
-	sdExpr *head, *cur;
+	m_input = str;
+	m_pos = 0;
+	m_line = 0;
+	m_col = 0;
+	return(this->parse_list());
+}
 
-	head = cur = lispy_parse_expr(mach, type, openfunc, input);
-	while (cur) {
-		cur->next = lispy_parse_expr(mach, type, 0, input);
-		cur = cur->next;
+MooCodeExpr *MooCodeParser::parse_list()
+{
+	MooCodeExpr *first = NULL, *cur = NULL, *prev = NULL;
+
+	while (1) {
+		this->read_token();
+		if (!(cur = this->parse_token()))
+			break;
+		if (prev)
+			prev->next(cur);
+		prev = cur;
+		if (!first)
+			first = cur;
 	}
-	return(head);
+	return(first);
 }
 
-static sdExpr *lispy_parse_expr(sdMachine *mach, sdType *type, int openfunc, sdInput *input)
+MooCodeExpr *MooCodeParser::parse_token()
 {
-	char ch;
-	linenumber_t line;
-	sdExpr *expr;
-
-	line = sdrl_get_linenumber(input);
-	ch = lispy_get_next_char(input);
-
-	if (!ch)
+	switch (m_type) {
+	    case 0:
+	    case TT_CLOSE:
 		return(NULL);
-	else if (ch == ')')
-		return(NULL);
-	else if (lispy_is_digit(ch) || ((ch == '-') && lispy_is_digit(sdrl_peek_char(input)))) {
-		if (!(expr = lispy_parse_number(mach, type, input, ch, line)))
-			return(NULL);
+	    case TT_STRING:
+		return(new MooCodeExpr(MCT_OBJECT, new MooString(m_token)));
+	    case TT_WORD: {
+		// TODO this doesn't work yet; you need to parse between integer and float
+		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1])))
+			;//return(new MooCodeExpr(MCT_OBJECT, new MooNumber(m_token)));
+		return(new MooCodeExpr(MCT_IDENTIFIER, new MooString(m_token)));
+	    }
+	    case TT_OPEN: {
+		MooCodeExpr *expr = this->parse_list();
+		if (!expr)
+			throw MooException("%d, %d: Empty list?", m_line, m_col);
+		return(new MooCodeExpr(MCT_CALL, expr));
+	    }
+	    default:
+		throw MooException("%d, %d: Invalid token type, %d", m_line, m_col, m_type);
 	}
-	else if ((ch == '\"') || (ch == '\'')) {
-		if (!(expr = lispy_parse_string(mach, type, input, ch, line)))
-			return(NULL);
-	}
-	else if (ch == '(') {
-		if(!(expr = lispy_parse_input(mach, type, 1, input)))
-			return(NULL);
-		expr = sdrl_make_expr_expr(mach, type, SDRL_ET_CALL, line, expr, NULL);
-	}
-	else {
-		if (!(expr = lispy_parse_identifier(mach, type, input, ch, line)))
-			return(NULL);
-		if (!openfunc) {
-			if (!(expr = sdrl_make_string_expr(mach, type, SDRL_ET_IDENTIFIER, line, "$", expr))
-			    || !(expr = sdrl_make_expr_expr(mach, type, SDRL_ET_CALL, line, expr, NULL)))
-				return(NULL);
+}
+
+int MooCodeParser::read_token()
+{
+	m_type = 0;
+	m_len = 0;
+	m_token[0] = '\0';
+	for (; m_input[m_pos] != '\0'; m_pos++) {
+		if (m_input[m_pos] == '\n') {
+			m_line++;
+			m_col = 0;
 		}
-	}
-	return(expr);
-}
 
-static sdExpr *lispy_parse_number(sdMachine *mach, sdType *type, sdInput *input, char first, linenumber_t line)
-{
-	int i = 0;
-	char buffer[LISPY_MAX_NUMBER];
-
-	// TODO make this parse octal and hex numbers
-	buffer[0] = first;
-	while ((i < LISPY_MAX_NUMBER - 1) && (buffer[++i] = sdrl_get_char(input))) {
-		if (!lispy_is_identifier(buffer[i]))
+		if (lispy_is_whitespace(m_input[m_pos]))
+			continue;
+		else if (m_input[m_pos] == ';') {
+			for (; m_input[m_pos] != '\0' && m_input[m_pos] != '\n'; m_pos++)
+				;
 			break;
-	}
-	if (buffer[i] == ')')
-		sdrl_unget_char(input, ')');
-	buffer[i] = '\0';
-	return(sdrl_make_number_expr(mach, type, SDRL_ET_NUMBER, line, strtod(buffer, NULL), NULL));
-}
-
-static sdExpr *lispy_parse_string(sdMachine *mach, sdType *type, sdInput *input, char first, linenumber_t line)
-{
-	int i;
-	char ch;
-	char buffer[LISPY_MAX_STRING];
-
-	for (i = 0; (i < LISPY_MAX_STRING) && (buffer[i] = sdrl_get_char(input)); i++) {
-		if ((buffer[i] == '\\') && (first == '\"')) {
-			if (!(ch = sdrl_get_char(input)))
-				break;
-			buffer[i] = lispy_escape_char(ch);
 		}
-		else if (buffer[i] == first)
+		else if (m_input[m_pos] == '(') {
+			m_type = TT_OPEN;
 			break;
-	}
-	buffer[i] = '\0';
-	return(sdrl_make_string_expr(mach, type, SDRL_ET_STRING, line, buffer, NULL));
-}
-
-static sdExpr *lispy_parse_identifier(sdMachine *mach, sdType *type, sdInput *input, char first, linenumber_t line)
-{
-	int i;
-	char buffer[LISPY_MAX_STRING];
-
-	buffer[0] = first;
-	for (i = 1; (i < LISPY_MAX_STRING) && (buffer[i] = sdrl_get_char(input)); i++) {
-		if (!lispy_is_identifier(buffer[i]))
-			break;
-	}
-	if (buffer[i] == ')')
-		sdrl_unget_char(input, ')');
-	buffer[i] = '\0';
-	return(sdrl_make_string_expr(mach, type, SDRL_ET_IDENTIFIER, line, buffer, NULL));
-}
-
-static int lispy_get_next_char(sdInput *input)
-{
-	char ch;
-
-	while ((ch = sdrl_get_char(input))) {
-		if (ch == '#') {
-			while ((ch = sdrl_get_char(input)) && (ch != '\n')) ;
 		}
-		else if (!lispy_is_whitespace(ch))
+		else if (m_input[m_pos] == ')') {
+			m_type = TT_CLOSE;
 			break;
+		}
+		else if (m_input[m_pos] == '\"') {
+			m_type = TT_STRING;
+			for (m_pos++; m_input[m_pos] != '\0'; m_pos++, m_len++) {
+ 				if (m_input[m_pos] == '\"')
+					break;
+				else if (m_input[m_pos] == '\\') {
+					if (m_input[++m_pos] == '\0')
+						break;
+					m_token[m_len] = lispy_escape_char(m_input[m_pos]);
+				}
+				else
+					m_token[m_len] = m_input[m_pos];
+			}
+			m_token[m_len] = '\0';
+			break;
+		}
+		else if (m_input[m_pos] == '\'') {
+			m_type = TT_STRING;
+			for (m_pos++; m_input[m_pos] != '\0'; m_pos++, m_len++) {
+ 				if (m_input[m_pos] == '\'')
+					break;
+				m_token[m_len] = m_input[m_pos];
+			}
+			m_token[m_len] = '\0';
+			break;
+		}
+		else {
+			m_type = TT_WORD;
+			for (; m_input[m_pos] != '\0' && !lispy_is_whitespace(m_input[m_pos]); m_pos++, m_len++) {
+ 				if (m_input[m_pos] == '(')
+					throw MooException("%d, %d: Unexpected open bracket.", m_line, m_col);
+				m_token[m_len] = m_input[m_pos];
+			}
+			m_token[m_len] = '\0';
+			break;
+		}
+		m_col++;
 	}
-	return(ch);
+	m_pos++;
+	return(0);
 }
 
 static inline int lispy_is_identifier(char ch)
@@ -267,6 +197,5 @@ static inline char lispy_escape_char(char ch)
 			return(ch);
 	}
 }
-
 
 

@@ -41,8 +41,9 @@ void release_world(void)
 	if (!moo_root_world)
 		return;
 	/// Write the world to disk
-	// TODO BUG there is an infinite loop on writing the world file
-	moo_root_world->write();
+	// TODO BUG there is an infinite loop on writing the world file (??? is there?)
+	// TODO commented out while we test MooCode
+	//moo_root_world->write();
 	delete moo_root_world;
 	moo_object_deregister_type(&moo_world_obj_type);
 }

@@ -19,7 +19,7 @@
 #include <sdm/actions/code/code.h>
 
 #include "expr.h"
-#include "thread.h"
+#include "frame.h"
 
 MooObjectType moo_code_expr_obj_type = {
 	&moo_object_obj_type,
@@ -83,29 +83,9 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeExpr::eval(MooCodeThread *thread)
+const char *MooCodeExpr::lineinfo()
 {
-	// TODO should this run the expr in the current thread or something!??
-	switch (m_type) {
-	    case MCT_OBJECT:
-		// TODO should you make a reference to m_value or something?  Should set_return?
-		thread->set_return(m_value);
-		break;
-	    case MCT_IDENTIFIER:
-		// TODO do variable lookup, use thread to find the evironment/table to look up
-		break;
-	    case MCT_CALL:
-		// TODO m_value should be a string?? Or should it be a list of exprs with the first expr being an identifier?
-		// TODO either look up the function yourself or just call thread->call(name, whatever)
-		break;
-	    case MCT_CODE:
-		// TODO same as above to get code name or expr itself or whatever
-		// TODO pass remaining expr to code (how will expr be called? will an event be added to the stack?)
-		break;
-	    default:
-		return(-1);
-	}
-	return(0);
+	// TODO this should return the action/file/linenumber/columnnumber/etc to be printed for debug purposes
+	return("Unknown");
 }
-
 

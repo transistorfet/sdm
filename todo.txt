@@ -119,6 +119,8 @@
 	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
 	  functions intended for internal use be inaccessible from the command line?
 
+	* a MooCodeThread can be a task, and then it's fully functional
+
 	* add stuff for this new global table and integrate it better
 	* add object recycle (delete) function and command
 	* make the accept() function of non-room objects say something (to user and everyone else) like "$user tries to climb into $thing

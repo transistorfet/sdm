@@ -1,10 +1,10 @@
 /*
- * Header Name:	thread.h
- * Description:	MooCode Thread
+ * Header Name:	frame.h
+ * Description:	MooCode Frame
  */
 
-#ifndef _SDM_ACTIONS_CODE_THREAD_H
-#define _SDM_ACTIONS_CODE_THREAD_H
+#ifndef _SDM_ACTIONS_CODE_FRAME_H
+#define _SDM_ACTIONS_CODE_FRAME_H
 
 #include <sdm/array.h>
 #include <sdm/globals.h>
@@ -14,13 +14,16 @@
 #include "expr.h"
 #include "event.h"
 
-class MooCodeThread : public MooObject {
+class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
 
+	// TODO you should probably have MooArgs here, right?  It could always be NULL if there are no args.
+	MooObjectHash *m_env;
+
     public:
-	MooCodeThread();
-	virtual ~MooCodeThread();
+	MooCodeFrame(MooObjectHash *parent = NULL);
+	virtual ~MooCodeFrame();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -36,15 +39,16 @@ class MooCodeThread : public MooObject {
 	int eval(MooCodeExpr *expr);
 
 	int run(int level = 0);
-	static int run_all(int cycles);
 
 	void set_return(MooObject *obj);
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
+	MooObjectHash *env() { return(m_env); }
+	void env(MooObjectHash *env);
 };
 
-extern MooObjectType moo_code_thread_obj_type;
+extern MooObjectType moo_code_frame_obj_type;
 
-MooObject *moo_code_thread_create(void);
+MooObject *moo_code_frame_create(void);
 
 #endif
 

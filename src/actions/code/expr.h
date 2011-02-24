@@ -13,11 +13,11 @@
 #define MCT_OBJECT	1
 #define MCT_IDENTIFIER	2
 #define MCT_CALL	3
-#define MCT_CODE	4
 
-class MooCodeThread;
+class MooCodeFrame;
 
 class MooCodeExpr : public MooObject {
+    protected:
 	int m_type;
 	MooObject *m_value;
 	MooCodeExpr *m_next;
@@ -29,10 +29,13 @@ class MooCodeExpr : public MooObject {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int eval(MooCodeThread *thread);
-
     public:
 	MooCodeExpr *next() { return(m_next); }
+	int expr_type() { return(m_type); }
+	MooObject *value() { return(m_value); }
+	const char *lineinfo();
+
+	void next(MooCodeExpr *expr) { if (expr) m_next = expr; }
 };
 
 extern MooObjectType moo_code_expr_obj_type;

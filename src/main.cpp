@@ -19,6 +19,7 @@
 
 #include <sdm/actions/alias.h>
 #include <sdm/actions/builtin/builtin.h>
+#include <sdm/actions/code/code.h>
 
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
@@ -55,6 +56,8 @@ int init_moo(void)
 		return(-1);
 
 	if (init_builtin() < 0)
+		return(-1);
+	if (init_moo_code() < 0)
 		return(-1);
 
 	moo_object_register_type(&moo_alias_obj_type);
@@ -101,6 +104,7 @@ void release_moo(void)
 	release_channel();
 	release_thing();
 
+	release_moo_code();
 	release_builtin();
 
 	release_irc_pseudoserv();
