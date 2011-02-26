@@ -17,6 +17,7 @@ class MooInteger : public MooObject {
 	moo_integer_t m_num;
 
 	MooInteger(moo_integer_t num) { m_num = num; }
+	MooInteger(const char *str);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

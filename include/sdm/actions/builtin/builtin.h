@@ -23,7 +23,7 @@ class MooBuiltin : public MooAction {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	virtual int do_action(MooThing *thing, MooArgs *args);
+	virtual int do_action(MooArgs *args);
 
 	int set(const char *name);
 };

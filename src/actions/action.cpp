@@ -86,6 +86,18 @@ MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
 	args = NULL;
 }
 
+MooArgs::MooArgs(MooArgs *args, int init_size)
+{
+	m_action = args->m_action;
+	m_action_text = args->m_action_text;
+	m_result = NULL;
+	m_user = args->m_user;
+	m_channel = args->m_channel;
+	m_caller = args->m_caller;
+	m_this = args->m_this;
+	m_args = new MooObjectArray(init_size);
+}
+
 MooArgs::~MooArgs()
 {
 	if (m_result)

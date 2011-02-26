@@ -28,6 +28,7 @@ class MooCodeExpr : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	virtual int evaluate(MooArgs *args);
 
     public:
 	MooCodeExpr *next() { return(m_next); }

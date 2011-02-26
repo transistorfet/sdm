@@ -21,7 +21,16 @@ struct MooObjectType moo_float_obj_type = {
 
 MooObject *moo_float_create(void)
 {
-	return(new MooFloat(0));
+	return(new MooFloat((moo_float_t) 0));
+}
+
+MooFloat::MooFloat(const char *str)
+{
+	char *endptr;
+
+	m_num = strtod(str, &endptr);
+	if (*endptr != '\0')
+		throw MooException("Invalid float, %s", str);
 }
 
 int MooFloat::read_entry(const char *type, MooDataFile *data)

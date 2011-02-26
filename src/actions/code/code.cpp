@@ -20,6 +20,7 @@
 #include <sdm/actions/code/code.h>
 
 #include "expr.h"
+#include "event.h"
 #include "frame.h"
 #include "parser.h"
 
@@ -30,7 +31,7 @@ MooObjectType moo_code_obj_type = {
 	(moo_type_create_t) moo_code_create
 };
 
-static MooObjectHash *global_env = NULL;
+MooObjectHash *global_env = NULL;
 
 extern int moo_load_code_basic(MooObjectHash *env);
 
@@ -38,15 +39,17 @@ int init_moo_code(void)
 {
 	if (moo_object_register_type(&moo_code_obj_type) < 0)
 		return(-1);
-	global_env = new MooObjectHash();
 	if (global_env)
 		return(1);
+	global_env = new MooObjectHash();
+	init_code_event();
 	moo_load_code_basic(global_env);
 	return(0);
 }
 
 void release_moo_code(void)
 {
+	release_code_event();
 	if (!global_env)
 		return;
 	delete global_env;
@@ -96,7 +99,7 @@ int MooCode::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCode::do_action(MooThing *thing, MooArgs *args)
+int MooCode::do_action(MooArgs *args)
 {
 	int ret;
 	MooObjectHash *env;
@@ -105,7 +108,7 @@ int MooCode::do_action(MooThing *thing, MooArgs *args)
 	env = frame.env();
 	// TODO add args to the environment (as MooArgs, or as something else?)
 	//env->set("args", args);
-	env->set("parent", new MooThingRef(thing));
+	env->set("parent", new MooThingRef(m_thing));
 	frame.add_block(m_code);
 	ret = frame.run();
 	args->m_result = frame.get_return();
@@ -132,7 +135,13 @@ int MooCode::set(const char *code)
 {
 	MooCodeParser parser;
 
-	m_code = parser.parse(code);
+	try {
+		m_code = parser.parse(code);
+	}
+	catch (MooException e) {
+		moo_status("%s", e.get());
+		return(-1);
+	}
 	return(0);
 }
 

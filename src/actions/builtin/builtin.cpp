@@ -112,11 +112,11 @@ int MooBuiltin::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooBuiltin::do_action(MooThing *thing, MooArgs *args)
+int MooBuiltin::do_action(MooArgs *args)
 {
 	if (!m_func)
 		return(-1);
-	return(m_func(this, thing, args));
+	return(m_func(this, m_thing, args));
 }
 
 int MooBuiltin::set(const char *name)

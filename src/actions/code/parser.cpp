@@ -72,19 +72,23 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_STRING:
 		return(new MooCodeExpr(MCT_OBJECT, new MooString(m_token)));
 	    case TT_WORD: {
-		// TODO this doesn't work yet; you need to parse between integer and float
-		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1])))
-			;//return(new MooCodeExpr(MCT_OBJECT, new MooNumber(m_token)));
-		return(new MooCodeExpr(MCT_IDENTIFIER, new MooString(m_token)));
+		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1]))) {
+			if (strchr(m_token, '.'))
+				return(new MooCodeExpr(MCT_OBJECT, new MooFloat(m_token)));
+			else
+				return(new MooCodeExpr(MCT_OBJECT, new MooInteger(m_token)));
+		}
+		else
+			return(new MooCodeExpr(MCT_IDENTIFIER, new MooString(m_token)));
 	    }
 	    case TT_OPEN: {
 		MooCodeExpr *expr = this->parse_list();
 		if (!expr)
-			throw MooException("%d, %d: Empty list?", m_line, m_col);
+			throw MooException("CODE: %d, %d: Empty list?", m_line, m_col);
 		return(new MooCodeExpr(MCT_CALL, expr));
 	    }
 	    default:
-		throw MooException("%d, %d: Invalid token type, %d", m_line, m_col, m_type);
+		throw MooException("CODE: %d, %d: Invalid token type, %d", m_line, m_col, m_type);
 	}
 }
 
@@ -144,15 +148,22 @@ int MooCodeParser::read_token()
 			m_type = TT_WORD;
 			for (; m_input[m_pos] != '\0' && !lispy_is_whitespace(m_input[m_pos]); m_pos++, m_len++) {
  				if (m_input[m_pos] == '(')
-					throw MooException("%d, %d: Unexpected open bracket.", m_line, m_col);
+					throw MooException("CODE: %d, %d: Unexpected open bracket.", m_line, m_col);
+ 				else if (m_input[m_pos] == ')') {
+					m_pos--;
+					break;
+				}
 				m_token[m_len] = m_input[m_pos];
 			}
 			m_token[m_len] = '\0';
 			break;
 		}
+		// TODO this doesn't work... maybe you could instead use m_pos for this instead (indirectly)
 		m_col++;
 	}
-	m_pos++;
+
+	if (m_input[m_pos] != '\0')
+		m_pos++;
 	return(0);
 }
 

@@ -18,7 +18,7 @@ class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
 
-	// TODO you should probably have MooArgs here, right?  It could always be NULL if there are no args.
+	// TODO you should probably have MooArgs here, right?  It could always be NULL if there are no args. YES WE SHOULD!!
 	MooObjectHash *m_env;
 
     public:
@@ -44,6 +44,8 @@ class MooCodeFrame : public MooObject {
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
+
+	MooObject *resolve(const char *name, MooArgs *args);
 };
 
 extern MooObjectType moo_code_frame_obj_type;

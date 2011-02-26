@@ -83,6 +83,11 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooCodeExpr::evaluate(MooArgs *args)
+{
+	// TODO we should create a frame and evaluate ourself in it??  This really isn't what a function would normally be
+}
+
 const char *MooCodeExpr::lineinfo()
 {
 	// TODO this should return the action/file/linenumber/columnnumber/etc to be printed for debug purposes

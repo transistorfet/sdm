@@ -21,8 +21,8 @@
 #define MAX_TOKEN_LEN		512
 
 class MooCodeParser {
-	int m_line;
-	int m_col;
+	short m_line;
+	short m_col;
 	int m_pos;
 	const char *m_input;
 

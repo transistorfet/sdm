@@ -96,7 +96,7 @@ MooObject *MooObjectHash::get(const char *key, MooObjectType *type)
 
 	if (!(obj = MooHash<MooObject *>::get(key)))
 		return(NULL);
-	if (!obj->is_a(type))
+	if (type && !obj->is_a(type))
 		throw moo_type_error;
 	return(obj);
 }

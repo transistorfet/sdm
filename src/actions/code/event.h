@@ -16,6 +16,9 @@
 class MooCodeEvent;
 class MooCodeFrame;
 
+int init_code_event(void);
+void release_code_event(void);
+
 class MooCodeEvent {
     public:
 	MooObjectHash *m_env;
@@ -41,13 +44,9 @@ class MooCodeEventEvalBlock : public MooCodeEvent {
 	int do_event(MooCodeFrame *frame);
 };
 
-
-class MooCodeEventDoAction : public MooCodeEvent {
-	MooThing *m_thing;
-	std::string *m_action;
+class MooCodeEventCallExpr : public MooCodeEvent {
     public:
-	MooCodeEventDoAction(MooObjectHash *env, MooThing *thing, const char *action, MooArgs *args);
-	virtual ~MooCodeEventDoAction();
+	MooCodeEventCallExpr(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, NULL, args) { };
 	int do_event(MooCodeFrame *frame);
 };
 

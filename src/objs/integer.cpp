@@ -21,7 +21,16 @@ struct MooObjectType moo_integer_obj_type = {
 
 MooObject *moo_integer_create(void)
 {
-	return(new MooInteger(0));
+	return(new MooInteger((moo_integer_t) 0));
+}
+
+MooInteger::MooInteger(const char *str)
+{
+	char *endptr;
+
+	m_num = strtol(str, &endptr, 0);
+	if (*endptr != '\0')
+		throw MooException("Invalid integer, %s", str);
 }
 
 int MooInteger::read_entry(const char *type, MooDataFile *data)

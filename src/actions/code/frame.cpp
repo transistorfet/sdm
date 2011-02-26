@@ -29,6 +29,7 @@ MooObjectType moo_code_frame_obj_type = {
 	(moo_type_create_t) moo_code_frame_create
 };
 
+extern MooObjectHash *global_env;
 
 MooObject *moo_code_frame_create(void)
 {
@@ -78,7 +79,7 @@ int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
 
 int MooCodeFrame::write_data(MooDataFile *data)
 {
-	const char *name;
+	//const char *name;
 
 	MooObject::write_data(data);
 	// TODO write the code to the file
@@ -102,6 +103,7 @@ int MooCodeFrame::call(const char *name, MooCodeExpr *expr)
 {
 	// TODO add eval expr event
 	// TODO add call function event (how are args passed from expr eval event to function call event?)
+	return(0);
 }
 
 int MooCodeFrame::call(const char *name, MooArgs *args)
@@ -110,11 +112,13 @@ int MooCodeFrame::call(const char *name, MooArgs *args)
 	// TODO add eval event if found
 	// TODO find the action with the given name (on what object??)
 	// TODO call action (or do we only set an event to call the action?)
+	return(0);
 }
 
 int MooCodeFrame::eval(MooCodeExpr *expr)
 {
 
+	return(0);
 }
 
 
@@ -128,11 +132,11 @@ int MooCodeFrame::run(int level)
 	//	a frame gets a limited time slice...
 	if (level < 0)
 		level = 0;
-	while (m_stack->last() > level) {
+	while (m_stack->last() >= level) {
 		if (!(event = m_stack->pop()))
 			continue;
 		try {
-			// TODO do we set the frame env to the event's env before doing the event?
+			m_env = event->m_env;
 			res = event->do_event(this);
 			if (res < 0)
 				return(res);
@@ -168,4 +172,35 @@ void MooCodeFrame::env(MooObjectHash *env)
 	m_env = env;
 }
 
+MooObject *MooCodeFrame::resolve(const char *name, MooArgs *args)
+{
+	int i;
+	MooObject *obj;
+	char *action = NULL;
+	char buffer[STRING_SIZE];
+
+	strncpy(buffer, name, STRING_SIZE);
+	buffer[STRING_SIZE - 1] = '\0';
+
+	if ((action = strchr(buffer, ':'))) {
+		*action = '\0';
+		action++;
+	}
+
+	// TODO temporary
+	if (!(obj = m_env->get(name, NULL)) && !(obj = global_env->get(name, NULL)))
+		return(NULL);
+	return(obj);
+
+	// TODO possible:  #124, me, variable, thing.prop, thing:action, #124.prop, etc
+	// TODO do variable lookup, use frame to find the evironment/table to look up
+	//	do a lookup on the frame env, then a lookup on global_env, then give up (since we don't have nested envs)
+
+	// TODO this might require a bunch of rewriting of the thing reference/string expander code
+	// if contains ':', then resolve lhs to a thing pointer, and look up the action (???)
+	// if contains a '.', then do all that processing
+
+	// if found in local environment, return value
+	// if found in global environment, return value
+}
 

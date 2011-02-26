@@ -65,7 +65,7 @@ int MooAlias::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooAlias::do_action(MooThing *thing, MooArgs *args)
+int MooAlias::do_action(MooArgs *args)
 {
 	char buffer[STRING_SIZE];
 

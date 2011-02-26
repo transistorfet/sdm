@@ -18,8 +18,8 @@
 #include <sdm/tasks/irc/pseudoserv.h>
 
 #include <sdm/actions/alias.h>
-#include <sdm/actions/builtin/builtin.h>
 #include <sdm/actions/code/code.h>
+#include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>

@@ -44,6 +44,7 @@ class MooAction;
 class MooChannel;
 
 class MooAction : public MooObject {
+    protected:
 	std::string *m_name;
 	MooThing *m_thing;
 	char m_params[MOO_PARAM_STRING_SIZE];
@@ -59,7 +60,7 @@ class MooAction : public MooObject {
 	// TODO should actions run at the permission level of the owner (SUID) or possibly have an SUID bit
 	// TODO if we do this, then we will need a function to call which elevates the permissions
 	// TODO we also need a way to elevate permissions
-	virtual int do_action(MooThing *thing, MooArgs *args) = 0;
+	virtual int do_action(MooArgs *args) = 0;
 
     public:
 	const char *name() { return(m_name->c_str()); }
@@ -80,6 +81,7 @@ class MooArgs {
 
 	MooArgs(int init_size = 5, MooThing *user = NULL, MooThing *channel = NULL);
 	MooArgs(MooObjectArray *&args, MooThing *user = NULL, MooThing *channel = NULL);
+	MooArgs(MooArgs *args, int init_size = 5);
 	~MooArgs();
 	void set_args(MooObjectArray *&args);
 

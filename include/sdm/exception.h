@@ -21,6 +21,7 @@ extern MooException moo_permissions;
 extern MooException moo_type_error;
 extern MooException moo_args_error;
 extern MooException moo_thing_not_found;
+extern MooException moo_evaluate_error;
 extern MooException moo_unknown;
 
 int moo_status(const char *fmt, ...);

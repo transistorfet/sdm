@@ -23,6 +23,7 @@ typedef struct MooObjectType {
 	moo_type_create_t m_create;
 } MooObjectType;
 
+class MooArgs;
 class MooThing;
 
 class MooObject {
@@ -34,6 +35,7 @@ class MooObject {
     public:
 	MooObject();
 	virtual ~MooObject() { }
+	void operator delete(void *ptr);
 
 	const MooObjectType *type();
 	const char *type_name() { return(this->type()->m_name); }
@@ -57,6 +59,7 @@ class MooObject {
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
+	virtual int evaluate(MooArgs *args) { throw moo_evaluate_error; }
 
 	virtual long int get_integer() { throw moo_type_error; }
 	virtual double get_float() { throw moo_type_error; }

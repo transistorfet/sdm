@@ -22,7 +22,7 @@ class MooAlias : public MooAction {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	virtual int do_action(MooThing *thing, MooArgs *args);
+	virtual int do_action(MooArgs *args);
 };
 
 extern MooObjectType moo_alias_obj_type;

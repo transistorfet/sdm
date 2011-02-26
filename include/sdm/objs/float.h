@@ -17,6 +17,7 @@ class MooFloat : public MooObject {
 	moo_float_t m_num;
 
 	MooFloat(moo_float_t num) { m_num = num; }
+	MooFloat(const char *str);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

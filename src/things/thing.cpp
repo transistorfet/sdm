@@ -553,9 +553,9 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
 		//	It should now be set in the action so we can get it from there
 		if (action->permissions() & MOO_PERM_SUID)
-			res = MooTask::elevated_do_action(action, this, args);
+			res = MooTask::elevated_do_action(action, args);
 		else
-			res = action->do_action(this, args);
+			res = action->do_action(args);
 
 		/// Set the result if we were given a pointer
 		if (result) {

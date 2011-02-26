@@ -53,7 +53,7 @@ class MooTask : public MooObject {
 
 	virtual int purge(MooUser *user) { return(-1); }
 
-	static int elevated_do_action(MooAction *action, MooThing *thing, MooArgs *args);
+	static int elevated_do_action(MooAction *action, MooArgs *args);
 
 	/// Accessors
 	int switch_handle(MooInterface *inter, int ready);

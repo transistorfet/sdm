@@ -95,6 +95,11 @@ MooObject::MooObject()
 	m_permissions = MOO_DEFAULT_PERMS;
 }
 
+void MooObject::operator delete(void *ptr)
+{
+	::delete ptr;
+}
+
 const MooObjectType *MooObject::type()
 {
 	const MooObjectType *type;

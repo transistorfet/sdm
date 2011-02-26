@@ -52,7 +52,7 @@
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
-   <code>(print "hey")</code>
+   <code>(print "hey" 0x324 124.35)</code>
   </action>
  </thing>
  <thing>

@@ -64,7 +64,7 @@ int MooTask::bestow(MooInterface *inter)
 	return(-1);
 }
 
-int MooTask::elevated_do_action(MooAction *action, MooThing *thing, MooArgs *args)
+int MooTask::elevated_do_action(MooAction *action, MooArgs *args)
 {
 	int res;
 	MooTask *prev_task;
@@ -78,7 +78,7 @@ int MooTask::elevated_do_action(MooAction *action, MooThing *thing, MooArgs *arg
 	prev_owner = MooTask::current_owner();
 	MooTask::current_owner(action->owner());
 	try {
-		res = action->do_action(thing, args);
+		res = action->do_action(args);
 	}
 	catch (int e) {
 		MooTask::current_owner(prev_task, prev_owner);

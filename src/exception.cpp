@@ -21,6 +21,7 @@ MooException moo_permissions("Permission denied");
 MooException moo_type_error("Invalid type");
 MooException moo_args_error("Invalid arguments");
 MooException moo_thing_not_found("Required thing not found");
+MooException moo_evaluate_error("Unable to evaluate object");
 MooException moo_unknown("Unknown error");
 
 MooException::MooException(const char *msg, ...)
