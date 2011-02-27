@@ -17,6 +17,7 @@ class MooCodeFunc : public MooObject {
 	moo_code_func_t m_func;
 
 	MooCodeFunc(moo_code_func_t func) { m_func = func; }
+	virtual ~MooCodeFunc() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

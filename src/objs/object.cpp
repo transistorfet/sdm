@@ -90,6 +90,7 @@ MooObject *moo_make_object(const MooObjectType *type)
 
 MooObject::MooObject()
 {
+	m_refs = 1;
 	m_delete = 0;
 	m_owner = MooTask::current_owner();
 	m_permissions = MOO_DEFAULT_PERMS;
@@ -97,7 +98,11 @@ MooObject::MooObject()
 
 void MooObject::operator delete(void *ptr)
 {
-	::delete ptr;
+	MooObject *obj = static_cast<MooObject *>(ptr);
+
+	moo_status("MEM: Freeing %x", ptr);
+	if (--obj->m_refs <= 0)
+		::delete obj;
 }
 
 const MooObjectType *MooObject::type()

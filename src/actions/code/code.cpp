@@ -19,6 +19,7 @@
 #include <sdm/actions/action.h>
 #include <sdm/actions/code/code.h>
 
+#include "func.h"
 #include "expr.h"
 #include "event.h"
 #include "frame.h"
@@ -37,8 +38,10 @@ extern int moo_load_code_basic(MooObjectHash *env);
 
 int init_moo_code(void)
 {
-	if (moo_object_register_type(&moo_code_obj_type) < 0)
-		return(-1);
+	moo_object_register_type(&moo_code_obj_type);
+	moo_object_register_type(&moo_code_func_obj_type);
+	moo_object_register_type(&moo_code_expr_obj_type);
+	moo_object_register_type(&moo_code_frame_obj_type);
 	if (global_env)
 		return(1);
 	global_env = new MooObjectHash();

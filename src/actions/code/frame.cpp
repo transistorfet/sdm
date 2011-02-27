@@ -98,30 +98,6 @@ int MooCodeFrame::add_block(MooCodeExpr *expr)
 	return(m_stack->push(new MooCodeEventEvalBlock(m_env, expr)));
 }
 
-
-int MooCodeFrame::call(const char *name, MooCodeExpr *expr)
-{
-	// TODO add eval expr event
-	// TODO add call function event (how are args passed from expr eval event to function call event?)
-	return(0);
-}
-
-int MooCodeFrame::call(const char *name, MooArgs *args)
-{
-	// TODO look for name in primatives/library functions list
-	// TODO add eval event if found
-	// TODO find the action with the given name (on what object??)
-	// TODO call action (or do we only set an event to call the action?)
-	return(0);
-}
-
-int MooCodeFrame::eval(MooCodeExpr *expr)
-{
-
-	return(0);
-}
-
-
 int MooCodeFrame::run(int level)
 {
 	int res;
@@ -138,16 +114,19 @@ int MooCodeFrame::run(int level)
 		try {
 			m_env = event->m_env;
 			res = event->do_event(this);
+			delete event;
 			if (res < 0)
 				return(res);
-			delete event;
 		}
 		catch (MooException e) {
-			// TODO what do we do if there's an error?
+			delete event;
+			// TODO this should be printed to the user (probably instead of rather than in addition to the status)
+			moo_status("CODE: %s", e.get());
 			return(-1);
 		}
 		catch (...) {
-
+			moo_status("CODE: Unknown error occurred");
+			return(-1);
 		}
 	}
 	return(0);
@@ -157,7 +136,7 @@ void MooCodeFrame::set_return(MooObject *obj)
 {
 	if (m_return)
 		delete m_return;
-	m_return = obj;
+	m_return = MOO_INCREF(obj);
 }
 
 void MooCodeFrame::env(MooObjectHash *env)

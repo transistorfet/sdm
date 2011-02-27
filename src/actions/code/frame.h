@@ -30,14 +30,6 @@ class MooCodeFrame : public MooObject {
 
 	int push_event(MooCodeEvent *event);
 	int add_block(MooCodeExpr *expr);
-	int add_expr_list(MooCodeExpr *expr);
-	int add_call(MooObject *func, MooArgs *args);		// TODO should this instead be MooObjectArray?
-	int add_code(MooObject *func, MooCodeExpr *expr);
-
-	int call(const char *name, MooCodeExpr *expr);
-	int call(const char *name, MooArgs *args);
-	int eval(MooCodeExpr *expr);
-
 	int run(int level = 0);
 
 	void set_return(MooObject *obj);

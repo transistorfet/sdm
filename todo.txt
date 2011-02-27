@@ -97,6 +97,9 @@
 	  the actual strings.
 
     Covnersion TODO:
+	* convert all moo_register_type function calls to rely on exceptions rather than return codes for reporting errors
+
+
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make an internal language of some kind
@@ -118,8 +121,6 @@
 	  notifies to that user
 	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
 	  functions intended for internal use be inaccessible from the command line?
-
-	* a MooCodeThread can be a task, and then it's fully functional
 
 	* add stuff for this new global table and integrate it better
 	* add object recycle (delete) function and command

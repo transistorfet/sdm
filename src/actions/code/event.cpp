@@ -47,7 +47,7 @@ void release_code_event(void)
 
 MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
 {
-	m_env = env;		// TODO do you make a reference?
+	MOO_INCREF(m_env = env);
 	m_expr = expr;
 	m_args = args;
 }
@@ -93,7 +93,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		str = m_expr->value();
 		if (!(obj = frame->resolve(str->get_string(), m_args)))
 			throw MooException("CODE: Undefined reference: %s", str->get_string());
-		frame->set_return(m_expr->value());
+		frame->set_return(obj);
 		break;
 	    }
 	    case MCT_CALL: {
@@ -117,7 +117,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 				return((*form)(frame, args_expr));
 		}
 		MooArgs *args = new MooArgs();
-		frame->push_event(new MooCodeEventCallExpr(NULL, args));
+		frame->push_event(new MooCodeEventCallExpr(m_env, args));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, expr, args));
 		break;
 	    }

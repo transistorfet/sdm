@@ -41,11 +41,11 @@ extern int moo_load_user_actions(MooBuiltinHash *actions);
 
 int init_builtin(void)
 {
-	if (moo_object_register_type(&moo_builtin_obj_type) < 0)
-		return(-1);
 	if (builtin_actions)
 		return(1);
+	moo_object_register_type(&moo_builtin_obj_type);
 	builtin_actions = new MooBuiltinHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
+
 	moo_load_basic_actions(builtin_actions);
 	moo_load_builder_actions(builtin_actions);
 	moo_load_channel_actions(builtin_actions);
