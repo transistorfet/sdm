@@ -27,6 +27,7 @@ typedef struct MooObjectType {
 
 class MooArgs;
 class MooThing;
+class MooObjectHash;
 
 class MooObject {
     protected:
@@ -63,7 +64,7 @@ class MooObject {
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
-	virtual int evaluate(MooArgs *args) { throw moo_evaluate_error; }
+	virtual int evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
 
 	virtual long int get_integer() { throw moo_type_error; }
 	virtual double get_float() { throw moo_type_error; }

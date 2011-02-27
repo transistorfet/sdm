@@ -10,7 +10,7 @@
 
 #include <sdm/objs/object.h>
 
-typedef int (*moo_code_func_t)(class MooCodeFrame *frame, class MooArgs *args);
+typedef int (*moo_code_func_t)(class MooObjectHash *env, class MooArgs *args);
 
 class MooCodeFunc : public MooObject {
     public:
@@ -23,7 +23,7 @@ class MooCodeFunc : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
-	virtual int evaluate(MooArgs *args);
+	virtual int evaluate(MooObjectHash *env, MooArgs *args);
 };
 
 extern MooObjectType moo_code_func_obj_type;

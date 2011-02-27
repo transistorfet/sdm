@@ -20,14 +20,15 @@ int init_code_event(void);
 void release_code_event(void);
 
 class MooCodeEvent {
-    public:
+    protected:
 	MooObjectHash *m_env;
 	MooCodeExpr *m_expr;
 	MooArgs *m_args;
 
+    public:
 	MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr = NULL, MooArgs *args = NULL);
 	virtual ~MooCodeEvent();
-	void set_args(MooArgs *args);
+	MooObjectHash *env() { return(m_env); }
 
 	virtual int do_event(MooCodeFrame *frame);
 };

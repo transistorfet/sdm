@@ -39,8 +39,9 @@ MooObject *moo_code_frame_create(void)
 MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
 {
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
+	m_env = NULL;
 	// TODO we should pass parent to the constructor, but MooObjectHash doesn't yet support nested tables
-	m_env = new MooObjectHash();
+	this->env(new MooObjectHash());
 	m_return = NULL;
 }
 
@@ -103,7 +104,6 @@ int MooCodeFrame::run(int level)
 	int res;
 	MooCodeEvent *event;
 
-	// TODO should level be relative?  That way you always call run(0) and it runs to the starting point
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
 	if (level < 0)
@@ -112,7 +112,7 @@ int MooCodeFrame::run(int level)
 		if (!(event = m_stack->pop()))
 			continue;
 		try {
-			m_env = event->m_env;
+			this->env(event->env());
 			res = event->do_event(this);
 			delete event;
 			if (res < 0)
@@ -141,14 +141,9 @@ void MooCodeFrame::set_return(MooObject *obj)
 
 void MooCodeFrame::env(MooObjectHash *env)
 {
-	// TODO m_env owns a reference to an environment.  The appropriate environment for an event is stored in the event
-	//	itself, so this function will be called when an event is being executed.  When an environment is created
-	//	for a function call or action or something, it's only reference will be owned by the event which will thus
-	//	destroy the environment when the event is destroyed (unless a new reference is created during the event's
-	//	execution)...  Should the event change m_env here before it finishes executing?
-//	if (m_env)
-//		delete m_env;
-	m_env = env;
+	if (m_env)
+		delete m_env;
+	MOO_INCREF(m_env = env);
 }
 
 MooObject *MooCodeFrame::resolve(const char *name, MooArgs *args)

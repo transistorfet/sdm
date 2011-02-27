@@ -27,6 +27,8 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 MooHash<MooFormT *> *form_env = NULL;
 
 static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr);
+static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr);
+static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr);
 
 int init_code_event(void)
 {
@@ -35,6 +37,8 @@ int init_code_event(void)
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
 	form_env->set("if", new MooFormT(code_event_if));
+	form_env->set("block", new MooFormT(code_event_block));
+	form_env->set("lambda", new MooFormT(code_event_lambda));
 	return(0);
 }
 
@@ -49,24 +53,15 @@ MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
 {
 	MOO_INCREF(m_env = env);
 	m_expr = expr;
-	m_args = args;
+	MOO_INCREF(m_args = args);
 }
 
 MooCodeEvent::~MooCodeEvent()
 {
-	// TODO should you free the m_env reference?
-	// TODO this causes a doublefree error since multiple events have a pointer to the same args.  Fix this with libgc or
-	//	else add reference management
-	//if (m_args)
-	//	delete m_args;
-}
-
-void MooCodeEvent::set_args(MooArgs *args)
-{
-	// TODO should this instead make the args?
+	if (m_env)
+		delete m_env;
 	if (m_args)
 		delete m_args;
-	m_args = args;
 }
 
 int MooCodeEvent::do_event(MooCodeFrame *frame)
@@ -92,38 +87,33 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		MooObject *str, *obj;
 		str = m_expr->value();
 		if (!(obj = frame->resolve(str->get_string(), m_args)))
-			throw MooException("CODE: Undefined reference: %s", str->get_string());
+			throw MooException("Undefined reference: %s", str->get_string());
 		frame->set_return(obj);
 		break;
 	    }
 	    case MCT_CALL: {
 		MooFormT *form;
 		MooObject *obj;
-		MooCodeExpr *expr, *args_expr;
+		MooCodeExpr *expr;
 
 		/// If the expr's value is not itself an expr, then the AST is invalid
-		try {
-			expr = dynamic_cast<MooCodeExpr *>(m_expr->value());
-		}
-		catch (...) {
-			throw MooException("CODE: (%s) Invalid AST; expected MooCodeExpr.", m_expr->lineinfo());
-		}
-
-		args_expr = expr->next();
+		if (!(expr = dynamic_cast<MooCodeExpr *>(m_expr->value())))
+			throw MooException("(%s) Invalid AST; expected MooCodeExpr.", m_expr->lineinfo());
 
 		if (expr->expr_type() == MCT_IDENTIFIER) {
 			obj = expr->value();
 			if ((form = form_env->get(obj->get_string())))
-				return((*form)(frame, args_expr));
+				return((*form)(frame, expr->next()));
 		}
 		MooArgs *args = new MooArgs();
 		frame->push_event(new MooCodeEventCallExpr(m_env, args));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, expr, args));
+		delete args;
 		break;
 	    }
 	    default:
 		// TODO you should print line and column number here, perhaps stored in expression during parsing
-		throw MooException("CODE: Invalid expression type, %d", m_expr->expr_type());
+		throw MooException("Invalid expression type, %d", m_expr->expr_type());
 	}
 	return(0);
 }
@@ -156,7 +146,6 @@ int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
 {
 	MooObject *func;
 	MooAction *action;
-	MooCodeExpr *expr;
 
 	// TODO MooAction::do_action should be changed to MooAction::evaluate()
 	// TODO the problem here is that you can't pass the frame to evaluate(), so you can't have MooCodeExpr::evaluate()
@@ -168,28 +157,23 @@ int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
 
 	// TODO re-evaluate the signifigance of MooAction... (if we are making evaluate())
 	if (!m_args || !(func = m_args->m_args->shift()))
-		throw MooException("CODE: Null function.");
+		throw MooException("Null function.");
 
+/*
 	/// If the func is not an expr, then the the function is invalid.
-	try {
-		expr = dynamic_cast<MooCodeExpr *>(func);
+	if ((expr = dynamic_cast<MooCodeExpr *>(func))) {
+		/// Create a new environment for the function to run in
+		MooObjectHash *env = new MooObjectHash();
+		// TODO use m_args as the arguments, but how do you pass them? set them in the environment???
+		frame->push_event(new MooCodeEventEvalBlock(env, expr));
+		m_args->m_result = frame.get_return();
 	}
-	catch (...) {
-		try {
-			action = dynamic_cast<MooAction *>(func);
-		}
-		catch (...) {
-			// TODO line/col info
-			throw MooException("CODE: Invalid function.");
-		}
+*/
+	if ((action = dynamic_cast<MooAction *>(func)))
 		action->do_action(m_args);
-		return(0);
-	}
-
-	/// Create a new environment for the function to run in
-	MooObjectHash *env = new MooObjectHash();
-	// TODO use m_args as the arguments, but how do you pass them? set them in the environment???
-	frame->push_event(new MooCodeEventEvalBlock(env, expr));
+	else
+		func->evaluate(m_env, m_args);
+	frame->set_return(m_args->m_result);
 	return(0);
 }
 
@@ -218,12 +202,14 @@ int MooCodeEventEvalArgs::do_event(MooCodeFrame *frame)
  * MooCodeEventAppendReturn *
  ****************************/
 
+#include <sdm/objs/integer.h>
 int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 {
 	if (!m_args)
 		return(-1);
-	// TODO do you need to inc a ref here on the return value?  Should it be embedded in one of these functions?
-	return(m_args->m_args->push(frame->get_return()));
+	// TODO this line causes a segfault for unknown reasons (possibly a double free somewhere??)
+	// TODO should this not incref, but instead just steal the ref and set return to NULL? (or otherwise set return to NULL)
+	return(m_args->m_args->push(MOO_INCREF(frame->get_return())));
 }
 
 
@@ -234,6 +220,19 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 
+	return(0);
+}
+
+static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO do you need to incref expr?
+	frame->set_return(expr);
+	return(0);
+}
+
+static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO you need to make and return a MooCodeLambda class
 	return(0);
 }
 

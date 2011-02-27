@@ -33,7 +33,7 @@
 // TODO what will the generic function prototype be?  How will parameters be passed?
 // TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
 //	have to be parsed out (the parameter names and that).
-static int basic_print(MooCodeFrame *frame, MooArgs *args);
+static int basic_print(MooObjectHash *env, MooArgs *args);
 
 int moo_load_code_basic(MooObjectHash *env)
 {
@@ -48,7 +48,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	return(0);
 }
 
-static int basic_print(MooCodeFrame *frame, MooArgs *args)
+static int basic_print(MooObjectHash *env, MooArgs *args)
 {
 	// TODO should this be the typical way you reference arguments?
 	// TODO i don't really like this, with the type reference...

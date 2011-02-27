@@ -74,7 +74,7 @@ int MooCodeExpr::read_entry(const char *type, MooDataFile *data)
 
 int MooCodeExpr::write_data(MooDataFile *data)
 {
-	const char *name;
+	//const char *name;
 
 	MooObject::write_data(data);
 	// TODO write the code to the file
@@ -83,9 +83,20 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeExpr::evaluate(MooArgs *args)
+int MooCodeExpr::evaluate(MooObjectHash *parent, MooArgs *args)
 {
-	// TODO we should create a frame and evaluate ourself in it??  This really isn't what a function would normally be
+	int ret;
+	MooObjectHash *env;
+	MooCodeFrame frame;
+
+	env = frame.env();
+	// TODO add args to the environment (as MooArgs, or as something else?)
+	//env->set("args", args);
+	//env->set("parent", new MooThingRef(m_thing));
+	frame.add_block(this);
+	ret = frame.run();
+	args->m_result = frame.get_return();
+	return(ret);
 }
 
 const char *MooCodeExpr::lineinfo()

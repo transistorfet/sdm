@@ -61,11 +61,11 @@ int MooCodeFunc::to_string(char *buffer, int max)
 //	return(snprintf(buffer, max, "%ld", m_num));
 }
 
-int MooCodeFunc::evaluate(MooArgs *args)
+int MooCodeFunc::evaluate(MooObjectHash *env, MooArgs *args)
 {
 	// TODO this really needs the frame (if only for the environment)
 	if (!m_func)
 		throw MooException("Null function");
-	return(m_func(NULL, args));
+	return(m_func(env, args));
 }
 

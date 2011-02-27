@@ -104,6 +104,9 @@ int MooCode::write_data(MooDataFile *data)
 
 int MooCode::do_action(MooArgs *args)
 {
+	return(m_code->evaluate(NULL, args));
+
+/*
 	int ret;
 	MooObjectHash *env;
 	MooCodeFrame frame;
@@ -116,6 +119,7 @@ int MooCode::do_action(MooArgs *args)
 	ret = frame.run();
 	args->m_result = frame.get_return();
 	return(ret);
+*/
 
 	/****
 
