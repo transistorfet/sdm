@@ -58,10 +58,8 @@ MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
 
 MooCodeEvent::~MooCodeEvent()
 {
-	if (m_env)
-		delete m_env;
-	if (m_args)
-		delete m_args;
+	MOO_DECREF(m_env);
+	MOO_DECREF(m_args);
 }
 
 int MooCodeEvent::do_event(MooCodeFrame *frame)
@@ -108,7 +106,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		MooArgs *args = new MooArgs();
 		frame->push_event(new MooCodeEventCallExpr(m_env, args));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, expr, args));
-		delete args;
+		MOO_DECREF(args);
 		break;
 	    }
 	    default:

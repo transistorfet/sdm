@@ -47,12 +47,9 @@ MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
 
 MooCodeFrame::~MooCodeFrame()
 {
-	if (m_stack)
-		delete m_stack;
-	if (m_env)
-		delete m_env;
-	if (m_return)
-		delete m_return;
+	MOO_DECREF(m_stack);
+	MOO_DECREF(m_env);
+	MOO_DECREF(m_return);
 }
 
 int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
@@ -134,15 +131,13 @@ int MooCodeFrame::run(int level)
 
 void MooCodeFrame::set_return(MooObject *obj)
 {
-	if (m_return)
-		delete m_return;
+	MOO_DECREF(m_return);
 	m_return = MOO_INCREF(obj);
 }
 
 void MooCodeFrame::env(MooObjectHash *env)
 {
-	if (m_env)
-		delete m_env;
+	MOO_DECREF(m_env);
 	MOO_INCREF(m_env = env);
 }
 

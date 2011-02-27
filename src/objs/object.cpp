@@ -96,15 +96,6 @@ MooObject::MooObject()
 	m_permissions = MOO_DEFAULT_PERMS;
 }
 
-void MooObject::operator delete(void *ptr)
-{
-	MooObject *obj = static_cast<MooObject *>(ptr);
-
-	moo_status("MEM: Freeing %x", ptr);
-	if (--obj->m_refs <= 0)
-		::delete obj;
-}
-
 const MooObjectType *MooObject::type()
 {
 	const MooObjectType *type;

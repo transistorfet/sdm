@@ -15,6 +15,7 @@
 #define MOO_HANDLED_ALL		2
 
 #define MOO_INCREF(ptr)		( MooObject::incref(ptr) )
+#define MOO_DECREF(ptr)		( MooObject::decref(ptr) )
 
 typedef class MooObject *(*moo_type_create_t)(void);
 
@@ -39,8 +40,8 @@ class MooObject {
     public:
 	MooObject();
 	virtual ~MooObject() { }
-	void operator delete(void *ptr);
 	static inline MooObject *incref(MooObject *obj) { if (obj) obj->m_refs++; return(obj); }
+	static inline void decref(MooObject *obj) { if (obj && --obj->m_refs <= 0) delete(obj); }
 
 	const MooObjectType *type();
 	const char *type_name() { return(this->type()->m_name); }
