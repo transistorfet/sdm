@@ -93,7 +93,7 @@ int MooCodeExpr::evaluate(MooObjectHash *parent, MooArgs *args)
 	// TODO add args to the environment (as MooArgs, or as something else?)
 	//env->set("args", args);
 	//env->set("parent", new MooThingRef(m_thing));
-	frame.add_block(this);
+	frame.add_block(args, this);
 	ret = frame.run();
 	args->m_result = frame.get_return();
 	return(ret);

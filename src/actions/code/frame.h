@@ -29,7 +29,7 @@ class MooCodeFrame : public MooObject {
 	virtual int write_data(MooDataFile *data);
 
 	int push_event(MooCodeEvent *event);
-	int add_block(MooCodeExpr *expr);
+	int add_block(MooArgs *args, MooCodeExpr *expr);
 	int run(int level = 0);
 
 	void set_return(MooObject *obj);

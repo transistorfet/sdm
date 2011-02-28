@@ -42,6 +42,7 @@ class MooChannel;
 
 class MooArgs : public MooObject {
     public:
+	MooArgs *m_parent;
 	MooAction *m_action;
 	const char *m_action_text;
 	MooObject *m_result;

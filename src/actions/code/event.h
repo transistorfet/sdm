@@ -26,7 +26,7 @@ class MooCodeEvent {
 	MooArgs *m_args;
 
     public:
-	MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr = NULL, MooArgs *args = NULL);
+	MooCodeEvent(MooObjectHash *env, MooArgs *args = NULL, MooCodeExpr *expr = NULL);
 	virtual ~MooCodeEvent();
 	MooObjectHash *env() { return(m_env); }
 
@@ -35,31 +35,31 @@ class MooCodeEvent {
 
 class MooCodeEventEvalExpr : public MooCodeEvent {
     public:
-	MooCodeEventEvalExpr(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, expr) { };
+	MooCodeEventEvalExpr(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
 	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventEvalBlock : public MooCodeEvent {
     public:
-	MooCodeEventEvalBlock(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, expr) { };
+	MooCodeEventEvalBlock(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
 	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventCallExpr : public MooCodeEvent {
     public:
-	MooCodeEventCallExpr(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, NULL, args) { };
+	MooCodeEventCallExpr(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
 	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventEvalArgs : public MooCodeEvent {
     public:
-	MooCodeEventEvalArgs(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args) : MooCodeEvent(env, expr, args) { };
+	MooCodeEventEvalArgs(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
 	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventAppendReturn : public MooCodeEvent {
     public:
-	MooCodeEventAppendReturn(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, NULL, args) { };
+	MooCodeEventAppendReturn(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
 	int do_event(MooCodeFrame *frame);
 };
 

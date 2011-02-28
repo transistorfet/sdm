@@ -49,11 +49,11 @@ void release_code_event(void)
 	delete form_env;
 }
 
-MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
+MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr)
 {
 	MOO_INCREF(m_env = env);
-	m_expr = expr;
 	MOO_INCREF(m_args = args);
+	m_expr = expr;
 }
 
 MooCodeEvent::~MooCodeEvent()
@@ -103,9 +103,10 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 			if ((form = form_env->get(obj->get_string())))
 				return((*form)(frame, expr->next()));
 		}
-		MooArgs *args = new MooArgs();
+		// TODO initialize with previous call's arguments (where get?) (either this->m_args or frame->m_args)
+		MooArgs *args = new MooArgs(m_args);
 		frame->push_event(new MooCodeEventCallExpr(m_env, args));
-		frame->push_event(new MooCodeEventEvalArgs(m_env, expr, args));
+		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
 		MOO_DECREF(args);
 		break;
 	    }
@@ -130,8 +131,8 @@ int MooCodeEventEvalBlock::do_event(MooCodeFrame *frame)
 	remain = m_expr->next();
 
 	if (remain)
-		frame->push_event(new MooCodeEventEvalBlock(m_env, remain));
-	frame->push_event(new MooCodeEventEvalExpr(m_env, m_expr));
+		frame->push_event(new MooCodeEventEvalBlock(m_env, m_args, remain));
+	frame->push_event(new MooCodeEventEvalExpr(m_env, m_args, m_expr));
 	return(0);
 }
 
@@ -189,9 +190,9 @@ int MooCodeEventEvalArgs::do_event(MooCodeFrame *frame)
 	remain = m_expr->next();
 
 	if (remain)
-		frame->push_event(new MooCodeEventEvalArgs(m_env, remain, m_args));
+		frame->push_event(new MooCodeEventEvalArgs(m_env, m_args, remain));
 	frame->push_event(new MooCodeEventAppendReturn(m_env, m_args));
-	frame->push_event(new MooCodeEventEvalExpr(m_env, m_expr));
+	frame->push_event(new MooCodeEventEvalExpr(m_env, m_args->m_parent, m_expr));
 	return(0);
 }
 

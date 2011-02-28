@@ -91,9 +91,9 @@ int MooCodeFrame::push_event(MooCodeEvent *event)
 	return(m_stack->push(event));
 }
 
-int MooCodeFrame::add_block(MooCodeExpr *expr)
+int MooCodeFrame::add_block(MooArgs *args, MooCodeExpr *expr)
 {
-	return(m_stack->push(new MooCodeEventEvalBlock(m_env, expr)));
+	return(m_stack->push(new MooCodeEventEvalBlock(m_env, args, expr)));
 }
 
 int MooCodeFrame::run(int level)

@@ -38,6 +38,7 @@ MooObject *moo_args_create(void)
 
 MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
+	m_parent = NULL;
 	m_action = NULL;
 	m_action_text = NULL;
 	m_result = NULL;
@@ -50,6 +51,7 @@ MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 
 MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
 {
+	m_parent = NULL;
 	m_action = NULL;
 	m_action_text = NULL;
 	m_result = NULL;
@@ -64,6 +66,7 @@ MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
 
 MooArgs::MooArgs(MooArgs *args, int init_size)
 {
+	MOO_INCREF(m_parent = args);
 	m_action = args->m_action;
 	m_action_text = args->m_action_text;
 	m_result = NULL;
