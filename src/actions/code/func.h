@@ -21,7 +21,6 @@ class MooCodeFunc : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
 	virtual int evaluate(MooObjectHash *env, MooArgs *args);
 };

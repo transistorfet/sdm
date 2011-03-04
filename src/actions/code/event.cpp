@@ -29,6 +29,7 @@ MooHash<MooFormT *> *form_env = NULL;
 static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr);
 static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr);
 static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr);
+static int code_event_foreach(MooCodeFrame *frame, MooCodeExpr *expr);
 
 int init_code_event(void)
 {
@@ -39,6 +40,7 @@ int init_code_event(void)
 	form_env->set("if", new MooFormT(code_event_if));
 	form_env->set("block", new MooFormT(code_event_block));
 	form_env->set("lambda", new MooFormT(code_event_lambda));
+	form_env->set("foreach", new MooFormT(code_event_foreach));
 	return(0);
 }
 
@@ -230,6 +232,12 @@ static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr)
 }
 
 static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO you need to make and return a MooCodeLambda class
+	return(0);
+}
+
+static int code_event_foreach(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	// TODO you need to make and return a MooCodeLambda class
 	return(0);

@@ -95,9 +95,12 @@ int MooCode::read_entry(const char *type, MooDataFile *data)
 
 int MooCode::write_data(MooDataFile *data)
 {
+	char buffer[STRING_SIZE];
+
 	MooObject::write_data(data);
-	// TODO write the code to the file
-	//data->write_string_entry("code", name);
+	MooCodeParser::generate(m_code, buffer, STRING_SIZE);
+	// TODO should this write a raw_string instead?
+	data->write_string_entry("code", buffer);
 	data->write_string_entry("params", this->params());
 	return(0);
 }
@@ -144,6 +147,10 @@ int MooCode::set(const char *code)
 
 	try {
 		m_code = parser.parse(code);
+		{ char buffer[1024];
+			MooCodeParser::generate(m_code, buffer, 1024);
+			moo_status("CODE: %s", buffer);
+		}
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());

@@ -65,6 +65,8 @@ class MooObject {
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
+	// TODO should this be called index??  It's not for indexing arrays; it's for accessing object members
+	virtual MooObject *index(const char *str, MooObject *value = NULL) { return(NULL); }
 	virtual int evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
 
 	virtual long int get_integer() { throw moo_type_error; }

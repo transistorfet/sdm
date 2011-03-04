@@ -102,7 +102,6 @@
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
-	* make an internal language of some kind
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 	* make MooObjectHash and MooObjectTree, and convert MooThing to use them for prop and action tables (and their automagic saving
 	  functionality)

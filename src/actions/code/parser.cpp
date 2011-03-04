@@ -210,3 +210,52 @@ static inline char lispy_escape_char(char ch)
 }
 
 
+int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char linebr, int indent)
+{
+	int i = 0;
+	MooObject *obj;
+	MooCodeExpr *call;
+
+	for (; expr && i < max; expr = expr->next()) {
+		if (indent < 0)
+			indent *= -1;
+		else {
+			for (int j = 0; i < max && j < indent; i++, j++)
+				buffer[i] = ' ';
+		}
+
+
+		if (expr->expr_type() == MCT_OBJECT) {
+			if (!(obj = expr->value()))
+				return(0);
+			if (dynamic_cast<MooString *>(obj)) {
+				buffer[i++] = '\'';
+				i += obj->to_string(&buffer[i], max - i);
+				buffer[i++] = '\'';
+			}
+			else
+				i += obj->to_string(&buffer[i], max - i);
+			buffer[i++] = linebr;
+		}
+		else if (expr->expr_type() == MCT_IDENTIFIER) {
+			if (!(obj = expr->value()))
+				return(0);
+			i += obj->to_string(&buffer[i], max - i);
+			buffer[i++] = linebr;
+		}
+		else if (expr->expr_type() == MCT_CALL) {
+			if (!(obj = expr->value()))
+				return(0);
+			if (!(call = dynamic_cast<MooCodeExpr *>(obj)))
+				return(0);
+			buffer[i++] = '(';
+			i += MooCodeParser::generate(call, &buffer[i], max - i, linebr, (indent + 1) * -1);
+			if (buffer[i - 1] == linebr)
+				i--;
+			buffer[i++] = ')';
+		}
+	}
+	return(i);
+}
+
+

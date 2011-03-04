@@ -46,19 +46,10 @@ int MooCodeFunc::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeFunc::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-/*
-	char *remain;
-
-	m_num = strtol(text, &remain, 0);
-	return(remain - text);
-*/
-}
-
 int MooCodeFunc::to_string(char *buffer, int max)
 {
 //	return(snprintf(buffer, max, "%ld", m_num));
+	return(0);
 }
 
 int MooCodeFunc::evaluate(MooObjectHash *env, MooArgs *args)

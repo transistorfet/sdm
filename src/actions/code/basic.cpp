@@ -50,8 +50,6 @@ int moo_load_code_basic(MooObjectHash *env)
 
 static int basic_print(MooObjectHash *env, MooArgs *args)
 {
-	// TODO should this be the typical way you reference arguments?
-	// TODO i don't really like this, with the type reference...
 	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
 	return(0);
 }

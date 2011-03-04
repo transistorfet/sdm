@@ -34,11 +34,12 @@ class MooCodeParser {
 	MooCodeParser();
 
 	MooCodeExpr *parse(const char *str);
+	static int generate(MooCodeExpr *expr, char *buffer, int max, char linebr = '\n', int indent = 0);
 
 	MooCodeExpr *parse_list();
 	MooCodeExpr *parse_token();
 	int read_token();
-	
+
 };
 
 #endif
