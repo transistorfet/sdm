@@ -3,15 +3,14 @@
  * Description:	MooCode Event
  */
 
-#ifndef _SDM_ACTIONS_CODE_EVENT_H
-#define _SDM_ACTIONS_CODE_EVENT_H
+#ifndef _SDM_CODE_EVENT_H
+#define _SDM_CODE_EVENT_H
 
 #include <sdm/array.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
-#include "expr.h"
+#include <sdm/code/expr.h>
 
 class MooCodeEvent;
 class MooCodeFrame;

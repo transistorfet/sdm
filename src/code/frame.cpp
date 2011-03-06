@@ -15,12 +15,7 @@
 #include <sdm/objs/object.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "expr.h"
-#include "event.h"
-#include "frame.h"
+#include <sdm/code/code.h>
 
 MooObjectType moo_code_frame_obj_type = {
 	&moo_object_obj_type,
@@ -143,7 +138,6 @@ void MooCodeFrame::env(MooObjectHash *env)
 
 MooObject *MooCodeFrame::resolve(const char *name, MooArgs *args)
 {
-	int i;
 	MooObject *obj;
 	char *action_name, *remain;
 	char buffer[STRING_SIZE];

@@ -3,16 +3,15 @@
  * Description:	MooCode Frame
  */
 
-#ifndef _SDM_ACTIONS_CODE_FRAME_H
-#define _SDM_ACTIONS_CODE_FRAME_H
+#ifndef _SDM_CODE_FRAME_H
+#define _SDM_CODE_FRAME_H
 
 #include <sdm/array.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
-#include "expr.h"
-#include "event.h"
+#include <sdm/code/expr.h>
+#include <sdm/code/event.h>
 
 class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;

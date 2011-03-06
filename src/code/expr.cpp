@@ -15,11 +15,7 @@
 #include <sdm/objs/object.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "expr.h"
-#include "frame.h"
+#include <sdm/code/code.h>
 
 MooObjectType moo_code_expr_obj_type = {
 	&moo_object_obj_type,

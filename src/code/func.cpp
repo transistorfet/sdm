@@ -9,9 +9,8 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/code/code.h>
 #include <sdm/objs/object.h>
-
-#include "func.h"
 
 struct MooObjectType moo_code_func_obj_type = {
 	NULL,

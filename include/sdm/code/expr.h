@@ -3,12 +3,11 @@
  * Description:	MooCode Expression
  */
 
-#ifndef _SDM_ACTIONS_CODE_EXPR_H
-#define _SDM_ACTIONS_CODE_EXPR_H
+#ifndef _SDM_CODE_EXPR_H
+#define _SDM_CODE_EXPR_H
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
 #define MCT_OBJECT	1
 #define MCT_IDENTIFIER	2

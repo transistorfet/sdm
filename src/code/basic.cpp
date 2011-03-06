@@ -22,13 +22,7 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
-#include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "func.h"
-#include "expr.h"
-#include "frame.h"
-#include "event.h"
+#include <sdm/code/code.h>
 
 // TODO what will the generic function prototype be?  How will parameters be passed?
 // TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
@@ -82,7 +76,7 @@ static int basic_null(MooObjectHash *env, MooArgs *args)
 
 /*
 
-(set $thing:title (lambda ()
+(set thing:title (lambda ()
 	(if (null this.title)
 		this.title
 		(if (null this.name)

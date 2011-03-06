@@ -1,6 +1,6 @@
 /*
  * Name:	code.cpp
- * Description:	MooCode
+ * Description:	MooCode Action
  */
 
 #include <stdio.h>
@@ -12,67 +12,34 @@
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/code/code.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thingref.h>
 
 #include <sdm/things/thing.h>
 #include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "func.h"
-#include "expr.h"
-#include "event.h"
-#include "frame.h"
-#include "parser.h"
+#include <sdm/actions/code.h>
 
 MooObjectType moo_code_obj_type = {
 	&moo_action_obj_type,
 	"moocode",
-	typeid(MooCode).name(),
+	typeid(MooCodeAction).name(),
 	(moo_type_create_t) moo_code_create
 };
 
-MooObjectHash *global_env = NULL;
-
-extern int moo_load_code_basic(MooObjectHash *env);
-
-int init_moo_code(void)
-{
-	moo_object_register_type(&moo_code_obj_type);
-	moo_object_register_type(&moo_code_func_obj_type);
-	moo_object_register_type(&moo_code_expr_obj_type);
-	moo_object_register_type(&moo_code_frame_obj_type);
-	if (global_env)
-		return(1);
-	global_env = new MooObjectHash();
-	init_code_event();
-	moo_load_code_basic(global_env);
-	return(0);
-}
-
-void release_moo_code(void)
-{
-	release_code_event();
-	if (!global_env)
-		return;
-	delete global_env;
-	global_env = NULL;
-	moo_object_deregister_type(&moo_code_obj_type);
-}
-
 MooObject *moo_code_create(void)
 {
-	return(new MooCode());
+	return(new MooCodeAction());
 }
 
-MooCode::MooCode(MooCodeExpr *code, const char *params, const char *name, MooThing *thing) : MooAction(name, thing)
+MooCodeAction::MooCodeAction(MooCodeExpr *code, const char *params, const char *name, MooThing *thing) : MooAction(name, thing)
 {
 	m_code = code;
 	if (params)
 		this->params(params);
 }
 
-int MooCode::read_entry(const char *type, MooDataFile *data)
+int MooCodeAction::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "code")) {
 		char buffer[STRING_SIZE];
@@ -93,7 +60,7 @@ int MooCode::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooCode::write_data(MooDataFile *data)
+int MooCodeAction::write_data(MooDataFile *data)
 {
 	char buffer[STRING_SIZE];
 
@@ -105,7 +72,7 @@ int MooCode::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCode::do_action(MooArgs *args)
+int MooCodeAction::do_action(MooArgs *args)
 {
 	return(m_code->evaluate(NULL, args));
 
@@ -141,7 +108,7 @@ int MooCode::do_action(MooArgs *args)
 	*/
 }
 
-int MooCode::set(const char *code)
+int MooCodeAction::set(const char *code)
 {
 	MooCodeParser parser;
 

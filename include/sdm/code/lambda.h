@@ -3,13 +3,13 @@
  * Description:	Moo Code Lambda
  */
 
-#ifndef _SDM_ACTION_CODE_LAMBDA_H
-#define _SDM_ACTION_CODE_LAMBDA_H
+#ifndef _SDM_CODE_LAMBDA_H
+#define _SDM_CODE_LAMBDA_H
 
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
-#include "expr.h"
+#include <sdm/code/expr.h>
 
 class MooCodeLambda : public MooObject {
     public:

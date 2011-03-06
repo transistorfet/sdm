@@ -18,13 +18,7 @@
 #include <sdm/objs/integer.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "expr.h"
-#include "event.h"
-#include "frame.h"
-#include "parser.h"
+#include <sdm/code/code.h>
 
 static inline int lispy_is_identifier(char);
 static inline int lispy_is_digit(char);

@@ -3,8 +3,8 @@
  * Description:	Moo Code Function
  */
 
-#ifndef _SDM_ACTION_CODE_FUNC_H
-#define _SDM_ACTION_CODE_FUNC_H
+#ifndef _SDM_CODE_FUNC_H
+#define _SDM_CODE_FUNC_H
 
 #include <stdarg.h>
 

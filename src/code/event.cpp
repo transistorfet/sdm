@@ -15,12 +15,7 @@
 #include <sdm/objs/object.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
-#include <sdm/actions/code/code.h>
-
-#include "expr.h"
-#include "event.h"
-#include "frame.h"
+#include <sdm/code/code.h>
 
 typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
@@ -84,12 +79,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		// TODO instead of throwing an exception we just return NULL, right?
-		//MooObject *str, *obj;
 		MooObject *str = m_expr->value();
-		//if (!(obj = frame->resolve(str->get_string(), m_args)))
-		//	throw MooException("Undefined reference: %s", str->get_string());
-		//frame->set_return(obj);
 		frame->set_return(frame->resolve(str->get_string(), m_args));
 		break;
 	    }

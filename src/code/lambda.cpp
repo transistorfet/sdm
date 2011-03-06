@@ -10,9 +10,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-
-#include "frame.h"
-#include "lambda.h"
+#include <sdm/code/code.h>
 
 struct MooObjectType moo_code_lambda_obj_type = {
 	NULL,
