@@ -299,6 +299,18 @@ void MooThing::add_global(const char *name, MooObject *obj)
 	moo_global_table->set(name, obj);
 }
 
+MooObject *MooThing::access(const char *name, MooObject *value)
+{
+	// TODO do you need to do permissions checks here?
+	if (value) {
+		if (this->set_property(name, value) < 0)
+			return(NULL);
+		return(value);
+	}
+	else
+		return(this->get_property(name, NULL));
+}
+
 ///// Property Methods /////
 
 int MooThing::set_property(const char *name, MooObject *obj)

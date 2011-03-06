@@ -54,7 +54,6 @@ int MooCodeFunc::to_string(char *buffer, int max)
 
 int MooCodeFunc::evaluate(MooObjectHash *env, MooArgs *args)
 {
-	// TODO this really needs the frame (if only for the environment)
 	if (!m_func)
 		throw MooException("Null function");
 	return(m_func(env, args));

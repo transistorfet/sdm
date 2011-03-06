@@ -30,6 +30,7 @@ OBJS =	colours.o	\
 	actions/code/expr.o	\
 	actions/code/frame.o	\
 	actions/code/func.o	\
+	actions/code/lambda.o	\
 	actions/code/parser.o	\
 	interfaces/interface.o	\
 	interfaces/rpc.o	\
@@ -258,7 +259,8 @@ actions/code/event.o: actions/code/event.cpp ../include/sdm/misc.h \
   ../include/sdm/tree.h ../include/sdm/array.h \
   ../include/sdm/actions/action.h ../include/sdm/objs/args.h \
   ../include/sdm/things/references.h ../include/sdm/actions/code/code.h \
-  actions/code/expr.h actions/code/event.h actions/code/frame.h
+  actions/code/expr.h actions/code/event.h actions/code/frame.h \
+  ../include/sdm/objs/integer.h
 
 actions/code/expr.o: actions/code/expr.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
@@ -282,6 +284,13 @@ actions/code/func.o: actions/code/func.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/data.h \
   ../include/sdm/misc.h actions/code/func.h
+
+actions/code/lambda.o: actions/code/lambda.cpp ../include/sdm/memory.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/objs/object.h ../include/sdm/data.h \
+  ../include/sdm/misc.h actions/code/lambda.h actions/code/expr.h \
+  ../include/sdm/actions/action.h ../include/sdm/array.h \
+  ../include/sdm/objs/args.h
 
 actions/code/parser.o: actions/code/parser.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \

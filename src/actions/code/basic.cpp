@@ -33,7 +33,63 @@
 // TODO what will the generic function prototype be?  How will parameters be passed?
 // TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
 //	have to be parsed out (the parameter names and that).
-static int basic_print(MooObjectHash *env, MooArgs *args);
+
+static int basic_print(MooObjectHash *env, MooArgs *args)
+{
+	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
+	return(0);
+}
+
+static int basic_add(MooObjectHash *env, MooArgs *args)
+{
+	// TODO what type? double? long int? a different function or something for each?
+	for (int i = 0; i < args->m_args->last(); i++) {
+		
+	}
+	return(0);
+}
+
+static int basic_subtract(MooObjectHash *env, MooArgs *args)
+{
+
+	return(0);
+}
+
+static int basic_multiply(MooObjectHash *env, MooArgs *args)
+{
+
+	return(0);
+}
+
+static int basic_divide(MooObjectHash *env, MooArgs *args)
+{
+
+	return(0);
+}
+
+static int basic_null(MooObjectHash *env, MooArgs *args)
+{
+	for (int i = 0; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i, NULL)) {
+			args->m_result = new MooInteger((moo_integer_t) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger(1);
+	return(0);
+}
+
+
+/*
+
+(set $thing:title (lambda ()
+	(if (null this.title)
+		this.title
+		(if (null this.name)
+			this.name
+			"object")))))
+
+*/
 
 int moo_load_code_basic(MooObjectHash *env)
 {
@@ -45,12 +101,11 @@ int moo_load_code_basic(MooObjectHash *env)
 	//	environment (and then the env relies on garbage collection to be freed)
 
 	env->set("print", new MooCodeFunc(basic_print));
-	return(0);
-}
-
-static int basic_print(MooObjectHash *env, MooArgs *args)
-{
-	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
+	env->set("+", new MooCodeFunc(basic_add));
+	env->set("-", new MooCodeFunc(basic_subtract));
+	env->set("*", new MooCodeFunc(basic_multiply));
+	env->set("/", new MooCodeFunc(basic_divide));
+	env->set("null", new MooCodeFunc(basic_null));
 	return(0);
 }
 

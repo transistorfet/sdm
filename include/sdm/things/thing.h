@@ -50,6 +50,8 @@ class MooThing : public MooObject {
 	MooThing *clone();
 	static void add_global(const char *name, MooObject *obj);
 
+	virtual MooObject *access(const char *name, MooObject *value = NULL);
+
 	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
 	int set_property(const char *name, moo_id_t id);

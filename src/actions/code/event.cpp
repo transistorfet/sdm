@@ -84,11 +84,13 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		MooObject *str, *obj;
-		str = m_expr->value();
-		if (!(obj = frame->resolve(str->get_string(), m_args)))
-			throw MooException("Undefined reference: %s", str->get_string());
-		frame->set_return(obj);
+		// TODO instead of throwing an exception we just return NULL, right?
+		//MooObject *str, *obj;
+		MooObject *str = m_expr->value();
+		//if (!(obj = frame->resolve(str->get_string(), m_args)))
+		//	throw MooException("Undefined reference: %s", str->get_string());
+		//frame->set_return(obj);
+		frame->set_return(frame->resolve(str->get_string(), m_args));
 		break;
 	    }
 	    case MCT_CALL: {

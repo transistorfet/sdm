@@ -38,6 +38,7 @@ class MooCodeFrame : public MooObject {
 	void env(MooObjectHash *env);
 
 	MooObject *resolve(const char *name, MooArgs *args);
+	MooObject *get_member(const char *name, MooObject *obj);
 };
 
 extern MooObjectType moo_code_frame_obj_type;

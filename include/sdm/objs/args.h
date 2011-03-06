@@ -70,6 +70,8 @@ class MooArgs : public MooObject {
 	void match_args_throw(const char *params);
 	const MooObjectType *get_type(char param);
 
+	virtual MooObject *access(const char *name, MooObject *value = NULL);
+
 	/// Accessors
 	inline MooObject *get(int index, MooObjectType *type) { return(m_args->get(index, type)); }
 	inline long int get_integer(int index) { return(m_args->get_integer(index)); }

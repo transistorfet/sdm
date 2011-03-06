@@ -198,6 +198,32 @@ int MooObject::check(moo_perm_t perms)
 	return(0);
 }
 
+MooObject *MooObject::member_object(const char *name, MooObject *value)
+{
+	int i;
+	MooObject *obj;
+	char *str, *remain;
+	char buffer[STRING_SIZE];
+
+	strncpy(buffer, name, STRING_SIZE);
+	buffer[STRING_SIZE - 1] = '\0';
+
+	// TODO do you need to do permissions checks during all of this?? (should be done in subfunc?)
+	// TODO should you throw an error if we can't set the value, instead of just returing a result?
+	for (str = buffer, obj = this; str && *str != '\0' && obj; str = remain) {
+		if ((remain = strchr(buffer, '.'))) {
+			*remain = '\0';
+			remain++;
+			if (!(obj = obj->access(str, NULL)))
+				return(NULL);
+		}
+		else
+			return(obj->access(str, value));
+	}
+	return(NULL);
+}
+
+
 moo_id_t MooObject::owner(moo_id_t id)
 {
 	return(m_owner = id);

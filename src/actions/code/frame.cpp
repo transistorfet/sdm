@@ -145,31 +145,36 @@ MooObject *MooCodeFrame::resolve(const char *name, MooArgs *args)
 {
 	int i;
 	MooObject *obj;
-	char *action = NULL;
+	char *action_name, *remain;
 	char buffer[STRING_SIZE];
 
 	strncpy(buffer, name, STRING_SIZE);
 	buffer[STRING_SIZE - 1] = '\0';
 
-	if ((action = strchr(buffer, ':'))) {
-		*action = '\0';
-		action++;
+	if ((action_name = strchr(buffer, ':'))) {
+		*action_name = '\0';
+		action_name++;
 	}
 
-	// TODO temporary
-	if (!(obj = m_env->get(name, NULL)) && !(obj = global_env->get(name, NULL)))
+	if ((remain = strchr(buffer, '.'))) {
+		*remain = '\0';
+		remain++;
+	}
+
+	// TODO should this take env as an arg rather than assuming m_env is accurate?
+	if (!(obj = MooThing::reference(buffer))
+	    && !(obj = m_env->get(buffer, NULL))
+	    && !(obj = global_env->get(buffer, NULL)))
 		return(NULL);
+	if (remain && !(obj = obj->member_object(remain)))
+		return(NULL);
+
+	if (action_name) {
+		MooThing *thing;
+		if (!(thing = obj->get_thing()))
+			return(NULL);
+		return(thing->get_action(action_name));
+	}
 	return(obj);
-
-	// TODO possible:  #124, me, variable, thing.prop, thing:action, #124.prop, etc
-	// TODO do variable lookup, use frame to find the evironment/table to look up
-	//	do a lookup on the frame env, then a lookup on global_env, then give up (since we don't have nested envs)
-
-	// TODO this might require a bunch of rewriting of the thing reference/string expander code
-	// if contains ':', then resolve lhs to a thing pointer, and look up the action (???)
-	// if contains a '.', then do all that processing
-
-	// if found in local environment, return value
-	// if found in global environment, return value
 }
 

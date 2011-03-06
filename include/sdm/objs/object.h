@@ -65,14 +65,15 @@ class MooObject {
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
-	// TODO should this be called index??  It's not for indexing arrays; it's for accessing object members
-	virtual MooObject *index(const char *str, MooObject *value = NULL) { return(NULL); }
+	virtual MooObject *access(const char *name, MooObject *value = NULL) { return(NULL); }
 	virtual int evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
 
 	virtual long int get_integer() { throw moo_type_error; }
 	virtual double get_float() { throw moo_type_error; }
 	virtual const char *get_string() { throw moo_type_error; }
 	virtual MooThing *get_thing() { throw moo_type_error; }
+
+	MooObject *member_object(const char *name, MooObject *value = NULL);
 
 	void check_throw(moo_perm_t perms);
 	int check(moo_perm_t perms);
@@ -112,6 +113,14 @@ inline int MooObject::is_a(const MooObjectType *type) {
 	}
 	return(0);
 }
+
+#define MOO_SET_MEMBER(var, type, value) 				\
+	if ((value)) {							\
+		type obj;						\
+		if (!(obj = dynamic_cast<type>((value))))		\
+			throw moo_type_error;				\
+		(var) = obj;						\
+	}
 
 #endif
 

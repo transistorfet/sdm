@@ -270,3 +270,42 @@ const MooObjectType *MooArgs::get_type(char param)
 	}
 }
 
+
+MooObject *MooArgs::access(const char *name, MooObject *value)
+{
+	if (!strcmp(name, "args")) {
+		MOO_SET_MEMBER(m_args, MooObjectArray *, value)
+		return(m_args);
+	}
+	else if (!strcmp(name, "this")) {
+		MOO_SET_MEMBER(m_this, MooThing *, value)
+		return(m_this);
+	}
+	else if (!strcmp(name, "result")) {
+		if (value)
+			m_result = value;
+		return(m_result);
+	}
+	else if (!strcmp(name, "user")) {
+		MOO_SET_MEMBER(m_user, MooThing *, value)
+		return(m_user);
+	}
+	else if (!strcmp(name, "channel")) {
+		MOO_SET_MEMBER(m_channel, MooThing *, value)
+		return(m_channel);
+	}
+	else if (!strcmp(name, "action")) {
+		MOO_SET_MEMBER(m_action, MooAction *, value)
+		return(m_action);
+	}
+	else if (!strcmp(name, "parent")) {
+		MOO_SET_MEMBER(m_parent, MooArgs *, value)
+		return(m_parent);
+	}
+	else if (!strcmp(name, "caller")) {
+		MOO_SET_MEMBER(m_caller, MooThing *, value)
+		return(m_caller);
+	}
+	return(NULL);
+}
+
