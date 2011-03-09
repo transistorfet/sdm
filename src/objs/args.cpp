@@ -79,16 +79,14 @@ MooArgs::MooArgs(MooArgs *args, int init_size)
 
 MooArgs::~MooArgs()
 {
-	if (m_result)
-		delete m_result;
-	if (m_args)
-		delete m_args;
+	MOO_DECREF(m_result);
+	MooGC::decref(m_args);
+	//MOO_DECREF(m_args);
 }
 
 void MooArgs::set_args(MooObjectArray *&args)
 {
-	if (m_args)
-		delete m_args;
+	MOO_DECREF(m_args);
 	m_args = args;
 	args = NULL;
 }

@@ -16,6 +16,8 @@
 #include <sdm/code/parser.h>
 #include <sdm/code/lambda.h>
 
+extern MooObjectHash *global_env;
+
 int init_moo_code(void);
 void release_moo_code(void);
 

@@ -90,7 +90,6 @@ MooObject *moo_make_object(const MooObjectType *type)
 
 MooObject::MooObject()
 {
-	m_refs = 1;
 	m_delete = 0;
 	m_owner = MooTask::current_owner();
 	m_permissions = MOO_DEFAULT_PERMS;
@@ -200,7 +199,6 @@ int MooObject::check(moo_perm_t perms)
 
 MooObject *MooObject::member_object(const char *name, MooObject *value)
 {
-	int i;
 	MooObject *obj;
 	char *str, *remain;
 	char buffer[STRING_SIZE];

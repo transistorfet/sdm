@@ -30,7 +30,16 @@
 
 static int basic_print(MooObjectHash *env, MooArgs *args)
 {
-	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
+	// TODO get_string causes a type error when printing a number, which isn't caught until way up the line (at the nearest
+	//	action call, I guess).  This is potentially a very big problem, and doesn't allow for moocode handling of exceptions.
+	//args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(obj = args->m_args->get(0, NULL)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	args->m_user->notify(TNT_STATUS, args, buffer);
 	return(0);
 }
 

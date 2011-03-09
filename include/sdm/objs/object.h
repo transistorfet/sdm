@@ -8,14 +8,12 @@
 
 #include <typeinfo>
 #include <stdarg.h>
+#include <sdm/gc.h>
 #include <sdm/data.h>
 
 #define MOO_NOT_HANDLED		0
 #define MOO_HANDLED		1
 #define MOO_HANDLED_ALL		2
-
-#define MOO_INCREF(ptr)		( MooObject::incref(ptr) )
-#define MOO_DECREF(ptr)		( MooObject::decref(ptr) )
 
 typedef class MooObject *(*moo_type_create_t)(void);
 
@@ -30,9 +28,8 @@ class MooArgs;
 class MooThing;
 class MooObjectHash;
 
-class MooObject {
+class MooObject : public MooGC {
     protected:
-	int m_refs;
 	int m_delete;
 	moo_id_t m_owner;
 	moo_perm_t m_permissions;
@@ -40,8 +37,6 @@ class MooObject {
     public:
 	MooObject();
 	virtual ~MooObject() { }
-	static inline MooObject *incref(MooObject *obj) { if (obj) obj->m_refs++; return(obj); }
-	static inline void decref(MooObject *obj) { if (obj && --obj->m_refs <= 0) delete(obj); }
 
 	const MooObjectType *type();
 	const char *type_name() { return(this->type()->m_name); }
