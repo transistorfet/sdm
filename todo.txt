@@ -85,6 +85,8 @@
 	* there is currently no point to frames, since we create a new frame every time a lambda or block is evaluated, as well as
 	  for actions.  Can we change this all so that only one frame is used?  Should you even try to do that?
 	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
+	* fix MooArray instances so that they pass a destroy_t function (how can you get it to work with delete??)
+	* convert hash and tree to use a destroy_t function, so that MOO_DECREF can be called for objects
 
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code

@@ -31,13 +31,15 @@ template<typename T>
 class MooTree {
     protected:
 	int m_bits;
+	void (*m_destroy)(T);
 	MooTreeEntry<T> *m_traverse_next;
 	MooTreeEntry<T> *m_root;
 
 	void destroy_subtree(MooTreeEntry<T> *entry);
     public:
-	MooTree(int bits = MOO_TREE_DEFAULT_BITS);
+	MooTree(int bits = MOO_TREE_DEFAULT_BITS, void (*destroy)(T)= MooTree::destroy);
 	~MooTree();
+	static void destroy(T value) { delete value; }
 
 	int set(const char *key, T data);
 	int remove(const char *key);
@@ -54,9 +56,10 @@ class MooTree {
 
 
 template<typename T>
-MooTree<T>::MooTree(int bits)
+MooTree<T>::MooTree(int bits, void (*destroy)(T))
 {
 	m_bits = bits;
+	m_destroy = destroy;
 	m_traverse_next = NULL;
 	m_root = NULL;
 }
@@ -82,8 +85,8 @@ int MooTree<T>::set(const char *key, T data)
 		if (!(res = strcmp(key, entry->m_key))) {
 			if (!(m_bits & MOO_TBF_REPLACE))
 				return(-1);
-			if (m_bits & MOO_TBF_DELETE)
-				delete entry->m_data;
+			if (m_bits & MOO_TBF_DELETE && m_destroy)
+				m_destroy(entry->m_data);
 			entry->m_data = data;
 			return(0);
 		}
@@ -160,8 +163,8 @@ int MooTree<T>::remove(const char *key)
 			// TODO this is incorrect but the correct way depends on how you traverse
 			if (m_traverse_next == cur)
 				m_traverse_next = NULL;
-			if (m_bits & MOO_TBF_DELETE)
-				delete cur->m_data;
+			if (m_bits & MOO_TBF_DELETE && m_destroy)
+				m_destroy(cur->m_data);
 			memory_free(cur);
 			return(0);
 		}
@@ -269,8 +272,8 @@ void MooTree<T>::destroy_subtree(MooTreeEntry<T> *entry)
 		this->destroy_subtree(entry->m_left);
 	if (entry->m_right)
 		this->destroy_subtree(entry->m_right);
-	if (m_bits & MOO_TBF_DELETEALL)
-		delete entry->m_data;
+	if (m_bits & MOO_TBF_DELETEALL && m_destroy)
+		m_destroy(entry->m_data);
 	memory_free(entry);
 }
 

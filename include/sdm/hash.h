@@ -42,12 +42,15 @@ class MooHash : public MooObject {
 	MooHashEntry<T> *m_traverse_next;
 	int m_size;
 	int m_entries;
+	void (*m_destroy)(T);
 	MooHashEntry<T> **m_table;
 
 	int rehash(int newsize);
     public:
-	MooHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS);
+	MooHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS, void (*destroy)(T) = MooHash::destroy);
 	~MooHash();
+	static void destroy(T value) { delete value; }
+
 	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
@@ -88,7 +91,7 @@ MooObject *moo_hash_create(void);
 static inline unsigned int moo_hash_func(const char *);
 
 template<typename T>
-MooHash<T>::MooHash(int size, int bits)
+MooHash<T>::MooHash(int size, int bits, void (*destroy)(T))
 {
 	if (size <= 0)
 		size = MOO_HASH_DEFAULT_SIZE;
@@ -97,6 +100,7 @@ MooHash<T>::MooHash(int size, int bits)
 	m_traverse_next = NULL;
 	m_size = size;
 	m_entries = 0;
+	m_destroy = destroy;
 	if (!(m_table = (MooHashEntry<T> **) memory_alloc(m_size * sizeof(MooHashEntry<T> *))))
 		throw(-1);
 	memset(m_table, '\0', m_size * sizeof(MooHashEntry<T> *));
@@ -112,8 +116,8 @@ MooHash<T>::~MooHash()
 		cur = m_table[i];
 		while (cur) {
 			next = cur->m_next;
-			if (m_bits & MOO_HBF_DELETEALL)
-				delete cur->m_data;
+			if (m_bits & MOO_HBF_DELETEALL && m_destroy)
+				m_destroy(cur->m_data);
 			delete cur;
 			cur = next;
 		}
@@ -135,8 +139,8 @@ int MooHash<T>::set(const char *key, T data)
 		if (!strcasecmp(key, entry->m_key)) {
 			if (!(m_bits & MOO_HBF_REPLACE))
 				return(-1);
-			if (m_bits & MOO_HBF_DELETE)
-				delete entry->m_data;
+			if (m_bits & MOO_HBF_DELETE && m_destroy)
+				m_destroy(entry->m_data);
 			entry->m_data = data;
 			return(0);
 		}
@@ -176,8 +180,8 @@ int MooHash<T>::remove(const char *key)
 				prev = cur->m_next;
 			else
 				m_table[hash] = cur->m_next;
-			if (m_bits & MOO_HBF_DELETE)
-				delete cur->m_data;
+			if (m_bits & MOO_HBF_DELETE && m_destroy)
+				m_destroy(cur->m_data);
 			memory_free(cur);
 			m_entries--;
 			return(0);

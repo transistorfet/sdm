@@ -31,11 +31,14 @@ class MooArray : public MooObject {
 	int m_max;
 	int m_last;
 	int m_next_space;
+	void (*m_destroy)(T);
 	T *m_data;
 
     public:
-	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS);
+	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS, void (*destroy)(T) = MooArray<T>::destroy);
 	virtual ~MooArray();
+	static void destroy(T value) { delete value; }
+
 	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
@@ -83,13 +86,14 @@ extern MooObjectType moo_array_obj_type;
 MooObject *moo_array_create(void);
 
 template<typename T>
-MooArray<T>::MooArray(int size, int max, int bits)
+MooArray<T>::MooArray(int size, int max, int bits, void (*destroy)(T))
 {
 	m_bits = bits;
 	m_size = 0;
 	m_max = max;
 	m_last = -1;
 	m_next_space = 0;
+	m_destroy = destroy;
 	m_data = NULL;
 	this->resize(size);
 }
@@ -99,10 +103,10 @@ MooArray<T>::~MooArray()
 {
 	int i;
 
-	if (m_bits & MOO_ABF_DELETEALL) {
+	if (m_bits & MOO_ABF_DELETEALL && m_destroy) {
 		for (i = 0; i < m_size; i++) {
 			if (m_data[i])
-				delete m_data[i];
+				m_destroy(m_data[i]);
 		}
 	}
 	memory_free(m_data);
@@ -113,10 +117,10 @@ void MooArray<T>::clear()
 {
 	int i;
 
-	if (m_bits & MOO_ABF_DELETE) {
+	if (m_bits & MOO_ABF_DELETE && m_destroy) {
 		for (i = 0; i < m_size; i++) {
 			if (m_data[i])
-				delete m_data[i];
+				m_destroy(m_data[i]);
 		}
 	}
 	m_last = -1;
@@ -152,8 +156,8 @@ T MooArray<T>::set(int index, T value)
 	if (m_data[index]) {
 		if (value && !(m_bits & MOO_ABF_REPLACE))
 			return(NULL);
-		if (m_bits & MOO_ABF_DELETE)
-			delete m_data[index];
+		if (m_bits & MOO_ABF_DELETE && m_destroy)
+			m_destroy(m_data[index]);
 	}
 	m_data[index] = value;
 

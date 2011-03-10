@@ -39,10 +39,8 @@ MooCodeExpr::MooCodeExpr(int type, MooObject *value, MooCodeExpr *next)
 
 MooCodeExpr::~MooCodeExpr()
 {
-	if (m_value)
-		delete m_value;
-	if (m_next)
-		delete m_next;
+	MOO_DECREF(m_value);
+	MOO_DECREF(m_next);
 }
 
 int MooCodeExpr::read_entry(const char *type, MooDataFile *data)

@@ -107,7 +107,7 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 					cur->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
 			}
 			ref = users->splice(i);
-			delete ref;
+			MOO_DECREF(ref);
 			return(0);
 		}
 	}
@@ -125,7 +125,7 @@ static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args)
 	for (int i = 0; i <= users->last(); i++) {
 		if (users->get_thing(i) == args->m_user) {
 			ref = users->splice(i);
-			delete ref;
+			MOO_DECREF(ref);
 			return(0);
 		}
 	}

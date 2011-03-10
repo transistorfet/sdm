@@ -556,8 +556,7 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		action->check_throw(MOO_PERM_X);
 
 		// TODO is this right, deleting the result if it's present?
-		if (args->m_result)
-			delete args->m_result;
+		MOO_DECREF(args->m_result);
 		args->m_result = NULL;
 		args->m_this = this;
 		args->m_action = action;
@@ -590,7 +589,7 @@ int MooThing::convert_result(MooObject *&result, int def)
 
 	if (result) {
 		res = result->get_integer();
-		delete result;
+		MOO_DECREF(result);
 		result = NULL;
 	}
 	else
@@ -690,7 +689,7 @@ MooThing *MooThing::reference(const char *name)
 int MooThing::command(MooThing *user, MooThing *channel, const char *action, const char *text)
 {
 	int res;
-	MooThingRef *ref;
+	MooThingRef *ref = NULL;
 	char buffer[STRING_SIZE];
 
 	if (!text) {

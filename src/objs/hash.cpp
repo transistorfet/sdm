@@ -30,7 +30,7 @@ MooObject *moo_hash_create(void)
 	return(new MooObjectHash(MOO_HASH_DEFAULT_SIZE, MOO_HBF_DELETE | MOO_HBF_DELETEALL | MOO_HBF_REPLACE | MOO_HBF_REMOVE));
 }
 
-MooObjectHash::MooObjectHash(int size, int bits) : MooHash<MooObject *>(size, bits)
+MooObjectHash::MooObjectHash(int size, int bits) : MooHash<MooObject *>(size, bits, (void (*)(MooObject *)) MooGC::decref)
 {
 	/// Nothing to be done.  This is just here for the call to the MooArray constructor
 }
