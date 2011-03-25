@@ -21,7 +21,19 @@ struct MooObjectType moo_code_lambda_obj_type = {
 
 MooObject *moo_code_lambda_create(void)
 {
-	return(new MooCodeLambda(NULL));
+	return(new MooCodeLambda(NULL, NULL));
+}
+
+MooCodeLambda::MooCodeLambda(MooCodeExpr *params, MooCodeExpr *func)
+{
+	MOO_INCREF(m_params = params);
+	MOO_INCREF(m_func = func);
+}
+
+MooCodeLambda::~MooCodeLambda()
+{
+	MOO_DECREF(m_func);
+	MOO_DECREF(m_params);
 }
 
 int MooCodeLambda::read_entry(const char *type, MooDataFile *data)
@@ -53,17 +65,17 @@ int MooCodeLambda::to_string(char *buffer, int max)
 
 int MooCodeLambda::evaluate(MooObjectHash *parent, MooArgs *args)
 {
-	int ret;
+	int i;
+	MooCodeExpr *cur;
 	MooObjectHash *env;
 	MooCodeFrame frame;
 
 	env = frame.env();
-	// TODO bind args to params list
-	//env->set("args", args);
-	//env->set("parent", new MooThingRef(m_thing));
-	frame.add_block(args, m_func);
-	ret = frame.run();
-	args->m_result = frame.get_return();
-	return(ret);
+	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next()) {
+		env->set(cur->get_identifier(), args->m_args->get(i, NULL));
+	}
+	if (cur || i <= args->m_args->last())
+		throw MooException("Mismatched arguments");
+	return(frame.call(m_func, args));
 }
 

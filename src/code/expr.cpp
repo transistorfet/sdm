@@ -79,23 +79,31 @@ int MooCodeExpr::write_data(MooDataFile *data)
 
 int MooCodeExpr::evaluate(MooObjectHash *parent, MooArgs *args)
 {
-	int ret;
-	MooObjectHash *env;
 	MooCodeFrame frame;
-
-	env = frame.env();
-	// TODO add args to the environment (as MooArgs, or as something else?)
-	//env->set("args", args);
-	//env->set("parent", new MooThingRef(m_thing));
-	frame.add_block(args, this);
-	ret = frame.run();
-	args->m_result = frame.get_return();
-	return(ret);
+	return(frame.call(this, args));
 }
 
 const char *MooCodeExpr::lineinfo()
 {
 	// TODO this should return the action/file/linenumber/columnnumber/etc to be printed for debug purposes
 	return("Unknown");
+}
+
+const char *MooCodeExpr::get_identifier()
+{
+	const char *str;
+
+	if (m_type != MCT_IDENTIFIER || !(str = m_value->get_string()))
+		throw MooException("(%s) Expected identifier", this->lineinfo());
+	return(str);
+}
+
+MooCodeExpr *MooCodeExpr::get_call()
+{
+	MooCodeExpr *expr;
+
+	if (m_type != MCT_CALL || !(expr = dynamic_cast<MooCodeExpr *>(m_value)))
+		throw MooException("(%s) Expected expression", this->lineinfo());
+	return(expr);
 }
 

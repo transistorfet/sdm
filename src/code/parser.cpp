@@ -247,9 +247,19 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char lineb
 			if (buffer[i - 1] == linebr)
 				i--;
 			buffer[i++] = ')';
+			buffer[i++] = linebr;
 		}
 	}
 	return(i);
 }
 
+#define MAX_CODE	2048
+
+int MooCodeParser::print(MooCodeExpr *expr)
+{
+	char buffer[MAX_CODE];
+
+	MooCodeParser::generate(expr, buffer, MAX_CODE);
+	moo_status("CODE: \n%s", buffer);
+}
 

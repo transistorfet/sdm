@@ -124,6 +124,57 @@ int MooCodeFrame::run(int level)
 	return(0);
 }
 
+int MooCodeFrame::eval(const char *code, MooArgs *args)
+{
+	MooCodeExpr *expr;
+
+	if (*code == '\0')
+		return(-1);
+	try {
+		MooCodeParser parser;
+		expr = parser.parse(code);
+		// TODO temporary
+		MooCodeParser::print(expr);
+	}
+	catch (MooException e) {
+		moo_status("%s", e.get());
+		return(-1);
+	}
+	return(this->call(expr, args));
+}
+
+int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
+{
+	int ret;
+	MooObjectHash *env;
+
+	// TODO args can be NULL here, don't forget.
+
+	// TODO add args to the environment (as MooArgs, or as something else?)
+	//env = frame.env();
+	//env->set("args", args);
+	//env->set("parent", new MooThingRef(m_thing));
+	this->add_block(args, expr);
+	ret = this->run(m_stack->last());
+	if (args)
+		args->m_result = m_return;
+	return(ret);
+}
+
+int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *parent, int num_params, ...)
+{
+	MooArgs *args;
+
+	if (parent)
+		args = new MooArgs(parent);
+	else
+		args = new MooArgs();
+
+	// TODO go through all the values on the stack and push them onto a new MooArgs
+
+	return(this->call(expr, args));
+}
+
 void MooCodeFrame::set_return(MooObject *obj)
 {
 	MOO_DECREF(m_return);

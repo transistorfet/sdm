@@ -76,21 +76,6 @@ int MooCodeAction::do_action(MooArgs *args)
 {
 	return(m_code->evaluate(NULL, args));
 
-/*
-	int ret;
-	MooObjectHash *env;
-	MooCodeFrame frame;
-
-	env = frame.env();
-	// TODO add args to the environment (as MooArgs, or as something else?)
-	//env->set("args", args);
-	env->set("parent", new MooThingRef(m_thing));
-	frame.add_block(m_code);
-	ret = frame.run();
-	args->m_result = frame.get_return();
-	return(ret);
-*/
-
 	/****
 
 	we need a thread in order to execute the code we have.  If a thread is also a task, we can't be sure if the
@@ -114,10 +99,8 @@ int MooCodeAction::set(const char *code)
 
 	try {
 		m_code = parser.parse(code);
-		{ char buffer[1024];
-			MooCodeParser::generate(m_code, buffer, 1024);
-			moo_status("CODE: %s", buffer);
-		}
+		// TODO temporary
+		MooCodeParser::print(m_code);
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());

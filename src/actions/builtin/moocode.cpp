@@ -29,37 +29,9 @@
 
 static int moocode_eval(MooAction *action, MooThing *thing, MooArgs *args)
 {
-	int ret;
-	const char *text;
-	MooCodeExpr *code;
-	MooObjectHash *env;
 	MooCodeFrame frame;
-	MooCodeParser parser;
 
-	text = args->m_args->get_string(0);
-	if (*text == '\0')
-		return(-1);
-	try {
-		code = parser.parse(text);
-		// TODO temporary
-		{ char buffer[1024];
-			MooCodeParser::generate(code, buffer, 1024);
-			moo_status("CODE: %s", buffer);
-		}
-	}
-	catch (MooException e) {
-		moo_status("%s", e.get());
-		return(-1);
-	}
-
-	env = frame.env();
-	// TODO add args to the environment (as MooArgs, or as something else?)
-	//env->set("args", args);
-	//env->set("parent", new MooThingRef(m_thing));
-	frame.add_block(args, code);
-	ret = frame.run();
-	args->m_result = frame.get_return();
-	return(ret);
+	return(frame.eval(args->m_args->get_string(0), args));
 }
 
 int moo_load_moocode_actions(MooBuiltinHash *actions)

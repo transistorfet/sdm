@@ -31,6 +31,10 @@ class MooCodeFrame : public MooObject {
 	int add_block(MooArgs *args, MooCodeExpr *expr);
 	int run(int level = 0);
 
+	int eval(const char *code, MooArgs *args = NULL);
+	int call(MooCodeExpr *expr, MooArgs *parent, int num_params, ...);
+	int call(MooCodeExpr *expr, MooArgs *args);
+
 	void set_return(MooObject *obj);
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }

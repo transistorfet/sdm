@@ -56,6 +56,7 @@ class MooArgs : public MooObject {
 	MooArgs(MooObjectArray *&args, MooThing *user = NULL, MooThing *channel = NULL);
 	MooArgs(MooArgs *args, int init_size = 5);
 	virtual ~MooArgs();
+	void init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action, const char *action_text);
 	void set_args(MooObjectArray *&args);
 
 	static int find_whitespace(const char *text);

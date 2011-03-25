@@ -16,8 +16,8 @@ class MooCodeLambda : public MooObject {
 	MooCodeExpr *m_func;
 	MooCodeExpr *m_params;
 
-	MooCodeLambda(MooCodeExpr *func, MooCodeExpr *params = NULL) { m_func = func; m_params = params; }
-	virtual ~MooCodeLambda() { }
+	MooCodeLambda(MooCodeExpr *params, MooCodeExpr *func);
+	virtual ~MooCodeLambda();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

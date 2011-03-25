@@ -50,13 +50,14 @@ MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr)
 {
 	MOO_INCREF(m_env = env);
 	MOO_INCREF(m_args = args);
-	m_expr = expr;
+	MOO_INCREF(m_expr = expr);
 }
 
 MooCodeEvent::~MooCodeEvent()
 {
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_args);
+	MOO_DECREF(m_expr);
 }
 
 int MooCodeEvent::do_event(MooCodeFrame *frame)
@@ -79,13 +80,11 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		MooObject *str = m_expr->value();
-		frame->set_return(frame->resolve(str->get_string(), m_args));
+		frame->set_return(frame->resolve(m_expr->get_identifier(), m_args));
 		break;
 	    }
 	    case MCT_CALL: {
 		MooFormT *form;
-		MooObject *obj;
 		MooCodeExpr *expr;
 
 		/// If the expr's value is not itself an expr, then the AST is invalid
@@ -93,8 +92,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 			throw MooException("(%s) Invalid AST; expected MooCodeExpr.", m_expr->lineinfo());
 
 		if (expr->expr_type() == MCT_IDENTIFIER) {
-			obj = expr->value();
-			if ((form = form_env->get(obj->get_string())))
+			if ((form = form_env->get(expr->get_identifier())))
 				return((*form)(frame, expr->next()));
 		}
 		// TODO initialize with previous call's arguments (where get?) (either this->m_args or frame->m_args)
@@ -195,7 +193,6 @@ int MooCodeEventEvalArgs::do_event(MooCodeFrame *frame)
  * MooCodeEventAppendReturn *
  ****************************/
 
-#include <sdm/objs/integer.h>
 int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 {
 	if (!m_args)
@@ -225,13 +222,17 @@ static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO you need to make and return a MooCodeLambda class
+	MooCodeLambda *lambda;
+
+	lambda = new MooCodeLambda(expr->get_call(), expr->next());
+	frame->set_return(lambda);
 	return(0);
 }
 
 static int code_event_foreach(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	// TODO you need to make and return a MooCodeLambda class
+	//frame->call(global_env->get("#foreach-func", ...)
 	return(0);
 }
 

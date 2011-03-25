@@ -35,6 +35,9 @@ class MooCodeExpr : public MooObject {
 	MooObject *value() { return(m_value); }
 	const char *lineinfo();
 
+	const char *get_identifier();
+	MooCodeExpr *get_call();
+
 	void next(MooCodeExpr *expr) { if (expr) m_next = expr; }
 };
 
