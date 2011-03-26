@@ -24,6 +24,8 @@ const MooObjectType moo_object_obj_type = {
 	NULL
 };
 
+extern MooObjectHash *global_env;
+
 static MooHash<const MooObjectType *> *name_type_list = NULL;
 static MooHash<const MooObjectType *> *realname_type_list = NULL;
 
@@ -197,7 +199,43 @@ int MooObject::check(moo_perm_t perms)
 	return(0);
 }
 
-MooObject *MooObject::member_object(const char *name, MooObject *value)
+
+MooObject *MooObject::resolve(const char *name, MooObjectHash *env)
+{
+	MooObject *obj;
+	char *action_name, *remain;
+	char buffer[STRING_SIZE];
+
+	strncpy(buffer, name, STRING_SIZE);
+	buffer[STRING_SIZE - 1] = '\0';
+
+	if ((action_name = strchr(buffer, ':'))) {
+		*action_name = '\0';
+		action_name++;
+	}
+
+	if ((remain = strchr(buffer, '.'))) {
+		*remain = '\0';
+		remain++;
+	}
+
+	if (!(obj = MooThing::reference(buffer))
+	    && !(obj = env->get(buffer, NULL))
+	    && !(obj = global_env->get(buffer, NULL)))
+		return(NULL);
+	if (remain && !(obj = obj->resolve_property(remain)))
+		return(NULL);
+
+	if (action_name) {
+		MooThing *thing;
+		if (!(thing = obj->get_thing()))
+			return(NULL);
+		return(thing->access_method(action_name));
+	}
+	return(obj);
+}
+
+MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 {
 	MooObject *obj;
 	char *str, *remain;
@@ -212,11 +250,11 @@ MooObject *MooObject::member_object(const char *name, MooObject *value)
 		if ((remain = strchr(buffer, '.'))) {
 			*remain = '\0';
 			remain++;
-			if (!(obj = obj->access(str, NULL)))
+			if (!(obj = obj->access_property(str, NULL)))
 				return(NULL);
 		}
 		else
-			return(obj->access(str, value));
+			return(obj->access_property(str, value));
 	}
 	return(NULL);
 }

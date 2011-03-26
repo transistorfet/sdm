@@ -60,15 +60,19 @@ class MooObject : public MooGC {
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { return(0); }
-	virtual MooObject *access(const char *name, MooObject *value = NULL) { return(NULL); }
 	virtual int evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
+
+	/// Object Member Access Functions
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { return(NULL); }
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { return(NULL); }
 
 	virtual long int get_integer() { throw moo_type_error; }
 	virtual double get_float() { throw moo_type_error; }
 	virtual const char *get_string() { throw moo_type_error; }
 	virtual MooThing *get_thing() { throw moo_type_error; }
 
-	MooObject *member_object(const char *name, MooObject *value = NULL);
+	static MooObject *resolve(const char *name, MooObjectHash *env);
+	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 
 	void check_throw(moo_perm_t perms);
 	int check(moo_perm_t perms);

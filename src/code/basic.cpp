@@ -45,9 +45,14 @@ static int basic_print(MooObjectHash *env, MooArgs *args)
 
 static int basic_add(MooObjectHash *env, MooArgs *args)
 {
+	int i = 0;
+	double d = 0;
+	MooObject *obj;
+
 	// TODO what type? double? long int? a different function or something for each?
 	for (int i = 0; i < args->m_args->last(); i++) {
-		
+		//obj = args->m_args->get(i);
+		// TODO wtf, seriously
 	}
 	return(0);
 }

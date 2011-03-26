@@ -64,21 +64,21 @@ int MooTask::bestow(MooInterface *inter)
 	return(-1);
 }
 
-int MooTask::elevated_do_action(MooAction *action, MooArgs *args)
+int MooTask::elevated_evaluate(MooObject *obj, MooObjectHash *env, MooArgs *args)
 {
 	int res;
 	MooTask *prev_task;
 	moo_id_t prev_owner;
 
-	if (!action)
+	if (!obj)
 		return(-1);
 	/// We save the current task and when we restore the owner, we make sure the same task is running, so that we don't
 	/// accidentally change the owner for a different task, giving it erronous permissions
 	prev_task = MooTask::current_task();
 	prev_owner = MooTask::current_owner();
-	MooTask::current_owner(action->owner());
+	MooTask::current_owner(obj->owner());
 	try {
-		res = action->do_action(args);
+		res = obj->evaluate(env, args);
 	}
 	catch (int e) {
 		MooTask::current_owner(prev_task, prev_owner);

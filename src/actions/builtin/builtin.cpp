@@ -114,7 +114,7 @@ int MooBuiltin::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooBuiltin::do_action(MooArgs *args)
+int MooBuiltin::evaluate(MooObjectHash *env, MooArgs *args)
 {
 	if (!m_func)
 		return(-1);

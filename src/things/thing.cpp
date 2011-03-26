@@ -299,7 +299,7 @@ void MooThing::add_global(const char *name, MooObject *obj)
 	moo_global_table->set(name, obj);
 }
 
-MooObject *MooThing::access(const char *name, MooObject *value)
+MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
 	// TODO do you need to do permissions checks here?
 	if (value) {
@@ -309,6 +309,19 @@ MooObject *MooThing::access(const char *name, MooObject *value)
 	}
 	else
 		return(this->get_property(name, NULL));
+}
+
+MooObject *MooThing::access_method(const char *name, MooObject *value)
+{
+	// TODO do you need to do permissions checks here?
+	if (value) {
+		// TODO this dynamic cast is temporary and should be removed in future when actions are MooObjects
+		if (this->set_action(name, dynamic_cast<MooAction *>(value)) < 0)
+			return(NULL);
+		return(value);
+	}
+	else
+		return(this->get_action(name));
 }
 
 ///// Property Methods /////
@@ -496,8 +509,6 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, con
 		return(MOO_ACTION_NOT_FOUND);
 	try {
 		args.parse_args(action->params(), user, channel, buffer, LARGE_STRING_SIZE, text ? text : "");
-		// TODO should i remove action_text entirely?
-		args.m_action_text = name;
 		return(this->do_action(action, &args, result));
 	}
 	catch (MooException e) {
@@ -535,8 +546,6 @@ int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 
 	if (!(action = this->get_action(name)))
 		return(MOO_ACTION_NOT_FOUND);
-	// TODO should i remove action_text entirely?
-	args->m_action_text = name;
 	try {
 		args->match_args_throw(action->params());
 		return(this->do_action(action, args, result));
@@ -552,6 +561,9 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 {
 	int res;
 
+	// TODO should this whole function always be called when evaluating something with evaluate()
+	// TODO the try block could be taken back to higher levels (psuedo server's call to command() or needs the try block at the
+	//	very least)
 	try {
 		action->check_throw(MOO_PERM_X);
 
@@ -564,9 +576,9 @@ int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
 		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
 		//	It should now be set in the action so we can get it from there
 		if (action->permissions() & MOO_PERM_SUID)
-			res = MooTask::elevated_do_action(action, args);
+			res = MooTask::elevated_evaluate(action, NULL, args);
 		else
-			res = action->do_action(args);
+			res = action->evaluate(NULL, args);
 
 		/// Set the result if we were given a pointer
 		if (result) {

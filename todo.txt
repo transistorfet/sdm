@@ -88,6 +88,10 @@
 	* fix MooArray instances so that they pass a destroy_t function (how can you get it to work with delete??)
 	* convert hash and tree to use a destroy_t function, so that MOO_DECREF can be called for objects
 
+	* should the NULL passed to evaluate() in some cases be changed?
+	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
+	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
+
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>

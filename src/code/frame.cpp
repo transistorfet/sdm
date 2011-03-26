@@ -157,7 +157,7 @@ int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
 	this->add_block(args, expr);
 	ret = this->run(m_stack->last());
 	if (args)
-		args->m_result = m_return;
+		MOO_INCREF(args->m_result = m_return);
 	return(ret);
 }
 
@@ -187,39 +187,4 @@ void MooCodeFrame::env(MooObjectHash *env)
 	MOO_INCREF(m_env = env);
 }
 
-MooObject *MooCodeFrame::resolve(const char *name, MooArgs *args)
-{
-	MooObject *obj;
-	char *action_name, *remain;
-	char buffer[STRING_SIZE];
-
-	strncpy(buffer, name, STRING_SIZE);
-	buffer[STRING_SIZE - 1] = '\0';
-
-	if ((action_name = strchr(buffer, ':'))) {
-		*action_name = '\0';
-		action_name++;
-	}
-
-	if ((remain = strchr(buffer, '.'))) {
-		*remain = '\0';
-		remain++;
-	}
-
-	// TODO should this take env as an arg rather than assuming m_env is accurate?
-	if (!(obj = MooThing::reference(buffer))
-	    && !(obj = m_env->get(buffer, NULL))
-	    && !(obj = global_env->get(buffer, NULL)))
-		return(NULL);
-	if (remain && !(obj = obj->member_object(remain)))
-		return(NULL);
-
-	if (action_name) {
-		MooThing *thing;
-		if (!(thing = obj->get_thing()))
-			return(NULL);
-		return(thing->get_action(action_name));
-	}
-	return(obj);
-}
 

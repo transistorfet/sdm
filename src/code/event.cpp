@@ -80,7 +80,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		frame->set_return(frame->resolve(m_expr->get_identifier(), m_args));
+		frame->set_return(MooObject::resolve(m_expr->get_identifier(), frame->env()));
 		break;
 	    }
 	    case MCT_CALL: {
@@ -136,34 +136,15 @@ int MooCodeEventEvalBlock::do_event(MooCodeFrame *frame)
 int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
 {
 	MooObject *func;
-	MooAction *action;
 
-	// TODO MooAction::do_action should be changed to MooAction::evaluate()
 	// TODO the problem here is that you can't pass the frame to evaluate(), so you can't have MooCodeExpr::evaluate()
 	//	push the expr in the frame.  It *can* create a new frame, but in this case, it might as well be such that
 	//	all MooCode functions have to be actions and they are called through the action interface.  This still does
 	//	not deal with the need for MooCodeFunc so we still need evaluate().
 
-	// TODO MooCodeExpr::evaluate() will create a new frame and thus new environment and thus we don't need teh code below
-
-	// TODO re-evaluate the signifigance of MooAction... (if we are making evaluate())
 	if (!m_args || !(func = m_args->m_args->shift()))
 		throw MooException("Null function.");
-
-/*
-	/// If the func is not an expr, then the the function is invalid.
-	if ((expr = dynamic_cast<MooCodeExpr *>(func))) {
-		/// Create a new environment for the function to run in
-		MooObjectHash *env = new MooObjectHash();
-		// TODO use m_args as the arguments, but how do you pass them? set them in the environment???
-		frame->push_event(new MooCodeEventEvalBlock(env, expr));
-		m_args->m_result = frame.get_return();
-	}
-*/
-	if ((action = dynamic_cast<MooAction *>(func)))
-		action->do_action(m_args);
-	else
-		func->evaluate(m_env, m_args);
+	func->evaluate(m_env, m_args);
 	frame->set_return(m_args->m_result);
 	return(0);
 }

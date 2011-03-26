@@ -44,7 +44,6 @@ class MooArgs : public MooObject {
     public:
 	MooArgs *m_parent;
 	MooAction *m_action;
-	const char *m_action_text;
 	MooObject *m_result;
 	MooThing *m_user;
 	MooThing *m_channel;
@@ -56,7 +55,7 @@ class MooArgs : public MooObject {
 	MooArgs(MooObjectArray *&args, MooThing *user = NULL, MooThing *channel = NULL);
 	MooArgs(MooArgs *args, int init_size = 5);
 	virtual ~MooArgs();
-	void init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action, const char *action_text);
+	void init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action);
 	void set_args(MooObjectArray *&args);
 
 	static int find_whitespace(const char *text);
@@ -71,7 +70,7 @@ class MooArgs : public MooObject {
 	void match_args_throw(const char *params);
 	const MooObjectType *get_type(char param);
 
-	virtual MooObject *access(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 
 	/// Accessors
 	inline MooObject *get(int index, MooObjectType *type) { return(m_args->get(index, type)); }

@@ -48,10 +48,14 @@ class MooThing : public MooObject {
 	int init();
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
+	// TODO should this be moved to moo_code??
 	static void add_global(const char *name, MooObject *obj);
 
-	virtual MooObject *access(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
+	// TODO should you move all these special functions to MooObject and has all accessing go through the access* functions?
+	//	Do you even need these functions?
 	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
 	int set_property(const char *name, moo_id_t id);

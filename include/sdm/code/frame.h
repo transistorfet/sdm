@@ -39,9 +39,6 @@ class MooCodeFrame : public MooObject {
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
-
-	MooObject *resolve(const char *name, MooArgs *args);
-	MooObject *get_member(const char *name, MooObject *obj);
 };
 
 extern MooObjectType moo_code_frame_obj_type;

@@ -36,7 +36,7 @@ class MooAction : public MooObject {
 	// TODO should actions run at the permission level of the owner (SUID) or possibly have an SUID bit
 	// TODO if we do this, then we will need a function to call which elevates the permissions
 	// TODO we also need a way to elevate permissions
-	virtual int do_action(MooArgs *args) = 0;
+	//virtual int do_action(MooArgs *args) = 0;
 
     public:
 	const char *name() { return(m_name->c_str()); }

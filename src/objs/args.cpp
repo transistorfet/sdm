@@ -38,20 +38,20 @@ MooObject *moo_args_create(void)
 
 MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL, NULL, NULL, NULL);
+	this->init(user, channel, NULL, NULL, NULL, NULL);
 	m_args = new MooObjectArray(init_size);
 }
 
 MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL, NULL, NULL, NULL);
+	this->init(user, channel, NULL, NULL, NULL, NULL);
 	m_args = args;
 }
 
 MooArgs::MooArgs(MooArgs *args, int init_size)
 {
 	MOO_INCREF(args);
-	this->init(args->m_user, args->m_channel, args->m_caller, args->m_this, args, args->m_action, args->m_action_text);
+	this->init(args->m_user, args->m_channel, args->m_caller, args->m_this, args, args->m_action);
 	m_args = new MooObjectArray(init_size);
 }
 
@@ -61,7 +61,7 @@ MooArgs::~MooArgs()
 	MOO_DECREF(m_args);
 }
 
-void MooArgs::init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action, const char *action_text)
+void MooArgs::init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action)
 {
 	m_args = NULL;
 	m_result = NULL;
@@ -71,7 +71,6 @@ void MooArgs::init(MooThing *user, MooThing *channel, MooThing *caller, MooThing
 	m_this = thing;
 	m_parent = parent;
 	m_action = action;
-	m_action_text = action_text;
 }
 
 void MooArgs::set_args(MooObjectArray *&args)
@@ -259,7 +258,7 @@ const MooObjectType *MooArgs::get_type(char param)
 }
 
 
-MooObject *MooArgs::access(const char *name, MooObject *value)
+MooObject *MooArgs::access_property(const char *name, MooObject *value)
 {
 	if (!strcmp(name, "args")) {
 		MOO_SET_MEMBER(m_args, MooObjectArray *, value)
