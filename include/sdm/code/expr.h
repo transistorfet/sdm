@@ -17,12 +17,14 @@ class MooCodeFrame;
 
 class MooCodeExpr : public MooObject {
     protected:
+	int m_line;
+	int m_col;
 	int m_type;
 	MooObject *m_value;
 	MooCodeExpr *m_next;
 
     public:
-	MooCodeExpr(int type, MooObject *value = NULL, MooCodeExpr *next = NULL);
+	MooCodeExpr(int line, int col, int type, MooObject *value = NULL, MooCodeExpr *next = NULL);
 	virtual ~MooCodeExpr();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
@@ -30,10 +32,11 @@ class MooCodeExpr : public MooObject {
 	virtual int evaluate(MooObjectHash *env, MooArgs *args);
 
     public:
+	int line() { return(m_line); }
+	int col() { return(m_col); }
 	MooCodeExpr *next() { return(m_next); }
 	int expr_type() { return(m_type); }
 	MooObject *value() { return(m_value); }
-	const char *lineinfo();
 
 	const char *get_identifier();
 	MooCodeExpr *get_call();

@@ -71,9 +71,8 @@ int MooCodeLambda::evaluate(MooObjectHash *parent, MooArgs *args)
 	MooCodeFrame frame;
 
 	env = frame.env();
-	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next()) {
+	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
 		env->set(cur->get_identifier(), args->m_args->get(i, NULL));
-	}
 	if (cur || i <= args->m_args->last())
 		throw MooException("Mismatched arguments");
 	return(frame.call(m_func, args));

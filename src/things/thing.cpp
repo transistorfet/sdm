@@ -731,6 +731,7 @@ int MooThing::command(MooThing *user, MooThing *channel, const char *action, con
 		//	throw -1;
 	}
 	catch (...) { }
+	// TODO should this be MOO_DECREF?
 	delete ref;
 	return(MOO_ACTION_NOT_FOUND);
 }

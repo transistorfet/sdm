@@ -28,6 +28,10 @@
 // TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
 //	have to be parsed out (the parameter names and that).
 
+/**************************
+ * Input/Output Functions *
+ **************************/
+
 static int basic_print(MooObjectHash *env, MooArgs *args)
 {
 	// TODO get_string causes a type error when printing a number, which isn't caught until way up the line (at the nearest
@@ -42,6 +46,10 @@ static int basic_print(MooObjectHash *env, MooArgs *args)
 	args->m_user->notify(TNT_STATUS, args, buffer);
 	return(0);
 }
+
+/******************
+ * Math Functions *
+ ******************/
 
 static int basic_add(MooObjectHash *env, MooArgs *args)
 {
@@ -75,6 +83,10 @@ static int basic_divide(MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+/************************
+ * Comparison Functions *
+ ************************/
+
 static int basic_null(MooObjectHash *env, MooArgs *args)
 {
 	for (int i = 0; i < args->m_args->last(); i++) {
@@ -87,6 +99,25 @@ static int basic_null(MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+/********************
+ * System Functions *
+ ********************/
+
+static int basic_load(MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	MooCodeFrame frame;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(obj = args->m_args->get(0, NULL)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	if (moo_data_read_file(buffer, buffer, LARGE_STRING_SIZE) <= 0)
+		throw MooException("Unable to read file %s", buffer);
+	return(frame.eval(buffer, args));
+}
+
+
 
 /*
 
@@ -96,6 +127,19 @@ static int basic_null(MooObjectHash *env, MooArgs *args)
 		(if (null this.name)
 			this.name
 			"object")))))
+
+
+; This is an action with a helper function inside of it.  This should be made to work somehow so that complex actions can use
+; localized helper functions without poluting other namespaces.  Also, moocode actions should be able to parse the args into
+; variables in the env based an a param list, just like lambda does.
+; TODO we still need to figure out how command lines should be parsed into moocode actions...  Where will the parsing take place
+;	and based on what information (like from <params></params>)
+(action (x)
+	(set fac (lambda (n)
+		(if (= n 0)
+			1
+			(* n (fac (- n 1)))))
+	(print "The factorial of " x " is " (fac x)))
 
 */
 
@@ -114,6 +158,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("*", new MooCodeFunc(basic_multiply));
 	env->set("/", new MooCodeFunc(basic_divide));
 	env->set("null", new MooCodeFunc(basic_null));
+	env->set("load", new MooCodeFunc(basic_load));
 	return(0);
 }
 

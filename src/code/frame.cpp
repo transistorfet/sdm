@@ -113,6 +113,7 @@ int MooCodeFrame::run(int level)
 		catch (MooException e) {
 			delete event;
 			// TODO this should be printed to the user (probably instead of rather than in addition to the status)
+			// TODO maybe the event could have the lineinfo stored in it and then we auto retreive it from there
 			moo_status("CODE: %s", e.get());
 			return(-1);
 		}

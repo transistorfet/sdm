@@ -21,6 +21,7 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
 MooHash<MooFormT *> *form_env = NULL;
 
+static int code_event_set(MooCodeFrame *frame, MooCodeExpr *expr);
 static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr);
 static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr);
 static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr);
@@ -32,6 +33,7 @@ int init_code_event(void)
 		return(1);
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
+	form_env->set("set", new MooFormT(code_event_set));
 	form_env->set("if", new MooFormT(code_event_if));
 	form_env->set("block", new MooFormT(code_event_block));
 	form_env->set("lambda", new MooFormT(code_event_lambda));
@@ -80,7 +82,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		frame->set_return(MooObject::resolve(m_expr->get_identifier(), frame->env()));
+		frame->set_return(MooObject::resolve(m_expr->get_identifier(), m_env));
 		break;
 	    }
 	    case MCT_CALL: {
@@ -89,7 +91,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 
 		/// If the expr's value is not itself an expr, then the AST is invalid
 		if (!(expr = dynamic_cast<MooCodeExpr *>(m_expr->value())))
-			throw MooException("(%s) Invalid AST; expected MooCodeExpr.", m_expr->lineinfo());
+			throw MooException("(%s, %s) Invalid AST; expected MooCodeExpr.", m_expr->line(), m_expr->col());
 
 		if (expr->expr_type() == MCT_IDENTIFIER) {
 			if ((form = form_env->get(expr->get_identifier())))
@@ -103,8 +105,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    default:
-		// TODO you should print line and column number here, perhaps stored in expression during parsing
-		throw MooException("Invalid expression type, %d", m_expr->expr_type());
+		throw MooException("(%s, %s) Invalid expression type, %d", m_expr->line(), m_expr->col(), m_expr->expr_type());
 	}
 	return(0);
 }
@@ -188,6 +189,13 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
  * Moo Code Event Forms *
  ************************/
 
+static int code_event_set(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO push an event to actually do the set with the return value
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
+	return(0);
+}
+
 static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 
@@ -196,8 +204,7 @@ static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO do you need to incref expr?
-	frame->set_return(expr);
+	frame->set_return(MOO_INCREF(expr));
 	return(0);
 }
 

@@ -68,8 +68,9 @@ class MooDataFile {
 int init_data(void);
 void release_data(void);
 
-int moo_set_data_path(const char *);
-int moo_data_file_exists(const char *);
+int moo_set_data_path(const char *path);
+int moo_data_file_exists(const char *file);
+int moo_data_read_file(const char *file, char *buffer, int max);
 
 #endif
 

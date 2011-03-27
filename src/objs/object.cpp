@@ -200,7 +200,7 @@ int MooObject::check(moo_perm_t perms)
 }
 
 
-MooObject *MooObject::resolve(const char *name, MooObjectHash *env)
+MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value)
 {
 	MooObject *obj;
 	char *action_name, *remain;
@@ -223,14 +223,14 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env)
 	    && !(obj = env->get(buffer, NULL))
 	    && !(obj = global_env->get(buffer, NULL)))
 		return(NULL);
-	if (remain && !(obj = obj->resolve_property(remain)))
+	if (remain && !(obj = obj->resolve_property(remain, value)))
 		return(NULL);
 
 	if (action_name) {
 		MooThing *thing;
 		if (!(thing = obj->get_thing()))
 			return(NULL);
-		return(thing->access_method(action_name));
+		return(thing->access_method(action_name, value));
 	}
 	return(obj);
 }
@@ -245,7 +245,7 @@ MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 	buffer[STRING_SIZE - 1] = '\0';
 
 	// TODO do you need to do permissions checks during all of this?? (should be done in subfunc?)
-	// TODO should you throw an error if we can't set the value, instead of just returing a result?
+	// TODO should you throw an error if we can't set the value, instead of just returing NULL?
 	for (str = buffer, obj = this; str && *str != '\0' && obj; str = remain) {
 		if ((remain = strchr(buffer, '.'))) {
 			*remain = '\0';

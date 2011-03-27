@@ -41,6 +41,26 @@ class MooCodeParser {
 	MooCodeExpr *parse_token();
 	int read_token();
 
+	inline char getchar() {
+		if (m_input[m_pos] == '\n') {
+			m_line++;
+			m_col = 0;
+		}
+		return(m_input[m_pos++]);
+	}
+
+	inline void ungetchar() {
+		if (--m_pos <= 0)
+			m_pos = 0;
+		else {
+			m_col--;
+			if (m_input[m_pos] == '\n') {
+				m_line--;
+				// TODO calculate the real column number =/
+				m_col = 0;
+			}
+		}
+	}
 };
 
 #endif

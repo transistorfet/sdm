@@ -27,11 +27,13 @@ MooObjectType moo_code_expr_obj_type = {
 
 MooObject *moo_code_expr_create(void)
 {
-	return(new MooCodeExpr(0));
+	return(new MooCodeExpr(-1, -1, 0));
 }
 
-MooCodeExpr::MooCodeExpr(int type, MooObject *value, MooCodeExpr *next)
+MooCodeExpr::MooCodeExpr(int line, int col, int type, MooObject *value, MooCodeExpr *next)
 {
+	m_line = line;
+	m_col = col;
 	m_type = type;
 	m_value = value;
 	m_next = next;
@@ -83,18 +85,12 @@ int MooCodeExpr::evaluate(MooObjectHash *parent, MooArgs *args)
 	return(frame.call(this, args));
 }
 
-const char *MooCodeExpr::lineinfo()
-{
-	// TODO this should return the action/file/linenumber/columnnumber/etc to be printed for debug purposes
-	return("Unknown");
-}
-
 const char *MooCodeExpr::get_identifier()
 {
 	const char *str;
 
 	if (m_type != MCT_IDENTIFIER || !(str = m_value->get_string()))
-		throw MooException("(%s) Expected identifier", this->lineinfo());
+		throw MooException("(%s, %s) Expected identifier", m_line, m_col);
 	return(str);
 }
 
@@ -103,7 +99,7 @@ MooCodeExpr *MooCodeExpr::get_call()
 	MooCodeExpr *expr;
 
 	if (m_type != MCT_CALL || !(expr = dynamic_cast<MooCodeExpr *>(m_value)))
-		throw MooException("(%s) Expected expression", this->lineinfo());
+		throw MooException("(%s, %s) Expected expression", m_line, m_col);
 	return(expr);
 }
 

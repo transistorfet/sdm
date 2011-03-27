@@ -64,22 +64,22 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_CLOSE:
 		return(NULL);
 	    case TT_STRING:
-		return(new MooCodeExpr(MCT_OBJECT, new MooString(m_token)));
+		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString(m_token)));
 	    case TT_WORD: {
 		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1]))) {
 			if (strchr(m_token, '.'))
-				return(new MooCodeExpr(MCT_OBJECT, new MooFloat(m_token)));
+				return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooFloat(m_token)));
 			else
-				return(new MooCodeExpr(MCT_OBJECT, new MooInteger(m_token)));
+				return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooInteger(m_token)));
 		}
 		else
-			return(new MooCodeExpr(MCT_IDENTIFIER, new MooString(m_token)));
+			return(new MooCodeExpr(m_line, m_col, MCT_IDENTIFIER, new MooString(m_token)));
 	    }
 	    case TT_OPEN: {
 		MooCodeExpr *expr = this->parse_list();
 		if (!expr)
 			throw MooException("%d, %d: Empty list?", m_line, m_col);
-		return(new MooCodeExpr(MCT_CALL, expr));
+		return(new MooCodeExpr(m_line, m_col, MCT_CALL, expr));
 	    }
 	    default:
 		throw MooException("%d, %d: Invalid token type, %d", m_line, m_col, m_type);
@@ -88,76 +88,81 @@ MooCodeExpr *MooCodeParser::parse_token()
 
 int MooCodeParser::read_token()
 {
+	char ch;
+
 	m_type = 0;
 	m_len = 0;
 	m_token[0] = '\0';
-	for (; m_input[m_pos] != '\0'; m_pos++) {
-		if (m_input[m_pos] == '\n') {
-			m_line++;
-			m_col = 0;
-		}
+	while (m_input[m_pos] != '\0') {
+		ch = this->getchar();
 
-		if (lispy_is_whitespace(m_input[m_pos]))
+		if (lispy_is_whitespace(ch))
 			continue;
-		else if (m_input[m_pos] == ';') {
-			for (; m_input[m_pos] != '\0' && m_input[m_pos] != '\n'; m_pos++)
-				;
+		else if (ch == ';') {
+			while (1) {
+				ch = this->getchar();
+				if (ch == '\0' || ch == '\n')
+					break;
+			}
 			break;
 		}
-		else if (m_input[m_pos] == '(') {
+		else if (ch == '(') {
 			m_type = TT_OPEN;
 			break;
 		}
-		else if (m_input[m_pos] == ')') {
+		else if (ch == ')') {
 			m_type = TT_CLOSE;
 			break;
 		}
-		else if (m_input[m_pos] == '\"') {
+		else if (ch == '\"') {
 			m_type = TT_STRING;
-			for (m_pos++; m_input[m_pos] != '\0'; m_pos++, m_len++) {
- 				if (m_input[m_pos] == '\"')
+			while (m_input[m_pos] != '\0') {
+				ch = this->getchar();
+ 				if (ch == '\"')
 					break;
-				else if (m_input[m_pos] == '\\') {
-					if (m_input[++m_pos] == '\0')
+				else if (ch == '\\') {
+					ch = this->getchar();
+					if (ch == '\0')
 						break;
-					m_token[m_len] = lispy_escape_char(m_input[m_pos]);
+					m_token[m_len] = lispy_escape_char(ch);
 				}
 				else
-					m_token[m_len] = m_input[m_pos];
+					m_token[m_len] = ch;
+				m_len++;
 			}
 			m_token[m_len] = '\0';
 			break;
 		}
-		else if (m_input[m_pos] == '\'') {
+		else if (ch == '\'') {
 			m_type = TT_STRING;
-			for (m_pos++; m_input[m_pos] != '\0'; m_pos++, m_len++) {
- 				if (m_input[m_pos] == '\'')
+			while (m_input[m_pos] != '\0') {
+				ch = this->getchar();
+ 				if (ch == '\'')
 					break;
-				m_token[m_len] = m_input[m_pos];
+				m_token[m_len++] = ch;
 			}
 			m_token[m_len] = '\0';
 			break;
 		}
 		else {
 			m_type = TT_WORD;
-			for (; m_input[m_pos] != '\0' && !lispy_is_whitespace(m_input[m_pos]); m_pos++, m_len++) {
- 				if (m_input[m_pos] == '(')
+			m_token[m_len++] = ch;
+			while (m_input[m_pos] != '\0') {
+				ch = this->getchar();
+				if (lispy_is_whitespace(ch))
+					break;
+ 				if (ch == '(')
 					throw MooException("%d, %d: Unexpected open bracket.", m_line, m_col);
- 				else if (m_input[m_pos] == ')') {
-					m_pos--;
+ 				else if (ch == ')') {
+					this->ungetchar();
 					break;
 				}
-				m_token[m_len] = m_input[m_pos];
+				m_token[m_len++] = ch;
 			}
 			m_token[m_len] = '\0';
 			break;
 		}
-		// TODO this doesn't work... maybe you could instead use m_pos for this instead (indirectly)
-		m_col++;
 	}
-
-	if (m_input[m_pos] != '\0')
-		m_pos++;
 	return(0);
 }
 

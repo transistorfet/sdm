@@ -71,7 +71,7 @@ class MooObject : public MooGC {
 	virtual const char *get_string() { throw moo_type_error; }
 	virtual MooThing *get_thing() { throw moo_type_error; }
 
-	static MooObject *resolve(const char *name, MooObjectHash *env);
+	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 
 	void check_throw(moo_perm_t perms);

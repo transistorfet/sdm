@@ -53,6 +53,23 @@ int moo_data_file_exists(const char *file)
 	return(1);
 }
 
+int moo_data_read_file(const char *file, char *buffer, int max)
+{
+	FILE *fptr;
+	int count;
+	char name[STRING_SIZE];
+
+	if (!data_path)
+		return(0);
+	snprintf(name, STRING_SIZE, "%s%s", data_path, file);
+	if (!(fptr = fopen(name, "r")))
+		return(0);
+	count = fread(buffer, 1, max, fptr);
+	buffer[count] = '\0';
+	fclose(fptr);
+	return(count);
+}
+
 
 MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 {
