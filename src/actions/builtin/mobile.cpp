@@ -21,16 +21,8 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args);
 
-int moo_load_mobile_actions(MooBuiltinHash *actions)
-{
-	actions->set("mobile_init", new MooBuiltin(mobile_init));
-	return(0);
-}
-
-
-static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args)
+static int mobile_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 
@@ -47,4 +39,11 @@ static int mobile_init(MooAction *action, MooThing *thing, MooArgs *args)
 
 	return(0);
 }
+
+int moo_load_mobile_actions(MooBuiltinHash *actions)
+{
+	actions->set("mobile_init", new MooBuiltin(mobile_init));
+	return(0);
+}
+
 

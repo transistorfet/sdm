@@ -16,13 +16,14 @@ class MooCodeAction : public MooAction {
 	MooCodeExpr *m_code;
 
     public:
-	MooCodeAction(MooCodeExpr *code = NULL, const char *params = NULL, const char *name = NULL, MooThing *thing = NULL);
+	MooCodeAction(MooCodeExpr *code = NULL, const char *params = NULL, MooThing *thing = NULL);
 	virtual ~MooCodeAction() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	virtual int evaluate(MooObjectHash *env, MooArgs *args);
+    private:
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
 
 	int set(const char *name);
 };

@@ -22,37 +22,14 @@
 #include <sdm/actions/builtin/mud.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int room_init(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_say(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_emote(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_look(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_go(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_accept(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args);
-static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args);
 
-int moo_load_room_actions(MooBuiltinHash *actions)
-{
-	actions->set("room_init", new MooBuiltin(room_init));
-	actions->set("room_say", new MooBuiltin(room_say));
-	actions->set("room_emote", new MooBuiltin(room_emote));
-	actions->set("room_whisper", new MooBuiltin(room_whisper));
-	actions->set("room_look", new MooBuiltin(room_look));
-	actions->set("room_go", new MooBuiltin(room_go));
-	actions->set("room_accept", new MooBuiltin(room_accept));
-	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
-	actions->set("room_do_exit", new MooBuiltin(room_do_exit));
-	return(0);
-}
-
-static int room_init(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 
 	return(0);
 }
 
-static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_say(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 	const char *text;
@@ -73,7 +50,7 @@ static int room_say(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_emote(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 	const char *text;
@@ -86,7 +63,7 @@ static int room_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_whisper(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO check that the user is the room
 	// TODO check if the user is yourself (Smaug: "You have a nice little chat with yourself.\n\r")
@@ -99,7 +76,7 @@ static int room_whisper(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_look(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 	MooThing *object;
@@ -118,20 +95,20 @@ static int room_look(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_go(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_go(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO search this.exits for an exit matching the given name
 	// TODO call exit:invoke()
 	return(0);
 }
 
-static int room_accept(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_accept(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	args->m_result = new MooInteger(1);
 	return(0);
 }
 
-static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_do_enter(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	const char *msg;
 	MooThing *cur, *obj;
@@ -181,7 +158,7 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args)
+static int room_do_exit(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 
@@ -214,6 +191,20 @@ static int room_do_exit(MooAction *action, MooThing *thing, MooArgs *args)
 		sdm_notify(args->caller, args, "You get $obj.name.\n");
 	}
 */
+	return(0);
+}
+
+int moo_load_room_actions(MooBuiltinHash *actions)
+{
+	actions->set("room_init", new MooBuiltin(room_init));
+	actions->set("room_say", new MooBuiltin(room_say));
+	actions->set("room_emote", new MooBuiltin(room_emote));
+	actions->set("room_whisper", new MooBuiltin(room_whisper));
+	actions->set("room_look", new MooBuiltin(room_look));
+	actions->set("room_go", new MooBuiltin(room_go));
+	actions->set("room_accept", new MooBuiltin(room_accept));
+	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
+	actions->set("room_do_exit", new MooBuiltin(room_do_exit));
 	return(0);
 }
 

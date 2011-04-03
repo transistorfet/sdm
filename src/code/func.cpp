@@ -51,7 +51,7 @@ int MooCodeFunc::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooCodeFunc::evaluate(MooObjectHash *env, MooArgs *args)
+int MooCodeFunc::do_evaluate(MooObjectHash *env, MooArgs *args)
 {
 	if (!m_func)
 		throw MooException("Null function");

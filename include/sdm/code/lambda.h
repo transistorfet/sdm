@@ -22,7 +22,9 @@ class MooCodeLambda : public MooObject {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 	virtual int to_string(char *buffer, int max);
-	virtual int evaluate(MooObjectHash *parent, MooArgs *args);
+
+    private:
+	virtual int do_evaluate(MooObjectHash *parent, MooArgs *args);
 };
 
 extern MooObjectType moo_code_lambda_obj_type;

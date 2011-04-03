@@ -32,7 +32,7 @@ MooObject *moo_code_create(void)
 	return(new MooCodeAction());
 }
 
-MooCodeAction::MooCodeAction(MooCodeExpr *code, const char *params, const char *name, MooThing *thing) : MooAction(name, thing)
+MooCodeAction::MooCodeAction(MooCodeExpr *code, const char *params, MooThing *thing) : MooAction(thing)
 {
 	m_code = code;
 	if (params)
@@ -73,7 +73,7 @@ int MooCodeAction::write_data(MooDataFile *data)
 }
 
 // TODO is this class even needed anymore?
-int MooCodeAction::evaluate(MooObjectHash *env, MooArgs *args)
+int MooCodeAction::do_evaluate(MooObjectHash *env, MooArgs *args)
 {
 	return(m_code->evaluate(env, args));
 

@@ -22,47 +22,10 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int channel_init(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_join(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_say(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_names(MooAction *action, MooThing *thing, MooArgs *args);
-static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_join(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_say(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_names(MooAction *action, MooThing *thing, MooArgs *args);
-static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args);
-
 static int cryolocker_store(MooThing *user, MooThing *channel);
 static int cryolocker_revive(MooThing *user, MooThing *channel);
 
-int moo_load_channel_actions(MooBuiltinHash *actions)
-{
-	// TODO should this specify various defaults of these actions?
-	actions->set("channel_init", new MooBuiltin(channel_init));
-	actions->set("channel_join", new MooBuiltin(channel_join));
-	actions->set("channel_leave", new MooBuiltin(channel_leave));
-	actions->set("channel_quit", new MooBuiltin(channel_quit));
-	actions->set("channel_say", new MooBuiltin(channel_say));
-	actions->set("channel_emote", new MooBuiltin(channel_emote));
-	actions->set("channel_names", new MooBuiltin(channel_names));
-	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
-	actions->set("realm_join", new MooBuiltin(realm_join));
-	actions->set("realm_leave", new MooBuiltin(realm_leave));
-	actions->set("realm_quit", new MooBuiltin(realm_quit));
-	actions->set("realm_say", new MooBuiltin(realm_say));
-	actions->set("realm_emote", new MooBuiltin(realm_emote));
-	actions->set("realm_names", new MooBuiltin(realm_names));
-	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
-	return(0);
-}
-
-static int channel_init(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO set channel name
 	// TODO create list of users object
@@ -71,7 +34,7 @@ static int channel_init(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_join(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooObjectArray *users;
@@ -92,7 +55,7 @@ static int channel_join(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_leave(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooObject *ref;
@@ -114,7 +77,7 @@ static int channel_leave(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_quit(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *ref;
 	MooObjectArray *users;
@@ -132,7 +95,7 @@ static int channel_quit(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_say(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	const char *text;
@@ -150,7 +113,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_emote(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	const char *text;
@@ -168,7 +131,7 @@ static int channel_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_names(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	int j = 0;
 	MooThing *cur;
@@ -194,7 +157,7 @@ static int channel_names(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
+static int channel_evaluate(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO you could also just print a message like "Commands are not supported in this channel"
 	args->m_user->notify(TNT_STATUS, NULL, NULL, "Commands are not supported in this channel.");
@@ -208,7 +171,7 @@ static int channel_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
 ///// Realm Actions /////
 
 // TODO move these all to a separate file (since we probably wont need to call any channel functions directly)
-static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_join(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should the realm channel bother maintaining a user list?
 	//if (channel_join(action, thing, args) < 0)
@@ -225,7 +188,7 @@ static int realm_join(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_leave(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	//if (channel_leave(action, thing, args) < 0)
 	//	return(-1);
@@ -240,7 +203,7 @@ static int realm_leave(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_quit(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	//if (channel_quit(action, thing, args) < 0)
 	//	return(-1);
@@ -254,7 +217,7 @@ static int realm_quit(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_say(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_say(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *location = args->m_user->location();
 	if (location)
@@ -262,7 +225,7 @@ static int realm_say(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_emote(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *location = args->m_user->location();
 	if (location)
@@ -270,7 +233,7 @@ static int realm_emote(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_names(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_names(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 
@@ -280,7 +243,7 @@ static int realm_names(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int realm_evaluate(MooAction *action, MooThing *thing, MooArgs *args)
+static int realm_evaluate(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	const char *text;
 
@@ -329,6 +292,27 @@ static int cryolocker_revive(MooThing *user, MooThing *channel)
 				user->moveto(user, channel, location);
 		}
 	}
+	return(0);
+}
+
+int moo_load_channel_actions(MooBuiltinHash *actions)
+{
+	// TODO should this specify various defaults of these actions?
+	actions->set("channel_init", new MooBuiltin(channel_init));
+	actions->set("channel_join", new MooBuiltin(channel_join));
+	actions->set("channel_leave", new MooBuiltin(channel_leave));
+	actions->set("channel_quit", new MooBuiltin(channel_quit));
+	actions->set("channel_say", new MooBuiltin(channel_say));
+	actions->set("channel_emote", new MooBuiltin(channel_emote));
+	actions->set("channel_names", new MooBuiltin(channel_names));
+	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
+	actions->set("realm_join", new MooBuiltin(realm_join));
+	actions->set("realm_leave", new MooBuiltin(realm_leave));
+	actions->set("realm_quit", new MooBuiltin(realm_quit));
+	actions->set("realm_say", new MooBuiltin(realm_say));
+	actions->set("realm_emote", new MooBuiltin(realm_emote));
+	actions->set("realm_names", new MooBuiltin(realm_names));
+	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
 	return(0);
 }
 

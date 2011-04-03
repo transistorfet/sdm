@@ -41,6 +41,10 @@ class MooObject : public MooGC {
 	const MooObjectType *type();
 	const char *type_name() { return(this->type()->m_name); }
 	inline int is_a(const MooObjectType *type);
+	int is_true();
+
+	void check_throw(moo_perm_t perms);
+	int check(moo_perm_t perms);
 
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
@@ -59,12 +63,7 @@ class MooObject : public MooGC {
 	virtual int write_data(MooDataFile *data);
 
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
-	virtual int to_string(char *buffer, int max) { return(0); }
-	virtual int evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
-
-	/// Object Member Access Functions
-	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { return(NULL); }
-	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { return(NULL); }
+	virtual int to_string(char *buffer, int max) { buffer[0] = '\0'; return(0); }
 
 	virtual long int get_integer() { throw moo_type_error; }
 	virtual double get_float() { throw moo_type_error; }
@@ -73,9 +72,18 @@ class MooObject : public MooGC {
 
 	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
+	int evaluate(MooObjectHash *env, MooArgs *args);
 
-	void check_throw(moo_perm_t perms);
-	int check(moo_perm_t perms);
+	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);
+	static int expand_reference(char *buffer, int max, MooObjectHash *env, const char *str, int *used);
+	static int escape_char(const char *str, char *buffer);
+
+    private:
+	/// Object Member Access Functions
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { return(NULL); }
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { return(NULL); }
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
+	friend class MooTask;
 
     public:
 	/// Accessors

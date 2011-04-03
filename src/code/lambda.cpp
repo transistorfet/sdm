@@ -63,7 +63,7 @@ int MooCodeLambda::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooCodeLambda::evaluate(MooObjectHash *parent, MooArgs *args)
+int MooCodeLambda::do_evaluate(MooObjectHash *parent, MooArgs *args)
 {
 	int i;
 	MooCodeExpr *cur;

@@ -43,19 +43,17 @@ class MooChannel;
 class MooArgs : public MooObject {
     public:
 	MooArgs *m_parent;
-	MooAction *m_action;
-	MooObject *m_result;
 	MooThing *m_user;
 	MooThing *m_channel;
-	MooThing *m_caller;		// TODO unused at this point
 	MooThing *m_this;
+	MooObject *m_result;
 	MooObjectArray *m_args;		// TODO better name!??
 
 	MooArgs(int init_size = 5, MooThing *user = NULL, MooThing *channel = NULL);
 	MooArgs(MooObjectArray *&args, MooThing *user = NULL, MooThing *channel = NULL);
 	MooArgs(MooArgs *args, int init_size = 5);
 	virtual ~MooArgs();
-	void init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action);
+	void init(MooThing *user, MooThing *channel, MooThing *thing, MooArgs *parent);
 	void set_args(MooObjectArray *&args);
 
 	static int find_whitespace(const char *text);
@@ -70,7 +68,7 @@ class MooArgs : public MooObject {
 	void match_args_throw(const char *params);
 	const MooObjectType *get_type(char param);
 
-	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
+	MooObjectHash *make_env(MooObjectHash *env = NULL);
 
 	/// Accessors
 	inline MooObject *get(int index, MooObjectType *type) { return(m_args->get(index, type)); }
@@ -80,6 +78,9 @@ class MooArgs : public MooObject {
 	inline MooThing *get_thing(int index) { return(m_args->get_thing(index)); }
 
 	inline int set(int index, MooObject *obj) { if (!m_args->set(index, obj)) return(-1); return(0); }
+
+    private:
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 };
 
 extern MooObjectType moo_args_obj_type;

@@ -40,16 +40,20 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 	int res;
 	MooObject *obj = NULL;
 	char key[STRING_SIZE];
-	char buffer[STRING_SIZE];
+	char type_name[STRING_SIZE];
 	const MooObjectType *objtype;
 
 	if (!strcmp(type, "entry")) {
-		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type(buffer, NULL)))
+		data->read_attrib_string("type", type_name, STRING_SIZE);
+		if (!(objtype = moo_object_find_type(type_name, NULL))) {
+			moo_status("HASH: Unable to find entry type, %s", type_name);
 			return(-1);
-		if (!(obj = moo_make_object(objtype)))
-			return(-1);
+		}
 		data->read_attrib_string("key", key, STRING_SIZE);
+		if (!(obj = moo_make_object(objtype))) {
+			moo_status("HASH: Error loading entry, %s", key);
+			return(-1);
+		}
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();

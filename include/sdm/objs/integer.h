@@ -25,6 +25,7 @@ class MooInteger : public MooObject {
 	virtual int to_string(char *buffer, int max);
 
 	virtual long int get_integer() { return(m_num); }
+	virtual double get_float() { return((double) m_num); }
 };
 
 extern MooObjectType moo_integer_obj_type;

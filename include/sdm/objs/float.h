@@ -24,6 +24,7 @@ class MooFloat : public MooObject {
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
 
+	virtual long int get_integer() { return((long int) m_num); }
 	virtual double get_float() { return(m_num); }
 };
 

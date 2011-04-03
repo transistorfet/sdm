@@ -29,7 +29,9 @@ class MooCodeExpr : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-	virtual int evaluate(MooObjectHash *env, MooArgs *args);
+
+    private:
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
 
     public:
 	int line() { return(m_line); }

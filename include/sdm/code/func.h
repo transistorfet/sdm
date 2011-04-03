@@ -22,7 +22,9 @@ class MooCodeFunc : public MooObject {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 	virtual int to_string(char *buffer, int max);
-	virtual int evaluate(MooObjectHash *env, MooArgs *args);
+
+    private:
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
 };
 
 extern MooObjectType moo_code_func_obj_type;

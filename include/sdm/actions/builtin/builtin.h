@@ -11,21 +11,21 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
-typedef int (*moo_action_t)(class MooAction *, class MooThing *, class MooArgs *);
+typedef int (*moo_action_t)(class MooAction *, class MooThing *, MooObjectHash *, class MooArgs *);
 
 class MooBuiltin : public MooAction {
 	moo_action_t m_func;
 	MooBuiltin *m_master;
     public:
-	MooBuiltin(moo_action_t func = NULL, const char *params = NULL, const char *name = NULL, MooThing *thing = NULL);
+	MooBuiltin(moo_action_t func = NULL, const char *params = NULL, MooThing *thing = NULL);
 	virtual ~MooBuiltin() { }
+	int set(const char *name);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	virtual int evaluate(MooObjectHash *env, MooArgs *args);
-
-	int set(const char *name);
+    private:
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
 };
 
 typedef MooHash<MooBuiltin *> MooBuiltinHash;

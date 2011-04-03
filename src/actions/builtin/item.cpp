@@ -21,17 +21,8 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int item_get(MooAction *action, MooThing *thing, MooArgs *args);
-static int item_drop(MooAction *action, MooThing *thing, MooArgs *args);
 
-int moo_load_item_actions(MooBuiltinHash *actions)
-{
-	actions->set("item_get", new MooBuiltin(item_get));
-	actions->set("item_drop", new MooBuiltin(item_drop));
-	return(0);
-}
-
-static int item_get(MooAction *action, MooThing *thing, MooArgs *args)
+static int item_get(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 /*
 	// TODO this just gets one arg for now because parsing is broken
@@ -48,7 +39,7 @@ static int item_get(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int item_drop(MooAction *action, MooThing *thing, MooArgs *args)
+static int item_drop(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 /*
 	int i = 0;
@@ -61,6 +52,13 @@ static int item_drop(MooAction *action, MooThing *thing, MooArgs *args)
 	}
 	sdm_moveto(args->caller, args->obj, args->caller->location, NULL);
 */
+	return(0);
+}
+
+int moo_load_item_actions(MooBuiltinHash *actions)
+{
+	actions->set("item_get", new MooBuiltin(item_get));
+	actions->set("item_drop", new MooBuiltin(item_drop));
 	return(0);
 }
 

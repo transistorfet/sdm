@@ -45,11 +45,15 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 	// TODO read/write the other values?? like max?
 	if (!strcmp(type, "entry")) {
 		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type(buffer, NULL)))
+		if (!(objtype = moo_object_find_type(buffer, NULL))) {
+			moo_status("ARRAY: Unable to find entry type, %s", buffer);
 			return(-1);
-		if (!(obj = moo_make_object(objtype)))
-			return(-1);
+		}
 		index = data->read_attrib_integer("index");
+		if (!(obj = moo_make_object(objtype))) {
+			moo_status("ARRAY: Error loading entry, %d", index);
+			return(-1);
+		}
 		data->read_children();
 		res = obj->read_data(data);
 		data->read_parent();

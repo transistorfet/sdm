@@ -79,7 +79,7 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeExpr::evaluate(MooObjectHash *parent, MooArgs *args)
+int MooCodeExpr::do_evaluate(MooObjectHash *parent, MooArgs *args)
 {
 	MooCodeFrame frame;
 	return(frame.call(this, args));

@@ -38,20 +38,20 @@ MooObject *moo_args_create(void)
 
 MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL, NULL, NULL);
+	this->init(user, channel, NULL, NULL);
 	m_args = new MooObjectArray(init_size);
 }
 
 MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL, NULL, NULL);
+	this->init(user, channel, NULL, NULL);
 	m_args = args;
 }
 
 MooArgs::MooArgs(MooArgs *args, int init_size)
 {
 	MOO_INCREF(args);
-	this->init(args->m_user, args->m_channel, args->m_caller, args->m_this, args, args->m_action);
+	this->init(args->m_user, args->m_channel, NULL, args);
 	m_args = new MooObjectArray(init_size);
 }
 
@@ -61,16 +61,14 @@ MooArgs::~MooArgs()
 	MOO_DECREF(m_args);
 }
 
-void MooArgs::init(MooThing *user, MooThing *channel, MooThing *caller, MooThing *thing, MooArgs *parent, MooAction *action)
+void MooArgs::init(MooThing *user, MooThing *channel, MooThing *thing, MooArgs *parent)
 {
 	m_args = NULL;
 	m_result = NULL;
 	m_user = user;
 	m_channel = channel;
-	m_caller = caller;
 	m_this = thing;
 	m_parent = parent;
-	m_action = action;
 }
 
 void MooArgs::set_args(MooObjectArray *&args)
@@ -135,8 +133,6 @@ void MooArgs::init(MooThing *user, MooThing *channel)
 {
 	m_user = user;
 	m_channel = channel;
-	// TODO should this even be used?
-	//m_caller = (MooThing *) user;
 }
 
 int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text)
@@ -281,18 +277,22 @@ MooObject *MooArgs::access_property(const char *name, MooObject *value)
 		MOO_SET_MEMBER(m_channel, MooThing *, value)
 		return(m_channel);
 	}
-	else if (!strcmp(name, "action")) {
-		MOO_SET_MEMBER(m_action, MooAction *, value)
-		return(m_action);
-	}
 	else if (!strcmp(name, "parent")) {
 		MOO_SET_MEMBER(m_parent, MooArgs *, value)
 		return(m_parent);
 	}
-	else if (!strcmp(name, "caller")) {
-		MOO_SET_MEMBER(m_caller, MooThing *, value)
-		return(m_caller);
-	}
 	return(NULL);
+}
+
+MooObjectHash *MooArgs::make_env(MooObjectHash *env)
+{
+	if (!env)
+		env = new MooObjectHash();
+	env->set("user", MOO_INCREF(m_user));
+	env->set("channel", MOO_INCREF(m_channel));
+	env->set("this", MOO_INCREF(m_this));
+	env->set("result", MOO_INCREF(m_result));
+	env->set("args", MOO_INCREF(m_args));
+	return(env);
 }
 

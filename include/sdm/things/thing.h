@@ -32,9 +32,8 @@ class MooThing : public MooObject {
 	moo_id_t m_id;
 	moo_id_t m_parent;
 	MooThing *m_location;
-	// TODO if you made MooObjectHash and MooObjectTree, then you could use their read_entry/write_data functions
-	MooHash<MooObject *> *m_properties;
-	MooTree<MooAction *> *m_actions;
+	MooObjectHash *m_properties;
+	MooObjectHash *m_methods;
 
 	MooThing *m_next;
 	MooThing *m_objects;
@@ -45,15 +44,18 @@ class MooThing : public MooObject {
 	virtual ~MooThing();
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+
 	int init();
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
 	// TODO should this be moved to moo_code??
 	static void add_global(const char *name, MooObject *obj);
 
+    private:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
+    public:
 	// TODO should you move all these special functions to MooObject and has all accessing go through the access* functions?
 	//	Do you even need these functions?
 	/// Property Methods
@@ -69,10 +71,8 @@ class MooThing : public MooObject {
 	const char *get_string_property(const char *name);
 
 	/// Action Methods
-	int set_action(const char *name, MooAction *action);
-	MooAction *get_action(const char *name);
-	// TODO will we ever use this?  Where would it be used?
-	MooAction *get_action_partial(const char *name);
+	int set_action(const char *name, MooObject *action);
+	MooObject *get_action(const char *name);
 	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
 	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
 	int do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result = NULL, MooObject *arg0 = NULL, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL, MooObject *arg4 = NULL, MooObject *arg5 = NULL);
@@ -113,18 +113,12 @@ class MooThing : public MooObject {
 
 	const char *name();
 
-	/// String Parsers
-	static int expand_str(char *buffer, int max, MooArgs *args, const char *fmt);
-	static int expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used);
-	static int resolve_reference(char *buffer, int max, MooArgs *args, const char *ref);
-	static int escape_char(const char *str, char *buffer);
-
     protected:
 	int assign_id(moo_id_t id);
 
 	int add(MooThing *thing);
 	int remove(MooThing *thing);
-	int do_action(MooAction *action, MooArgs *args, MooObject **result = NULL);
+	int do_action(MooObject *action, MooArgs *args, MooObject **result = NULL);
 	MooObject *get_property_raw(const char *name, MooThing **thing);
 };
 

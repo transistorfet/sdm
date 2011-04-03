@@ -21,31 +21,20 @@
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int user_init(MooAction *action, MooThing *thing, MooArgs *args);
-static int user_passwd(MooAction *action, MooThing *thing, MooArgs *args);
-static int user_inventory(MooAction *action, MooThing *thing, MooArgs *args);
 
-int moo_load_user_actions(MooBuiltinHash *actions)
-{
-	actions->set("user_init", new MooBuiltin(user_init));
-	actions->set("user_passwd", new MooBuiltin(user_passwd));
-	actions->set("user_inventory", new MooBuiltin(user_inventory));
-	return(0);
-}
-
-static int user_init(MooAction *action, MooThing *thing, MooArgs *args)
+static int user_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO set any properties or whatever needs to be found on any user thing
 	return(0);
 }
 
-static int user_passwd(MooAction *action, MooThing *thing, MooArgs *args)
+static int user_passwd(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO change the password for the user
 	return(0);
 }
 
-static int user_inventory(MooAction *action, MooThing *thing, MooArgs *args)
+static int user_inventory(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 /*
 	const char *str;
@@ -65,4 +54,13 @@ static int user_inventory(MooAction *action, MooThing *thing, MooArgs *args)
 */
 	return(0);
 }
+
+int moo_load_user_actions(MooBuiltinHash *actions)
+{
+	actions->set("user_init", new MooBuiltin(user_init));
+	actions->set("user_passwd", new MooBuiltin(user_passwd));
+	actions->set("user_inventory", new MooBuiltin(user_inventory));
+	return(0);
+}
+
 

@@ -6,7 +6,6 @@
 #include <stdarg.h>
 
 #include <sdm/hash.h>
-#include <sdm/tree.h>
 #include <sdm/data.h>
 #include <sdm/misc.h>
 #include <sdm/array.h>
@@ -27,7 +26,8 @@
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
 #define THING_PROPERTIES_SIZE		5
-#define THING_ACTIONS_BITS		MOO_TBF_REPLACE | MOO_TBF_REMOVE | MOO_TBF_DELETEALL | MOO_TBF_DELETE
+#define THING_METHODS_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
+#define THING_METHODS_SIZE		5
 
 #define MOO_THING_INIT_SIZE			100
 /// This is to prevent us from making giant table accidentally
@@ -71,11 +71,11 @@ MooObject *moo_thing_create(void)
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)
 {
-	m_properties = new MooHash<MooObject *>(THING_PROPERTIES_SIZE, THING_PROPERTIES_BITS);
+	m_properties = new MooObjectHash(THING_PROPERTIES_SIZE, THING_PROPERTIES_BITS);
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	m_actions = new MooTree<MooAction *>(THING_ACTIONS_BITS);
+	m_methods = new MooObjectHash(THING_METHODS_SIZE, THING_METHODS_BITS);
 
 	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
 	/// If the id = MOO_NEW_ID then assign the next available id
@@ -102,8 +102,8 @@ MooThing::~MooThing()
 		m_location->remove(this);
 	if (m_properties)
 		delete m_properties;
-	if (m_actions)
-		delete m_actions;
+	if (m_methods)
+		delete m_methods;
 	if (m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
 
@@ -119,25 +119,16 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	char buffer[STRING_SIZE];
 	const MooObjectType *objtype;
 
-	if (!strcmp(type, "property")) {
-		MooObject *obj = NULL;
-		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "string", NULL))) {
-			moo_status("THING: Unable to find property type, %s", buffer);
-			return(-1);
-		}
-		data->read_attrib_string("name", buffer, STRING_SIZE);
-		if (!(obj = moo_make_object(objtype))) {
-			moo_status("THING: Error loading property, %s", buffer);
-			return(-1);
-		}
+	if (!strcmp(type, "properties")) {
 		data->read_children();
-		res = obj->read_data(data);
+		res = m_properties->read_data(data);
 		data->read_parent();
-		if ((res < 0) || (m_properties->set(buffer, obj) < 0)) {
-			delete obj;
-			return(-1);
-		}
+	}
+	else if (!strcmp(type, "methods")) {
+		data->read_children();
+		res = m_methods->read_data(data);
+		data->read_parent();
+		// TODO should you go through all the methods and ->init() them, so that the object is set properly?
 	}
 	else if (!strcmp(type, "thing")) {
 		MooThing *thing = NULL;
@@ -154,25 +145,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		thing->read_data(data);
 		data->read_parent();
 		this->add(thing);
-	}
-	else if (!strcmp(type, "action")) {
-		MooAction *action = NULL;
-		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type(buffer, &moo_action_obj_type))
-		    || !(action = (MooAction *) moo_make_object(objtype))) {
-			moo_status("THING: Unable to find action type, %s", buffer);
-			return(-1);
-		}
-		data->read_attrib_string("name", buffer, STRING_SIZE);
-		data->read_children();
-		res = action->read_data(data);
-		data->read_parent();
-		action->init(buffer, this);
-		if ((res < 0) || (m_actions->set(buffer, action) < 0)) {
-			moo_status("THING: Error loading action, %s.", buffer);
-			delete action;
-			return(-1);
-		}
 	}
 	else if (!strcmp(type, "bits")) {
 		int bits = data->read_integer_entry();
@@ -199,9 +171,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 
 int MooThing::write_data(MooDataFile *data)
 {
-	MooHashEntry<MooObject *> *hentry;
-	MooTreeEntry<MooAction *> *tentry;
-
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
 		data->write_integer_entry("parent", m_parent);
@@ -212,24 +181,14 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_integer_entry("location", m_location->m_id);
 
 	/// Write the properties to the file
-	m_properties->reset();
-	while ((hentry = m_properties->next_entry())) {
-		data->write_begin_entry("property");
-		data->write_attrib_string("type", hentry->m_data->type_name());
-		data->write_attrib_string("name", hentry->m_key);
-		hentry->m_data->write_data(data);
-		data->write_end_entry();
-	}
+	data->write_begin_entry("properties");
+	m_properties->write_data(data);
+	data->write_end_entry();
 
 	/// Write the actions to the file
-	m_actions->reset();
-	while ((tentry = m_actions->next_entry())) {
-		data->write_begin_entry("action");
-		data->write_attrib_string("type", tentry->m_data->type_name());
-		data->write_attrib_string("name", tentry->m_key);
-		tentry->m_data->write_data(data);
-		data->write_end_entry();
-	}
+	data->write_begin_entry("methods");
+	m_methods->write_data(data);
+	data->write_end_entry();
 
 	/// Write the things we contain to the file
 	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {
@@ -315,8 +274,7 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 {
 	// TODO do you need to do permissions checks here?
 	if (value) {
-		// TODO this dynamic cast is temporary and should be removed in future when actions are MooObjects
-		if (this->set_action(name, dynamic_cast<MooAction *>(value)) < 0)
+		if (this->set_action(name, value) < 0)
 			return(NULL);
 		return(value);
 	}
@@ -407,7 +365,7 @@ MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
 	MooObject *obj;
 
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((obj = cur->m_properties->get(name))) {
+		if ((obj = cur->m_properties->get(name, NULL))) {
 			if (thing)
 				*thing = cur;
 			return(obj);
@@ -454,42 +412,37 @@ const char *MooThing::get_string_property(const char *name)
 
 ///// Action Methods /////
 
-int MooThing::set_action(const char *name, MooAction *action)
+int MooThing::set_action(const char *name, MooObject *action)
 {
+	MooAction *a;
+
 	if (!name || (*name == '\0'))
 		return(-1);
 	// TODO do permissions check??
 	/// If the action is NULL, remove the entry from the table
 	if (!action)
-		return(m_actions->remove(name));
-	action->init(name, this);
-	return(m_actions->set(name, action));
+		return(m_methods->remove(name));
+	// TODO remove this eventually?
+	if ((a = dynamic_cast<MooAction *>(action)))
+		a->init(this);
+	return(m_methods->set(name, action));
 }
 
-MooAction *MooThing::get_action(const char *name)
+MooObject *MooThing::get_action(const char *name)
 {
 	MooThing *cur;
-	MooAction *action;
+	MooObject *action;
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((action = cur->m_actions->get(name)))
+		if ((action = cur->m_methods->get(name, NULL)))
 			return(action);
 	}
 	return(NULL);
 }
 
-MooAction *MooThing::get_action_partial(const char *name)
-{
-	MooThing *cur;
-	MooAction *action;
 
-	for (cur = this; cur; cur = cur->parent()) {
-		if ((action = cur->m_actions->get_partial(name)))
-			return(action);
-	}
-	return(NULL);
-}
+
 
 int MooThing::do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result)
 {
@@ -502,21 +455,24 @@ int MooThing::do_action(MooThing *user, MooThing *channel, const char *text, Moo
 int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result)
 {
 	MooArgs args;
-	MooAction *action;
+	MooObject *action;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (!(action = this->get_action(name)))
 		return(MOO_ACTION_NOT_FOUND);
 	try {
-		args.parse_args(action->params(), user, channel, buffer, LARGE_STRING_SIZE, text ? text : "");
+		MooAction *a;
+		if ((a = dynamic_cast<MooAction *>(action)))
+			args.parse_args(a->params(), user, channel, buffer, LARGE_STRING_SIZE, text ? text : "");
 		return(this->do_action(action, &args, result));
 	}
 	catch (MooException e) {
-		moo_status("ACTION: (%s) %s", action->name(), e.get());
+		moo_status("ACTION: (%s) %s", name, e.get());
 		user->notify(TNT_STATUS, user, channel, e.get());
 		return(-1);
 	}
 }
+
 int MooThing::do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result, MooObject *arg0, MooObject *arg1, MooObject *arg2, MooObject *arg3, MooObject *arg4, MooObject *arg5)
 {
 	MooArgs args(6, user, channel);
@@ -542,57 +498,37 @@ int MooThing::do_action(const char *name, MooThing *user, MooThing *channel, Moo
 
 int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 {
-	MooAction *action;
+	MooObject *action;
 
 	if (!(action = this->get_action(name)))
 		return(MOO_ACTION_NOT_FOUND);
 	try {
-		args->match_args_throw(action->params());
+		MooAction *a;
+		if ((a = dynamic_cast<MooAction *>(action)))
+			args->match_args_throw(a->params());
 		return(this->do_action(action, args, result));
 	}
 	catch (MooException e) {
-		moo_status("ACTION: (%s) %s", action->name(), e.get());
+		moo_status("ACTION: (%s) %s", name, e.get());
 		args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, e.get());
 		return(-1);
 	}
 }
 
-int MooThing::do_action(MooAction *action, MooArgs *args, MooObject **result)
+// TODO this function should be removed entirely, if possible
+int MooThing::do_action(MooObject *action, MooArgs *args, MooObject **result)
 {
 	int res;
 
-	// TODO should this whole function always be called when evaluating something with evaluate()
-	// TODO the try block could be taken back to higher levels (psuedo server's call to command() or needs the try block at the
-	//	very least)
-	try {
-		action->check_throw(MOO_PERM_X);
+	args->m_this = this;
+	res = action->evaluate(NULL, args);
 
-		// TODO is this right, deleting the result if it's present?
-		MOO_DECREF(args->m_result);
+	/// Set the result if we were given a pointer
+	if (result) {
+		*result = args->m_result;
 		args->m_result = NULL;
-		args->m_this = this;
-		args->m_action = action;
-
-		// TODO should 'this' here instead be action->m_thing??  should there be something like 'this' at all?
-		//	It should now be set in the action so we can get it from there
-		if (action->permissions() & MOO_PERM_SUID)
-			res = MooTask::elevated_evaluate(action, NULL, args);
-		else
-			res = action->evaluate(NULL, args);
-
-		/// Set the result if we were given a pointer
-		if (result) {
-			*result = args->m_result;
-			args->m_result = NULL;
-		}
-		return(res);
 	}
-	catch (MooException e) {
-		throw e;
-	}
-	catch (...) {
-		throw MooException("An unspecified error has occurred");
-	}
+	return(res);
 }
 
 int MooThing::convert_result(MooObject *&result, int def)
@@ -686,6 +622,7 @@ MooThing *MooThing::reference(const char *name)
 			return(NULL);
 		return(world->find_named(name));
 	}
+	// TODO should we just get rid of this entirely?
 	else if (name[0] == '$') {
 		// TODO should we break up the reference??
 		MooThingRef *ref = (MooThingRef *) moo_global_table->get(&name[1], &moo_thingref_obj_type);
@@ -763,10 +700,15 @@ int MooThing::notify(int type, MooArgs *args, const char *fmt, ...)
 
 	{
 		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
+		MooObjectHash *env;
 		char buffer1[LARGE_STRING_SIZE];
+
+		if (args)
+			env = args->make_env();
 		va_start(va, fmt);
 		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
-		MooThing::expand_str(buffer2, LARGE_STRING_SIZE, args, buffer1);
+		MooObject::format(buffer2, LARGE_STRING_SIZE, env, buffer1);
+		MOO_DECREF(env);
 	}
 	return(this->notify(type, args->m_user, args->m_channel, buffer2));
 }
@@ -843,6 +785,7 @@ int MooThing::attach_orphans()
 	MooThing *cur;
 	MooThing *root;
 
+	// TODO should this instead be a sign that we need to recycle these things?
 	if (!(root = MooWorld::root()))
 		return(-1);
 	for (int i = 0; i <= moo_thing_table->last(); i++) {
@@ -944,213 +887,6 @@ const char *MooThing::name()
 	if (!name)
 		return("???");
 	return(name);
-}
-
-///// String Parsers /////
-
-/**
- * Format a string using the given fmt string and place the resulting
- * string into the given buffer.  The number of characters written to
- * the buffer is returned.  If a $ is encountered, the substring up
- * to the next space is taken to be a reference name.  If the reference
- * name is enclosed in { }, then the reference name is take to be
- * up to the closing }.  The reference is evaluated into a string using
- * the MooThing::expand_reference function.  If a & follows the $ then the
- * resolved string is recursively expanded.
- */
-int MooThing::expand_str(char *buffer, int max, MooArgs *args, const char *fmt)
-{
-	int i;
-	int j = 0;
-
-	max--;
-	for (i = 0;(fmt[i] != '\0') && (j < max);i++) {
-		if (fmt[i] == '\\') {
-			if (fmt[++i] == '\0')
-				break;
-			i += MooThing::escape_char(&fmt[i], &buffer[j++]) - 1;
-		}
-		else if (fmt[i] == '$')
-			j += MooThing::expand_reference(&buffer[j], max - j + 1, args, &fmt[i], &i);
-		else
-			buffer[j++] = fmt[i];
-	}
-	buffer[j] = '\0';
-	return(j);
-}
-
-#define IS_NUMBER_CHAR(ch)	\
-	( ((ch) >= 0x30) && ((ch) <= 0x39) )
-
-#define IS_VALID_CHAR(ch)	\
-	( (((ch) >= '0') && ((ch) <= '9'))	\
-	|| (((ch) >= 'A') && ((ch) <= 'Z')) || (((ch) >= 'a') && ((ch) <= 'z'))	\
-	|| ((ch) == '.') || ((ch) == '_') )
-
-/**
- * Expand the reference using the given args and copy the resulting string
- * to the given buffer up to the max number of characters.  The number
- * of characters written to the buffer is returned.  If the given str_count
- * pointer is not NULL then the number of characters used as the variable
- * name in str is added to the value it points to.  The given str may
- * start with the '$' char or may start just after it.
- */
-int MooThing::expand_reference(char *buffer, int max, MooArgs *args, const char *str, int *used)
-{
-	int k;
-	char delim;
-	int recurse;
-	int i = 0, j = 0;
-	char value[STRING_SIZE];
-
-	if (str[i] == '$')
-		i++;
-
-	if (str[i] == '&') {
-		recurse = 1;
-		i++;
-	}
-	else
-		recurse = 0;
-
-	if (str[i] == '{') {
-		delim = '}';
-		i++;
-	}
-	else
-		delim = ' ';
-
-	for (k = 0; (str[i] != '\0') && (str[i] != delim) && IS_VALID_CHAR(str[i]) && (k < max - 1); k++, i++)
-		buffer[k] = str[i];
-	buffer[k] = '\0';
-	if (MooThing::resolve_reference(value, STRING_SIZE, args, buffer) >= 0) {
-		if (recurse)
-			j = MooThing::expand_str(buffer, max, args, value);
-		else {
-			strncpy(buffer, value, max - 1);
-			if ((j = strlen(value)) >= max)
-				j = max - 1;
-		}
-	}
-	if (delim != '}')
-		i--;
-
-	if (used)
-		*used += i;
-	buffer[j] = '\0';
-	return(j);
-}
-
-/**
- * Resolves the given reference using the given arguments and copies the
- * resulting string into the given buffer.  The number of characters written
- * to the buffer is returned.
- */
-int MooThing::resolve_reference(char *buffer, int max, MooArgs *args, const char *ref)
-{
-	int i, j;
-	char *name;
-	MooThing *thing;
-	MooObject *result = NULL;
-
-	max--;
-	if ((name = strchr(ref, '.'))) {
-		i = name - ref;
-		name++;
-	}
-	else
-		i = strlen(ref);
-
-	if (!strncmp(ref, "action", i)) {
-		// TODO we are ignoring the rest of the reference for now ($action.owner, $action.name)
-		strncpy(buffer, args->m_action->name(), max);
-		buffer[max] = '\0';
-		return(strlen(buffer));
-	}
-	else if (!strncmp(ref, "user", i))
-		thing = args->m_user;
-	else if (!strncmp(ref, "this", i))
-		thing = args->m_this;
-	else if (!strncmp(ref, "caller", i))
-		thing = args->m_caller;
-	else if (!strncmp(ref, "result", i))
-		result = args->m_result;
-	else if (ref[0] > '0' && ref[0] < '9') {
-		char *remain;
-		j = strtol(ref, &remain, 10);
-		// TODO should we do anything more severe here?
-		if (remain - ref != i)
-			return(0);
-		result = args->m_args->get(j, NULL);
-	}
-	else
-		thing = MooThing::reference(ref);
-
-	buffer[0] = '\0';
-	if (name) {
-		if (!thing || !(result = thing->get_property(name, NULL)))
-			return(0);
-	}
-	else if (!result) {
-		if ((i = snprintf(buffer, max, "#%d", thing->m_id)) < 0)
-			return(0);
-		buffer[i] = '\0';
-		return(i);
-	}
-	return(result->to_string(buffer, max));
-}
-
-
-/**
- * Convert the charcter escape sequence (assuming str starts after the escape
- * character) and stores the character in buffer[0].  The number of characters
- * read as a sequence from str is returned
- */
-int MooThing::escape_char(const char *str, char *buffer)
-{
-	char number[3];
-
-	if (*str == '\0')
-		return(0);
-	switch (str[0]) {
-		case 'n':
-			buffer[0] = '\n';
-			break;
-		case 'r':
-			buffer[0] = '\r';
-			break;
-		case 't':
-			buffer[0] = '\t';
-			break;
-		case 'e':
-			buffer[0] = '\x1b';
-			break;
-		case 'x':
-			if ((str[1] != '\0') && (str[2] != '\0')) {
-				number[0] = str[1];
-				number[1] = str[2];
-				number[2] = '\0';
-				buffer[0] = strtol(number, NULL, 16);
-			}
-			return(3);
-		default:
-			if (IS_NUMBER_CHAR(str[0])) {
-				buffer[0] = str[0] - 0x30;
-				if (IS_NUMBER_CHAR(str[1])) {
-					buffer[0] = (buffer[0] * 8) + str[1] - 0x30;
-					if (IS_NUMBER_CHAR(str[2])) {
-						buffer[0] = (buffer[0] * 8) + str[2] - 0x30;
-						return(3);
-					}
-					return(2);
-				}
-				return(1);
-			}
-			else
-				buffer[0] = str[0];
-			break;
-	}
-	return(1);
 }
 
 

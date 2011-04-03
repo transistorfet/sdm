@@ -21,33 +21,6 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
 MooHash<MooFormT *> *form_env = NULL;
 
-static int code_event_set(MooCodeFrame *frame, MooCodeExpr *expr);
-static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr);
-static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr);
-static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr);
-static int code_event_foreach(MooCodeFrame *frame, MooCodeExpr *expr);
-
-int init_code_event(void)
-{
-	if (form_env)
-		return(1);
-	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
-
-	form_env->set("set", new MooFormT(code_event_set));
-	form_env->set("if", new MooFormT(code_event_if));
-	form_env->set("block", new MooFormT(code_event_block));
-	form_env->set("lambda", new MooFormT(code_event_lambda));
-	form_env->set("foreach", new MooFormT(code_event_foreach));
-	return(0);
-}
-
-void release_code_event(void)
-{
-	if (!form_env)
-		return;
-	delete form_env;
-}
-
 MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr)
 {
 	MOO_INCREF(m_env = env);
@@ -189,26 +162,64 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
  * Moo Code Event Forms *
  ************************/
 
-static int code_event_set(MooCodeFrame *frame, MooCodeExpr *expr)
+
+
+/******************************
+ * Form: (set <name> <value>) *
+ ******************************/
+
+static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	// TODO push an event to actually do the set with the return value
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
 	return(0);
 }
 
-static int code_event_if(MooCodeFrame *frame, MooCodeExpr *expr)
-{
+/*******************************************************
+ * Form: (if <cond:number> <true-expr> [<false-expr>]) *
+ *******************************************************/
 
+class FormIfEvent : public MooCodeEvent {
+    public:
+	FormIfEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	int do_event(MooCodeFrame *frame) {
+		MooObject *obj;
+
+		if ((obj = frame->get_return()) && obj->is_true())
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, m_expr));
+		else
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, m_expr->next()));
+		return(0);
+	}
+};
+
+static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO should you check argument numbers?
+	//MooCodeExpr *next;
+	//if (!(next = expr->next()))
+
+	// TODO wouldn't this cause a segfault?
+	frame->push_event(new FormIfEvent(frame->env(), NULL, expr->next()));
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr));
 	return(0);
 }
 
-static int code_event_block(MooCodeFrame *frame, MooCodeExpr *expr)
+/****************************
+ * Form: (block <expr> ...) *
+ ****************************/
+
+static int form_block(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	frame->set_return(MOO_INCREF(expr));
 	return(0);
 }
 
-static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
+/**************************************************
+ * Form: (lambda ([<identifier>] ...) <expr> ...) *
+ **************************************************/
+
+static int form_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	MooCodeLambda *lambda;
 
@@ -217,10 +228,37 @@ static int code_event_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
-static int code_event_foreach(MooCodeFrame *frame, MooCodeExpr *expr)
+/***************************************************
+ * Form: (foreach <identifier> <array> <expr> ...) *
+ ***************************************************/
+
+static int form_foreach(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	// TODO you need to make and return a MooCodeLambda class
 	//frame->call(global_env->get("#foreach-func", ...)
 	return(0);
 }
+
+
+int init_code_event(void)
+{
+	if (form_env)
+		return(1);
+	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
+
+	form_env->set("set", new MooFormT(form_set));
+	form_env->set("if", new MooFormT(form_if));
+	form_env->set("block", new MooFormT(form_block));
+	form_env->set("lambda", new MooFormT(form_lambda));
+	form_env->set("foreach", new MooFormT(form_foreach));
+	return(0);
+}
+
+void release_code_event(void)
+{
+	if (!form_env)
+		return;
+	delete form_env;
+}
+
 

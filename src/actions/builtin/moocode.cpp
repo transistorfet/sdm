@@ -27,7 +27,7 @@
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int moocode_eval(MooAction *action, MooThing *thing, MooArgs *args)
+static int moocode_eval(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooCodeFrame frame;
 

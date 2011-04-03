@@ -16,13 +16,14 @@
 class MooAlias : public MooAction {
 	std::string *m_command;
     public:
-	MooAlias(const char *name = NULL, MooThing* thing = NULL, const char *command = NULL);
+	MooAlias(MooThing* thing = NULL, const char *command = NULL);
 	virtual ~MooAlias();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	virtual int evaluate(MooObjectHash *env, MooArgs *args);
+    private:
+	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
 };
 
 extern MooObjectType moo_alias_obj_type;

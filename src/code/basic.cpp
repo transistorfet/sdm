@@ -117,6 +117,34 @@ static int basic_load(MooObjectHash *env, MooArgs *args)
 	return(frame.eval(buffer, args));
 }
 
+static int basic_create_thing(MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	MooThing *thing, *parent;
+	char buffer[LARGE_STRING_SIZE];
+
+	// TODO This should probably be a thing/thingref instead of a string
+	if (!(obj = args->m_args->get(0, NULL)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	// TODO set parent
+
+	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
+		throw MooException("Error creating new thing from %d", parent->id());
+
+	if ((obj = args->m_args->get(1, NULL))) {
+		try {
+			//obj->evaluate()
+		}
+		catch (MooException e) {
+			// TODO how do you destroy a thing
+			//thing->recycle();
+			throw e;
+		}
+	}
+	args->m_result = thing;
+	return(0);
+}
 
 
 /*

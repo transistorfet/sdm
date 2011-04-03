@@ -88,9 +88,22 @@
 	* fix MooArray instances so that they pass a destroy_t function (how can you get it to work with delete??)
 	* convert hash and tree to use a destroy_t function, so that MOO_DECREF can be called for objects
 
-	* should the NULL passed to evaluate() in some cases be changed?
+	* what is the MooAction class used for?  Make code use MooObject instead where possible (like in MooThing::get_action)
+
+	* should the NULL passed to evaluate() in some cases be changed? (only in MooThing::do_action)
 	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
 	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
+	* convert notify() that takes args to take env or something else instead
+	* consolidate/move the moo_global_table from thing into the code's global table?
+	* get rid of MooBultin's MooAction parameter??
+	* rename everything to do with action to 'method'
+
+	* object->is_true(), what is true vs false?
+	* add permissions checks to access and evaluate functions
+	* how will methods work, in terms of getting the object they were called on?
+	* how will user/channel be set/passed around and so on?  Could we even have certain I/O functions that you call and which then
+	  forward the call on to the appropriate user/channel stuff??  MooTask might be an appropriate place for that.
+
 
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code

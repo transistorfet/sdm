@@ -26,22 +26,19 @@ MooObjectType moo_action_obj_type = {
 	(moo_type_create_t) NULL
 };
 
-MooAction::MooAction(const char *name, MooThing *thing)
+MooAction::MooAction(MooThing *thing)
 {
-	this->init(name, thing);
+	this->init(thing);
 	m_params[0] = '\0';
 }
 
 MooAction::~MooAction()
 {
-	// TODO maybe you could check the thing and make sure the action is removed???
-	if (m_name)
-		delete m_name;
+
 }
 
-void MooAction::init(const char *name, MooThing *thing)
+void MooAction::init(MooThing *thing)
 {
-	m_name = name ? new std::string(name) : NULL;
 	m_thing = thing;
 }
 

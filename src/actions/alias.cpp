@@ -31,7 +31,7 @@ MooObject *moo_alias_create(void)
 	return(new MooAlias());
 }
 
-MooAlias::MooAlias(const char *name, MooThing* thing, const char *command) : MooAction(name, thing)
+MooAlias::MooAlias(MooThing* thing, const char *command) : MooAction(thing)
 {
 	m_command = command ? new std::string(command) : NULL;
 }
@@ -65,11 +65,13 @@ int MooAlias::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooAlias::evaluate(MooObjectHash *env, MooArgs *args)
+int MooAlias::do_evaluate(MooObjectHash *env, MooArgs *args)
 {
 	char buffer[STRING_SIZE];
 
-	MooThing::expand_str(buffer, STRING_SIZE, args, m_command->c_str());
+	// TODO how do you add the args to the environment? using make_env or just as 'args' or what?  Should it/will it mask an
+	//	args declaration for the previous call?  Should it extend the environment so that it doesn't get modified
+	MooThing::format(buffer, STRING_SIZE, env, m_command->c_str());
 	return(args->m_user->command(args->m_user, args->m_channel, buffer));
 }
 

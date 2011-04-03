@@ -25,29 +25,14 @@
 #include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
-static int basics_register(MooAction *action, MooThing *thing, MooArgs *args);
-static int basics_print(MooAction *action, MooThing *thing, MooArgs *args);
-static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args);
-static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args);
-static int basics_go(MooAction *action, MooThing *thing, MooArgs *args);
 
-int moo_load_basic_actions(MooBuiltinHash *actions)
-{
-	actions->set("basics_register", new MooBuiltin(basics_register));
-	actions->set("basics_print", new MooBuiltin(basics_print));
-	actions->set("basics_print_view", new MooBuiltin(basics_print_view));
-	actions->set("basics_look_self", new MooBuiltin(basics_look_self));
-	actions->set("basics_go", new MooBuiltin(basics_go));
-	return(0);
-}
-
-static int basics_register(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_register(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO register new user
 	return(0);
 }
 
-static int basics_print(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_print(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should this be the typical way you reference arguments?
 	// TODO i don't really like this, with the type reference...
@@ -55,7 +40,7 @@ static int basics_print(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_print_view(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 
@@ -65,7 +50,7 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_look_self(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooString *str;
@@ -75,7 +60,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	args->m_user->notify(TNT_STATUS, args, "<lightgreen>$this.description");
 	/// Print the views of all objects contained in the target
 	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-		if (cur == args->m_caller || cur == args->m_user)
+		if (cur == args->m_user)
 			continue;
 		cur->do_action(args->m_user, args->m_channel, "print_view");
 	}
@@ -107,7 +92,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooArgs *args)
 	return(0);
 }
 
-static int basics_go(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_go(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 /*
 	double num;
@@ -123,7 +108,7 @@ static int basics_go(MooAction *action, MooThing *thing, MooArgs *args)
 }
 
 /*
-static int basics_respond(MooAction *action, MooThing *thing, MooArgs *args)
+static int basics_respond(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
 {
 
 
@@ -154,4 +139,15 @@ static int basics_respond(MooAction *action, MooThing *thing, MooArgs *args)
 	}
 }
 */
+
+int moo_load_basic_actions(MooBuiltinHash *actions)
+{
+	actions->set("basics_register", new MooBuiltin(basics_register));
+	actions->set("basics_print", new MooBuiltin(basics_print));
+	actions->set("basics_print_view", new MooBuiltin(basics_print_view));
+	actions->set("basics_look_self", new MooBuiltin(basics_look_self));
+	actions->set("basics_go", new MooBuiltin(basics_go));
+	return(0);
+}
+
 

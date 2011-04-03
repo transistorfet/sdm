@@ -10,52 +10,56 @@
   <owner>7</owner>
   <permissions>075</permissions>
   <location>1</location>
-  <property type="string" name="title">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>The Test Room</value>
-  </property>
-  <property type="string" name="description">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value>
-  </property>
-  <property type="string" name="name">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>start</value>
-  </property>
+  <properties>
+   <entry type="string" key="title">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>The Test Room</value>
+   </entry>
+   <entry type="string" key="description">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value>
+   </entry>
+   <entry type="string" key="name">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>start</value>
+   </entry>
+  </properties>
   <thing>
    <id>51</id>
    <parent>11</parent>
    <owner>7</owner>
    <permissions>075</permissions>
    <location>50</location>
-   <property type="string" name="title">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>North</value>
-   </property>
-   <property type="thingref" name="target">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>55</value>
-   </property>
-   <property type="string" name="brief">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>A typical looking wooden doorway</value>
-   </property>
-   <property type="string" name="name">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>north</value>
-   </property>
-   <property type="string" name="description">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>It's a door that you don't need to open. What more do you need to know</value>
-   </property>
+   <properties>
+    <entry type="string" key="title">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>North</value>
+    </entry>
+    <entry type="thingref" key="target">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>55</value>
+    </entry>
+    <entry type="string" key="brief">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>A typical looking wooden doorway</value>
+    </entry>
+    <entry type="string" key="name">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>north</value>
+    </entry>
+    <entry type="string" key="description">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>It's a door that you don't need to open. What more do you need to know</value>
+    </entry>
+   </properties>
   </thing>
  </thing>
  <thing>
@@ -64,47 +68,51 @@
   <owner>7</owner>
   <permissions>075</permissions>
   <location>1</location>
-  <property type="string" name="title">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>The Lounge</value>
-  </property>
-  <property type="string" name="description">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>You are in some kind of lounge area. There is an old couch against one wall with a fridge, microwave and countertop on the opposite wall.</value>
-  </property>
+  <properties>
+   <entry type="string" key="title">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>The Lounge</value>
+   </entry>
+   <entry type="string" key="description">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <value>You are in some kind of lounge area. There is an old couch against one wall with a fridge, microwave and countertop on the opposite wall.</value>
+   </entry>
+  </properties>
   <thing>
    <id>56</id>
    <parent>11</parent>
    <owner>7</owner>
    <permissions>075</permissions>
    <location>55</location>
-   <property type="string" name="title">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>South</value>
-   </property>
-   <property type="thingref" name="target">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>50</value>
-   </property>
-   <property type="string" name="brief">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>A strange looking curved hallway</value>
-   </property>
-   <property type="string" name="name">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>south</value>
-   </property>
-   <property type="string" name="description">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <value>For some reason you are unable to see the hallway clearly</value>
-   </property>
+   <properties>
+    <entry type="string" key="title">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>South</value>
+    </entry>
+    <entry type="thingref" key="target">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>50</value>
+    </entry>
+    <entry type="string" key="brief">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>A strange looking curved hallway</value>
+    </entry>
+    <entry type="string" key="name">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>south</value>
+    </entry>
+    <entry type="string" key="description">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <value>For some reason you are unable to see the hallway clearly</value>
+    </entry>
+   </properties>
   </thing>
  </thing>
 </world>

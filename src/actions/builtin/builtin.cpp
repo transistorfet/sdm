@@ -72,12 +72,23 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin(moo_action_t func, const char *params, const char *name, MooThing *thing) : MooAction(name, thing)
+MooBuiltin::MooBuiltin(moo_action_t func, const char *params, MooThing *thing) : MooAction(thing)
 {
 	m_func = func;
 	m_master = NULL;
 	if (params)
 		this->params(params);
+}
+
+int MooBuiltin::set(const char *name)
+{
+	MooBuiltin *master;
+
+	if (!(master = builtin_actions->get(name)))
+		return(-1);
+	m_master = master;
+	m_func = master->m_func;
+	return(0);
 }
 
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
@@ -114,22 +125,13 @@ int MooBuiltin::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooBuiltin::evaluate(MooObjectHash *env, MooArgs *args)
+int MooBuiltin::do_evaluate(MooObjectHash *env, MooArgs *args)
 {
 	if (!m_func)
 		return(-1);
-	return(m_func(this, m_thing, args));
+	return(m_func(this, m_thing, env, args));
 }
 
-int MooBuiltin::set(const char *name)
-{
-	MooBuiltin *master;
 
-	if (!(master = builtin_actions->get(name)))
-		return(-1);
-	m_master = master;
-	m_func = master->m_func;
-	return(0);
-}
 
 
