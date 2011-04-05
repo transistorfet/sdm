@@ -515,19 +515,39 @@ int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
 	}
 }
 
+#include <sdm/code/code.h>
+
 // TODO this function should be removed entirely, if possible
 int MooThing::do_action(MooObject *action, MooArgs *args, MooObject **result)
 {
 	int res;
+	MooObjectHash *env;
+	MooCodeFrame frame;
 
+	// TODO technically this is already in the frame, so we don't need it, but what if you take env as an argument?  Do you pass it
+	//	to frame and extend it? or use it directly?
+	//if (!(env = new MooObjectHash()))
+	//	return(-1);
+
+	// TODO should you add the user and channel to the environment here (and then eventually remove them from user/channel?)
+	//	should they be added inside MooObject::evaluate(), so that they are always set?
+	// TODO should user always be aquired from MooTask for security purposes?  I guess all perm checks still check MooTask so the
+	//	'user' in env is just for convenience...
 	args->m_this = this;
-	res = action->evaluate(NULL, args);
+
+	// TODO this is all temporary until we can either move this function elsewhere or remove it entirely
+	//frame.call(action, env, args);
+	frame.push_call(action, args);
+	frame.run(0);
+
+	//res = action->evaluate(env, args);
 
 	/// Set the result if we were given a pointer
 	if (result) {
 		*result = args->m_result;
 		args->m_result = NULL;
 	}
+	//MOO_DECREF(env);
 	return(res);
 }
 

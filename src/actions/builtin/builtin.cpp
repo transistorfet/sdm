@@ -125,11 +125,11 @@ int MooBuiltin::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooBuiltin::do_evaluate(MooObjectHash *env, MooArgs *args)
+int MooBuiltin::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	if (!m_func)
 		return(-1);
-	return(m_func(this, m_thing, env, args));
+	return(m_func(this, m_thing, frame, env, args));
 }
 
 

@@ -23,13 +23,13 @@
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int room_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_init(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 	return(0);
 }
 
-static int room_say(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 	const char *text;
@@ -50,7 +50,7 @@ static int room_say(MooAction *action, MooThing *thing, MooObjectHash *env, MooA
 	return(0);
 }
 
-static int room_emote(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 	const char *text;
@@ -63,7 +63,7 @@ static int room_emote(MooAction *action, MooThing *thing, MooObjectHash *env, Mo
 	return(0);
 }
 
-static int room_whisper(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_whisper(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO check that the user is the room
 	// TODO check if the user is yourself (Smaug: "You have a nice little chat with yourself.\n\r")
@@ -76,7 +76,7 @@ static int room_whisper(MooAction *action, MooThing *thing, MooObjectHash *env, 
 	return(0);
 }
 
-static int room_look(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_look(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 	MooThing *object;
@@ -95,20 +95,20 @@ static int room_look(MooAction *action, MooThing *thing, MooObjectHash *env, Moo
 	return(0);
 }
 
-static int room_go(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_go(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO search this.exits for an exit matching the given name
 	// TODO call exit:invoke()
 	return(0);
 }
 
-static int room_accept(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_accept(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	args->m_result = new MooInteger(1);
 	return(0);
 }
 
-static int room_do_enter(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_do_enter(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *msg;
 	MooThing *cur, *obj;
@@ -158,7 +158,7 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooObjectHash *env,
 	return(0);
 }
 
-static int room_do_exit(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int room_do_exit(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 

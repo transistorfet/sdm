@@ -118,7 +118,7 @@ int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
 
 	if (!m_args || !(func = m_args->m_args->shift()))
 		throw MooException("Null function.");
-	func->evaluate(m_env, m_args);
+	func->evaluate(frame, m_env, m_args);
 	frame->set_return(m_args->m_result);
 	return(0);
 }
@@ -162,15 +162,26 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
  * Moo Code Event Forms *
  ************************/
 
-
-
 /******************************
  * Form: (set <name> <value>) *
  ******************************/
 
+class FormSetEvent : public MooCodeEvent {
+    public:
+	FormSetEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	int do_event(MooCodeFrame *frame) {
+		MooObject *obj;
+
+		obj = frame->get_return();
+		MooObject::resolve(m_expr->get_identifier(), m_env, obj);
+		return(0);
+	}
+};
+
 static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO push an event to actually do the set with the return value
+	// TODO check arguments
+	frame->push_event(new FormSetEvent(frame->env(), NULL, expr));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
 	return(0);
 }

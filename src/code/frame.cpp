@@ -86,9 +86,34 @@ int MooCodeFrame::push_event(MooCodeEvent *event)
 	return(m_stack->push(event));
 }
 
-int MooCodeFrame::add_block(MooArgs *args, MooCodeExpr *expr)
+int MooCodeFrame::push_block(MooCodeExpr *expr, MooArgs *args)
 {
 	return(m_stack->push(new MooCodeEventEvalBlock(m_env, args, expr)));
+}
+
+int MooCodeFrame::push_call(MooObject *func, MooArgs *args)
+{
+	args->m_args->unshift(func);
+	return(m_stack->push(new MooCodeEventCallExpr(m_env, args)));
+}
+
+int MooCodeFrame::push_code(const char *code, MooArgs *args)
+{
+	MooCodeExpr *expr;
+
+	if (*code == '\0')
+		return(-1);
+	try {
+		MooCodeParser parser;
+		expr = parser.parse(code);
+		// TODO temporary
+		MooCodeParser::print(expr);
+	}
+	catch (MooException e) {
+		moo_status("%s", e.get());
+		return(-1);
+	}
+	return(this->push_block(expr, args));
 }
 
 int MooCodeFrame::run(int level)
@@ -127,26 +152,17 @@ int MooCodeFrame::run(int level)
 
 int MooCodeFrame::eval(const char *code, MooArgs *args)
 {
-	MooCodeExpr *expr;
+	int level;
 
-	if (*code == '\0')
-		return(-1);
-	try {
-		MooCodeParser parser;
-		expr = parser.parse(code);
-		// TODO temporary
-		MooCodeParser::print(expr);
-	}
-	catch (MooException e) {
-		moo_status("%s", e.get());
-		return(-1);
-	}
-	return(this->call(expr, args));
+	level = m_stack->last();
+	this->push_code(code, args);
+	return(this->run(level));
 }
 
 int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
 {
 	int ret;
+	int level;
 	MooObjectHash *env;
 
 	// TODO args can be NULL here, don't forget.
@@ -155,8 +171,9 @@ int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
 	//env = frame.env();
 	//env->set("args", args);
 	//env->set("parent", new MooThingRef(m_thing));
-	this->add_block(args, expr);
-	ret = this->run(m_stack->last());
+	level = m_stack->last();
+	this->push_block(expr, args);
+	ret = this->run(level);
 	if (args)
 		MOO_INCREF(args->m_result = m_return);
 	return(ret);

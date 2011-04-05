@@ -283,7 +283,7 @@ MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 	return(NULL);
 }
 
-int MooObject::evaluate(MooObjectHash *env, MooArgs *args)
+int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int res;
 
@@ -293,9 +293,9 @@ int MooObject::evaluate(MooObjectHash *env, MooArgs *args)
 	//args->m_this = this;
 
 	if (this->permissions() & MOO_PERM_SUID)
-		res = MooTask::suid_evaluate(this, env, args);
+		res = MooTask::suid_evaluate(this, frame, env, args);
 	else
-		res = this->do_evaluate(env, args);
+		res = this->do_evaluate(frame, env, args);
 	return(res);
 }
 

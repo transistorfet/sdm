@@ -73,9 +73,9 @@ int MooCodeAction::write_data(MooDataFile *data)
 }
 
 // TODO is this class even needed anymore?
-int MooCodeAction::do_evaluate(MooObjectHash *env, MooArgs *args)
+int MooCodeAction::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	return(m_code->evaluate(env, args));
+	return(m_code->evaluate(frame, env, args));
 
 	/****
 

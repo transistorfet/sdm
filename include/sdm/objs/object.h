@@ -26,6 +26,7 @@ typedef struct MooObjectType {
 
 class MooArgs;
 class MooThing;
+class MooCodeFrame;
 class MooObjectHash;
 
 class MooObject : public MooGC {
@@ -72,7 +73,7 @@ class MooObject : public MooGC {
 
 	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
-	int evaluate(MooObjectHash *env, MooArgs *args);
+	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 
 	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooObjectHash *env, const char *str, int *used);
@@ -82,7 +83,7 @@ class MooObject : public MooGC {
 	/// Object Member Access Functions
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { return(NULL); }
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { return(NULL); }
-	virtual int do_evaluate(MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
 	friend class MooTask;
 
     public:

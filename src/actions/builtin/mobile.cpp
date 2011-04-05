@@ -22,7 +22,7 @@
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int mobile_init(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int mobile_init(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	//MooThing *cur;
 

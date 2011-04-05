@@ -31,7 +31,7 @@ class MooCodeExpr : public MooObject {
 	virtual int write_data(MooDataFile *data);
 
     private:
-	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 
     public:
 	int line() { return(m_line); }

@@ -11,7 +11,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
-typedef int (*moo_action_t)(class MooAction *, class MooThing *, MooObjectHash *, class MooArgs *);
+typedef int (*moo_action_t)(class MooAction *, class MooThing *, MooCodeFrame *frame, MooObjectHash *, class MooArgs *);
 
 class MooBuiltin : public MooAction {
 	moo_action_t m_func;
@@ -25,7 +25,7 @@ class MooBuiltin : public MooAction {
 	virtual int write_data(MooDataFile *data);
 
     private:
-	virtual int do_evaluate(MooObjectHash *env, MooArgs *args);
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 };
 
 typedef MooHash<MooBuiltin *> MooBuiltinHash;

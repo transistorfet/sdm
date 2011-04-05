@@ -86,9 +86,18 @@
 	  for actions.  Can we change this all so that only one frame is used?  Should you even try to do that?
 	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
 	* fix MooArray instances so that they pass a destroy_t function (how can you get it to work with delete??)
-	* convert hash and tree to use a destroy_t function, so that MOO_DECREF can be called for objects
 
 	* what is the MooAction class used for?  Make code use MooObject instead where possible (like in MooThing::get_action)
+
+	* make it so that there is always a code frame, from the very start, and everything uses it, including builtins.  If a builtin
+	  needs to call another method, it must do so indirectly using the frame.  The frame could either just always be passed, or else
+	  passed as a variable stored in the environment.
+	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early
+	* add nested hash tables, and add caching (so a reference is always made in the local env to a value that was looked up in a
+	  distant env (this only works, really, if no writing to parent env's is allowed))
+	* we could actually prevent an attempt to add the same method to 2 objects by looking at the number of references
+	* should you have private environments that are skipped when doing nested lookups?
+	* should you store a pointer to frame in the env?  this might have a lot of problems 
 
 	* should the NULL passed to evaluate() in some cases be changed? (only in MooThing::do_action)
 	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
@@ -98,7 +107,6 @@
 	* get rid of MooBultin's MooAction parameter??
 	* rename everything to do with action to 'method'
 
-	* object->is_true(), what is true vs false?
 	* add permissions checks to access and evaluate functions
 	* how will methods work, in terms of getting the object they were called on?
 	* how will user/channel be set/passed around and so on?  Could we even have certain I/O functions that you call and which then

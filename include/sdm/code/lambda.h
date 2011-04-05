@@ -24,7 +24,7 @@ class MooCodeLambda : public MooObject {
 	virtual int to_string(char *buffer, int max);
 
     private:
-	virtual int do_evaluate(MooObjectHash *parent, MooArgs *args);
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args);
 };
 
 extern MooObjectType moo_code_lambda_obj_type;

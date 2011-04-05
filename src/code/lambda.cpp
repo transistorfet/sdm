@@ -63,18 +63,18 @@ int MooCodeLambda::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooCodeLambda::do_evaluate(MooObjectHash *parent, MooArgs *args)
+int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
 {
 	int i;
 	MooCodeExpr *cur;
 	MooObjectHash *env;
-	MooCodeFrame frame;
 
-	env = frame.env();
+	// TODO extend the environment
+	env = frame->env();
 	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
 		env->set(cur->get_identifier(), args->m_args->get(i, NULL));
 	if (cur || i <= args->m_args->last())
 		throw MooException("Mismatched arguments");
-	return(frame.call(m_func, args));
+	return(frame->push_block(m_func, args));
 }
 

@@ -32,7 +32,7 @@
  * Input/Output Functions *
  **************************/
 
-static int basic_print(MooObjectHash *env, MooArgs *args)
+static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO get_string causes a type error when printing a number, which isn't caught until way up the line (at the nearest
 	//	action call, I guess).  This is potentially a very big problem, and doesn't allow for moocode handling of exceptions.
@@ -51,7 +51,7 @@ static int basic_print(MooObjectHash *env, MooArgs *args)
  * Math Functions *
  ******************/
 
-static int basic_add(MooObjectHash *env, MooArgs *args)
+static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int i = 0;
 	double d = 0;
@@ -65,19 +65,19 @@ static int basic_add(MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int basic_subtract(MooObjectHash *env, MooArgs *args)
+static int basic_subtract(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 	return(0);
 }
 
-static int basic_multiply(MooObjectHash *env, MooArgs *args)
+static int basic_multiply(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 	return(0);
 }
 
-static int basic_divide(MooObjectHash *env, MooArgs *args)
+static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 	return(0);
@@ -87,7 +87,7 @@ static int basic_divide(MooObjectHash *env, MooArgs *args)
  * Comparison Functions *
  ************************/
 
-static int basic_null(MooObjectHash *env, MooArgs *args)
+static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	for (int i = 0; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i, NULL)) {
@@ -103,10 +103,9 @@ static int basic_null(MooObjectHash *env, MooArgs *args)
  * System Functions *
  ********************/
 
-static int basic_load(MooObjectHash *env, MooArgs *args)
+static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
-	MooCodeFrame frame;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (!(obj = args->m_args->get(0, NULL)))
@@ -114,10 +113,10 @@ static int basic_load(MooObjectHash *env, MooArgs *args)
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	if (moo_data_read_file(buffer, buffer, LARGE_STRING_SIZE) <= 0)
 		throw MooException("Unable to read file %s", buffer);
-	return(frame.eval(buffer, args));
+	return(frame->push_code(buffer, args));
 }
 
-static int basic_create_thing(MooObjectHash *env, MooArgs *args)
+static int basic_create_thing(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
 	MooThing *thing, *parent;

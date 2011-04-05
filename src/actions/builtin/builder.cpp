@@ -26,7 +26,7 @@ teleport <destination>
 
 */
 
-static int builder_teleport(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_teleport(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *to;
 
@@ -39,7 +39,7 @@ static int builder_teleport(MooAction *action, MooThing *thing, MooObjectHash *e
 	return(0);
 }
 
-static int builder_create(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_create(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	struct sdm_thing *obj;
@@ -62,7 +62,7 @@ static int builder_create(MooAction *action, MooThing *thing, MooObjectHash *env
 	return(0);
 }
 
-static int builder_dig(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_dig(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 	// @dig "Name"
@@ -87,7 +87,7 @@ static int builder_dig(MooAction *action, MooThing *thing, MooObjectHash *env, M
 	return(0);
 }
 
-static int builder_add_exit(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_add_exit(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	int i = 0;
@@ -114,7 +114,7 @@ static int builder_add_exit(MooAction *action, MooThing *thing, MooObjectHash *e
 	return(0);
 }
 
-static int builder_info(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_info(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *object, *tmp;
 
@@ -130,7 +130,7 @@ static int builder_info(MooAction *action, MooThing *thing, MooObjectHash *env, 
 	return(0);
 }
 
-static int builder_set(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_set(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	int i = 0;
@@ -154,7 +154,7 @@ static int builder_set(MooAction *action, MooThing *thing, MooObjectHash *env, M
 	return(0);
 }
 
-static int builder_save(MooAction *action, MooThing *thing, MooObjectHash *env, MooArgs *args)
+static int builder_save(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooWorld *root;
 

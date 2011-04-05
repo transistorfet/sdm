@@ -64,7 +64,7 @@ int MooTask::bestow(MooInterface *inter)
 	return(-1);
 }
 
-int MooTask::suid_evaluate(MooObject *obj, MooObjectHash *env, MooArgs *args)
+int MooTask::suid_evaluate(MooObject *obj, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int res;
 	MooTask *prev_task;
@@ -78,7 +78,7 @@ int MooTask::suid_evaluate(MooObject *obj, MooObjectHash *env, MooArgs *args)
 	prev_owner = MooTask::current_owner();
 	MooTask::current_owner(obj->owner());
 	try {
-		res = obj->do_evaluate(env, args);
+		res = obj->do_evaluate(frame, env, args);
 	}
 	catch (int e) {
 		MooTask::current_owner(prev_task, prev_owner);

@@ -53,7 +53,7 @@ class MooTask : public MooObject {
 
 	virtual int purge(MooUser *user) { return(-1); }
 
-	static int suid_evaluate(MooObject *obj, MooObjectHash *env, MooArgs *args);
+	static int suid_evaluate(MooObject *obj, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 
 	/// Accessors
 	int switch_handle(MooInterface *inter, int ready);
