@@ -312,14 +312,14 @@ int PseudoServ::dispatch(Msg *msg)
 			if (!channel)
 				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 			if (msg->m_last[0] == '.') {
-				res = channel->do_action(m_user, channel, "evaluate", &msg->m_last[1]);
+				res = channel->call_method(channel, "evaluate", &msg->m_last[1]);
 				if (res == MOO_ACTION_NOT_FOUND)
 					this->notify(TNT_STATUS, NULL, channel, "Pardon?");
 			}
 			else if (msg->m_last[0] == '\x01')
 				this->process_ctcp(msg, channel);
 			else
-				channel->do_action(m_user, channel, "say", msg->m_last);
+				channel->call_method(channel, "say", msg->m_last);
 		}
 		return(0);
 	    }
@@ -471,7 +471,7 @@ int PseudoServ::handle_join(const char *name)
 	MooChannel *channel = MooChannel::get(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-	return(channel->do_action(m_user, channel, "join"));
+	return(channel->call_method(channel, "join", NULL));
 }
 
 int PseudoServ::handle_leave(const char *name)
@@ -480,7 +480,7 @@ int PseudoServ::handle_leave(const char *name)
 	MooChannel *channel = MooChannel::get(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-	return(channel->do_action(m_user, channel, "leave"));
+	return(channel->call_method(channel, "leave", NULL));
 }
 
 int PseudoServ::login()
@@ -570,7 +570,7 @@ int PseudoServ::send_names(const char *name)
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	// TODO change this to a throwing do_action so that if an error occurs, it can recover
-	channel->do_action(m_user, channel, "names", NULL, &result);
+	channel->call_method(channel, "names", NULL, &result);
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
 	if (result && result->is_a(&moo_string_obj_type))
@@ -611,7 +611,7 @@ int PseudoServ::process_ctcp(Msg *msg, MooThing *channel)
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
 		if (channel)
-			return(channel->do_action(m_user, channel, "emote", buffer));
+			return(channel->call_method(channel, "emote", buffer));
 		else
 			return(m_user->command(m_user, NULL, "emote", buffer));
 	}

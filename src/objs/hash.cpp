@@ -27,12 +27,12 @@ struct MooObjectType moo_hash_obj_type = {
 
 MooObject *moo_hash_create(void)
 {
-	return(new MooObjectHash(MOO_HASH_DEFAULT_SIZE, MOO_HBF_DELETE | MOO_HBF_DELETEALL | MOO_HBF_REPLACE | MOO_HBF_REMOVE));
+	return(new MooObjectHash());
 }
 
-MooObjectHash::MooObjectHash(int size, int bits) : MooHash<MooObject *>(size, bits, (void (*)(MooObject *)) MooGC::decref)
+MooObjectHash::MooObjectHash(MooObjectHash *parent, int size, int bits) : MooHash<MooObject *>(size, bits, (void (*)(MooObject *)) MooGC::decref)
 {
-	/// Nothing to be done.  This is just here for the call to the MooArray constructor
+	m_parent = parent;
 }
 
 int MooObjectHash::read_entry(const char *type, MooDataFile *data)
@@ -94,51 +94,59 @@ int MooObjectHash::to_string(char *buffer, int max)
 }
 
 
-MooObject *MooObjectHash::get(const char *key, MooObjectType *type)
+MooObject *MooObjectHash::get(const char *key)
 {
 	MooObject *obj;
+	MooObjectHash *cur;
 
-	if (!(obj = MooHash<MooObject *>::get(key)))
-		return(NULL);
-	if (type && !obj->is_a(type))
-		throw moo_type_error;
-	return(obj);
+	for (cur = this; cur; cur = cur->m_parent) {
+		if ((obj = cur->get_local(key))) {
+			// TODO optionally cache the entry in 'this'
+			return(obj);
+		}
+	}
+	return(NULL);
+}
+
+MooObject *MooObjectHash::get_local(const char *key)
+{
+	return(MooHash<MooObject *>::get(key));
 }
 
 long int MooObjectHash::get_integer(const char *key)
 {
-	MooInteger *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooInteger *) this->get(key, &moo_integer_obj_type)))
+	if (!(obj = this->get(key)))
 		return(0);
-	return(obj->m_num);
+	return(obj->get_integer());
 }
 
 double MooObjectHash::get_float(const char *key)
 {
-	MooFloat *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooFloat *) this->get(key, &moo_float_obj_type)))
+	if (!(obj = this->get(key)))
 		return(0);
-	return(obj->m_num);
+	return(obj->get_float());
 }
 
 const char *MooObjectHash::get_string(const char *key)
 {
-	MooString *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooString *) this->get(key, &moo_string_obj_type)))
-		return(NULL);
-	return(obj->m_str);
+	if (!(obj = this->get(key)))
+		return(0);
+	return(obj->get_string());
 }
 
 MooThing *MooObjectHash::get_thing(const char *key)
 {
-	MooThingRef *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooThingRef *) this->get(key, &moo_thingref_obj_type)))
-		return(NULL);
-	return(obj->get());
+	if (!(obj = this->get(key)))
+		return(0);
+	return(obj->get_thing());
 }
 
 

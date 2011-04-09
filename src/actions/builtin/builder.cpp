@@ -119,7 +119,7 @@ static int builder_info(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	MooThing *object, *tmp;
 
 	if (!(object = args->m_args->get_thing(0)))
-		object = args->m_this;
+		;//object = args->m_this;
 	// TODO display all detailed information
 	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>ID: %s (#%d)", object->name(), object->id());
 	args->m_user->notifyf(TNT_STATUS, NULL, args->m_channel, "<green>PARENT: %s (#%d)", object->parent()->name(), object->parent_id());

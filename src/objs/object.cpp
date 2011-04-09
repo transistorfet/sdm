@@ -15,6 +15,8 @@
 #include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
 
+#include <sdm/code/code.h>
+
 #define TYPE_INIT_SIZE		32
 
 const MooObjectType moo_object_obj_type = {
@@ -241,9 +243,10 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		remain++;
 	}
 
+	// TODO should we modify this so that we never do a global_env lookup and instead rely on the env being linked to global_env
 	if (!(obj = MooThing::reference(buffer))
-	    && !(obj = env->get(buffer, NULL))
-	    && !(obj = global_env->get(buffer, NULL)))
+	    && !(obj = env->get(buffer))
+	    && !(obj = global_env->get(buffer)))
 		return(NULL);
 	if (remain && !(obj = obj->resolve_property(remain, value)))
 		return(NULL);
@@ -283,15 +286,68 @@ MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 	return(NULL);
 }
 
+MooObject *MooObject::resolve_method(const char *name, MooObject *value)
+{
+	return(this->access_method(name, value));
+}
+
+// TODO should this be somewhere else where we can more generically put the parameter parsing? (ie. get it out of MooArgs)
+int MooObject::call_method(MooObject *channel, const char *name, const char *text, MooObject **result)
+{
+	int res;
+	MooArgs *args;
+	MooObject *func;
+	MooAction *action;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(func = this->resolve_method(name)))
+		return(-1);
+	args = new MooArgs(DEFAULT_ARGS, NULL, (MooThing *) channel);
+	// TODO get rid of parse args (and/or replace channel with MooObject??
+	if ((action = dynamic_cast<MooAction *>(func)))
+		args->parse_args(action->params(), buffer, LARGE_STRING_SIZE, text ? text : "");
+	res = this->call_method(channel, func, args);
+	if (result) {
+		*result = args->m_result;
+		args->m_result = NULL;
+	}
+	MOO_DECREF(args);
+	return(res);
+}
+
+int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
+{
+	int res;
+	MooObjectHash *env;
+
+	env = new MooObjectHash();
+	env->set("channel", channel);
+	res = this->call_method(func, env, args);
+	// TODO this probably doesn't always work because an exception could occur in the call, and bypass our decref
+	MOO_DECREF(env);
+	return(res);
+}
+
+// TODO i hate the name of this function already
+int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
+{
+	int res;
+	MooCodeFrame *frame;
+
+	frame = new MooCodeFrame(env);
+	args->m_this = this;
+	frame->push_call(func, args);
+	res = frame->run(0);
+	MOO_DECREF(frame);
+	return(res);
+}
+
+// TODO should this function be private or something? I think it's only ever called by MooCodeEventCallExpr
 int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int res;
 
 	this->check_throw(MOO_PERM_X);
-
-	// TODO where would this go??
-	//args->m_this = this;
-
 	if (this->permissions() & MOO_PERM_SUID)
 		res = MooTask::suid_evaluate(this, frame, env, args);
 	else

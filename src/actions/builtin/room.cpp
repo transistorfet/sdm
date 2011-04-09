@@ -86,10 +86,10 @@ static int room_look(MooAction *action, MooThing *thing, MooCodeFrame *frame, Mo
 	if ((name = args->m_args->get_string(0)))
 		object = args->m_user->find(name);
 	else
-		object = args->m_this;
+		;//object = args->m_this;
 	// TODO notify all the people in the room that you are looking at something (should this be here or in look_self?)
 	if (object)
-		object->do_action(args->m_user, args->m_channel, "look_self");
+		;//object->do_action(args->m_user, args->m_channel, "look_self");
 	else
 		args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, "You don't see that here");
 	return(0);
@@ -127,7 +127,7 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	}
 
 	if (obj == args->m_user)
-		args->m_this->do_action(args->m_user, args->m_channel, "look_self");
+		;//args->m_this->do_action(args->m_user, args->m_channel, "look_self");
 
 
 /*

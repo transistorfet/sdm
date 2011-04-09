@@ -75,7 +75,6 @@ class MooObjectArray : public MooArray<MooObject *> {
 	int parse_arg(MooThing *user, MooThing *channel, char *text);
 	int to_string(char *buffer, int max);
 
-	MooObject *get(int index, MooObjectType *type);
 	long int get_integer(int index);
 	double get_float(int index);
 	const char *get_string(int index);

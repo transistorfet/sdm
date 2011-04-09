@@ -40,7 +40,9 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObject *obj;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (!(obj = args->m_args->get(0, NULL)))
+	// TODO this is temporary until you get notify refactored
+	args->m_channel = dynamic_cast<MooThing *>(env->get("channel"));
+	if (!(obj = args->m_args->get(0)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	args->m_user->notify(TNT_STATUS, args, buffer);
@@ -90,7 +92,7 @@ static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	for (int i = 0; i < args->m_args->last(); i++) {
-		if (args->m_args->get(i, NULL)) {
+		if (args->m_args->get(i)) {
 			args->m_result = new MooInteger((moo_integer_t) 0);
 			return(0);
 		}
@@ -108,7 +110,7 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObject *obj;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (!(obj = args->m_args->get(0, NULL)))
+	if (!(obj = args->m_args->get(0)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	if (moo_data_read_file(buffer, buffer, LARGE_STRING_SIZE) <= 0)
@@ -116,14 +118,14 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(frame->push_code(buffer, args));
 }
 
-static int basic_create_thing(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_create(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
 	MooThing *thing, *parent;
 	char buffer[LARGE_STRING_SIZE];
 
 	// TODO This should probably be a thing/thingref instead of a string
-	if (!(obj = args->m_args->get(0, NULL)))
+	if (!(obj = args->m_args->get(0)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	// TODO set parent
@@ -131,7 +133,7 @@ static int basic_create_thing(MooCodeFrame *frame, MooObjectHash *env, MooArgs *
 	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
 		throw MooException("Error creating new thing from %d", parent->id());
 
-	if ((obj = args->m_args->get(1, NULL))) {
+	if ((obj = args->m_args->get(1))) {
 		try {
 			//obj->evaluate()
 		}
@@ -186,6 +188,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("/", new MooCodeFunc(basic_divide));
 	env->set("null", new MooCodeFunc(basic_null));
 	env->set("load", new MooCodeFunc(basic_load));
+	env->set("@create", new MooCodeFunc(basic_create));
 	return(0);
 }
 

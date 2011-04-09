@@ -24,9 +24,7 @@
 #include <sdm/things/world.h>
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
-#define THING_PROPERTIES_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
 #define THING_PROPERTIES_SIZE		5
-#define THING_METHODS_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
 #define THING_METHODS_SIZE		5
 
 #define MOO_THING_INIT_SIZE			100
@@ -71,11 +69,14 @@ MooObject *moo_thing_create(void)
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)
 {
-	m_properties = new MooObjectHash(THING_PROPERTIES_SIZE, THING_PROPERTIES_BITS);
+	// TODO temporary since we haven't properly dealt with refcounting/thingrefs
+	this->set_nofree();
+
+	m_properties = new MooObjectHash();
 	// TODO we could choose to only create an actions list when we want to place a new
 	//	action in it unique to this object and otherwise, an action on this object will
 	//	only send the request to it's parent object
-	m_methods = new MooObjectHash(THING_METHODS_SIZE, THING_METHODS_BITS);
+	m_methods = new MooObjectHash();
 
 	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
 	/// If the id = MOO_NEW_ID then assign the next available id
@@ -100,10 +101,8 @@ MooThing::~MooThing()
 
 	if (m_location)
 		m_location->remove(this);
-	if (m_properties)
-		delete m_properties;
-	if (m_methods)
-		delete m_methods;
+	MOO_DECREF(m_properties);
+	MOO_DECREF(m_methods);
 	if (m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
 
@@ -215,7 +214,7 @@ int MooThing::init()
 	/// This is a rare situation where we will use the owner of the object rather than the current owner.  This
 	/// *shouldn't* make a difference here, since normally they would be the same.
 	// TODO is this call correct?
-	this->do_action(this->owner_thing(), NULL, "init");
+	this->call_method(NULL, "init", NULL);
 	return(0);
 }
 
@@ -365,7 +364,7 @@ MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
 	MooObject *obj;
 
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((obj = cur->m_properties->get(name, NULL))) {
+		if ((obj = cur->m_properties->get(name))) {
 			if (thing)
 				*thing = cur;
 			return(obj);
@@ -435,120 +434,10 @@ MooObject *MooThing::get_action(const char *name)
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((action = cur->m_methods->get(name, NULL)))
+		if ((action = cur->m_methods->get(name)))
 			return(action);
 	}
 	return(NULL);
-}
-
-
-
-
-int MooThing::do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result)
-{
-	char action[STRING_SIZE];
-
-	text = MooArgs::parse_word(action, STRING_SIZE, text);
-	return(this->do_action(user, channel, action, text, result));
-}
-
-int MooThing::do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result)
-{
-	MooArgs args;
-	MooObject *action;
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!(action = this->get_action(name)))
-		return(MOO_ACTION_NOT_FOUND);
-	try {
-		MooAction *a;
-		if ((a = dynamic_cast<MooAction *>(action)))
-			args.parse_args(a->params(), user, channel, buffer, LARGE_STRING_SIZE, text ? text : "");
-		return(this->do_action(action, &args, result));
-	}
-	catch (MooException e) {
-		moo_status("ACTION: (%s) %s", name, e.get());
-		user->notify(TNT_STATUS, user, channel, e.get());
-		return(-1);
-	}
-}
-
-int MooThing::do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result, MooObject *arg0, MooObject *arg1, MooObject *arg2, MooObject *arg3, MooObject *arg4, MooObject *arg5)
-{
-	MooArgs args(6, user, channel);
-	if (arg0) {
-		args.set(0, arg0);
-		if (arg1) {
-			args.set(1, arg1);
-			if (arg2) {
-				args.set(2, arg2);
-				if (arg3) {
-					args.set(3, arg3);
-					if (arg4) {
-						args.set(4, arg4);
-						if (arg5)
-							args.set(5, arg5);
-					}
-				}
-			}
-		}
-	}
-	return(this->do_action(name, &args, result));
-}
-
-int MooThing::do_action(const char *name, MooArgs *args, MooObject **result)
-{
-	MooObject *action;
-
-	if (!(action = this->get_action(name)))
-		return(MOO_ACTION_NOT_FOUND);
-	try {
-		MooAction *a;
-		if ((a = dynamic_cast<MooAction *>(action)))
-			args->match_args_throw(a->params());
-		return(this->do_action(action, args, result));
-	}
-	catch (MooException e) {
-		moo_status("ACTION: (%s) %s", name, e.get());
-		args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, e.get());
-		return(-1);
-	}
-}
-
-#include <sdm/code/code.h>
-
-// TODO this function should be removed entirely, if possible
-int MooThing::do_action(MooObject *action, MooArgs *args, MooObject **result)
-{
-	int res;
-	MooObjectHash *env;
-	MooCodeFrame frame;
-
-	// TODO technically this is already in the frame, so we don't need it, but what if you take env as an argument?  Do you pass it
-	//	to frame and extend it? or use it directly?
-	//if (!(env = new MooObjectHash()))
-	//	return(-1);
-
-	// TODO should you add the user and channel to the environment here (and then eventually remove them from user/channel?)
-	//	should they be added inside MooObject::evaluate(), so that they are always set?
-	// TODO should user always be aquired from MooTask for security purposes?  I guess all perm checks still check MooTask so the
-	//	'user' in env is just for convenience...
-	args->m_this = this;
-
-	// TODO this is all temporary until we can either move this function elsewhere or remove it entirely
-	//frame.call(action, env, args);
-	frame.push_call(action, args);
-	frame.run(0);
-
-	//res = action->evaluate(env, args);
-
-	/// Set the result if we were given a pointer
-	if (result) {
-		*result = args->m_result;
-		args->m_result = NULL;
-	}
-	//MOO_DECREF(env);
-	return(res);
 }
 
 int MooThing::convert_result(MooObject *&result, int def)
@@ -645,10 +534,10 @@ MooThing *MooThing::reference(const char *name)
 	// TODO should we just get rid of this entirely?
 	else if (name[0] == '$') {
 		// TODO should we break up the reference??
-		MooThingRef *ref = (MooThingRef *) moo_global_table->get(&name[1], &moo_thingref_obj_type);
+		MooObject *ref = moo_global_table->get(&name[1]);
 		if (!ref)
 			return(NULL);
-		return(ref->get());
+		return(ref->get_thing());
 	}
 	return(NULL);
 }
@@ -666,9 +555,9 @@ int MooThing::command(MooThing *user, MooThing *channel, const char *action, con
 		action = buffer;
 	}
 
-	if ((res = this->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+	if ((res = this->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
-	if (m_location && (res = m_location->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+	if (m_location && (res = m_location->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
 	try {
 		MooThing *thing;
@@ -681,10 +570,10 @@ int MooThing::command(MooThing *user, MooThing *channel, const char *action, con
 				throw -1;
 		}
 		thing = ref->get();
-		if (thing && (res = thing->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+		if (thing && (res = thing->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
 			throw -1;
 		// TODO how will this one work?  it's a bit harder
-		//if (args->m_target && (res = args->m_target->do_action(user, channel, action, text)) != MOO_ACTION_NOT_FOUND)
+		//if (args->m_target && (res = args->m_target->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		//	throw -1;
 	}
 	catch (...) { }
@@ -700,7 +589,7 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 
 	args.set(0, new MooInteger(type));
 	args.set(1, new MooString(text));
-	return(this->do_action("notify", &args));
+	return(this->call_method(channel, this->resolve_method("notify"), &args));
 }
 
 int MooThing::notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...)
@@ -759,8 +648,6 @@ int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, Moo
 
 int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 {
-	MooObject *result;
-
 	if (!to)
 		return(-1);
 	if (to == m_location)
@@ -769,18 +656,18 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 		{
 			MooArgs args(1, user, channel);
 			args.set(0, new MooThingRef(m_id));
-			if (to->do_action("accept", &args, &result) < 0)
+			if (to->call_method(channel, to->resolve_method("accept"), &args) < 0)
 				return(-1);
-			if (MooThing::convert_result(result) != 1)
+			if (MooThing::convert_result(args.m_result) != 1)
 				return(1);
 		}
 
 		if (m_location) {
 			MooArgs args(1, user, channel);
 			args.set(0, new MooThingRef(m_id));
-			if (m_location->do_action("do_exit", &args, &result) < 0)
+			if (m_location->call_method(channel, m_location->resolve_method("do_exit"), &args) < 0)
 				return(-1);
-			if (MooThing::convert_result(result) < 0)
+			if (MooThing::convert_result(args.m_result) < 0)
 				return(1);
 		}
 
@@ -790,7 +677,7 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 		if (m_location) {
 			MooArgs args(1, user, channel);
 			args.set(0, new MooThingRef(m_id));
-			return(m_location->do_action("do_enter", &args));
+			return(m_location->call_method(channel, m_location->resolve_method("do_enter"), &args));
 		}
 		return(0);
 	}
@@ -897,10 +784,13 @@ int MooThing::remove(MooThing *obj)
 
 const char *MooThing::name()
 {
+	MooObject *obj;
 	const char *name = NULL;
 
 	try {
-		name = this->get_string_property("name");
+		if (!(obj = this->get_property("name", NULL)))
+			return(NULL);
+		name = obj->get_string();
 	}
 	catch (...) { }
 

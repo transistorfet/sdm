@@ -73,10 +73,6 @@ class MooThing : public MooObject {
 	/// Action Methods
 	int set_action(const char *name, MooObject *action);
 	MooObject *get_action(const char *name);
-	int do_action(MooThing *user, MooThing *channel, const char *text, MooObject **result = NULL);
-	int do_action(MooThing *user, MooThing *channel, const char *name, const char *text, MooObject **result = NULL);
-	int do_action(const char *name, MooThing *user, MooThing *channel, MooObject **result = NULL, MooObject *arg0 = NULL, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL, MooObject *arg4 = NULL, MooObject *arg5 = NULL);
-	int do_action(const char *name, MooArgs *args, MooObject **result = NULL);
 	static int convert_result(MooObject *&result, int def = 0);
 
 	/// Search Methods

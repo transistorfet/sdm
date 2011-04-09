@@ -34,7 +34,7 @@ class MooCodeFrame : public MooObject {
 	int run(int level = 0);
 
 	int eval(const char *code, MooArgs *args = NULL);
-	int call(MooCodeExpr *expr, MooArgs *parent, int num_params, ...);
+	int call(MooCodeExpr *expr, int num_params, ...);
 	int call(MooCodeExpr *expr, MooArgs *args);
 
 	void set_return(MooObject *obj);

@@ -69,10 +69,10 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 	MooCodeExpr *cur;
 	MooObjectHash *env;
 
-	// TODO extend the environment
 	env = frame->env();
+	env = new MooObjectHash(env);
 	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
-		env->set(cur->get_identifier(), args->m_args->get(i, NULL));
+		env->set(cur->get_identifier(), args->m_args->get(i));
 	if (cur || i <= args->m_args->last())
 		throw MooException("Mismatched arguments");
 	return(frame->push_block(m_func, args));

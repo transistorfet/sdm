@@ -70,8 +70,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 			if ((form = form_env->get(expr->get_identifier())))
 				return((*form)(frame, expr->next()));
 		}
-		// TODO initialize with previous call's arguments (where get?) (either this->m_args or frame->m_args)
-		MooArgs *args = new MooArgs(m_args);
+		MooArgs *args = new MooArgs();
 		frame->push_event(new MooCodeEventCallExpr(m_env, args));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
 		MOO_DECREF(args);
@@ -139,7 +138,7 @@ int MooCodeEventEvalArgs::do_event(MooCodeFrame *frame)
 	if (remain)
 		frame->push_event(new MooCodeEventEvalArgs(m_env, m_args, remain));
 	frame->push_event(new MooCodeEventAppendReturn(m_env, m_args));
-	frame->push_event(new MooCodeEventEvalExpr(m_env, m_args->m_parent, m_expr));
+	frame->push_event(new MooCodeEventEvalExpr(m_env, NULL, m_expr));
 	return(0);
 }
 

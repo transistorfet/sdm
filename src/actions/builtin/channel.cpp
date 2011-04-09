@@ -39,7 +39,7 @@ static int channel_join(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	MooThing *cur;
 	MooObjectArray *users;
 
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	/// If the user is already in the channel, then just return
 	for (int i = 0; i <= users->last(); i++) {
@@ -50,7 +50,7 @@ static int channel_join(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	users->push(new MooThingRef(args->m_user->id()));
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
+			cur->notify(TNT_JOIN, args->m_user, (MooThing *) args->m_this, NULL);
 	}
 	return(0);
 }
@@ -61,13 +61,13 @@ static int channel_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	MooObject *ref;
 	MooObjectArray *users;
 
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
 		if (users->get_thing(i) == args->m_user) {
 			for (int j = 0; j < users->last() + 1; j++) {
 				if ((cur = users->get_thing(j)))
-					cur->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
+					cur->notify(TNT_LEAVE, args->m_user, (MooThing *) args->m_this, NULL);
 			}
 			ref = users->splice(i);
 			MOO_DECREF(ref);
@@ -83,7 +83,7 @@ static int channel_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	MooObjectArray *users;
 
 	// TODO how will other users receive the quit message
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
 		if (users->get_thing(i) == args->m_user) {
@@ -104,11 +104,11 @@ static int channel_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, 
 	text = args->m_args->get_string(0);
 	if (*text == '\0')
 		return(-1);
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_SAY, args->m_user, args->m_this, text);
+			cur->notify(TNT_SAY, args->m_user, (MooThing *) args->m_this, text);
 	}
 	return(0);
 }
@@ -122,11 +122,11 @@ static int channel_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	text = args->m_args->get_string(0);
 	if (*text == '\0')
 		return(-1);
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i)))
-			cur->notify(TNT_EMOTE, args->m_user, args->m_this, text);
+			cur->notify(TNT_EMOTE, args->m_user, (MooThing *) args->m_this, text);
 	}
 	return(0);
 }
@@ -139,7 +139,7 @@ static int channel_names(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	MooObjectArray *users;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (!(users = (MooObjectArray *) args->m_this->get_property("users", &moo_array_obj_type)))
+	if (!(users = dynamic_cast<MooObjectArray *>(args->m_this->resolve_property("users"))))
 		return(-1);
 	for (int i = 0; i <= users->last(); i++) {
 		if ((cur = users->get_thing(i))) {
@@ -176,7 +176,7 @@ static int realm_join(MooAction *action, MooThing *thing, MooCodeFrame *frame, M
 	// TODO should the realm channel bother maintaining a user list?
 	//if (channel_join(action, thing, args) < 0)
 	//	return(-1);
-	args->m_user->notify(TNT_JOIN, args->m_user, args->m_this, NULL);
+	args->m_user->notify(TNT_JOIN, args->m_user, (MooThing *) args->m_this, NULL);
 	try {
 		cryolocker_revive(args->m_user, args->m_channel);
 	}
@@ -192,7 +192,7 @@ static int realm_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame, 
 {
 	//if (channel_leave(action, thing, args) < 0)
 	//	return(-1);
-	args->m_user->notify(TNT_LEAVE, args->m_user, args->m_this, NULL);
+	args->m_user->notify(TNT_LEAVE, args->m_user, (MooThing *) args->m_this, NULL);
 
 	try {
 		cryolocker_store(args->m_user, args->m_channel);
@@ -219,17 +219,17 @@ static int realm_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame, M
 
 static int realm_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooThing *location = args->m_user->location();
-	if (location)
-		return(location->do_action("say", args));
+	//MooThing *location = args->m_user->location();
+	//if (location)
+	//	return(location->do_action("say", args));
 	return(0);
 }
 
 static int realm_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooThing *location = args->m_user->location();
-	if (location)
-		return(location->do_action("emote", args));
+	//MooThing *location = args->m_user->location();
+	//if (location)
+	//	return(location->do_action("emote", args));
 	return(0);
 }
 
@@ -279,12 +279,13 @@ static int cryolocker_store(MooThing *user, MooThing *channel)
 
 static int cryolocker_revive(MooThing *user, MooThing *channel)
 {
+	MooObject *obj;
 	MooThing *cryolocker, *location;
 
 	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
 		return(-1);
 	if (user->location() == cryolocker) {
-		if (!(location = user->get_thing_property("last_location")))
+		if (!(obj = user->get_property("last_location", NULL)) || !(location = obj->get_thing()))
 			return(-1);
 		// TODO how the fuck does the 'by' param work?
 		if (user->moveto(user, channel, location)) {

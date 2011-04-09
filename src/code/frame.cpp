@@ -35,8 +35,7 @@ MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
 {
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
 	m_env = NULL;
-	// TODO we should pass parent to the constructor, but MooObjectHash doesn't yet support nested tables
-	this->env(new MooObjectHash());
+	this->env(new MooObjectHash(parent));
 	m_return = NULL;
 }
 
@@ -179,14 +178,11 @@ int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
 	return(ret);
 }
 
-int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *parent, int num_params, ...)
+int MooCodeFrame::call(MooCodeExpr *expr, int num_params, ...)
 {
 	MooArgs *args;
 
-	if (parent)
-		args = new MooArgs(parent);
-	else
-		args = new MooArgs();
+	args = new MooArgs();
 
 	// TODO go through all the values on the stack and push them onto a new MooArgs
 

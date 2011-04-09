@@ -132,7 +132,9 @@ int MooChannel::quit(MooThing *user)
 	while ((entry = channel_list->next_entry())) {
 		// TODO quit works except for printing the quit message (only once) to all appropriate users
 		//entry->m_data->do_action(user, entry->m_data, "quit");
-		entry->m_data->do_action(user, entry->m_data, "leave");
+
+		// TODO this doesn't work because the leave method expects the current_user to be the one leaving
+		//entry->m_data->call_method(user, entry->m_data, "leave");
 	}
 	return(0);
 }

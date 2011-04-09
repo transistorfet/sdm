@@ -98,10 +98,13 @@
 	* we could actually prevent an attempt to add the same method to 2 objects by looking at the number of references
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
+	* should you modify the writing system to write each MooThing into it's own file?  Or to just write it all together but forget
+	  about the idea of seperate world systems, and the whole /path system of referencing
 
 	* should the NULL passed to evaluate() in some cases be changed? (only in MooThing::do_action)
 	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
 	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
+	* remove the channel arg from parse_args() at the very least, if not remove the whole function
 	* convert notify() that takes args to take env or something else instead
 	* consolidate/move the moo_global_table from thing into the code's global table?
 	* get rid of MooBultin's MooAction parameter??

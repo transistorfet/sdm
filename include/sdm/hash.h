@@ -18,7 +18,7 @@
 #define MOO_HBF_DELETE			0x0010		/// Delete elements when removed from list
 #define MOO_HBF_DELETEALL		0x0020		/// Delete all elements when list is destroyed
 
-#define MOO_HASH_DEFAULT_SIZE		32
+#define MOO_HASH_DEFAULT_SIZE		16
 #define MOO_HASH_DEFAULT_BITS		MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL
 #define MOO_HASH_LOAD_FACTOR		0.75
 #define MOO_HASH_GROWTH_FACTOR		1.75
@@ -67,15 +67,18 @@ class MooHash : public MooObject {
 };
 
 class MooObjectHash : public MooHash<MooObject *> {
+	MooObjectHash *m_parent;
+
     public:
-	MooObjectHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_OBJECT_HASH_DEFAULT_BITS);
+	MooObjectHash(MooObjectHash *parent = NULL, int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_OBJECT_HASH_DEFAULT_BITS);
 
 	int read_entry(const char *type, MooDataFile *data);
 	int write_data(MooDataFile *data);
 	int parse_arg(MooThing *user, MooThing *channel, char *text);
 	int to_string(char *buffer, int max);
 
-	MooObject *get(const char *key, MooObjectType *type);
+	MooObject *get(const char *key);
+	MooObject *get_local(const char *key);
 	long int get_integer(const char *key);
 	double get_float(const char *key);
 	const char *get_string(const char *key);

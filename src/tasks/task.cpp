@@ -90,7 +90,7 @@ int MooTask::suid_evaluate(MooObject *obj, MooCodeFrame *frame, MooObjectHash *e
 	}
 	catch (...) {
 		MooTask::current_owner(prev_task, prev_owner);
-		throw MooException("Error in elevated do_action");
+		throw MooException("Error in elevated evaluate");
 	}
 	MooTask::current_owner(prev_task, prev_owner);
 	return(res);

@@ -92,51 +92,40 @@ int MooObjectArray::to_string(char *buffer, int max)
 
 }
 
-MooObject *MooObjectArray::get(int index, MooObjectType *type)
+long int MooObjectArray::get_integer(int index)
 {
 	MooObject *obj;
 
-	if (!(obj = MooArray<MooObject *>::get(index)))
-		return(NULL);
-	if (type && !obj->is_a(type))
-		throw moo_type_error;
-	return(obj);
-}
-
-long int MooObjectArray::get_integer(int index)
-{
-	MooInteger *obj;
-
-	if (!(obj = (MooInteger *) this->get(index, &moo_integer_obj_type)))
+	if (!(obj = this->get(index)))
 		return(0);
-	return(obj->m_num);
+	return(obj->get_integer());
 }
 
 double MooObjectArray::get_float(int index)
 {
-	MooFloat *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooFloat *) this->get(index, &moo_float_obj_type)))
+	if (!(obj = this->get(index)))
 		return(0);
-	return(obj->m_num);
+	return(obj->get_float());
 }
 
 const char *MooObjectArray::get_string(int index)
 {
-	MooString *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooString *) this->get(index, &moo_string_obj_type)))
-		return(NULL);
-	return(obj->m_str);
+	if (!(obj = this->get(index)))
+		return(0);
+	return(obj->get_string());
 }
 
 MooThing *MooObjectArray::get_thing(int index)
 {
-	MooThingRef *obj;
+	MooObject *obj;
 
-	if (!(obj = (MooThingRef *) this->get(index, &moo_thingref_obj_type)))
-		return(NULL);
-	return(obj->get());
+	if (!(obj = this->get(index)))
+		return(0);
+	return(obj->get_thing());
 }
 
 

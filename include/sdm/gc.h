@@ -20,6 +20,8 @@ typedef gc MooGC;
 #define MOO_INCREF(ptr)		( (class MooObject *) MooGC::incref(ptr) )
 #define MOO_DECREF(ptr)		( MooGC::decref(ptr) )
 
+#define GC_NOFREE		32767
+
 class MooGC {
     public:
 	int m_refs;
@@ -50,13 +52,17 @@ class MooGC {
 	}
 
 	static inline MooGC *incref(MooGC *obj) {
-		if (obj)
+		if (obj && obj->m_refs != GC_NOFREE)
 			obj->m_refs++;
 		return(obj);
 	}
 	static inline void decref(MooGC *obj) {
-		if (obj && --obj->m_refs <= 0)
+		if (obj && obj->m_refs != GC_NOFREE && --obj->m_refs <= 0)
 			delete(obj);
+	}
+
+	inline void set_nofree() {
+		m_refs = GC_NOFREE;
 	}
 };
 

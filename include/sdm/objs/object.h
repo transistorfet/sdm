@@ -73,6 +73,11 @@ class MooObject : public MooGC {
 
 	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
+	MooObject *resolve_method(const char *name, MooObject *value = NULL);
+
+	int call_method(MooObject *channel, const char *name, const char *text, MooObject **result = NULL);
+	int call_method(MooObject *channel, MooObject *func, MooArgs *args);
+	int call_method(MooObject *func, MooObjectHash *env, MooArgs *args);
 	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 
 	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);

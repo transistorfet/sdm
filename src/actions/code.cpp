@@ -76,22 +76,6 @@ int MooCodeAction::write_data(MooDataFile *data)
 int MooCodeAction::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	return(m_code->evaluate(frame, env, args));
-
-	/****
-
-	we need a thread in order to execute the code we have.  If a thread is also a task, we can't be sure if the
-	current task is a thread (it probably isn't in fact).  We definitely don't want to make a new thread for
-	each action call, but then again, if it was lightweight enough, I suppose we could, in which case it would
-	be more like a stack frame than a thread.  We also don't want a dedicated thread for each action, which not
-	only would mean a lot of threads sitting around, but would make it quite complicated during execution of
-	nested action calls and so on.
-
-	A thread should be called a frame instead.  It can be stored in each action or allocated when an action is
-	executed.  A reference to a global environment could be included in the action itself.  The current task
-	will "run" the frame/thread.
-
-
-	*/
 }
 
 int MooCodeAction::set(const char *code)

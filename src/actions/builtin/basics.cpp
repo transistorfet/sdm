@@ -45,8 +45,8 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooCodeFrame *f
 	const char *name;
 
 	// TODO make this use different colours for different types of things
-	if ((name = args->m_this->name()))
-		args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name);
+	//if ((name = args->m_this->resolve_property("name")))
+	//	args->m_user->notify(TNT_STATUS, args, "<b><lightblue>You see %s here.", name);
 	return(0);
 }
 
@@ -59,36 +59,36 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooCodeFrame *fr
 	args->m_user->notify(TNT_STATUS, args, "<yellow>$this.title");
 	args->m_user->notify(TNT_STATUS, args, "<lightgreen>$this.description");
 	/// Print the views of all objects contained in the target
-	for (cur = args->m_this->contents(); cur; cur = cur->next()) {
-		if (cur == args->m_user)
-			continue;
-		cur->do_action(args->m_user, args->m_channel, "print_view");
-	}
+	//for (cur = args->m_this->contents(); cur; cur = cur->next()) {
+	//	if (cur == args->m_user)
+	//		continue;
+		//cur->do_action(args->m_user, args->m_channel, "print_view");
+	//}
 
 	// TODO you should print a different set of messages if the look failed
 	// TODO you can transfer a lot of this "message response" code to a special function which takes a list of
 	//	responses and prints them under the various conditions
 
 	/// Print a message to all objects in the room that someone is looking at something
-	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
-		if (cur == args->m_user)	/// Don't print a message to the user
-			continue;
-		if (args->m_user == args->m_this)
-			//print "checks out self" message to cur
-			str = (MooString *) args->m_this->get_property("self_looked_at", &moo_string_obj_type);
-		else if (cur == args->m_this)
-			//print "victimized message"
-			//(if someone looks at you, the message should come from whatever is looking at you
-			str = (MooString *) args->m_user->get_property("look_at", &moo_string_obj_type);
-		else
-			//print "3rd party" message
-			//("You see $user.name looking around the room confused")
-			//("$user.name examines a $this.name")
-			//This comes from the object being looked at
-			str = (MooString *) args->m_this->get_property("looked_at", &moo_string_obj_type);
-		if (str)
-			cur->notify(TNT_STATUS, args, str->m_str);
-	}
+	//for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
+	//	if (cur == args->m_user)	/// Don't print a message to the user
+	//		continue;
+	//	if (args->m_user == args->m_this)
+	//		//print "checks out self" message to cur
+	//		str = (MooString *) args->m_this->get_property("self_looked_at", &moo_string_obj_type);
+	//	else if (cur == args->m_this)
+	//		//print "victimized message"
+	//		//(if someone looks at you, the message should come from whatever is looking at you
+	//		str = (MooString *) args->m_user->get_property("look_at", &moo_string_obj_type);
+	//	else
+	//		//print "3rd party" message
+	//		//("You see $user.name looking around the room confused")
+	//		//("$user.name examines a $this.name")
+	//		//This comes from the object being looked at
+	//		str = (MooString *) args->m_this->get_property("looked_at", &moo_string_obj_type);
+	//	if (str)
+	//		cur->notify(TNT_STATUS, args, str->m_str);
+	//}
 	return(0);
 }
 

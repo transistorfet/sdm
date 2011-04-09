@@ -38,21 +38,14 @@ MooObject *moo_args_create(void)
 
 MooArgs::MooArgs(int init_size, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL);
+	this->init(user, channel, NULL);
 	m_args = new MooObjectArray(init_size);
 }
 
-MooArgs::MooArgs(MooObjectArray *&args, MooThing *user, MooThing *channel)
+MooArgs::MooArgs(MooObjectArray *args, MooThing *user, MooThing *channel)
 {
-	this->init(user, channel, NULL, NULL);
-	m_args = args;
-}
-
-MooArgs::MooArgs(MooArgs *args, int init_size)
-{
-	MOO_INCREF(args);
-	this->init(args->m_user, args->m_channel, NULL, args);
-	m_args = new MooObjectArray(init_size);
+	this->init(user, channel, NULL);
+	MOO_INCREF(m_args = args);
 }
 
 MooArgs::~MooArgs()
@@ -61,14 +54,14 @@ MooArgs::~MooArgs()
 	MOO_DECREF(m_args);
 }
 
-void MooArgs::init(MooThing *user, MooThing *channel, MooThing *thing, MooArgs *parent)
+void MooArgs::init(MooThing *user, MooThing *channel, MooObject *thing)
 {
-	m_args = NULL;
+	if (!user)
+		user = MooThing::lookup(MooTask::current_user());
 	m_result = NULL;
 	m_user = user;
 	m_channel = channel;
 	m_this = thing;
-	m_parent = parent;
 }
 
 void MooArgs::set_args(MooObjectArray *&args)
@@ -129,28 +122,20 @@ char *MooArgs::parse_word(char *buffer)
 	return(&buffer[i]);
 }
 
-void MooArgs::init(MooThing *user, MooThing *channel)
-{
-	m_user = user;
-	m_channel = channel;
-}
-
-int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer, int max, const char *text)
+int MooArgs::parse_args(const char *params, char *buffer, int max, const char *text)
 {
 	strncpy(buffer, text, max);
-	return(this->parse_args(params, user, channel, buffer));
+	return(this->parse_args(params, buffer));
 }
 
 #define MAX_STACK	10
 
-int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, char *buffer)
+int MooArgs::parse_args(const char *params, char *buffer)
 {
 	int i, j = 0, k, sp = 0, ap = 0;
 	MooObject *obj;
 	const MooObjectType *type;
 	char stack[MAX_STACK];
-
-	this->init(user, channel);
 
 	stack[sp] = '\0';
 	j += MooArgs::find_character(&buffer[j]);
@@ -171,7 +156,7 @@ int MooArgs::parse_args(const char *params, MooThing *user, MooThing *channel, c
 					throw moo_args_error;
 				if (!(obj = moo_make_object(type)))
 					throw moo_mem_error;
-				k = obj->parse_arg(user, channel, &buffer[j]);
+				k = obj->parse_arg(NULL, NULL, &buffer[j]);
 			}
 			if (!k) {
 				delete obj;
@@ -216,7 +201,7 @@ int MooArgs::match_args(const char *params)
 	for (i = 0; i <= m_args->last(); i++) {
 		if (params[i] == '\0')
 			return(-1);
-		if (!(obj = m_args->get(i, NULL)))
+		if (!(obj = m_args->get(i)))
 			return(-1);
 		if (obj->type() != MooArgs::get_type(params[i]))
 			return(-1);
@@ -276,10 +261,6 @@ MooObject *MooArgs::access_property(const char *name, MooObject *value)
 	else if (!strcmp(name, "channel")) {
 		MOO_SET_MEMBER(m_channel, MooThing *, value)
 		return(m_channel);
-	}
-	else if (!strcmp(name, "parent")) {
-		MOO_SET_MEMBER(m_parent, MooArgs *, value)
-		return(m_parent);
 	}
 	return(NULL);
 }
