@@ -12,6 +12,7 @@
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 
 #include <sdm/things/thing.h>
@@ -86,15 +87,15 @@ int MooCodeFrame::push_event(MooCodeEvent *event)
 	return(m_stack->push(event));
 }
 
-int MooCodeFrame::push_block(MooCodeExpr *expr, MooArgs *args)
+int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
 {
-	return(m_stack->push(new MooCodeEventEvalBlock(m_env, args, expr)));
+	return(m_stack->push(new MooCodeEventEvalBlock(env, args, expr)));
 }
 
-int MooCodeFrame::push_call(MooObject *func, MooArgs *args)
+int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
 {
 	args->m_args->unshift(func);
-	return(m_stack->push(new MooCodeEventCallExpr(m_env, args)));
+	return(m_stack->push(new MooCodeEventCallExpr(env, args)));
 }
 
 int MooCodeFrame::push_code(const char *code, MooArgs *args)
@@ -113,7 +114,7 @@ int MooCodeFrame::push_code(const char *code, MooArgs *args)
 		moo_status("%s", e.get());
 		return(-1);
 	}
-	return(this->push_block(expr, args));
+	return(this->push_block(m_env, expr, args));
 }
 
 int MooCodeFrame::run(int level)
@@ -166,16 +167,18 @@ int MooCodeFrame::call(MooCodeExpr *expr, MooArgs *args)
 {
 	int ret;
 	int level;
-	MooObjectHash *env;
+	//MooObjectHash *env;
 
 	// TODO args can be NULL here, don't forget.
 
 	// TODO add args to the environment (as MooArgs, or as something else?)
+	// TODO should you really?  Lambda and Method handle arguments on their own, builtin doesn't need it, and everything else
+	//	doesn't really take arguments... Maybe the issue should be entirely handled by individual do_evaluate functions
 	//env = frame.env();
 	//env->set("args", args);
 	//env->set("parent", new MooThingRef(m_thing));
 	level = m_stack->last();
-	this->push_block(expr, args);
+	this->push_block(m_env, expr, args);
 	ret = this->run(level);
 	if (args)
 		MOO_INCREF(args->m_result = m_return);

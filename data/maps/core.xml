@@ -344,10 +344,10 @@
    <entry type="moocode" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>s</params>
+    <params>text</params>
     <func>
 	(foreach this:contents cur
-		(cur:notify SAY user channel (args:get 0)))
+		(cur:notify SAY user channel text))
     </func>
    </entry>
    <entry type="builtin" key="whisper">

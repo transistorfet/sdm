@@ -11,10 +11,11 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/things/thing.h>
-#include <sdm/tasks/task.h>
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
+#include <sdm/tasks/task.h>
+#include <sdm/things/thing.h>
 
 #include <sdm/code/code.h>
 
@@ -257,6 +258,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		MooThing *thing;
 		if (!(thing = obj->get_thing()) || !(obj = ((MooObject *) thing)->access_method(action_name, value)))
 			return(NULL);
+		//obj = new MooMethodThingThatHasObject(thing, obj);
 	}
 	obj->check_throw(MOO_PERM_R);
 	return(obj);
@@ -319,6 +321,7 @@ int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
 	MooObjectHash *env;
 
 	env = new MooObjectHash();
+	env->set("user", MooThing::lookup(MooTask::current_user()));
 	env->set("channel", channel);
 	res = this->call_method(func, env, args);
 	// TODO this probably doesn't always work because an exception could occur in the call, and bypass our decref
@@ -334,7 +337,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 
 	frame = new MooCodeFrame(env);
 	args->m_this = this;
-	frame->push_call(func, args);
+	frame->push_call(frame->env(), func, args);
 	res = frame->run(0);
 	MOO_DECREF(frame);
 	return(res);

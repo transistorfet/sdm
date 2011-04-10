@@ -17,7 +17,6 @@
 #include <sdm/objs/thingref.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
 #include <sdm/actions/code.h>
 
 MooObjectType moo_code_obj_type = {

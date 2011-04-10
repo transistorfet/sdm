@@ -14,7 +14,6 @@
 #include <sdm/data.h>
 #include <sdm/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 #include <sdm/things/references.h>
 
 #define MOO_ACTION_NOT_FOUND	1
@@ -57,23 +56,15 @@ class MooThing : public MooObject {
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
     public:
-	// TODO should you move all these special functions to MooObject and has all accessing go through the access* functions?
-	//	Do you even need these functions?
+	// TODO integrate these directly into the access* methods?
 	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
-	int set_property(const char *name, moo_id_t id);
-	int set_property(const char *name, long int num);
-	int set_property(const char *name, double num);
-	int set_property(const char *name, const char *str);
 	MooObject *get_property(const char *name, MooObjectType *type);
-	MooThing *get_thing_property(const char *name);
-	long int get_integer_property(const char *name);
-	double get_float_property(const char *name);
-	const char *get_string_property(const char *name);
 
 	/// Action Methods
 	int set_action(const char *name, MooObject *action);
 	MooObject *get_action(const char *name);
+
 	static int convert_result(MooObject *&result, int def = 0);
 
 	/// Search Methods

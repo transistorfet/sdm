@@ -22,17 +22,16 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
-#include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int basics_register(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_register(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO register new user
 	return(0);
 }
 
-static int basics_print(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should this be the typical way you reference arguments?
 	// TODO i don't really like this, with the type reference...
@@ -40,7 +39,7 @@ static int basics_print(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	return(0);
 }
 
-static int basics_print_view(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_print_view(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 
@@ -50,7 +49,7 @@ static int basics_print_view(MooAction *action, MooThing *thing, MooCodeFrame *f
 	return(0);
 }
 
-static int basics_look_self(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_look_self(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooString *str;
@@ -92,7 +91,7 @@ static int basics_look_self(MooAction *action, MooThing *thing, MooCodeFrame *fr
 	return(0);
 }
 
-static int basics_go(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_go(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	double num;
@@ -108,7 +107,7 @@ static int basics_go(MooAction *action, MooThing *thing, MooCodeFrame *frame, Mo
 }
 
 /*
-static int basics_respond(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basics_respond(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 
 

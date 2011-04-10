@@ -82,13 +82,12 @@
 
 
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-	* get rid of MooBultin's MooAction parameter??
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
 	* convert all moo_register_type function calls to rely on exceptions rather than return codes for reporting errors
 	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
-	* what is the MooAction class used for?  Make code use MooObject instead where possible (like in MooThing::get_action)
 	* rename everything to do with action to 'method'
+	* replace all builtins with MooCodeFunc possibly, now that the C prototype is identical
 	* fix thing->command() (object/target do_actions are disabled atm)
 
 	* add permissions checks to access and evaluate functions

@@ -11,12 +11,11 @@
 #include <sdm/hash.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
-class MooAlias : public MooObject, public MooAction {
+class MooAlias : public MooObject {
 	std::string *m_command;
     public:
-	MooAlias(MooThing* thing = NULL, const char *command = NULL);
+	MooAlias(const char *command = NULL);
 	virtual ~MooAlias();
 
 	virtual int read_entry(const char *type, MooDataFile *data);

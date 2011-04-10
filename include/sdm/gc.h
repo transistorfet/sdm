@@ -36,18 +36,18 @@ class MooGC {
 	}
 
 	inline void *operator new(size_t size) {
-		void *ptr;
-		ptr = malloc(size);
-		moo_status("MEM: alloc 0x%x", ptr);
-		return(ptr);
-		//return(malloc(size));
+		//void *ptr;
+		//ptr = malloc(size);
+		//moo_status("MEM: alloc 0x%x", ptr);
+		//return(ptr);
+		return(malloc(size));
 	}
 	inline void *operator new(size_t size, void *ptr) {
 		// TODO wtf??
 		return(ptr);
 	}
 	inline void operator delete(void *ptr) {
-		moo_status("MEM: free 0x%x", ptr);
+		//moo_status("MEM: free 0x%x", ptr);
 		free(ptr);
 	}
 

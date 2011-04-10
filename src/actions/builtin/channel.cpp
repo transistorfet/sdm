@@ -18,6 +18,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thingref.h>
+#include <sdm/code/code.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
@@ -25,7 +26,7 @@
 static int cryolocker_store(MooThing *user, MooThing *channel);
 static int cryolocker_revive(MooThing *user, MooThing *channel);
 
-static int channel_init(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO set channel name
 	// TODO create list of users object
@@ -34,7 +35,7 @@ static int channel_init(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	return(0);
 }
 
-static int channel_join(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooObjectArray *users;
@@ -55,7 +56,7 @@ static int channel_join(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	return(0);
 }
 
-static int channel_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_leave(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	MooObject *ref;
@@ -77,7 +78,7 @@ static int channel_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	return(0);
 }
 
-static int channel_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_quit(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *ref;
 	MooObjectArray *users;
@@ -95,7 +96,7 @@ static int channel_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame,
 	return(0);
 }
 
-static int channel_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_say(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	const char *text;
@@ -113,7 +114,7 @@ static int channel_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, 
 	return(0);
 }
 
-static int channel_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_emote(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *cur;
 	const char *text;
@@ -131,7 +132,7 @@ static int channel_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	return(0);
 }
 
-static int channel_names(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_names(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int j = 0;
 	MooThing *cur;
@@ -157,7 +158,7 @@ static int channel_names(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	return(0);
 }
 
-static int channel_evaluate(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int channel_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO you could also just print a message like "Commands are not supported in this channel"
 	args->m_user->notify(TNT_STATUS, NULL, NULL, "Commands are not supported in this channel.");
@@ -171,7 +172,7 @@ static int channel_evaluate(MooAction *action, MooThing *thing, MooCodeFrame *fr
 ///// Realm Actions /////
 
 // TODO move these all to a separate file (since we probably wont need to call any channel functions directly)
-static int realm_join(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should the realm channel bother maintaining a user list?
 	//if (channel_join(action, thing, args) < 0)
@@ -188,7 +189,7 @@ static int realm_join(MooAction *action, MooThing *thing, MooCodeFrame *frame, M
 	return(0);
 }
 
-static int realm_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_leave(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	//if (channel_leave(action, thing, args) < 0)
 	//	return(-1);
@@ -203,7 +204,7 @@ static int realm_leave(MooAction *action, MooThing *thing, MooCodeFrame *frame, 
 	return(0);
 }
 
-static int realm_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_quit(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	//if (channel_quit(action, thing, args) < 0)
 	//	return(-1);
@@ -217,23 +218,27 @@ static int realm_quit(MooAction *action, MooThing *thing, MooCodeFrame *frame, M
 	return(0);
 }
 
-static int realm_say(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_say(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	//MooThing *location = args->m_user->location();
-	//if (location)
-	//	return(location->do_action("say", args));
+	MooObject *func;
+	MooThing *location;
+
+	if ((location = args->m_user->location()) && (func = location->resolve_method("say")))
+		frame->push_call(env, func, args);
 	return(0);
 }
 
-static int realm_emote(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_emote(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	//MooThing *location = args->m_user->location();
-	//if (location)
-	//	return(location->do_action("emote", args));
+	MooObject *func;
+	MooThing *location;
+
+	if ((location = args->m_user->location()) && (func = location->resolve_method("emote")))
+		frame->push_call(env, func, args);
 	return(0);
 }
 
-static int realm_names(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_names(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *name;
 
@@ -243,14 +248,13 @@ static int realm_names(MooAction *action, MooThing *thing, MooCodeFrame *frame, 
 	return(0);
 }
 
-static int realm_evaluate(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *text;
 
 	text = args->m_args->get_string(0);
 	// TODO should you check to make sure this doesn't loop? (ie. the command isn't evaluate)
 	return(args->m_user->command(args->m_user, args->m_channel, text));
-	return(0);
 }
 
 
@@ -263,7 +267,7 @@ static int cryolocker_store(MooThing *user, MooThing *channel)
 	// TODO could this be dangerous if you had to create a new cryolocker object, and now it will move the thing even though
 	//	it was already in the cryolocker, causing last_location to be erroneusly overwritten
 	if (user->location() != cryolocker) {
-		user->set_property("last_location", user->location()->id());
+		user->resolve_property("last_location", new MooThingRef(user->location()->id()));
 		// TODO call the action needed to notify that the object is leaving (so everyone in the room sees "Soandso leaves in a
 		//	puff of smoke" or something like that
 
@@ -285,7 +289,7 @@ static int cryolocker_revive(MooThing *user, MooThing *channel)
 	if (!(cryolocker = MooThing::reference(MOO_CRYOLOCKER)))
 		return(-1);
 	if (user->location() == cryolocker) {
-		if (!(obj = user->get_property("last_location", NULL)) || !(location = obj->get_thing()))
+		if (!(obj = user->resolve_property("last_location")) || !(location = obj->get_thing()))
 			return(-1);
 		// TODO how the fuck does the 'by' param work?
 		if (user->moveto(user, channel, location)) {

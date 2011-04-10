@@ -8,20 +8,20 @@
 
 #include <sdm/hash.h>
 #include <sdm/globals.h>
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
 #define MOO_PARAM_STRING_SIZE		16
 
-typedef int (*moo_action_t)(class MooAction *, class MooThing *, MooCodeFrame *frame, MooObjectHash *, class MooArgs *);
+typedef int (*moo_action_t)(MooCodeFrame *frame, MooObjectHash *, class MooArgs *);
 
-class MooBuiltin : public MooObject, public MooAction {
+class MooBuiltin : public MooObject {
 	moo_action_t m_func;
 	MooBuiltin *m_master;
 	char m_params[MOO_PARAM_STRING_SIZE];
 
     public:
-	MooBuiltin(moo_action_t func = NULL, const char *params = NULL, MooThing *thing = NULL);
+	MooBuiltin(moo_action_t func = NULL, const char *params = NULL);
 	virtual ~MooBuiltin() { }
 	int set(const char *name);
 	const char *params(const char *params = NULL);

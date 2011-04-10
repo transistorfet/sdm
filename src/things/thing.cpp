@@ -16,12 +16,15 @@
 #include <sdm/things/world.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
+
+#include <sdm/actions/method.h>
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define THING_PROPERTIES_SIZE		5
@@ -303,38 +306,6 @@ int MooThing::set_property(const char *name, MooObject *obj)
 	}
 }
 
-int MooThing::set_property(const char *name, moo_id_t id)
-{
-	MooThingRef *obj;
-
-	obj = new MooThingRef(id);
-	return(this->set_property(name, obj));
-}
-
-int MooThing::set_property(const char *name, long int num)
-{
-	MooInteger *obj;
-
-	obj = new MooInteger(num);
-	return(this->set_property(name, obj));
-}
-
-int MooThing::set_property(const char *name, double num)
-{
-	MooFloat *obj;
-
-	obj = new MooFloat(num);
-	return(this->set_property(name, obj));
-}
-
-int MooThing::set_property(const char *name, const char *str)
-{
-	MooString *obj;
-
-	obj = new MooString(str);
-	return(this->set_property(name, obj));
-}
-
 MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 {
 	MooObject *obj;
@@ -362,57 +333,17 @@ MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
 	return(NULL);
 }
 
-MooThing *MooThing::get_thing_property(const char *name)
-{
-	MooThingRef *obj;
-
-	if (!(obj = (MooThingRef *) this->get_property(name, &moo_thingref_obj_type)))
-		return(NULL);
-	return(MooThing::lookup(obj->m_id));
-}
-
-long int MooThing::get_integer_property(const char *name)
-{
-	MooInteger *obj;
-
-	if (!(obj = (MooInteger *) this->get_property(name, &moo_integer_obj_type)))
-		return(0);
-	return(obj->m_num);
-}
-
-double MooThing::get_float_property(const char *name)
-{
-	MooFloat *obj;
-
-	if (!(obj = (MooFloat *) this->get_property(name, &moo_float_obj_type)))
-		return(0);
-	return(obj->m_num);
-}
-
-const char *MooThing::get_string_property(const char *name)
-{
-	MooString *obj;
-
-	if (!(obj = (MooString *) this->get_property(name, &moo_string_obj_type)))
-		return(NULL);
-	return(obj->m_str);
-}
 
 ///// Action Methods /////
 
 int MooThing::set_action(const char *name, MooObject *action)
 {
-	MooAction *a;
-
 	if (!name || (*name == '\0'))
 		return(-1);
 	// TODO do permissions check??
 	/// If the action is NULL, remove the entry from the table
 	if (!action)
 		return(m_methods->remove(name));
-	// TODO remove this eventually?
-	if ((a = dynamic_cast<MooAction *>(action)))
-		a->init(this);
 	return(m_methods->set(name, action));
 }
 
@@ -423,8 +354,13 @@ MooObject *MooThing::get_action(const char *name)
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((action = cur->m_methods->get(name)))
-			return(action);
+		if ((action = cur->m_methods->get(name))) {
+			// TODO should this be moved to resolve() ??  or even resolve_method(), and then everything would go through that
+			if (dynamic_cast<MooMethod *>(action))
+				return(action);
+			// TODO this is a memory leak i think, because the return'd pointer is assumed to be borrowed
+			return(new MooMethod(this, action));
+		}
 	}
 	return(NULL);
 }

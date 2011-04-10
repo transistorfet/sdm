@@ -29,8 +29,8 @@ class MooCodeFrame : public MooObject {
 	virtual int write_data(MooDataFile *data);
 
 	int push_event(MooCodeEvent *event);
-	int push_block(MooCodeExpr *expr, MooArgs *args);
-	int push_call(MooObject *func, MooArgs *args);
+	int push_block(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args);
+	int push_call(MooObjectHash *env, MooObject *func, MooArgs *args);
 	int push_code(const char *code, MooArgs *args = NULL);
 	int run(int level = 0);
 

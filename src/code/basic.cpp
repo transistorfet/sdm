@@ -14,6 +14,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>

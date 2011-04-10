@@ -9,7 +9,6 @@
 #include <sdm/array.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/actions/action.h>
 
 #include <sdm/code/expr.h>
 
@@ -35,7 +34,7 @@ class MooCodeParser {
 
 	MooCodeExpr *parse(const char *str);
 	static int generate(MooCodeExpr *expr, char *buffer, int max, char linebr = '\n', int indent = 0);
-	static int print(MooCodeExpr *expr);
+	static void print(MooCodeExpr *expr);
 
     private:
 	MooCodeExpr *parse_list();

@@ -22,7 +22,7 @@
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int item_get(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int item_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	// TODO this just gets one arg for now because parsing is broken
@@ -39,7 +39,7 @@ static int item_get(MooAction *action, MooThing *thing, MooCodeFrame *frame, Moo
 	return(0);
 }
 
-static int item_drop(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int item_drop(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	int i = 0;

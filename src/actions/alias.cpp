@@ -12,11 +12,11 @@
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/user.h>
 
-#include <sdm/actions/action.h>
 #include <sdm/actions/alias.h>
 
 MooObjectType moo_alias_obj_type = {
@@ -31,7 +31,7 @@ MooObject *moo_alias_create(void)
 	return(new MooAlias());
 }
 
-MooAlias::MooAlias(MooThing* thing, const char *command) : MooAction(thing)
+MooAlias::MooAlias(const char *command)
 {
 	m_command = command ? new std::string(command) : NULL;
 }

@@ -260,7 +260,7 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char lineb
 
 #define MAX_CODE	2048
 
-int MooCodeParser::print(MooCodeExpr *expr)
+void MooCodeParser::print(MooCodeExpr *expr)
 {
 	char buffer[MAX_CODE];
 

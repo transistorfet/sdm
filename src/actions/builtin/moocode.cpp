@@ -23,11 +23,10 @@
 #include <sdm/things/world.h>
 
 #include <sdm/code/code.h>
-#include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int moocode_eval(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int moocode_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	return(frame->push_code(args->m_args->get_string(0), args));
 }

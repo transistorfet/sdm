@@ -22,19 +22,19 @@
 #include <sdm/actions/builtin/builtin.h>
 
 
-static int user_init(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int user_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO set any properties or whatever needs to be found on any user thing
 	return(0);
 }
 
-static int user_passwd(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int user_passwd(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO change the password for the user
 	return(0);
 }
 
-static int user_inventory(MooAction *action, MooThing *thing, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int user_inventory(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
 	const char *str;

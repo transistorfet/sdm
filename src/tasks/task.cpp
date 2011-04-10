@@ -11,7 +11,6 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
-#include <sdm/actions/action.h>
 #include <sdm/interfaces/interface.h>
 
 #define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE

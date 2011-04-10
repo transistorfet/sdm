@@ -81,7 +81,7 @@ int MooCodeExpr::write_data(MooDataFile *data)
 
 int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
 {
-	return(frame->push_block(this, args));
+	return(frame->push_block(parent, this, args));
 }
 
 const char *MooCodeExpr::get_identifier()

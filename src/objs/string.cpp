@@ -10,9 +10,9 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
-#include <sdm/actions/action.h>
 
 MooObjectType moo_string_obj_type = {
 	NULL,

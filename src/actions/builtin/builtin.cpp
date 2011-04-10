@@ -15,7 +15,6 @@
 #include <sdm/objs/object.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/action.h>
 #include <sdm/actions/builtin/builtin.h>
 
 #define BUILTIN_LIST_SIZE	32
@@ -72,7 +71,7 @@ MooObject *moo_builtin_create(void)
 	return(new MooBuiltin());
 }
 
-MooBuiltin::MooBuiltin(moo_action_t func, const char *params, MooThing *thing) : MooAction(thing)
+MooBuiltin::MooBuiltin(moo_action_t func, const char *params)
 {
 	m_func = func;
 	m_master = NULL;
@@ -140,7 +139,7 @@ int MooBuiltin::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *ar
 		return(-1);
 	if (args->m_args->last() >= 0)
 		args->parse_args(this->params(), args->m_args->get_string(0));
-	return(m_func(this, m_thing, frame, env, args));
+	return(m_func(frame, env, args));
 }
 
 

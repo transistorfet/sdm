@@ -8,7 +8,7 @@
 
 #include <sdm/memory.h>
 #include <sdm/globals.h>
-
+#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/code/code.h>
 
@@ -84,11 +84,13 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 
 	env = frame->env();
 	env = new MooObjectHash(env);
+	// TODO should this be here? somewhere else? How is it usually set?
+	env->set("this", args->m_this);
 	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
 		env->set(cur->get_identifier(), args->m_args->get(i));
 	if (cur || i <= args->m_args->last())
 		throw MooException("Mismatched arguments");
-	return(frame->push_block(m_func, args));
+	return(frame->push_block(env, m_func, args));
 }
 
 MooCodeExpr *MooCodeLambda::parse(const char *code)

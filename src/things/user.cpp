@@ -18,6 +18,7 @@
 #include <sdm/interfaces/interface.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/string.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/channel.h>
 #include <sdm/things/user.h>
@@ -110,10 +111,10 @@ MooUser *MooUser::make_guest(const char *name)
 	if (!(parent = MooThing::reference(MOO_GENERIC_USER)))
 		throw moo_thing_not_found;
 	user = new MooUser(name, MOO_UBF_GUEST, MOO_NEW_ID, parent->id());
-	user->set_property("name", name);
+	user->resolve_property("name", new MooString(name));
 	//user->init();
 	user->owner(user->m_id);
-	user->set_property("description", "You see a new person who looks rather out-of-place.");
+	user->resolve_property("description", new MooString("You see a new person who looks rather out-of-place."));
 	// TODO is this the correct way to moving a user to the starting location?
 	user->moveto(user, NULL, MooThing::reference(MOO_START_ROOM));
 	return(user);
