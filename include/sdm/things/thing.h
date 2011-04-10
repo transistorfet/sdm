@@ -55,25 +55,21 @@ class MooThing : public MooObject {
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
-    public:
 	// TODO integrate these directly into the access* methods?
-	/// Property Methods
 	int set_property(const char *name, MooObject *obj);
 	MooObject *get_property(const char *name, MooObjectType *type);
-
-	/// Action Methods
-	int set_action(const char *name, MooObject *action);
-	MooObject *get_action(const char *name);
+	int set_method(const char *name, MooObject *action);
+	MooObject *get_method(const char *name);
 
 	static int convert_result(MooObject *&result, int def = 0);
 
+    public:
 	/// Search Methods
 	MooThing *find(const char *name);
 	MooThing *find_named(const char *name);
 	static MooThing *reference(const char *name);
 
 	/// Helper Methods
-	int command(MooThing *user, MooThing *channel, const char *action, const char *text = NULL);
 	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 	int notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...);
 	int notify(int type, MooArgs *args, const char *fmt, ...);

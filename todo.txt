@@ -72,13 +72,12 @@
 	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
 	  directly.  Objects could still have an ID but it just wont be used internally as much.
 	* how will MooThings be garbage collected?
-	* how do we get/set/pass the actual 'this' object that a method is called on?  You could always create a special object that
-	  stores the method and object, and when do_evaluate()'d, it unshifts 'this' or something into the args.  You can't set
-	  args->this or anything in environment due to the possibility of passing the method as a value (it has to be self contained)
 	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
 	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
 	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
 	  functions intended for internal use be inaccessible from the command line?
+	* go through all throw/catch/exceptions and make sure they make sense.  Make sure all throws end up in an appropriate place to
+	  be handled (such as frame->run()) and make sure errors are sent as notices/status/whatever to the current user
 
 
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).

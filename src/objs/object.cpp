@@ -229,15 +229,15 @@ int MooObject::write_data(MooDataFile *data)
 MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value)
 {
 	MooObject *obj;
-	char *action_name, *remain;
+	char *method, *remain;
 	char buffer[STRING_SIZE];
 
 	strncpy(buffer, name, STRING_SIZE);
 	buffer[STRING_SIZE - 1] = '\0';
 
-	if ((action_name = strchr(buffer, ':'))) {
-		*action_name = '\0';
-		action_name++;
+	if ((method = strchr(buffer, ':'))) {
+		*method = '\0';
+		method++;
 	}
 
 	if ((remain = strchr(buffer, '.'))) {
@@ -253,10 +253,10 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 	if (remain && !(obj = obj->resolve_property(remain, value)))
 		return(NULL);
 
-	if (action_name) {
+	if (method) {
 		// TODO why do we assume the object is a thingref, basically... we kinda need to just use thing instead of thingref =/
 		MooThing *thing;
-		if (!(thing = obj->get_thing()) || !(obj = ((MooObject *) thing)->access_method(action_name, value)))
+		if (!(thing = obj->get_thing()) || !(obj = ((MooObject *) thing)->access_method(method, value)))
 			return(NULL);
 		//obj = new MooMethodThingThatHasObject(thing, obj);
 	}

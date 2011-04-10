@@ -250,11 +250,42 @@ static int realm_names(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	const char *text;
+	const char *action, *text;
 
 	text = args->m_args->get_string(0);
 	// TODO should you check to make sure this doesn't loop? (ie. the command isn't evaluate)
-	return(args->m_user->command(args->m_user, args->m_channel, text));
+	//return(args->m_user->command(args->m_user, args->m_channel, text));
+
+	int res;
+	MooThing *location;
+	MooThingRef *ref = NULL;
+	char buffer[STRING_SIZE];
+
+	text = MooArgs::parse_word(buffer, STRING_SIZE, text);
+	action = buffer;
+
+	if ((res = args->m_user->call_method(args->m_channel, action, text)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	location = args->m_user->location();
+	if (location && (res = location->call_method(args->m_channel, action, text)) != MOO_ACTION_NOT_FOUND)
+		return(res);
+	try {
+		MooThing *thing;
+
+		{
+			char buffer[STRING_SIZE];
+			text = MooArgs::parse_word(buffer, STRING_SIZE, text);
+			// TODO this is now invalid because it doesn't check the local area for objects
+			ref = new MooThingRef(buffer);
+		}
+		thing = ref->get();
+		if (thing && (res = thing->call_method(args->m_channel, action, text)) != MOO_ACTION_NOT_FOUND)
+			throw MooException("Action not found: %s", action);
+	}
+	catch (...) { }
+	// TODO should this be MOO_DECREF?
+	delete ref;
+	return(MOO_ACTION_NOT_FOUND);
 }
 
 

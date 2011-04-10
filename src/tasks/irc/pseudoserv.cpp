@@ -613,7 +613,7 @@ int PseudoServ::process_ctcp(Msg *msg, MooThing *channel)
 		if (channel)
 			return(channel->call_method(channel, "emote", buffer));
 		else
-			return(m_user->command(m_user, NULL, "emote", buffer));
+			return(m_user->call_method(NULL, "emote", buffer));
 	}
 	// TODO process others?? return error??
 	return(0);

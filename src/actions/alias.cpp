@@ -69,12 +69,13 @@ int MooAlias::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 {
 	char buffer[STRING_SIZE];
 
-	// TODO use frame to do the actual evaluation
-
 	// TODO how do you add the args to the environment? using make_env or just as 'args' or what?  Should it/will it mask an
 	//	args declaration for the previous call?  Should it extend the environment so that it doesn't get modified
 	MooThing::format(buffer, STRING_SIZE, env, m_command->c_str());
-	return(args->m_user->command(args->m_user, args->m_channel, buffer));
+
+	// TODO use frame to do the actual evaluation
+	//return(args->m_user->command(args->m_user, args->m_channel, buffer));
+	return(-1);
 }
 
 

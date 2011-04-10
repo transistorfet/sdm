@@ -18,8 +18,8 @@
 #include <sdm/tasks/rpc-server.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
-#include <sdm/actions/code.h>
 #include <sdm/actions/alias.h>
+#include <sdm/actions/method.h>
 #include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/float.h>
@@ -70,7 +70,7 @@ int init_moo(void)
 	moo_object_register_type(&moo_array_obj_type);
 	moo_object_register_type(&moo_hash_obj_type);
 
-	moo_object_register_type(&moo_code_obj_type);
+	moo_object_register_type(&moo_method_obj_type);
 
 	moo_object_register_type(&moo_tcp_obj_type);
 	moo_object_register_type(&moo_rpc_obj_type);

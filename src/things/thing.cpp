@@ -265,12 +265,12 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 {
 	// TODO do you need to do permissions checks here?
 	if (value) {
-		if (this->set_action(name, value) < 0)
+		if (this->set_method(name, value) < 0)
 			return(NULL);
 		return(value);
 	}
 	else
-		return(this->get_action(name));
+		return(this->get_method(name));
 }
 
 ///// Property Methods /////
@@ -334,9 +334,9 @@ MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
 }
 
 
-///// Action Methods /////
+///// Method Methods /////
 
-int MooThing::set_action(const char *name, MooObject *action)
+int MooThing::set_method(const char *name, MooObject *action)
 {
 	if (!name || (*name == '\0'))
 		return(-1);
@@ -347,19 +347,19 @@ int MooThing::set_action(const char *name, MooObject *action)
 	return(m_methods->set(name, action));
 }
 
-MooObject *MooThing::get_action(const char *name)
+MooObject *MooThing::get_method(const char *name)
 {
 	MooThing *cur;
-	MooObject *action;
+	MooObject *func;
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((action = cur->m_methods->get(name))) {
+		if ((func = cur->m_methods->get(name))) {
 			// TODO should this be moved to resolve() ??  or even resolve_method(), and then everything would go through that
-			if (dynamic_cast<MooMethod *>(action))
-				return(action);
+			if (dynamic_cast<MooMethod *>(func))
+				return(func);
 			// TODO this is a memory leak i think, because the return'd pointer is assumed to be borrowed
-			return(new MooMethod(this, action));
+			return(new MooMethod(this, func));
 		}
 	}
 	return(NULL);
@@ -470,42 +470,6 @@ MooThing *MooThing::reference(const char *name)
 ///// Helper Methods /////
 
 // TODO all these helper functions should be put into MooCode or else made into hardcoded functions called via a do_evaluate()
-
-int MooThing::command(MooThing *user, MooThing *channel, const char *action, const char *text)
-{
-	int res;
-	MooThingRef *ref = NULL;
-	char buffer[STRING_SIZE];
-
-	// TODO this whole function should probably become a MooCode function on an object somewhere which is called by realm evaluate
-	if (!text) {
-		text = MooArgs::parse_word(buffer, STRING_SIZE, action);
-		action = buffer;
-	}
-
-	if ((res = this->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	if (m_location && (res = m_location->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
-		return(res);
-	try {
-		MooThing *thing;
-
-		{
-			char buffer[STRING_SIZE];
-			text = MooArgs::parse_word(buffer, STRING_SIZE, text);
-			// TODO this is now invalid because it doesn't check the local area for objects
-			ref = new MooThingRef(buffer);
-		}
-		thing = ref->get();
-		if (thing && (res = thing->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
-			throw MooException("Action not found: %s", action);
-	}
-	catch (...) { }
-	// TODO should this be MOO_DECREF?
-	delete ref;
-	return(MOO_ACTION_NOT_FOUND);
-}
-
 
 int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
 {

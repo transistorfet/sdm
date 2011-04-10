@@ -59,13 +59,13 @@
     <params>s</params>
     <function>moocode_eval</function>
    </entry>
-   <entry type="moocode" key="print_hi">
+   <entry type="moolambda" key="print_hi">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
     <func>(print #55.description)</func>
    </entry>
-   <entry type="moocode" key="print">
+   <entry type="moolambda" key="print">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
@@ -341,7 +341,7 @@
     <params></params>
     <function>room_direction</function>
    </entry>
-   <entry type="moocode" key="say">
+   <entry type="moolambda" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
