@@ -105,7 +105,7 @@ MooHash<T>::MooHash(int size, int bits, void (*destroy)(T))
 	m_entries = 0;
 	m_destroy = destroy;
 	if (!(m_table = (MooHashEntry<T> **) memory_alloc(m_size * sizeof(MooHashEntry<T> *))))
-		throw(-1);
+		throw moo_mem_error;
 	memset(m_table, '\0', m_size * sizeof(MooHashEntry<T> *));
 }
 

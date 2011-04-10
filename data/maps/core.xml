@@ -63,7 +63,13 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <code>(print #55.description)</code>
+    <func>(print #55.description)</func>
+   </entry>
+   <entry type="moocode" key="print">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params>text</params>
+    <func>(print text)</func>
    </entry>
   </methods>
  </thing>
@@ -335,11 +341,14 @@
     <params></params>
     <function>room_direction</function>
    </entry>
-   <entry type="builtin" key="say">
+   <entry type="moocode" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>room_say</function>
+    <func>
+	(foreach this:contents cur
+		(cur:notify SAY user channel (args:get 0)))
+    </func>
    </entry>
    <entry type="builtin" key="whisper">
     <owner>-1</owner>

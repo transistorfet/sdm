@@ -66,10 +66,10 @@ class MooObject : public MooGC {
 	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { buffer[0] = '\0'; return(0); }
 
-	virtual long int get_integer() { throw moo_type_error; }
-	virtual double get_float() { throw moo_type_error; }
-	virtual const char *get_string() { throw moo_type_error; }
-	virtual MooThing *get_thing() { throw moo_type_error; }
+	virtual long int get_integer() { throw MooException("Unable to convert to integer"); }
+	virtual double get_float() { throw MooException("Unable to convert to float"); }
+	virtual const char *get_string() { throw MooException("Unable to convert to string"); }
+	virtual MooThing *get_thing() { throw MooException("Unable to convert to thing"); }
 
 	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);

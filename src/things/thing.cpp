@@ -207,17 +207,6 @@ int MooThing::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooThing::init()
-{
-	//this->permissions(THING_DEFAULT_PERMISSIONS);
-
-	/// This is a rare situation where we will use the owner of the object rather than the current owner.  This
-	/// *shouldn't* make a difference here, since normally they would be the same.
-	// TODO is this call correct?
-	this->call_method(NULL, "init", NULL);
-	return(0);
-}
-
 /*
 // TODO you should probably move these to basics.cpp or builder.cpp, or make them accept user/channel args
 MooThing *MooThing::create(moo_id_t parent)
@@ -544,12 +533,15 @@ MooThing *MooThing::reference(const char *name)
 
 ///// Helper Methods /////
 
+// TODO all these helper functions should be put into MooCode or else made into hardcoded functions called via a do_evaluate()
+
 int MooThing::command(MooThing *user, MooThing *channel, const char *action, const char *text)
 {
 	int res;
 	MooThingRef *ref = NULL;
 	char buffer[STRING_SIZE];
 
+	// TODO this whole function should probably become a MooCode function on an object somewhere which is called by realm evaluate
 	if (!text) {
 		text = MooArgs::parse_word(buffer, STRING_SIZE, action);
 		action = buffer;
@@ -561,20 +553,16 @@ int MooThing::command(MooThing *user, MooThing *channel, const char *action, con
 		return(res);
 	try {
 		MooThing *thing;
-		ref = new MooThingRef();
 
 		{
 			char buffer[STRING_SIZE];
 			text = MooArgs::parse_word(buffer, STRING_SIZE, text);
-			if (ref->parse_arg(user, channel, buffer) <= 0)
-				throw -1;
+			// TODO this is now invalid because it doesn't check the local area for objects
+			ref = new MooThingRef(buffer);
 		}
 		thing = ref->get();
 		if (thing && (res = thing->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
-			throw -1;
-		// TODO how will this one work?  it's a bit harder
-		//if (args->m_target && (res = args->m_target->call_method(channel, action, text)) != MOO_ACTION_NOT_FOUND)
-		//	throw -1;
+			throw MooException("Action not found: %s", action);
 	}
 	catch (...) { }
 	// TODO should this be MOO_DECREF?
@@ -587,8 +575,8 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 {
 	MooArgs args(2, thing, channel);
 
-	args.set(0, new MooInteger(type));
-	args.set(1, new MooString(text));
+	args.m_args->set(0, new MooInteger(type));
+	args.m_args->set(1, new MooString(text));
 	return(this->call_method(channel, this->resolve_method("notify"), &args));
 }
 
@@ -655,7 +643,7 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 	try {
 		{
 			MooArgs args(1, user, channel);
-			args.set(0, new MooThingRef(m_id));
+			args.m_args->set(0, new MooThingRef(m_id));
 			if (to->call_method(channel, to->resolve_method("accept"), &args) < 0)
 				return(-1);
 			if (MooThing::convert_result(args.m_result) != 1)
@@ -664,7 +652,7 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 
 		if (m_location) {
 			MooArgs args(1, user, channel);
-			args.set(0, new MooThingRef(m_id));
+			args.m_args->set(0, new MooThingRef(m_id));
 			if (m_location->call_method(channel, m_location->resolve_method("do_exit"), &args) < 0)
 				return(-1);
 			if (MooThing::convert_result(args.m_result) < 0)
@@ -676,7 +664,7 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 
 		if (m_location) {
 			MooArgs args(1, user, channel);
-			args.set(0, new MooThingRef(m_id));
+			args.m_args->set(0, new MooThingRef(m_id));
 			return(m_location->call_method(channel, m_location->resolve_method("do_enter"), &args));
 		}
 		return(0);

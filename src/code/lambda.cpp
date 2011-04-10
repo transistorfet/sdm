@@ -38,22 +38,35 @@ MooCodeLambda::~MooCodeLambda()
 
 int MooCodeLambda::read_entry(const char *type, MooDataFile *data)
 {
-/*
-	if (!strcmp(type, "value")) {
-		m_num = data->read_integer_entry();
+	if (!strcmp(type, "func")) {
+		char buffer[STRING_SIZE];
+
+		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+			return(-1);
+		m_func = MooCodeLambda::parse(buffer);
+	}
+	else if (!strcmp(type, "params")) {
+		char buffer[STRING_SIZE];
+
+		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+			return(-1);
+		m_params = MooCodeLambda::parse(buffer);
 	}
 	else
 		return(MooObject::read_entry(type, data));
-*/
 	return(MOO_HANDLED);
 }
 
 int MooCodeLambda::write_data(MooDataFile *data)
 {
-/*
+	char buffer[STRING_SIZE];
+
 	MooObject::write_data(data);
-	data->write_integer_entry("value", m_num);
-*/
+	MooCodeParser::generate(m_func, buffer, STRING_SIZE);
+	// TODO should this write a raw_string instead?
+	data->write_string_entry("code", buffer);
+	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
+	data->write_string_entry("params", buffer);
 	return(0);
 }
 
@@ -77,4 +90,16 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 		throw MooException("Mismatched arguments");
 	return(frame->push_block(m_func, args));
 }
+
+MooCodeExpr *MooCodeLambda::parse(const char *code)
+{
+	MooCodeExpr *expr;
+	MooCodeParser parser;
+
+	expr = parser.parse(code);
+	// TODO temporary
+	MooCodeParser::print(expr);
+	return(expr);
+}
+
 

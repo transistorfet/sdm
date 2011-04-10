@@ -32,7 +32,7 @@ static int builder_teleport(MooAction *action, MooThing *thing, MooCodeFrame *fr
 
 	// TODO what permissions would control teleporting other than wizard
 	if (args->m_user->is_wizard()) {
-		if ((to = args->get_thing(0)))
+		if ((to = args->m_args->get_thing(0)))
 			return(args->m_user->moveto(args->m_user, args->m_channel, to));
 	}
 	args->m_user->notify(TNT_STATUS, args->m_user, args->m_channel, "Unable to teleport to that location");

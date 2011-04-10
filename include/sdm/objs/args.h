@@ -61,22 +61,10 @@ class MooArgs : public MooObject {
 	static const char *parse_word(char *buffer, int max, const char *text);
 	static char *parse_word(char *buffer);
 
-	int parse_args(const char *params, char *buffer, int max, const char *text);
-	int parse_args(const char *params, char *buffer);
-	int match_args(const char *params);
-	void match_args_throw(const char *params);
+	int parse_args(const char *params, const char *text);
 	const MooObjectType *get_type(char param);
 
 	MooObjectHash *make_env(MooObjectHash *env = NULL);
-
-	/// Accessors
-	inline MooObject *get(int index) { return(m_args->get(index)); }
-	inline long int get_integer(int index) { return(m_args->get_integer(index)); }
-	inline double get_float(int index) { return(m_args->get_float(index)); }
-	inline const char *get_string(int index) { return(m_args->get_string(index)); }
-	inline MooThing *get_thing(int index) { return(m_args->get_thing(index)); }
-
-	inline int set(int index, MooObject *obj) { if (!m_args->set(index, obj)) return(-1); return(0); }
 
     private:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);

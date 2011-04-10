@@ -507,10 +507,10 @@ int PseudoServ::login()
 		/// We received no network password so sign in as a guest
 		try {
 			if (!(m_user = MooUser::make_guest(m_nick->c_str())))
-				throw -1;
+				throw MooException("Unable to connect as guest");
 		}
-		catch (...) {
-			Msg::send(m_inter, "ERROR :Closing Link: Unable to connect as guest, %s\r\n", m_nick->c_str());
+		catch (MooException e) {
+			Msg::send(m_inter, "ERROR :Closing Link: (%s) %s\r\n", m_nick->c_str(), e.get());
 			delete this;
 			return(0);
 		}

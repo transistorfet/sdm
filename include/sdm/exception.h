@@ -11,6 +11,7 @@
 class MooException {
 	std::string m_msg;
     public:
+	MooException() { m_msg = std::string(""); }
 	MooException(const char *msg, ...);
 	const char *get() const { return(m_msg.c_str()); }
 };

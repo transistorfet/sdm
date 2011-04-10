@@ -17,6 +17,7 @@ class MooThingRef : public MooObject {
 
 	MooThingRef(moo_id_t id = -1) { m_id = id; }
 	MooThingRef(MooThing *thing) { if (thing) m_id = thing->id(); else m_id = -1; }
+	MooThingRef(const char *str);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

@@ -33,6 +33,7 @@ MooObject *moo_code_frame_create(void)
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
 {
+	m_exception = MooException();
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
 	m_env = NULL;
 	this->env(new MooObjectHash(parent));
@@ -120,6 +121,7 @@ int MooCodeFrame::run(int level)
 	int res;
 	MooCodeEvent *event;
 
+	m_exception = MooException("");
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
 	if (level < 0)
@@ -138,11 +140,13 @@ int MooCodeFrame::run(int level)
 			delete event;
 			// TODO this should be printed to the user (probably instead of rather than in addition to the status)
 			// TODO maybe the event could have the lineinfo stored in it and then we auto retreive it from there
+			m_exception = e;
 			moo_status("CODE: %s", e.get());
 			return(-1);
 		}
 		catch (...) {
-			moo_status("CODE: Unknown error occurred");
+			m_exception = MooException("Unknown error occurred");
+			moo_status("CODE: %s", m_exception.get());
 			return(-1);
 		}
 	}

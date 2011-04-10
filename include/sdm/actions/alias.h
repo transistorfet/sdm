@@ -13,7 +13,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
-class MooAlias : public MooAction {
+class MooAlias : public MooObject, public MooAction {
 	std::string *m_command;
     public:
 	MooAlias(MooThing* thing = NULL, const char *command = NULL);

@@ -22,7 +22,7 @@
 #define BUILTIN_LIST_BITS	MOO_HBF_REPLACE | MOO_HBF_REMOVE | MOO_HBF_DELETEALL | MOO_HBF_DELETE
 
 MooObjectType moo_builtin_obj_type = {
-	&moo_action_obj_type,
+	NULL,
 	"builtin",
 	typeid(MooBuiltin).name(),
 	(moo_type_create_t) moo_builtin_create
@@ -91,6 +91,15 @@ int MooBuiltin::set(const char *name)
 	return(0);
 }
 
+const char *MooBuiltin::params(const char *params)
+{
+	if (params) {
+		strncpy(m_params, params, MOO_PARAM_STRING_SIZE);
+		m_params[MOO_PARAM_STRING_SIZE - 1] = '\0';
+	}
+	return(m_params);
+}
+
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "function")) {
@@ -129,6 +138,8 @@ int MooBuiltin::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *ar
 {
 	if (!m_func)
 		return(-1);
+	if (args->m_args->last() >= 0)
+		args->parse_args(this->params(), args->m_args->get_string(0));
 	return(m_func(this, m_thing, frame, env, args));
 }
 

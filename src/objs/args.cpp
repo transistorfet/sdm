@@ -122,20 +122,17 @@ char *MooArgs::parse_word(char *buffer)
 	return(&buffer[i]);
 }
 
-int MooArgs::parse_args(const char *params, char *buffer, int max, const char *text)
-{
-	strncpy(buffer, text, max);
-	return(this->parse_args(params, buffer));
-}
-
 #define MAX_STACK	10
 
-int MooArgs::parse_args(const char *params, char *buffer)
+int MooArgs::parse_args(const char *params, const char *text)
 {
 	int i, j = 0, k, sp = 0, ap = 0;
 	MooObject *obj;
 	const MooObjectType *type;
 	char stack[MAX_STACK];
+	char buffer[LARGE_STRING_SIZE];
+
+	strncpy(buffer, text, LARGE_STRING_SIZE);
 
 	stack[sp] = '\0';
 	j += MooArgs::find_character(&buffer[j]);
@@ -190,31 +187,6 @@ int MooArgs::parse_args(const char *params, char *buffer)
 	if (buffer[j] != '\0')
 		throw MooException("Error: Too many arguments");
 	return(0);
-}
-
-int MooArgs::match_args(const char *params)
-{
-	int i;
-	MooObject *obj;
-
-	// TODO fix this so that it supports variable args parsing
-	for (i = 0; i <= m_args->last(); i++) {
-		if (params[i] == '\0')
-			return(-1);
-		if (!(obj = m_args->get(i)))
-			return(-1);
-		if (obj->type() != MooArgs::get_type(params[i]))
-			return(-1);
-	}
-	if (params[i] != '\0')
-		return(-1);
-	return(0);
-}
-
-void MooArgs::match_args_throw(const char *params)
-{
-	if (this->match_args(params) < 0)
-		throw moo_args_error;
 }
 
 const MooObjectType *MooArgs::get_type(char param)

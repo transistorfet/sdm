@@ -11,15 +11,20 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
+#define MOO_PARAM_STRING_SIZE		16
+
 typedef int (*moo_action_t)(class MooAction *, class MooThing *, MooCodeFrame *frame, MooObjectHash *, class MooArgs *);
 
-class MooBuiltin : public MooAction {
+class MooBuiltin : public MooObject, public MooAction {
 	moo_action_t m_func;
 	MooBuiltin *m_master;
+	char m_params[MOO_PARAM_STRING_SIZE];
+
     public:
 	MooBuiltin(moo_action_t func = NULL, const char *params = NULL, MooThing *thing = NULL);
 	virtual ~MooBuiltin() { }
 	int set(const char *name);
+	const char *params(const char *params = NULL);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

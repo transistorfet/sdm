@@ -16,6 +16,7 @@
 class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
+	MooException m_exception;
 
 	// TODO you should probably have MooArgs here, right?  It could always be NULL if there are no args. YES WE SHOULD!!
 	MooObjectHash *m_env;

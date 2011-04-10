@@ -12,11 +12,9 @@
 #include <sdm/objs/object.h>
 #include <sdm/actions/action.h>
 
-class MooCodeAction : public MooAction {
-	MooCodeExpr *m_code;
-
+class MooCodeAction : public MooCodeLambda, public MooAction {
     public:
-	MooCodeAction(MooCodeExpr *code = NULL, const char *params = NULL, MooThing *thing = NULL);
+	MooCodeAction(MooCodeExpr *params, MooCodeExpr *func, MooThing *thing = NULL) : MooCodeLambda(params, func), MooAction (thing) { }
 	virtual ~MooCodeAction() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);
@@ -24,8 +22,6 @@ class MooCodeAction : public MooAction {
 
     private:
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
-
-	int set(const char *name);
 };
 
 extern MooObjectType moo_code_obj_type;

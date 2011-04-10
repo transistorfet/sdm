@@ -20,7 +20,7 @@
 #include <sdm/actions/alias.h>
 
 MooObjectType moo_alias_obj_type = {
-	&moo_action_obj_type,
+	NULL,
 	"alias",
 	typeid(MooAlias).name(),
 	(moo_type_create_t) moo_alias_create

@@ -14,7 +14,6 @@ OBJS =	colours.o	\
 	main.o	\
 	misc.o	\
 	timer.o	\
-	actions/action.o	\
 	actions/alias.o	\
 	actions/code.o	\
 	actions/builtin/basics.o	\
@@ -118,18 +117,6 @@ misc.o: misc.cpp ../include/sdm/misc.h ../include/sdm/memory.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h
-
-actions/action.o: actions/action.cpp ../include/sdm/hash.h \
-  ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/misc.h \
-  ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/array.h ../include/sdm/objs/float.h \
-  ../include/sdm/objs/integer.h ../include/sdm/objs/string.h \
-  ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
-  ../include/sdm/tree.h ../include/sdm/actions/action.h \
-  ../include/sdm/objs/args.h ../include/sdm/things/references.h \
-  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h
 
 actions/alias.o: actions/alias.cpp ../include/sdm/misc.h \
   ../include/sdm/hash.h ../include/sdm/data.h ../include/sdm/globals.h \
@@ -304,7 +291,7 @@ code/event.o: code/event.cpp ../include/sdm/misc.h ../include/sdm/hash.h \
   ../include/sdm/code/code.h ../include/sdm/code/func.h \
   ../include/sdm/code/expr.h ../include/sdm/code/event.h \
   ../include/sdm/code/frame.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/lambda.h ../include/sdm/objs/integer.h
+  ../include/sdm/code/lambda.h
 
 code/expr.o: code/expr.cpp ../include/sdm/misc.h ../include/sdm/hash.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
@@ -437,7 +424,10 @@ objs/object.o: objs/object.cpp ../include/sdm/misc.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
   ../include/sdm/array.h ../include/sdm/actions/action.h \
   ../include/sdm/objs/args.h ../include/sdm/things/references.h \
-  ../include/sdm/tasks/task.h
+  ../include/sdm/tasks/task.h ../include/sdm/code/code.h \
+  ../include/sdm/code/func.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/lambda.h
 
 objs/string.o: objs/string.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -515,9 +505,9 @@ things/thing.o: things/thing.cpp ../include/sdm/hash.h \
   ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/misc.h \
   ../include/sdm/memory.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/tree.h ../include/sdm/array.h \
-  ../include/sdm/tasks/task.h ../include/sdm/things/user.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/gc.h ../include/sdm/array.h ../include/sdm/tasks/task.h \
+  ../include/sdm/things/user.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/things/thing.h ../include/sdm/tree.h \
   ../include/sdm/actions/action.h ../include/sdm/objs/args.h \
   ../include/sdm/things/references.h ../include/sdm/things/world.h \
   ../include/sdm/objs/float.h ../include/sdm/objs/integer.h \

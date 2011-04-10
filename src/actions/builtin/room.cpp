@@ -113,7 +113,7 @@ static int room_do_enter(MooAction *action, MooThing *thing, MooCodeFrame *frame
 	const char *msg;
 	MooThing *cur, *obj;
 
-	if (!(obj = args->get_thing(0)))
+	if (!(obj = args->m_args->get_thing(0)))
 		return(-1);
 	// TODO how the hell do you tell these things?
 	if (1) //obj->is_a_thing(MooThing::reference(MOO_GENERIC_MOBILE)))

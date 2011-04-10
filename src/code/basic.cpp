@@ -136,6 +136,7 @@ static int basic_create(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if ((obj = args->m_args->get(1))) {
 		try {
 			//obj->evaluate()
+			//(obj:init ...)
 		}
 		catch (MooException e) {
 			// TODO how do you destroy a thing

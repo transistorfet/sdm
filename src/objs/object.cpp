@@ -14,6 +14,7 @@
 #include <sdm/things/thing.h>
 #include <sdm/tasks/task.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/string.h>
 
 #include <sdm/code/code.h>
 
@@ -254,7 +255,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 	if (action_name) {
 		// TODO why do we assume the object is a thingref, basically... we kinda need to just use thing instead of thingref =/
 		MooThing *thing;
-		if (!(thing = obj->get_thing()) && !(obj = ((MooObject *) thing)->access_method(action_name, value)))
+		if (!(thing = obj->get_thing()) || !(obj = ((MooObject *) thing)->access_method(action_name, value)))
 			return(NULL);
 	}
 	obj->check_throw(MOO_PERM_R);
@@ -297,15 +298,12 @@ int MooObject::call_method(MooObject *channel, const char *name, const char *tex
 	int res;
 	MooArgs *args;
 	MooObject *func;
-	MooAction *action;
-	char buffer[LARGE_STRING_SIZE];
 
 	if (!(func = this->resolve_method(name)))
 		return(-1);
 	args = new MooArgs(DEFAULT_ARGS, NULL, (MooThing *) channel);
-	// TODO get rid of parse args (and/or replace channel with MooObject??
-	if ((action = dynamic_cast<MooAction *>(func)))
-		args->parse_args(action->params(), buffer, LARGE_STRING_SIZE, text ? text : "");
+	if (text)
+		args->m_args->set(0, new MooString(text));
 	res = this->call_method(channel, func, args);
 	if (result) {
 		*result = args->m_result;

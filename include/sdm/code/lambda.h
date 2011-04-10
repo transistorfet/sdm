@@ -23,7 +23,9 @@ class MooCodeLambda : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int to_string(char *buffer, int max);
 
-    private:
+	static MooCodeExpr *parse(const char *code);
+
+    protected:
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args);
 };
 

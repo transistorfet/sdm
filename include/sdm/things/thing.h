@@ -45,7 +45,8 @@ class MooThing : public MooObject {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int init();
+	virtual MooThing *get_thing() { return(this); }
+
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
 	// TODO should this be moved to moo_code??

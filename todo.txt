@@ -15,7 +15,7 @@
 	  Mighten this require the use of child/parent object linking (perhaps even just a property list of the child objects, which
 	  could be maintained by the clone function or something).
 
-      Miscellaneous:
+      Interface Methods:
 	* by making a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
 	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
 	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
@@ -29,36 +29,37 @@
 	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
 	  or something like that would still be possible (channels could be +si or something, so that you can only join if you are
 	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
-
-	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
-	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
-	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
 	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
 
-	* add a bitflag to MooThing to indicate that the thing is locked and cannot be replace or deleted.  This could then be set
-	  to indicate that a direct pointer is being used.  MooUser could set this bit for the cryolocker to protect it.
+      MultiTasking:
 	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
 	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
 	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
 	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
 	* we could have queued actions (or a special param or something passed to do_action) such that the action data can be copied
 	  and placed in a queue to be evaluated later (namely when the object is unlocked, when doing multithreading and stuff).
-	* think about multithreading possibilities
 
-	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
-	  directly.  Objects could still have an ID but it just wont be used internally as much.
-	* should an action be directly passed the object pointer on which the action exists or should it get the pointer to the object
-	  on which the action was called (which m_thing would be set to in the args anyways)?
-	* could you perhaps add some objects to the properties list as 'constants' so that you could store either the pointer to the
-	  MooObject value, or to the value embedded in the object in MooThing itself so that it is easy for C stuff to access directly
-	  but is also accessible as a property and no effort is needed to keep both values consistent (since they are the same).
-	  Perhaps you could also just say to fuck with it and just always access it as a property (and use accessor functions to make it
-	  easier to manipulate in C) (???)
+      Miscellaneous:
+	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
+	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
+	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
+
 	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
 
-	* you need a 'thing' garbage collection system, and possible an any-MooObject collection system
-	* make it so that you can have a script (either of MooCode or commands or both) such that you can program an entire initial
-	  system.  When the code is run, it generates the database which can then be saved as the core database.
+	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
+	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
+	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
+	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
+	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
+	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
+
+    TODO:
+	* should you modify the writing system to write each MooThing into it's own file?  Or to just write it all together but forget
+	  about the idea of seperate world systems, and the whole /path system of referencing
+	* now that you have the MooCode system, and possibly a format for loading in an entire functional database from code, could
+	  you possibly save the database back to that code system?  I guess the main benefit of that would be ease of editing a live
+	  database offline.  It wouldn't be trivial to get the system to write back to MooCode, but it would save on having libxml and
+	  essentially 2 possible formats for databases.
 	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
 	  quota system such that each object has a certain range of IDs from which it can create new objects.  You could even have
 	  limit inheritence such that it looks for the object with the first defined min ID and the first max ID from which it gets
@@ -68,105 +69,67 @@
 	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 
-	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
-	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
-	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
-	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
-	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
-	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
+	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
+	  directly.  Objects could still have an ID but it just wont be used internally as much.
+	* how will MooThings be garbage collected?
+	* how do we get/set/pass the actual 'this' object that a method is called on?  You could always create a special object that
+	  stores the method and object, and when do_evaluate()'d, it unshifts 'this' or something into the args.  You can't set
+	  args->this or anything in environment due to the possibility of passing the method as a value (it has to be self contained)
+	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
+	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
+	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
+	  functions intended for internal use be inaccessible from the command line?
 
-	* check out Smaug's system/socials.dat.  It has various premade commands for interaction which don't actually do anything
-	  other than print various messages to various people but would make a great addition.  Find out what each line is for
-	  (it's able to print different messages to different people/objects) and also what variables are available for expansion in
-	  the actual strings.
 
-    Covnersion TODO:
+	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
+	* get rid of MooBultin's MooAction parameter??
+	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
+	  the appropriate people in the room (like socials.dat in SMAUG)
 	* convert all moo_register_type function calls to rely on exceptions rather than return codes for reporting errors
-	* there is currently no point to frames, since we create a new frame every time a lambda or block is evaluated, as well as
-	  for actions.  Can we change this all so that only one frame is used?  Should you even try to do that?
 	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
-	* fix MooArray instances so that they pass a destroy_t function (how can you get it to work with delete??)
-
 	* what is the MooAction class used for?  Make code use MooObject instead where possible (like in MooThing::get_action)
+	* rename everything to do with action to 'method'
+	* fix thing->command() (object/target do_actions are disabled atm)
 
-	* make it so that there is always a code frame, from the very start, and everything uses it, including builtins.  If a builtin
-	  needs to call another method, it must do so indirectly using the frame.  The frame could either just always be passed, or else
-	  passed as a variable stored in the environment.
+	* add permissions checks to access and evaluate functions
 	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early
-	* add nested hash tables, and add caching (so a reference is always made in the local env to a value that was looked up in a
-	  distant env (this only works, really, if no writing to parent env's is allowed))
+	* add caching to environments
 	* we could actually prevent an attempt to add the same method to 2 objects by looking at the number of references
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
-	* should you modify the writing system to write each MooThing into it's own file?  Or to just write it all together but forget
-	  about the idea of seperate world systems, and the whole /path system of referencing
+	* convert notify() that takes args to take env or something else instead
+	* can you convert init/release functions to be constructor/destructor of a singleton class?
 
 	* should the NULL passed to evaluate() in some cases be changed? (only in MooThing::do_action)
-	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
-	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
-	* remove the channel arg from parse_args() at the very least, if not remove the whole function
-	* convert notify() that takes args to take env or something else instead
+	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* consolidate/move the moo_global_table from thing into the code's global table?
-	* get rid of MooBultin's MooAction parameter??
-	* rename everything to do with action to 'method'
-
-	* add permissions checks to access and evaluate functions
-	* how will methods work, in terms of getting the object they were called on?
-	* how will user/channel be set/passed around and so on?  Could we even have certain I/O functions that you call and which then
-	  forward the call on to the appropriate user/channel stuff??  MooTask might be an appropriate place for that.
-
-
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
-	* make MooObjectHash and MooObjectTree, and convert MooThing to use them for prop and action tables (and their automagic saving
-	  functionality)
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
-	* can you convert init/release functions to be constructor/destructor of a singleton class?
-	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-	* make a do_action which does not catch exceptions, so that they can be passed on.  What will we use to differentiate the 2 types
-	  of functions?  How will we differentiate in general?
-	* make it so that builtin functions have all sorts of things built in (when the functions are registered with the
-	  central table, it stores the records as MooBuiltin * objects), like the default name, the expected params, etc.  Then
-	  you can specify an action with <action type="builtin">basics_look</action>. 
-	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
 	  notifies to that user
-	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
-	  functions intended for internal use be inaccessible from the command line?
 
-	* add stuff for this new global table and integrate it better
-	* add object recycle (delete) function and command
-	* make the accept() function of non-room objects say something (to user and everyone else) like "$user tries to climb into $thing
-	  but fails miserably"
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
-	* should you make a macro or something to simplying notifying to the user from an action?
-	* implement variable argument *matching* function
-	* fix thing->command() (object/target do_actions are disabled atm)
 	* add permissions checking functions of some kind to all applicable locations
 	* add support for notices from clients to other clients
 	* add a 'register' and 'login' commands to basics
 	* implement client quit in the channels
 	* perhaps add "TheRealm" to any channel users list (names)
 
-	* everything should use actions that return a value rather than direct values for information, so that the action can do
-	  processing and adapt its output
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing
 
-    Old Stuff:
-	* should you change the position of the caller argument in all of the do_action util functions?
 
+    Old Stuff:
 	* make @destroy command
-	* add a @write_world command
 	* add a @get command for returning the raw property values
-	* add functions to lua for util_expand_ref stuff
 	* should you make the announce action add a "\n" before each output to the user in order to prevent
 	  interrupting the current line being typed instead of putting it in all the places that generate
 	  output sent to the announce action?

@@ -24,6 +24,15 @@ MooObject *moo_thingref_create(void)
 	return(new MooThingRef());
 }
 
+MooThingRef::MooThingRef(const char *str)
+{
+	MooThing *thing;
+
+	if (!(thing = MooThing::reference(str)))
+		throw MooException("Invalid thing reference: %s", str);
+	m_id = thing->id();
+}
+
 int MooThingRef::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {
