@@ -51,10 +51,11 @@ class MooThing : public MooObject {
 	// TODO should this be moved to moo_code??
 	static void add_global(const char *name, MooObject *obj);
 
-    private:
+    public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
+    private:
 	// TODO integrate these directly into the access* methods?
 	int set_property(const char *name, MooObject *obj);
 	MooObject *get_property(const char *name, MooObjectType *type);

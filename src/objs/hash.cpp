@@ -17,6 +17,8 @@
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
 #include <sdm/hash.h>
+#include <sdm/code/code.h>
+#include <sdm/objs/args.h>
 
 struct MooObjectType moo_hash_obj_type = {
 	NULL,
@@ -24,6 +26,22 @@ struct MooObjectType moo_hash_obj_type = {
 	typeid(MooObjectHash).name(),
 	(moo_type_create_t) moo_hash_create
 };
+
+static MooObjectHash *hash_methods = new MooObjectHash();
+void moo_load_hash_methods(MooObjectHash *env);
+
+int init_hash(void)
+{
+	moo_object_register_type(&moo_hash_obj_type);
+	moo_load_hash_methods(hash_methods);
+	return(0);
+}
+
+void release_hash(void)
+{
+	MOO_DECREF(hash_methods);
+	moo_object_deregister_type(&moo_hash_obj_type);
+}
 
 MooObject *moo_hash_create(void)
 {
@@ -147,6 +165,66 @@ MooThing *MooObjectHash::get_thing(const char *key)
 	if (!(obj = this->get(key)))
 		return(0);
 	return(obj->get_thing());
+}
+
+MooObject *MooObjectHash::access_property(const char *name, MooObject *value)
+{
+	// TODO do you need to do permissions checks here?
+	if (value) {
+		if (this->set(name, value) < 0)
+			return(NULL);
+		return(value);
+	}
+	else
+		return(this->get(name));
+}
+
+MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
+{
+	if (value)
+		throw moo_permissions;
+	// TODO do you need to do a read permissions check here?
+	return(hash_methods->get(name));
+}
+
+/************************
+ * Hash Object Methods *
+ ************************/
+
+static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	const char *name;
+	MooObjectHash *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+		throw moo_args_wrong_num;
+	if (args->m_args->last() != 0)
+		throw moo_args_wrong_num;
+	name = args->m_args->get_string(0);
+	args->m_result = m_this->get(name);
+	return(0);
+}
+
+static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	const char *name;
+	MooObjectHash *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 1)
+		throw moo_args_wrong_num;
+	name = args->m_args->get_string(0);
+	obj = args->m_args->get(1);
+	m_this->set(name, obj);
+	return(0);
+}
+
+void moo_load_hash_methods(MooObjectHash *env)
+{
+	env->set("get", new MooCodeFunc(hash_get));
+	env->set("set", new MooCodeFunc(hash_set));
 }
 
 

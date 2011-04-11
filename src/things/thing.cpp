@@ -48,8 +48,7 @@ int init_thing(void)
 {
 	if (moo_thing_table)
 		return(1);
-	if (moo_object_register_type(&moo_thing_obj_type) < 0)
-		return(-1);
+	moo_object_register_type(&moo_thing_obj_type);
 	// TODO should the global table be read/written to a file?
 	moo_global_table = new MooObjectHash();
 	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
@@ -354,13 +353,8 @@ MooObject *MooThing::get_method(const char *name)
 
 	// TODO do permissions check??
 	for (cur = this; cur; cur = cur->parent()) {
-		if ((func = cur->m_methods->get(name))) {
-			// TODO should this be moved to resolve() ??  or even resolve_method(), and then everything would go through that
-			if (dynamic_cast<MooMethod *>(func))
-				return(func);
-			// TODO this is a memory leak i think, because the return'd pointer is assumed to be borrowed
-			return(new MooMethod(this, func));
-		}
+		if ((func = cur->m_methods->get(name)))
+			return(func);
 	}
 	return(NULL);
 }

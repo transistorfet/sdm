@@ -31,8 +31,7 @@ int init_world(void)
 	// TODO alternatively you can pass over all things and fix them so if their location is NULL, add them to the root world
 	/// Create the world object with ID = 1, and parent ID = -1 since the world has no parent
 	moo_root_world = new MooWorld("maps/world.xml", 1, -1);
-	if (moo_object_register_type(&moo_world_obj_type) < 0)
-		return(-1);
+	moo_object_register_type(&moo_world_obj_type);
 	return(0);
 }
 

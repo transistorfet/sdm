@@ -83,10 +83,17 @@ class MooObjectHash : public MooHash<MooObject *> {
 	double get_float(const char *key);
 	const char *get_string(const char *key);
 	MooThing *get_thing(const char *key);
+
+    private:
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 };
 
 extern MooObjectType moo_hash_obj_type;
 MooObject *moo_hash_create(void);
+
+int init_hash(void);
+void release_hash(void);
 
 #define LOWERCASE(ch) \
 	( (ch >= 0x41 && ch <= 0x5a) ? ch + 0x20 : ch )

@@ -11,6 +11,8 @@
 #include <sdm/timer.h>
 #include <sdm/exception.h>
 #include <sdm/code/code.h>
+#include <sdm/array.h>
+#include <sdm/hash.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/interfaces/telnet.h>
@@ -39,62 +41,55 @@ static void handle_sigint(int);
 
 int init_moo(void)
 {
-	if (init_data() < 0)
-		return(-1);
-	moo_set_data_path("data");
+	try {
+		init_data();
+		moo_set_data_path("data");
 
-	if (init_object() < 0)
-		return(-1);
-	if (init_timer() < 0)
-		return(-1);
-	if (init_task() < 0)
-		return(-1);
-	if (init_interface() < 0)
-		return(-1);
-//	if (init_telnet() < 0)
-//		return(-1);
-	if (init_irc_pseudoserv() < 0)
-		return(-1);
+		init_object();
+		init_timer();
+		init_task();
+		init_interface();
+		//init_telnet();
+		init_irc_pseudoserv();
 
-	if (init_builtin() < 0)
-		return(-1);
-	if (init_moo_code() < 0)
-		return(-1);
+		init_builtin();
+		init_moo_code();
 
-	moo_object_register_type(&moo_alias_obj_type);
+		moo_object_register_type(&moo_alias_obj_type);
 
-	moo_object_register_type(&moo_float_obj_type);
-	moo_object_register_type(&moo_integer_obj_type);
-	moo_object_register_type(&moo_string_obj_type);
-	moo_object_register_type(&moo_thingref_obj_type);
-	moo_object_register_type(&moo_array_obj_type);
-	moo_object_register_type(&moo_hash_obj_type);
+		moo_object_register_type(&moo_float_obj_type);
+		moo_object_register_type(&moo_integer_obj_type);
+		moo_object_register_type(&moo_string_obj_type);
+		moo_object_register_type(&moo_thingref_obj_type);
+		init_array();
+		moo_object_register_type(&moo_hash_obj_type);
 
-	moo_object_register_type(&moo_method_obj_type);
+		moo_object_register_type(&moo_method_obj_type);
 
-	moo_object_register_type(&moo_tcp_obj_type);
-	moo_object_register_type(&moo_rpc_obj_type);
-	moo_object_register_type(&moo_rpc_server_obj_type);
-	moo_object_register_type(&moo_irc_pseudoserv_obj_type);
+		moo_object_register_type(&moo_tcp_obj_type);
+		moo_object_register_type(&moo_rpc_obj_type);
+		moo_object_register_type(&moo_rpc_server_obj_type);
+		moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
-	if (init_thing() < 0)
-		return(-1);
-	if (init_channel() < 0)
-		return(-1);
-	if (init_world() < 0)
-		return(-1);
-	if (init_user() < 0)
-		return(-1);
-	if (load_global_config())
-		return(-1);
+		init_thing();
+		init_channel();
+		init_world();
+		init_user();
 
-	MooThing::add_global("start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
-	MooThing::add_global("user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
-	MooThing::add_global("room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
-	MooThing::add_global("exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
-	MooThing::add_global("mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
-	MooThing::add_global("cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
-	MooThing::add_global("channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
+		load_global_config();
+
+		MooThing::add_global("start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
+		MooThing::add_global("user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
+		MooThing::add_global("room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
+		MooThing::add_global("exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
+		MooThing::add_global("mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
+		MooThing::add_global("cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
+		MooThing::add_global("channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
+	}
+	catch (MooException e) {
+		moo_status("%s", e.get());
+		return(-1);
+	}
 
 	signal(SIGINT, handle_sigint);
 	return(0);
@@ -109,6 +104,9 @@ void release_moo(void)
 
 	release_moo_code();
 	release_builtin();
+
+	release_array();
+	release_hash();
 
 	release_irc_pseudoserv();
 //	release_telnet();

@@ -16,7 +16,10 @@
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
+#include <sdm/hash.h>
 #include <sdm/array.h>
+#include <sdm/code/code.h>
+#include <sdm/objs/args.h>
 
 struct MooObjectType moo_array_obj_type = {
 	NULL,
@@ -24,6 +27,22 @@ struct MooObjectType moo_array_obj_type = {
 	typeid(MooObjectArray).name(),
 	(moo_type_create_t) moo_array_create
 };
+
+static MooObjectHash *array_methods = new MooObjectHash();
+void moo_load_array_methods(MooObjectHash *env);
+
+int init_array(void)
+{
+	moo_object_register_type(&moo_array_obj_type);
+	moo_load_array_methods(array_methods);
+	return(0);
+}
+
+void release_array(void)
+{
+	MOO_DECREF(array_methods);
+	moo_object_deregister_type(&moo_array_obj_type);
+}
 
 MooObject *moo_array_create(void)
 {
@@ -128,4 +147,81 @@ MooThing *MooObjectArray::get_thing(int index)
 	return(obj->get_thing());
 }
 
+MooObject *MooObjectArray::access_property(const char *name, MooObject *value)
+{
+	if (value)
+		throw moo_permissions;
+	else if (!strcmp(name, "size"))
+		return(new MooInteger(m_size));
+	else if (!strcmp(name, "last"))
+		return(new MooInteger(m_last));
+	// TODO should you throw not-found?
+	return(NULL);
+}
+
+MooObject *MooObjectArray::access_method(const char *name, MooObject *value)
+{
+	if (value)
+		throw moo_permissions;
+	// TODO do you need to do a read permissions check here?
+	return(array_methods->get(name));
+}
+
+/************************
+ * Array Object Methods *
+ ************************/
+
+static int array_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	long int index;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_wrong_num;
+	index = args->m_args->get_integer(0);
+	args->m_result = m_this->get(index);
+	return(0);
+}
+
+static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	long int index;
+	MooObject *obj;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 1)
+		throw moo_args_wrong_num;
+	index = args->m_args->get_integer(0);
+	obj = args->m_args->get(1);
+	args->m_result = m_this->set(index, obj);
+	return(0);
+}
+
+static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *func;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_wrong_num;
+	func = args->m_args->get(0);
+
+	// TODO you forget... this function must use tail recursion to loop
+
+	//args->m_result = m_this->set(index, obj);
+	return(0);
+}
+
+void moo_load_array_methods(MooObjectHash *env)
+{
+	env->set("get", new MooCodeFunc(array_get));
+	env->set("set", new MooCodeFunc(array_set));
+	env->set("foreach", new MooCodeFunc(array_foreach));
+}
 

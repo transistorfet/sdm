@@ -16,6 +16,7 @@ class MooCodeFunc : public MooObject {
     public:
 	moo_code_func_t m_func;
 
+	// TODO should you add parameters here?
 	MooCodeFunc(moo_code_func_t func) { m_func = func; }
 	virtual ~MooCodeFunc() { }
 

@@ -27,6 +27,10 @@ class MooThingRef : public MooObject {
 	virtual MooThing *get_thing() { return(this->get()); }
 
 	MooThing *get() { return(MooThing::lookup(m_id)); }
+
+    private:
+	MooObject *access_property(const char *name, MooObject *value = NULL);
+	MooObject *access_method(const char *name, MooObject *value = NULL);
 };
 
 extern MooObjectType moo_thingref_obj_type;

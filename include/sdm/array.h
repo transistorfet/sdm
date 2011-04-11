@@ -79,10 +79,17 @@ class MooObjectArray : public MooArray<MooObject *> {
 	double get_float(int index);
 	const char *get_string(int index);
 	MooThing *get_thing(int index);
+
+    private:
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 };
 
 extern MooObjectType moo_array_obj_type;
 MooObject *moo_array_create(void);
+
+int init_array(void);
+void release_array(void);
 
 template<typename T>
 MooArray<T>::MooArray(int size, int max, int bits, void (*destroy)(T))

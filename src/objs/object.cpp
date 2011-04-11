@@ -16,6 +16,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/thing.h>
+#include <sdm/actions/method.h>
 
 #include <sdm/code/code.h>
 
@@ -254,11 +255,8 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		return(NULL);
 
 	if (method) {
-		// TODO why do we assume the object is a thingref, basically... we kinda need to just use thing instead of thingref =/
-		MooThing *thing;
-		if (!(thing = obj->get_thing()) || !(obj = ((MooObject *) thing)->access_method(method, value)))
+		if (!(obj = obj->resolve_method(method, value)))
 			return(NULL);
-		//obj = new MooMethodThingThatHasObject(thing, obj);
 	}
 	obj->check_throw(MOO_PERM_R);
 	return(obj);
@@ -291,7 +289,14 @@ MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 
 MooObject *MooObject::resolve_method(const char *name, MooObject *value)
 {
-	return(this->access_method(name, value));
+	MooObject *func;
+
+	if (!(func = this->access_method(name, value)))
+		return(NULL);
+	if (dynamic_cast<MooMethod *>(func))
+		return(func);
+	// TODO this is a memory leak i think, because the return'd pointer is assumed to be borrowed
+	return(new MooMethod(this, func));
 }
 
 // TODO should this be somewhere else where we can more generically put the parameter parsing? (ie. get it out of MooArgs)

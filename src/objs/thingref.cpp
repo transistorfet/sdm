@@ -68,3 +68,21 @@ int MooThingRef::to_string(char *buffer, int max)
 	return(snprintf(buffer, max, "#%d", m_id));
 }
 
+MooObject *MooThingRef::access_property(const char *name, MooObject *value)
+{
+	MooThing *thing;
+
+	if (!(thing = this->get()))
+		return(NULL);
+	return(thing->access_property(name, value));
+}
+
+MooObject *MooThingRef::access_method(const char *name, MooObject *value)
+{
+	MooThing *thing;
+
+	if (!(thing = this->get()))
+		return(NULL);
+	return(thing->access_method(name, value));
+}
+
