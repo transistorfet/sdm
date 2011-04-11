@@ -201,6 +201,34 @@ static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+class MooArrayEventForeach : public MooCodeEvent {
+	int m_index;
+	MooObjectArray *m_this;
+	MooObject *m_func;
+	
+    public:
+	MooArrayEventForeach(int index, MooObjectArray *obj, MooObjectHash *env, MooObject *func) : MooCodeEvent(env, NULL, NULL) {
+		m_index = index;
+		// TODO incref??
+		m_this = obj;
+		m_func = func;
+	}
+
+	int do_event(MooCodeFrame *frame) {
+		MooArgs *args;
+
+		if (m_index > m_this->last())
+			return(0);
+		if (m_index < m_this->last())
+			frame->push_event(new MooArrayEventForeach(m_index + 1, m_this, m_env, m_func));
+		args = new MooArgs();
+		args->m_args->set(0, MOO_INCREF(m_func));
+		args->m_args->set(1, MOO_INCREF(m_this->get(m_index)));
+		frame->push_event(new MooCodeEventCallExpr(m_env, args));
+		return(0);
+	}
+};
+
 static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *func;
@@ -211,10 +239,7 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_wrong_num;
 	func = args->m_args->get(0);
-
-	// TODO you forget... this function must use tail recursion to loop
-
-	//args->m_result = m_this->set(index, obj);
+	frame->push_event(new MooArrayEventForeach(0, m_this, env, func));
 	return(0);
 }
 

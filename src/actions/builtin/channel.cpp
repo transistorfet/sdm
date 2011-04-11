@@ -175,8 +175,8 @@ static int channel_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *ar
 static int realm_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should the realm channel bother maintaining a user list?
-	//if (channel_join(action, thing, args) < 0)
-	//	return(-1);
+	if (channel_join(frame, env, args) < 0)
+		return(-1);
 	args->m_user->notify(TNT_JOIN, args->m_user, (MooThing *) args->m_this, NULL);
 	try {
 		cryolocker_revive(args->m_user, args->m_channel);
@@ -191,8 +191,8 @@ static int realm_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int realm_leave(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	//if (channel_leave(action, thing, args) < 0)
-	//	return(-1);
+	if (channel_leave(frame, env, args) < 0)
+		return(-1);
 	args->m_user->notify(TNT_LEAVE, args->m_user, (MooThing *) args->m_this, NULL);
 
 	try {
@@ -206,8 +206,8 @@ static int realm_leave(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int realm_quit(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	//if (channel_quit(action, thing, args) < 0)
-	//	return(-1);
+	if (channel_quit(frame, env, args) < 0)
+		return(-1);
 
 	try {
 		cryolocker_store(args->m_user, args->m_channel);
