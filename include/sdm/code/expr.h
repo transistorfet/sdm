@@ -44,6 +44,7 @@ class MooCodeExpr : public MooObject {
 	MooCodeExpr *get_call();
 
 	void next(MooCodeExpr *expr) { if (expr) m_next = expr; }
+	static int check_args(MooCodeExpr *expr, int min, int max);
 };
 
 extern MooObjectType moo_code_expr_obj_type;

@@ -246,11 +246,20 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		remain++;
 	}
 
-	// TODO should we modify this so that we never do a global_env lookup and instead rely on the env being linked to global_env
-	if (!(obj = MooThing::reference(buffer))
-	    && !(obj = env->get(buffer))
-	    && !(obj = global_env->get(buffer)))
-		return(NULL);
+	if (!remain && value) {
+		if (!env)
+			env = global_env;
+		if (env->set(buffer, MOO_INCREF(value)))
+			return(NULL);
+		return(value);
+	}
+	else {
+		// TODO should we modify this so that we never do a global_env lookup and instead rely on the env being linked to global_env
+		if (!(obj = MooThing::reference(buffer))
+		    && !(obj = env->get(buffer))
+		    && !(obj = global_env->get(buffer)))
+			return(NULL);
+	}
 	if (remain && !(obj = obj->resolve_property(remain, value)))
 		return(NULL);
 

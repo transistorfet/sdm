@@ -150,7 +150,7 @@ int MooArgs::parse_args(const char *params, const char *text)
 			}
 			else {
 				if (!(type = MooArgs::get_type(params[i])))
-					throw moo_args_error;
+					throw MooException("Error: Invalid arg type (%d), expected %c", ap, params[i]);
 				if (!(obj = moo_make_object(type)))
 					throw moo_mem_error;
 				k = obj->parse_arg(NULL, NULL, &buffer[j]);

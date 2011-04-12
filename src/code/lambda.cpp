@@ -89,7 +89,7 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
 		env->set(cur->get_identifier(), args->m_args->get(i));
 	if (cur || i <= args->m_args->last())
-		throw MooException("Mismatched arguments");
+		throw moo_args_mismatched;
 	return(frame->push_block(env, m_func, args));
 }
 

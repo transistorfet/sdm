@@ -48,8 +48,7 @@ class MooGC {
 	}
 	inline void operator delete(void *ptr) {
 		//moo_status("MEM: free 0x%x", ptr);
-		// TODO temporarily disable freeing
-		//free(ptr);
+		free(ptr);
 	}
 
 	static inline MooGC *incref(MooGC *obj) {
@@ -59,7 +58,8 @@ class MooGC {
 	}
 	static inline void decref(MooGC *obj) {
 		if (obj && obj->m_refs != GC_NOFREE && --obj->m_refs <= 0)
-			delete(obj);
+		// TODO temporarily disable freeing
+		;//	delete(obj);
 	}
 
 	inline void set_nofree() {

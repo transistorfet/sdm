@@ -294,14 +294,14 @@ int MooThing::set_property(const char *name, MooObject *obj)
 			obj->owner(cur->owner());
 			obj->permissions(cur->permissions());
 			// TODO you could also do a check here for the type (only allow the same type to overwrite)
-			return(thing->m_properties->set(name, obj));
+			return(thing->m_properties->set(name, MOO_INCREF(obj)));
 		}
 	}
 	else {
 		if (!obj)
 			return(1);
 		this->check_throw(MOO_PERM_W);
-		return(m_properties->set(name, obj));
+		return(m_properties->set(name, MOO_INCREF(obj)));
 	}
 }
 
@@ -343,7 +343,7 @@ int MooThing::set_method(const char *name, MooObject *action)
 	/// If the action is NULL, remove the entry from the table
 	if (!action)
 		return(m_methods->remove(name));
-	return(m_methods->set(name, action));
+	return(m_methods->set(name, MOO_INCREF(action)));
 }
 
 MooObject *MooThing::get_method(const char *name)

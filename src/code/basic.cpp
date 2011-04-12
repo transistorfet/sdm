@@ -102,6 +102,26 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+/******************
+ * Type Functions *
+ ******************/
+
+static int basic_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	args->m_result = args->m_args;
+	args->m_args = NULL;
+	return(0);
+}
+
+static int basic_hash(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	// TODO for now, we wont initialize the hash
+	if (args->m_args->last() >= 0)
+		throw moo_args_mismatched;
+	args->m_result = new MooObjectHash();
+	return(0);
+}
+
 /********************
  * System Functions *
  ********************/
@@ -184,11 +204,17 @@ int moo_load_code_basic(MooObjectHash *env)
 	//	environment (and then the env relies on garbage collection to be freed)
 
 	env->set("print", new MooCodeFunc(basic_print));
+
 	env->set("+", new MooCodeFunc(basic_add));
 	env->set("-", new MooCodeFunc(basic_subtract));
 	env->set("*", new MooCodeFunc(basic_multiply));
 	env->set("/", new MooCodeFunc(basic_divide));
+
 	env->set("null", new MooCodeFunc(basic_null));
+
+	env->set("array", new MooCodeFunc(basic_array));
+	env->set("hash", new MooCodeFunc(basic_hash));
+
 	env->set("load", new MooCodeFunc(basic_load));
 	env->set("@create", new MooCodeFunc(basic_create));
 	return(0);

@@ -197,9 +197,9 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObjectHash *m_this;
 
 	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
-		throw moo_args_wrong_num;
+		throw moo_method_object;
 	if (args->m_args->last() != 0)
-		throw moo_args_wrong_num;
+		throw moo_args_mismatched;
 	name = args->m_args->get_string(0);
 	args->m_result = m_this->get(name);
 	return(0);
@@ -214,7 +214,7 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
 		throw moo_method_object;
 	if (args->m_args->last() != 1)
-		throw moo_args_wrong_num;
+		throw moo_args_mismatched;
 	name = args->m_args->get_string(0);
 	obj = args->m_args->get(1);
 	m_this->set(name, obj);

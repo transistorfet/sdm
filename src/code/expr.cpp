@@ -102,3 +102,14 @@ MooCodeExpr *MooCodeExpr::get_call()
 	return(expr);
 }
 
+int MooCodeExpr::check_args(MooCodeExpr *expr, int min, int max)
+{
+	int num = 0;
+
+	for (; expr; num++, expr = expr->next())
+		;
+	if (num >= min && num <= max)
+		return(1);
+	return(0);
+}
+

@@ -180,7 +180,8 @@ class FormSetEvent : public MooCodeEvent {
 
 static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO check arguments
+	if (!MooCodeExpr::check_args(expr, 2, 2))
+		throw moo_args_mismatched;
 	frame->push_event(new FormSetEvent(frame->env(), NULL, expr));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
 	return(0);
@@ -206,11 +207,8 @@ class FormIfEvent : public MooCodeEvent {
 
 static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO should you check argument numbers?
-	//MooCodeExpr *next;
-	//if (!(next = expr->next()))
-
-	// TODO wouldn't this cause a segfault?
+	if (!MooCodeExpr::check_args(expr, 2, 3))
+		throw moo_args_mismatched;
 	frame->push_event(new FormIfEvent(frame->env(), NULL, expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr));
 	return(0);
@@ -261,7 +259,7 @@ int init_code_event(void)
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("block", new MooFormT(form_block));
 	form_env->set("lambda", new MooFormT(form_lambda));
-	form_env->set("foreach", new MooFormT(form_foreach));
+	//form_env->set("foreach", new MooFormT(form_foreach));
 	return(0);
 }
 
