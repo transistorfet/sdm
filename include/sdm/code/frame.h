@@ -35,13 +35,13 @@ class MooCodeFrame : public MooObject {
 	int run(int level = 0);
 
 	int eval(const char *code, MooArgs *args = NULL);
-	int call(MooCodeExpr *expr, int num_params, ...);
-	int call(MooCodeExpr *expr, MooArgs *args);
 
 	void set_return(MooObject *obj);
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
+
+	int linecol(int &line, int &col);
 };
 
 extern MooObjectType moo_code_frame_obj_type;

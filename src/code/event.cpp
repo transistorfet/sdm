@@ -162,9 +162,10 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
  * Moo Code Event Forms *
  ************************/
 
-/******************************
- * Form: (set <name> <value>) *
- ******************************/
+/*********************************
+ * Form: (set <name> <value>)    *
+ *       (define <name> <value>) *
+ *********************************/
 
 class FormSetEvent : public MooCodeEvent {
     public:
@@ -183,6 +184,15 @@ static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 	if (!MooCodeExpr::check_args(expr, 2, 2))
 		throw moo_args_mismatched;
 	frame->push_event(new FormSetEvent(frame->env(), NULL, expr));
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
+	return(0);
+}
+
+static int form_define(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!MooCodeExpr::check_args(expr, 2, 2))
+		throw moo_args_mismatched;
+	frame->push_event(new FormSetEvent(global_env, NULL, expr));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
 	return(0);
 }
@@ -256,6 +266,7 @@ int init_code_event(void)
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
 	form_env->set("set", new MooFormT(form_set));
+	form_env->set("define", new MooFormT(form_define));
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("block", new MooFormT(form_block));
 	form_env->set("lambda", new MooFormT(form_lambda));

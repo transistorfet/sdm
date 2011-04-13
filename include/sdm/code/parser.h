@@ -22,6 +22,7 @@
 class MooCodeParser {
 	short m_line;
 	short m_col;
+	short m_last_col;
 	int m_pos;
 	const char *m_input;
 
@@ -42,13 +43,16 @@ class MooCodeParser {
 	int read_token();
 
 	inline char getchar() {
+		m_col++;
 		if (m_input[m_pos] == '\n') {
 			m_line++;
-			m_col = 0;
+			m_last_col = m_col;
+			m_col = 1;
 		}
 		return(m_input[m_pos++]);
 	}
 
+	/// NOTE: This only guarantees only one unget while maintaining correct line and column number (in exchange for slight performance)
 	inline void ungetchar() {
 		if (--m_pos <= 0)
 			m_pos = 0;
@@ -56,8 +60,7 @@ class MooCodeParser {
 			m_col--;
 			if (m_input[m_pos] == '\n') {
 				m_line--;
-				// TODO calculate the real column number =/
-				m_col = 0;
+				m_col = m_last_col;
 			}
 		}
 	}

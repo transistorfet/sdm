@@ -8,12 +8,20 @@
 
 #include <string>
 
+#define E_FATAL		1
+#define E_NORMAL	2
+
 class MooException {
+	int m_severity;
 	std::string m_msg;
     public:
-	MooException() { m_msg = std::string(""); }
+	MooException() { m_severity = 0; m_msg = std::string(""); }
 	MooException(const char *msg, ...);
+	MooException(int severity, const char *msg, ...);
+	MooException(int severity, const char *msg, va_list va);
+	void init(int severity, const char *msg, va_list va);
 	const char *get() const { return(m_msg.c_str()); }
+	inline int severity() { return(m_severity); }
 };
 
 extern MooException moo_mem_error;

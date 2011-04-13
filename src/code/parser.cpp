@@ -35,8 +35,9 @@ MooCodeExpr *MooCodeParser::parse(const char *str)
 {
 	m_input = str;
 	m_pos = 0;
-	m_line = 0;
-	m_col = 0;
+	m_line = 1;
+	m_col = 1;
+	m_last_col = 1;
 	return(this->parse_list());
 }
 
@@ -78,11 +79,11 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_OPEN: {
 		MooCodeExpr *expr = this->parse_list();
 		if (!expr)
-			throw MooException("%d, %d: Empty list?", m_line, m_col);
+			throw MooException("(%d, %d): Empty list?", m_line, m_col);
 		return(new MooCodeExpr(m_line, m_col, MCT_CALL, expr));
 	    }
 	    default:
-		throw MooException("%d, %d: Invalid token type, %d", m_line, m_col, m_type);
+		throw MooException("(%d, %d): Invalid token type, %d", m_line, m_col, m_type);
 	}
 }
 
@@ -152,7 +153,7 @@ int MooCodeParser::read_token()
 				if (lispy_is_whitespace(ch))
 					break;
  				if (ch == '(')
-					throw MooException("%d, %d: Unexpected open bracket.", m_line, m_col);
+					throw MooException("(%d, %d): Unexpected open bracket.", m_line, m_col);
  				else if (ch == ')') {
 					this->ungetchar();
 					break;

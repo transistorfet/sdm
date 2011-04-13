@@ -30,6 +30,14 @@ class MooCodeEvent {
 	MooObjectHash *env() { return(m_env); }
 
 	virtual int do_event(MooCodeFrame *frame);
+
+	inline int linecol(int &line, int &col) {
+		if (!m_expr)
+			return(0);
+		line = m_expr->line();
+		col = m_expr->col();
+		return(1);
+	}
 };
 
 class MooCodeEventEvalExpr : public MooCodeEvent {

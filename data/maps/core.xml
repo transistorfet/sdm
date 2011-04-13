@@ -346,8 +346,8 @@
     <permissions>075</permissions>
     <params>text</params>
     <func>
-	(foreach this:contents cur
-		(cur:notify SAY user channel text))
+	(this.contents:foreach (lambda (cur)
+		(cur:notify SAY user channel text)))
     </func>
    </entry>
    <entry type="builtin" key="whisper">
@@ -475,15 +475,6 @@
     <permissions>075</permissions>
     <params>s</params>
     <function>channel_evaluate</function>
-   </entry>
-   <entry type="moolambda" key="test">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>text</params>
-    <func>
-	(this.users:foreach (lambda (cur)
-		(print "$cur.name says \'$text\'")))
-    </func>
    </entry>
   </methods>
   <thing type="channel">
