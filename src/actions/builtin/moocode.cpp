@@ -14,6 +14,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
@@ -23,7 +24,6 @@
 #include <sdm/things/world.h>
 
 #include <sdm/code/code.h>
-#include <sdm/actions/builtin/builtin.h>
 
 
 static int moocode_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -31,9 +31,9 @@ static int moocode_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(frame->push_code(args->m_args->get_string(0), args));
 }
 
-int moo_load_moocode_actions(MooBuiltinHash *actions)
+int moo_load_moocode_actions(MooObjectHash *env)
 {
-	actions->set("moocode_eval", new MooBuiltin(moocode_eval));
+	env->set("moocode_eval", new MooCodeFunc(moocode_eval));
 	return(0);
 }
 

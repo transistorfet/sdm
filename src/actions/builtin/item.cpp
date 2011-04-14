@@ -13,13 +13,14 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 static int item_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -55,10 +56,10 @@ static int item_drop(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-int moo_load_item_actions(MooBuiltinHash *actions)
+int moo_load_item_actions(MooObjectHash *env)
 {
-	actions->set("item_get", new MooBuiltin(item_get));
-	actions->set("item_drop", new MooBuiltin(item_drop));
+	env->set("item_get", new MooCodeFunc(item_get));
+	env->set("item_drop", new MooCodeFunc(item_drop));
 	return(0);
 }
 

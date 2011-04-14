@@ -168,6 +168,10 @@ int MooObject::read_file(const char *file, const char *type)
 		delete data;
 		return(res);
 	}
+	catch (MooException e) {
+		moo_status("DATA: %s", e.get());
+		return(-1);
+	}
 	catch (...) {
 		moo_status("Error opening file \"%s\".", file);
 		return(-1);

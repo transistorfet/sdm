@@ -9,15 +9,20 @@
 #include <stdarg.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/code/expr.h>
+#include <sdm/code/parser.h>
 
 typedef int (*moo_code_func_t)(class MooCodeFrame *frame, class MooObjectHash *env, class MooArgs *args);
 
 class MooCodeFunc : public MooObject {
-    public:
+    protected:
+	std::string *m_name;
 	moo_code_func_t m_func;
+	MooCodeExpr *m_params;
 
-	// TODO should you add parameters here?
-	MooCodeFunc(moo_code_func_t func) { m_func = func; }
+    public:
+	MooCodeFunc(moo_code_func_t func, const char *params) { m_func = func; m_params = MooCodeParser::parse_code(params); }
+	MooCodeFunc(moo_code_func_t func, MooCodeExpr *params = NULL) { m_func = func; m_params = params; }
 	virtual ~MooCodeFunc() { }
 
 	virtual int read_entry(const char *type, MooDataFile *data);

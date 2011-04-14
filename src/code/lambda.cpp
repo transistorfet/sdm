@@ -43,14 +43,14 @@ int MooCodeLambda::read_entry(const char *type, MooDataFile *data)
 
 		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
-		m_func = MooCodeLambda::parse(buffer);
+		m_func = MooCodeParser::parse_code(buffer);
 	}
 	else if (!strcmp(type, "params")) {
 		char buffer[STRING_SIZE];
 
 		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
-		m_params = MooCodeLambda::parse(buffer);
+		m_params = MooCodeParser::parse_code(buffer);
 	}
 	else
 		return(MooObject::read_entry(type, data));
@@ -91,17 +91,6 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 	if (cur || i <= args->m_args->last())
 		throw moo_args_mismatched;
 	return(frame->push_block(env, m_func, args));
-}
-
-MooCodeExpr *MooCodeLambda::parse(const char *code)
-{
-	MooCodeExpr *expr;
-	MooCodeParser parser;
-
-	expr = parser.parse(code);
-	// TODO temporary
-	MooCodeParser::print(expr);
-	return(expr);
 }
 
 

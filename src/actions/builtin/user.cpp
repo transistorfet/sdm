@@ -13,13 +13,14 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 static int user_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -55,11 +56,11 @@ static int user_inventory(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 	return(0);
 }
 
-int moo_load_user_actions(MooBuiltinHash *actions)
+int moo_load_user_actions(MooObjectHash *env)
 {
-	actions->set("user_init", new MooBuiltin(user_init));
-	actions->set("user_passwd", new MooBuiltin(user_passwd));
-	actions->set("user_inventory", new MooBuiltin(user_inventory));
+	env->set("user_init", new MooCodeFunc(user_init));
+	env->set("user_passwd", new MooCodeFunc(user_passwd));
+	env->set("user_inventory", new MooCodeFunc(user_inventory));
 	return(0);
 }
 

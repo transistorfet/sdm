@@ -41,23 +41,23 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="look_self">
+   <entry type="moofunc" key="look_self">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>basics_look_self</function>
+    <func>basics_look_self</func>
    </entry>
-   <entry type="builtin" key="print_view">
+   <entry type="moofunc" key="print_view">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>basics_print_view</function>
+    <func>basics_print_view</func>
    </entry>
-   <entry type="builtin" key="@eval">
+   <entry type="moofunc" key="@eval">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>moocode_eval</function>
+    <func>moocode_eval</func>
    </entry>
    <entry type="moolambda" key="print_hi">
     <owner>-1</owner>
@@ -140,23 +140,23 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="init">
+   <entry type="moofunc" key="init">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>user_init</function>
+    <func>user_init</func>
    </entry>
-   <entry type="builtin" key="passwd">
+   <entry type="moofunc" key="passwd">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>user_passwd</function>
+    <func>user_passwd</func>
    </entry>
-   <entry type="builtin" key="inv">
+   <entry type="moofunc" key="inv">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>user_inventory</function>
+    <func>user_inventory</func>
    </entry>
   </methods>
  </thing>
@@ -179,47 +179,47 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="teleport">
+   <entry type="moofunc" key="teleport">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>builder_teleport</function>
+    <func>builder_teleport</func>
    </entry>
-   <entry type="builtin" key="@create">
+   <entry type="moofunc" key="@create">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>builder_create</function>
+    <func>builder_create</func>
    </entry>
-   <entry type="builtin" key="@add_exit">
+   <entry type="moofunc" key="@add_exit">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>builder_add_exit</function>
+    <func>builder_add_exit</func>
    </entry>
-   <entry type="builtin" key="@dig">
+   <entry type="moofunc" key="@dig">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>builder_dig</function>
+    <func>builder_dig</func>
    </entry>
-   <entry type="builtin" key="@info">
+   <entry type="moofunc" key="@info">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>builder_info</function>
+    <func>builder_info</func>
    </entry>
-   <entry type="builtin" key="@set">
+   <entry type="moofunc" key="@set">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>builder_set</function>
+    <func>builder_set</func>
    </entry>
-   <entry type="builtin" key="@save">
+   <entry type="moofunc" key="@save">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>builder_save</function>
+    <func>builder_save</func>
    </entry>
   </methods>
  </thing>
@@ -237,17 +237,17 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="get">
+   <entry type="moofunc" key="get">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>item_get</function>
+    <func>item_get</func>
    </entry>
-   <entry type="builtin" key="drop">
+   <entry type="moofunc" key="drop">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>item_drop</function>
+    <func>item_drop</func>
    </entry>
   </methods>
  </thing>
@@ -275,71 +275,71 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="n">
+   <entry type="moofunc" key="n">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
-   <entry type="builtin" key="e">
+   <entry type="moofunc" key="e">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
-   <entry type="builtin" key="d">
+   <entry type="moofunc" key="d">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
-   <entry type="builtin" key="accept">
+   <entry type="moofunc" key="accept">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>room_accept</function>
+    <func>room_accept</func>
    </entry>
-   <entry type="builtin" key="do_enter">
+   <entry type="moofunc" key="do_enter">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>room_do_enter</function>
+    <func>room_do_enter</func>
    </entry>
-   <entry type="builtin" key="do_leave">
+   <entry type="moofunc" key="do_leave">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>room_do_exit</function>
+    <func>room_do_exit</func>
    </entry>
-   <entry type="builtin" key="look">
+   <entry type="moofunc" key="look">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>[s]</params>
-    <function>room_look</function>
+    <func>room_look</func>
    </entry>
-   <entry type="builtin" key="emote">
+   <entry type="moofunc" key="emote">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>room_emote</function>
+    <func>room_emote</func>
    </entry>
-   <entry type="builtin" key="s">
+   <entry type="moofunc" key="s">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
-   <entry type="builtin" key="w">
+   <entry type="moofunc" key="w">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
-   <entry type="builtin" key="u">
+   <entry type="moofunc" key="u">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>room_direction</function>
+    <func>room_direction</func>
    </entry>
    <entry type="moolambda" key="say">
     <owner>-1</owner>
@@ -350,11 +350,11 @@
 		(cur:notify SAY user channel text)))
     </func>
    </entry>
-   <entry type="builtin" key="whisper">
+   <entry type="moofunc" key="whisper">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>room_whisper</function>
+    <func>room_whisper</func>
    </entry>
   </methods>
  </thing>
@@ -377,19 +377,19 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="go">
+   <entry type="moofunc" key="go">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>basics_go</function>
+    <func>basics_go</func>
    </entry>
-   <entry type="builtin" key="move">
+   <entry type="moofunc" key="move">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
-    <function>basics_go</function>
+    <func>basics_go</func>
    </entry>
-   <entry type="builtin" key="print_view">
+   <entry type="moofunc" key="print_view">
     <owner>-1</owner>
     <permissions>075</permissions>
    </entry>
@@ -428,53 +428,53 @@
    </entry>
   </properties>
   <methods>
-   <entry type="builtin" key="init">
+   <entry type="moofunc" key="init">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>channel_init</function>
+    <func>channel_init</func>
    </entry>
-   <entry type="builtin" key="join">
+   <entry type="moofunc" key="join">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>channel_join</function>
+    <func>channel_join</func>
    </entry>
-   <entry type="builtin" key="leave">
+   <entry type="moofunc" key="leave">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>channel_leave</function>
+    <func>channel_leave</func>
    </entry>
-   <entry type="builtin" key="quit">
+   <entry type="moofunc" key="quit">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>channel_quit</function>
+    <func>channel_quit</func>
    </entry>
-   <entry type="builtin" key="say">
+   <entry type="moofunc" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>channel_say</function>
+    <func>channel_say</func>
    </entry>
-   <entry type="builtin" key="emote">
+   <entry type="moofunc" key="emote">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>channel_emote</function>
+    <func>channel_emote</func>
    </entry>
-   <entry type="builtin" key="names">
+   <entry type="moofunc" key="names">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <function>channel_names</function>
+    <func>channel_names</func>
    </entry>
-   <entry type="builtin" key="evaluate">
+   <entry type="moofunc" key="evaluate">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <function>channel_evaluate</function>
+    <func>channel_evaluate</func>
    </entry>
   </methods>
   <thing type="channel">
@@ -533,47 +533,47 @@
     </entry>
    </properties>
    <methods>
-    <entry type="builtin" key="join">
+    <entry type="moofunc" key="join">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params></params>
-     <function>realm_join</function>
+     <func>realm_join</func>
     </entry>
-    <entry type="builtin" key="leave">
+    <entry type="moofunc" key="leave">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params></params>
-     <function>realm_leave</function>
+     <func>realm_leave</func>
     </entry>
-    <entry type="builtin" key="quit">
+    <entry type="moofunc" key="quit">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params></params>
-     <function>realm_quit</function>
+     <func>realm_quit</func>
     </entry>
-    <entry type="builtin" key="say">
+    <entry type="moofunc" key="say">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params>s</params>
-     <function>realm_say</function>
+     <func>realm_say</func>
     </entry>
-    <entry type="builtin" key="emote">
+    <entry type="moofunc" key="emote">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params>s</params>
-     <function>realm_emote</function>
+     <func>realm_emote</func>
     </entry>
-    <entry type="builtin" key="names">
+    <entry type="moofunc" key="names">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params></params>
-     <function>realm_names</function>
+     <func>realm_names</func>
     </entry>
-    <entry type="builtin" key="evaluate">
+    <entry type="moofunc" key="evaluate">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params>s</params>
-     <function>realm_evaluate</function>
+     <func>realm_evaluate</func>
     </entry>
    </methods>
    <name>#realm</name>

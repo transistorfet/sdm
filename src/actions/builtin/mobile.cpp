@@ -13,13 +13,14 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 static int mobile_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -40,9 +41,9 @@ static int mobile_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-int moo_load_mobile_actions(MooBuiltinHash *actions)
+int moo_load_mobile_actions(MooObjectHash *env)
 {
-	actions->set("mobile_init", new MooBuiltin(mobile_init));
+	env->set("mobile_init", new MooCodeFunc(mobile_init));
 	return(0);
 }
 

@@ -33,6 +33,7 @@ class MooCodeParser {
     public:
 	MooCodeParser();
 
+	static MooCodeExpr *parse_code(const char *str);
 	MooCodeExpr *parse(const char *str);
 	static int generate(MooCodeExpr *expr, char *buffer, int max, char linebr = '\n', int indent = 0);
 	static void print(MooCodeExpr *expr);

@@ -14,6 +14,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
@@ -22,7 +23,7 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 static int basics_register(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -139,13 +140,13 @@ static int basics_respond(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 }
 */
 
-int moo_load_basic_actions(MooBuiltinHash *actions)
+int moo_load_basic_actions(MooObjectHash *env)
 {
-	actions->set("basics_register", new MooBuiltin(basics_register));
-	actions->set("basics_print", new MooBuiltin(basics_print));
-	actions->set("basics_print_view", new MooBuiltin(basics_print_view));
-	actions->set("basics_look_self", new MooBuiltin(basics_look_self));
-	actions->set("basics_go", new MooBuiltin(basics_go));
+	env->set("basics_register", new MooCodeFunc(basics_register));
+	env->set("basics_print", new MooCodeFunc(basics_print));
+	env->set("basics_print_view", new MooCodeFunc(basics_print_view));
+	env->set("basics_look_self", new MooCodeFunc(basics_look_self));
+	env->set("basics_go", new MooCodeFunc(basics_go));
 	return(0);
 }
 

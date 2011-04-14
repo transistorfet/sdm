@@ -13,6 +13,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
@@ -21,7 +22,7 @@
 #include <sdm/code/code.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 static int cryolocker_store(MooThing *user, MooThing *channel);
 static int cryolocker_revive(MooThing *user, MooThing *channel);
@@ -331,24 +332,24 @@ static int cryolocker_revive(MooThing *user, MooThing *channel)
 	return(0);
 }
 
-int moo_load_channel_actions(MooBuiltinHash *actions)
+int moo_load_channel_actions(MooObjectHash *env)
 {
 	// TODO should this specify various defaults of these actions?
-	actions->set("channel_init", new MooBuiltin(channel_init));
-	actions->set("channel_join", new MooBuiltin(channel_join));
-	actions->set("channel_leave", new MooBuiltin(channel_leave));
-	actions->set("channel_quit", new MooBuiltin(channel_quit));
-	actions->set("channel_say", new MooBuiltin(channel_say));
-	actions->set("channel_emote", new MooBuiltin(channel_emote));
-	actions->set("channel_names", new MooBuiltin(channel_names));
-	actions->set("channel_evaluate", new MooBuiltin(channel_evaluate));
-	actions->set("realm_join", new MooBuiltin(realm_join));
-	actions->set("realm_leave", new MooBuiltin(realm_leave));
-	actions->set("realm_quit", new MooBuiltin(realm_quit));
-	actions->set("realm_say", new MooBuiltin(realm_say));
-	actions->set("realm_emote", new MooBuiltin(realm_emote));
-	actions->set("realm_names", new MooBuiltin(realm_names));
-	actions->set("realm_evaluate", new MooBuiltin(realm_evaluate));
+	env->set("channel_init", new MooCodeFunc(channel_init));
+	env->set("channel_join", new MooCodeFunc(channel_join));
+	env->set("channel_leave", new MooCodeFunc(channel_leave));
+	env->set("channel_quit", new MooCodeFunc(channel_quit));
+	env->set("channel_say", new MooCodeFunc(channel_say));
+	env->set("channel_emote", new MooCodeFunc(channel_emote));
+	env->set("channel_names", new MooCodeFunc(channel_names));
+	env->set("channel_evaluate", new MooCodeFunc(channel_evaluate));
+	env->set("realm_join", new MooCodeFunc(realm_join));
+	env->set("realm_leave", new MooCodeFunc(realm_leave));
+	env->set("realm_quit", new MooCodeFunc(realm_quit));
+	env->set("realm_say", new MooCodeFunc(realm_say));
+	env->set("realm_emote", new MooCodeFunc(realm_emote));
+	env->set("realm_names", new MooCodeFunc(realm_names));
+	env->set("realm_evaluate", new MooCodeFunc(realm_evaluate));
 	return(0);
 }
 

@@ -8,6 +8,7 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
@@ -15,7 +16,7 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 /**
@@ -165,15 +166,15 @@ static int builder_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 
 
-int moo_load_builder_actions(MooBuiltinHash *actions)
+int moo_load_builder_actions(MooObjectHash *env)
 {
-	actions->set("builder_teleport", new MooBuiltin(builder_teleport));
-	actions->set("builder_create", new MooBuiltin(builder_create));
-	actions->set("builder_dig", new MooBuiltin(builder_dig));
-	actions->set("builder_add_exit", new MooBuiltin(builder_add_exit));
-	actions->set("builder_info", new MooBuiltin(builder_info));
-	actions->set("builder_set", new MooBuiltin(builder_set));
-	actions->set("builder_save", new MooBuiltin(builder_save));
+	env->set("builder_teleport", new MooCodeFunc(builder_teleport));
+	env->set("builder_create", new MooCodeFunc(builder_create));
+	env->set("builder_dig", new MooCodeFunc(builder_dig));
+	env->set("builder_add_exit", new MooCodeFunc(builder_add_exit));
+	env->set("builder_info", new MooCodeFunc(builder_info));
+	env->set("builder_set", new MooCodeFunc(builder_set));
+	env->set("builder_save", new MooCodeFunc(builder_save));
 	return(0);
 }
 

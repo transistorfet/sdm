@@ -14,6 +14,8 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 
+#include <sdm/code/code.h>
+
 #include <sdm/things/thing.h>
 #include <sdm/actions/builtin/builtin.h>
 
@@ -27,42 +29,32 @@ MooObjectType moo_builtin_obj_type = {
 	(moo_type_create_t) moo_builtin_create
 };
 
-static MooBuiltinHash *builtin_actions = NULL;
-
-
-extern int moo_load_moocode_actions(MooBuiltinHash *actions);
-extern int moo_load_basic_actions(MooBuiltinHash *actions);
-extern int moo_load_builder_actions(MooBuiltinHash *actions);
-extern int moo_load_channel_actions(MooBuiltinHash *actions);
-extern int moo_load_item_actions(MooBuiltinHash *actions);
-extern int moo_load_mobile_actions(MooBuiltinHash *actions);
-extern int moo_load_room_actions(MooBuiltinHash *actions);
-extern int moo_load_user_actions(MooBuiltinHash *actions);
+extern int moo_load_moocode_actions(MooObjectHash *env);
+extern int moo_load_basic_actions(MooObjectHash *env);
+extern int moo_load_builder_actions(MooObjectHash *env);
+extern int moo_load_channel_actions(MooObjectHash *env);
+extern int moo_load_item_actions(MooObjectHash *env);
+extern int moo_load_mobile_actions(MooObjectHash *env);
+extern int moo_load_room_actions(MooObjectHash *env);
+extern int moo_load_user_actions(MooObjectHash *env);
 
 int init_builtin(void)
 {
-	if (builtin_actions)
-		return(1);
 	moo_object_register_type(&moo_builtin_obj_type);
-	builtin_actions = new MooBuiltinHash(BUILTIN_LIST_SIZE, BUILTIN_LIST_BITS);
 
-	moo_load_moocode_actions(builtin_actions);
-	moo_load_basic_actions(builtin_actions);
-	moo_load_builder_actions(builtin_actions);
-	moo_load_channel_actions(builtin_actions);
-	moo_load_item_actions(builtin_actions);
-	moo_load_mobile_actions(builtin_actions);
-	moo_load_room_actions(builtin_actions);
-	moo_load_user_actions(builtin_actions);
+	moo_load_moocode_actions(global_env);
+	moo_load_basic_actions(global_env);
+	moo_load_builder_actions(global_env);
+	moo_load_channel_actions(global_env);
+	moo_load_item_actions(global_env);
+	moo_load_mobile_actions(global_env);
+	moo_load_room_actions(global_env);
+	moo_load_user_actions(global_env);
 	return(0);
 }
 
 void release_builtin(void)
 {
-	if (!builtin_actions)
-		return;
-	delete builtin_actions;
-	builtin_actions = NULL;
 	moo_object_deregister_type(&moo_builtin_obj_type);
 }
 
@@ -83,7 +75,7 @@ int MooBuiltin::set(const char *name)
 {
 	MooBuiltin *master;
 
-	if (!(master = builtin_actions->get(name)))
+	if (!(master = dynamic_cast<MooBuiltin *>(global_env->get(name))))
 		return(-1);
 	m_master = master;
 	m_func = master->m_func;
@@ -101,7 +93,7 @@ const char *MooBuiltin::params(const char *params)
 
 int MooBuiltin::read_entry(const char *type, MooDataFile *data)
 {
-	if (!strcmp(type, "function")) {
+	if (!strcmp(type, "func")) {
 		char buffer[STRING_SIZE];
 
 		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
@@ -126,9 +118,9 @@ int MooBuiltin::write_data(MooDataFile *data)
 
 	MooObject::write_data(data);
 	// TODO we should do this in a more stable way, since there is a chance it wont be found in the list or master will be NULL
-	if (!(name = builtin_actions->key(m_master)))
+	if (!(name = global_env->key(m_master)))
 		return(-1);
-	data->write_string_entry("function", name);
+	data->write_string_entry("func", name);
 	data->write_string_entry("params", this->params());
 	return(0);
 }

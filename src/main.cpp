@@ -20,7 +20,6 @@
 #include <sdm/tasks/rpc-server.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
-#include <sdm/actions/alias.h>
 #include <sdm/actions/method.h>
 #include <sdm/actions/builtin/builtin.h>
 
@@ -52,10 +51,8 @@ int init_moo(void)
 		//init_telnet();
 		init_irc_pseudoserv();
 
-		init_builtin();
 		init_moo_code();
-
-		moo_object_register_type(&moo_alias_obj_type);
+		init_builtin();
 
 		moo_object_register_type(&moo_float_obj_type);
 		moo_object_register_type(&moo_integer_obj_type);

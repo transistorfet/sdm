@@ -13,14 +13,14 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/args.h>
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/builtin/mud.h>
-#include <sdm/actions/builtin/builtin.h>
+#include <sdm/code/code.h>
 
 
 static int room_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -112,6 +112,7 @@ static int room_do_enter(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *msg;
 	MooThing *cur, *obj;
+	MooObjectArray *contents;
 
 	if (!(obj = args->m_args->get_thing(0)))
 		return(-1);
@@ -121,7 +122,11 @@ static int room_do_enter(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	else
 		msg = "<b><blue>$user.name drops $0.name here.";
 
-	for (cur = args->m_user->location()->contents(); cur; cur = cur->next()) {
+	// TODO these should check for null pointer
+	cur = dynamic_cast<MooThing *>(args->m_user->resolve_property("location"));
+	contents = dynamic_cast<MooObjectArray *>(cur->resolve_property("contents"));
+	for (int i = 0; i <= contents->last(); i++) {
+		cur = dynamic_cast<MooThing *>(contents->get(i));
 		if (cur != args->m_user)
 			cur->notify(TNT_STATUS, args, msg);
 	}
@@ -194,17 +199,24 @@ static int room_do_exit(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-int moo_load_room_actions(MooBuiltinHash *actions)
+static int room_direction(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	actions->set("room_init", new MooBuiltin(room_init));
-	actions->set("room_say", new MooBuiltin(room_say));
-	actions->set("room_emote", new MooBuiltin(room_emote));
-	actions->set("room_whisper", new MooBuiltin(room_whisper));
-	actions->set("room_look", new MooBuiltin(room_look));
-	actions->set("room_go", new MooBuiltin(room_go));
-	actions->set("room_accept", new MooBuiltin(room_accept));
-	actions->set("room_do_enter", new MooBuiltin(room_do_enter));
-	actions->set("room_do_exit", new MooBuiltin(room_do_exit));
+
+	return(0);
+}
+
+int moo_load_room_actions(MooObjectHash *env)
+{
+	env->set("room_init", new MooCodeFunc(room_init));
+	env->set("room_say", new MooCodeFunc(room_say));
+	env->set("room_emote", new MooCodeFunc(room_emote));
+	env->set("room_whisper", new MooCodeFunc(room_whisper));
+	env->set("room_look", new MooCodeFunc(room_look));
+	env->set("room_go", new MooCodeFunc(room_go));
+	env->set("room_accept", new MooCodeFunc(room_accept));
+	env->set("room_do_enter", new MooCodeFunc(room_do_enter));
+	env->set("room_do_exit", new MooCodeFunc(room_do_exit));
+	env->set("room_direction", new MooCodeFunc(room_direction));
 	return(0);
 }
 

@@ -33,8 +33,6 @@ class MooBuiltin : public MooObject {
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
 };
 
-typedef MooHash<MooBuiltin *> MooBuiltinHash;
-
 extern MooObjectType moo_builtin_obj_type;
 
 int init_builtin(void);
