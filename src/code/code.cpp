@@ -22,6 +22,15 @@ MooObjectHash *global_env = NULL;
 
 extern int moo_load_code_basic(MooObjectHash *env);
 
+extern int moo_load_moocode_actions(MooObjectHash *env);
+extern int moo_load_basic_actions(MooObjectHash *env);
+extern int moo_load_builder_actions(MooObjectHash *env);
+extern int moo_load_channel_actions(MooObjectHash *env);
+extern int moo_load_item_actions(MooObjectHash *env);
+extern int moo_load_mobile_actions(MooObjectHash *env);
+extern int moo_load_room_actions(MooObjectHash *env);
+extern int moo_load_user_actions(MooObjectHash *env);
+
 int init_moo_code(void)
 {
 	moo_object_register_type(&moo_code_func_obj_type);
@@ -33,6 +42,16 @@ int init_moo_code(void)
 	global_env = new MooObjectHash();
 	init_code_event();
 	moo_load_code_basic(global_env);
+
+	moo_load_moocode_actions(global_env);
+	moo_load_basic_actions(global_env);
+	moo_load_builder_actions(global_env);
+	moo_load_channel_actions(global_env);
+	moo_load_item_actions(global_env);
+	moo_load_mobile_actions(global_env);
+	moo_load_room_actions(global_env);
+	moo_load_user_actions(global_env);
+
 	return(0);
 }
 

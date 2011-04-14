@@ -21,7 +21,6 @@
 #include <sdm/tasks/irc/pseudoserv.h>
 
 #include <sdm/actions/method.h>
-#include <sdm/actions/builtin/builtin.h>
 
 #include <sdm/objs/float.h>
 #include <sdm/objs/integer.h>
@@ -52,7 +51,6 @@ int init_moo(void)
 		init_irc_pseudoserv();
 
 		init_moo_code();
-		init_builtin();
 
 		moo_object_register_type(&moo_float_obj_type);
 		moo_object_register_type(&moo_integer_obj_type);
@@ -100,7 +98,6 @@ void release_moo(void)
 	release_thing();
 
 	release_moo_code();
-	release_builtin();
 
 	release_array();
 	release_hash();
