@@ -104,7 +104,7 @@ static int room_go(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int room_accept(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooInteger((long int) 1);
 	return(0);
 }
 

@@ -101,11 +101,6 @@ int MooObjectArray::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooObjectArray::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-
-}
-
 int MooObjectArray::to_string(char *buffer, int max)
 {
 
@@ -152,9 +147,9 @@ MooObject *MooObjectArray::access_property(const char *name, MooObject *value)
 	if (value)
 		throw moo_permissions;
 	else if (!strcmp(name, "size"))
-		return(new MooInteger(m_size));
+		return(new MooInteger((long int) m_size));
 	else if (!strcmp(name, "last"))
-		return(new MooInteger(m_last));
+		return(new MooInteger((long int) m_last));
 	// TODO should you throw not-found?
 	return(NULL);
 }
@@ -198,6 +193,41 @@ static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	index = args->m_args->get_integer(0);
 	obj = args->m_args->get(1);
 	args->m_result = m_this->set(index, obj);
+	return(0);
+}
+
+static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int res;
+	MooObject *obj;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	res = m_this->push(obj);
+	args->m_result = new MooInteger((long int) res);
+	return(0);
+}
+
+
+static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 0; i <= m_this->last(); i++) {
+		if (m_this->get(i) == obj)
+			args->m_result = new MooInteger((long int) i);
+	}
+	args->m_result = new MooInteger((long int) -1);
 	return(0);
 }
 
@@ -245,8 +275,11 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 void moo_load_array_methods(MooObjectHash *env)
 {
-	env->set("get", new MooCodeFunc(array_get));
-	env->set("set", new MooCodeFunc(array_set));
-	env->set("foreach", new MooCodeFunc(array_foreach));
+	env->set("get", new MooCodeFunc(array_get, "&all"));
+	env->set("set", new MooCodeFunc(array_set, "&all"));
+	env->set("push", new MooCodeFunc(array_push, "&all"));
+
+	env->set("search", new MooCodeFunc(array_search, "&all"));
+	env->set("foreach", new MooCodeFunc(array_foreach, "&all"));
 }
 

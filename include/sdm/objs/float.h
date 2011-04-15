@@ -21,7 +21,6 @@ class MooFloat : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-	virtual int parse_arg(MooThing *user, MooThing *channel, char *text);
 	virtual int to_string(char *buffer, int max);
 
 	virtual long int get_integer() { return((long int) m_num); }

@@ -94,6 +94,40 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	for (int i = 0; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i)) {
+			args->m_result = new MooInteger((long int) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger((long int) 1);
+	return(0);
+}
+
+static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) != obj) {
+			args->m_result = new MooInteger((long int) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger((long int) 1);
+	return(0);
+}
+/*
+static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) == obj) {
 			args->m_result = new MooInteger((moo_integer_t) 0);
 			return(0);
 		}
@@ -101,6 +135,75 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	args->m_result = new MooInteger(1);
 	return(0);
 }
+
+static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) == obj) {
+			args->m_result = new MooInteger((moo_integer_t) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger(1);
+	return(0);
+}
+
+static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) == obj) {
+			args->m_result = new MooInteger((moo_integer_t) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger(1);
+	return(0);
+}
+
+static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) == obj) {
+			args->m_result = new MooInteger((moo_integer_t) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger(1);
+	return(0);
+}
+
+static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (args->m_args->get(i) == obj) {
+			args->m_result = new MooInteger((moo_integer_t) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooInteger(1);
+	return(0);
+}
+*/
 
 /******************
  * Type Functions *
@@ -211,6 +314,12 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("/", new MooCodeFunc(basic_divide));
 
 	env->set("null", new MooCodeFunc(basic_null));
+	env->set("eqv", new MooCodeFunc(basic_eqv));
+	//env->set("=", new MooCodeFunc(basic_equal));
+	//env->set(">", new MooCodeFunc(basic_gt));
+	//env->set(">=", new MooCodeFunc(basic_ge));
+	//env->set("<", new MooCodeFunc(basic_lt));
+	//env->set("<=", new MooCodeFunc(basic_le));
 
 	env->set("array", new MooCodeFunc(basic_array));
 	env->set("hash", new MooCodeFunc(basic_hash));

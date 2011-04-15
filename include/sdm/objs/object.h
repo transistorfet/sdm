@@ -63,7 +63,6 @@ class MooObject : public MooGC {
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
 	virtual int write_data(MooDataFile *data);
 
-	virtual int parse_arg(MooThing *user, MooThing *channel, char *text) { return(0); }
 	virtual int to_string(char *buffer, int max) { buffer[0] = '\0'; return(0); }
 
 	virtual long int get_integer() { throw MooException("Unable to convert to integer"); }

@@ -64,13 +64,6 @@ int MooString::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooString::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-	MooArgs::parse_word(text);
-	this->set(text);
-	return(m_len);
-}
-
 int MooString::to_string(char *buffer, int max)
 {
 	strncpy(buffer, m_str, max);

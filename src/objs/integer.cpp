@@ -21,14 +21,21 @@ struct MooObjectType moo_integer_obj_type = {
 
 MooObject *moo_integer_create(void)
 {
-	return(new MooInteger((moo_integer_t) 0));
+	return(new MooInteger((long int) 0));
 }
 
 MooInteger::MooInteger(const char *str)
 {
 	char *endptr;
 
-	m_num = strtol(str, &endptr, 0);
+	if (strchr(str, '.')) {
+		m_format = FLOAT;
+		m_float = strtod(str, &endptr);
+	}
+	else {
+		m_format = FLOAT;
+		m_int = strtol(str, &endptr, 0);
+	}
 	if (*endptr != '\0')
 		throw MooException("Invalid integer, %s", str);
 }
@@ -36,7 +43,10 @@ MooInteger::MooInteger(const char *str)
 int MooInteger::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {
-		m_num = data->read_integer_entry();
+		if (m_format == INT)
+			m_int = data->read_integer_entry();
+		else if (m_format == FLOAT)
+			m_float = data->read_float_entry();
 	}
 	else
 		return(MooObject::read_entry(type, data));
@@ -46,20 +56,32 @@ int MooInteger::read_entry(const char *type, MooDataFile *data)
 int MooInteger::write_data(MooDataFile *data)
 {
 	MooObject::write_data(data);
-	data->write_integer_entry("value", m_num);
+	if (m_format == INT)
+		data->write_integer_entry("value", m_int);
+	else if (m_format == FLOAT)
+		data->write_float_entry("value", m_float);
 	return(0);
-}
-
-int MooInteger::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-	char *remain;
-
-	m_num = strtol(text, &remain, 0);
-	return(remain - text);
 }
 
 int MooInteger::to_string(char *buffer, int max)
 {
-	return(snprintf(buffer, max, "%ld", m_num));
+	if (m_format == INT)
+		return(snprintf(buffer, max, "%ld", m_int));
+	else if (m_format == FLOAT)
+		return(snprintf(buffer, max, "%f", m_float));
+	return(0);
 }
+
+void MooInteger::set_format(MooNumberFormatT format)
+{
+	if (format == FLOAT && m_format == INT) {
+		m_format = FLOAT;
+		m_float = (double) m_int;
+	}
+	else if (format == INT && m_format == FLOAT) {
+		m_format = INT;
+		m_int = (long int) m_float;
+	}
+}
+
 

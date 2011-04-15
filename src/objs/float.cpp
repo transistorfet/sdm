@@ -50,14 +50,6 @@ int MooFloat::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooFloat::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-	char *remain;
-
-	m_num = strtof(text, &remain);
-	return(remain - text);
-}
-
 int MooFloat::to_string(char *buffer, int max)
 {
 	return(snprintf(buffer, max, "%f", m_num));

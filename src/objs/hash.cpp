@@ -101,11 +101,6 @@ int MooObjectHash::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooObjectHash::parse_arg(MooThing *user, MooThing *channel, char *text)
-{
-
-}
-
 int MooObjectHash::to_string(char *buffer, int max)
 {
 

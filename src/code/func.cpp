@@ -11,6 +11,7 @@
 
 #include <sdm/code/code.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/args.h>
 
 struct MooObjectType moo_code_func_obj_type = {
 	NULL,
@@ -72,6 +73,7 @@ int MooCodeFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 {
 	if (!m_func)
 		throw MooException("Null function");
+	args->map_args(env, m_params);
 	return(m_func(frame, env, args));
 }
 

@@ -69,9 +69,8 @@
 	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 
-
-	* you could probably replace the whole parse_args bit with a few parameter format options, or it could even be specific to
-	  builtin actions, such that the param checks/parsing all happens during the MooBuiltin::evaluate() function
+	* finish converting MooInteger into MooNumber
+	* add pop, unshift, shift functions to array
 	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
 	  functions intended for internal use be inaccessible from the command line?
 
@@ -88,7 +87,6 @@
 	  the appropriate people in the room (like socials.dat in SMAUG)
 	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
 	* rename everything to do with action to 'method'
-	* replace all builtins with MooCodeFunc possibly, now that the C prototype is identical
 	* fix thing->command() (object/target do_actions are disabled atm)
 	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
 	  directly.  Objects could still have an ID but it just wont be used internally as much.  Actually right now though, the access

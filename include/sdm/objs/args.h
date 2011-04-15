@@ -41,6 +41,7 @@ class MooUser;
 class MooThing;
 class MooAction;
 class MooChannel;
+class MooCodeExpr;
 
 class MooArgs : public MooObject {
     public:
@@ -55,14 +56,12 @@ class MooArgs : public MooObject {
 	virtual ~MooArgs();
 	void init(MooThing *user, MooThing *channel, MooObject *thing = NULL);
 	void set_args(MooObjectArray *&args);
+	int map_args(MooObjectHash *env, MooCodeExpr *params);
 
 	static int find_whitespace(const char *text);
 	static int find_character(const char *text);
 	static const char *parse_word(char *buffer, int max, const char *text);
 	static char *parse_word(char *buffer);
-
-	int parse_args(const char *params, const char *text);
-	const MooObjectType *get_type(char param);
 
 	MooObjectHash *make_env(MooObjectHash *env = NULL);
 

@@ -469,7 +469,7 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 {
 	MooArgs args(2, thing, channel);
 
-	args.m_args->set(0, new MooInteger(type));
+	args.m_args->set(0, new MooInteger((long int) type));
 	args.m_args->set(1, new MooString(text));
 	return(this->call_method(channel, this->resolve_method("notify"), &args));
 }

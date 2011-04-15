@@ -63,13 +63,13 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>(print #55.description)</func>
+    <func><![CDATA[(print #55.description)]]></func>
    </entry>
    <entry type="moolambda" key="print">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func>(print text)</func>
+    <func><![CDATA[(print text)]]></func>
    </entry>
   </methods>
  </thing>
@@ -345,10 +345,10 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func>
+    <func><![CDATA[
 	(this.contents:foreach (lambda (cur)
 		(cur:notify SAY user channel text)))
-    </func>
+    ]]></func>
    </entry>
    <entry type="moofunc" key="whisper">
     <owner>-1</owner>
@@ -434,11 +434,18 @@
     <params></params>
     <func>channel_init</func>
    </entry>
-   <entry type="moofunc" key="join">
+   <entry type="moolambda" key="join">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>channel_join</func>
+    <func><![CDATA[
+	(if (this.users:search user)
+		0		; (return)
+		(block
+			(this.users:push user)
+			(this.users:foreach (lambda (cur)
+				(cur:notify TNT_JOIN user channel "")))))
+    ]]></func>
    </entry>
    <entry type="moofunc" key="leave">
     <owner>-1</owner>

@@ -41,7 +41,7 @@ int MooCodeLambda::read_entry(const char *type, MooDataFile *data)
 	if (!strcmp(type, "func")) {
 		char buffer[STRING_SIZE];
 
-		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+		if (data->read_raw_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
 		m_func = MooCodeParser::parse_code(buffer);
 	}
@@ -64,7 +64,9 @@ int MooCodeLambda::write_data(MooDataFile *data)
 	MooObject::write_data(data);
 	MooCodeParser::generate(m_func, buffer, STRING_SIZE);
 	// TODO should this write a raw_string instead?
-	data->write_string_entry("code", buffer);
+	data->write_begin_entry("code");
+	data->write_raw_string(buffer);
+	data->write_end_entry();
 	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
 	data->write_string_entry("params", buffer);
 	return(0);
@@ -78,18 +80,11 @@ int MooCodeLambda::to_string(char *buffer, int max)
 
 int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
 {
-	int i;
-	MooCodeExpr *cur;
 	MooObjectHash *env;
 
 	env = frame->env();
 	env = new MooObjectHash(env);
-	// TODO should this be here? somewhere else? How is it usually set?
-	env->set("this", args->m_this);
-	for (i = 0, cur = m_params; cur && i < args->m_args->size(); i++, cur = cur->next())
-		env->set(cur->get_identifier(), args->m_args->get(i));
-	if (cur || i <= args->m_args->last())
-		throw moo_args_mismatched;
+	args->map_args(env, m_params);
 	return(frame->push_block(env, m_func, args));
 }
 

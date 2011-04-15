@@ -18,11 +18,9 @@
 #include <sdm/objs/thingref.h>
 #include <sdm/things/user.h>
 #include <sdm/objs/args.h>
+#include <sdm/code/code.h>
 
 #define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )
-
-static char *moo_prepositions[] = { "from", "on", "with", "to", "at", NULL };
-
 
 MooObjectType moo_args_obj_type = {
 	NULL,
@@ -122,95 +120,6 @@ char *MooArgs::parse_word(char *buffer)
 	return(&buffer[i]);
 }
 
-#define MAX_STACK	10
-
-int MooArgs::parse_args(const char *params, const char *text)
-{
-	int i, j = 0, k, sp = 0, ap = 0;
-	MooObject *obj;
-	const MooObjectType *type;
-	char stack[MAX_STACK];
-	char buffer[LARGE_STRING_SIZE];
-
-	strncpy(buffer, text, LARGE_STRING_SIZE);
-
-	stack[sp] = '\0';
-	j += MooArgs::find_character(&buffer[j]);
-	for (i = 0; params[i] != '\0'; i++) {
-		if (params[i] == stack[sp])
-			sp--;
-		else if (params[i] == '[')
-			stack[++sp] = ']';
-		else {
-			if (&buffer[j] == '\0')
-				break;
-			if (params[i] == 's') {
-				obj = new MooString(&buffer[j]);
-				k = ((MooString *) obj)->m_len;
-			}
-			else {
-				if (!(type = MooArgs::get_type(params[i])))
-					throw MooException("Error: Invalid arg type (%d), expected %c", ap, params[i]);
-				if (!(obj = moo_make_object(type)))
-					throw moo_mem_error;
-				k = obj->parse_arg(NULL, NULL, &buffer[j]);
-			}
-			if (!k) {
-				delete obj;
-				if (stack[sp] == ']') {
-					while (params[i] != '\0' && params[i] != stack[sp])
-						i++;
-				}
-				else
-					throw MooException("Error parsing argument (%s)", type->m_name);
-			}
-			else {
-				j += k;
-				m_args->set(ap++, obj);
-				/// Trim any whitespace before next argument
-				k = MooArgs::find_character(&buffer[j]);
-				/// If we didn't find any whitespace then the argument was invalid
-				if (!k && buffer[j] != '\0')
-					throw MooException("Error: Invalid argument (%s)", type->m_name);
-				j += k;
-			}
-		}
-	}
-	for (; params[i] != '\0'; i++) {
-		if (params[i] == stack[sp])
-			sp--;
-		else if (params[i] == '[')
-			stack[++sp] = ']';
-		else if (sp <= 0)
-			throw MooException("Error: Not enough arguments");
-	}
-	if (buffer[j] != '\0')
-		throw MooException("Error: Too many arguments");
-	return(0);
-}
-
-const MooObjectType *MooArgs::get_type(char param)
-{
-	switch (param) {
-	    case 's':
-	    case 'w':
-		return(&moo_string_obj_type);
-	    case 'i':
-		return(&moo_integer_obj_type);
-	    case 'f':
-		return(&moo_float_obj_type);
-	    case 't':
-		return(&moo_thingref_obj_type);
-	    case 'a':
-		return(&moo_array_obj_type);
-	    case 'h':
-		return(&moo_hash_obj_type);
-	    default:
-		return(NULL);
-	}
-}
-
-
 MooObject *MooArgs::access_property(const char *name, MooObject *value)
 {
 	if (!strcmp(name, "args")) {
@@ -235,6 +144,25 @@ MooObject *MooArgs::access_property(const char *name, MooObject *value)
 		return(m_channel);
 	}
 	return(NULL);
+}
+
+int MooArgs::map_args(MooObjectHash *env, MooCodeExpr *params)
+{
+	int i;
+	const char *id;
+	MooCodeExpr *cur;
+
+	env->set("this", m_this);
+	for (i = 0, cur = params; cur && i <= m_args->last(); i++, cur = cur->next()) {
+		id = cur->get_identifier();
+		if (!strcmp(id, "&all"))
+			return(0);
+		else
+			env->set(id, m_args->get(i));
+	}
+	if (cur || i <= m_args->last())
+		throw moo_args_mismatched;
+	return(0);
 }
 
 MooObjectHash *MooArgs::make_env(MooObjectHash *env)

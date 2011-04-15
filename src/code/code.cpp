@@ -41,6 +41,7 @@ int init_moo_code(void)
 		return(1);
 	global_env = new MooObjectHash();
 	init_code_event();
+
 	moo_load_code_basic(global_env);
 
 	moo_load_moocode_actions(global_env);
@@ -51,7 +52,6 @@ int init_moo_code(void)
 	moo_load_mobile_actions(global_env);
 	moo_load_room_actions(global_env);
 	moo_load_user_actions(global_env);
-
 	return(0);
 }
 

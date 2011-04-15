@@ -247,18 +247,6 @@ static int form_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
-/***************************************************
- * Form: (foreach <identifier> <array> <expr> ...) *
- ***************************************************/
-
-static int form_foreach(MooCodeFrame *frame, MooCodeExpr *expr)
-{
-	// TODO you need to make and return a MooCodeLambda class
-	//frame->call(global_env->get("#foreach-func", ...)
-	return(0);
-}
-
-
 int init_code_event(void)
 {
 	if (form_env)
@@ -270,7 +258,6 @@ int init_code_event(void)
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("block", new MooFormT(form_block));
 	form_env->set("lambda", new MooFormT(form_lambda));
-	//form_env->set("foreach", new MooFormT(form_foreach));
 	return(0);
 }
 
