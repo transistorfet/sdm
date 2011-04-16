@@ -8,21 +8,15 @@
 #include <string.h>
 
 #include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/args.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/object.h>
-#include <sdm/objs/thingref.h>
 #include <sdm/code/code.h>
+
+#include <sdm/objs/thingref.h>
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/code/code.h>
 
 static int cryolocker_store(MooThing *user, MooThing *channel);
 static int cryolocker_revive(MooThing *user, MooThing *channel);

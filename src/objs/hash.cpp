@@ -10,15 +10,10 @@
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
-#include <sdm/objs/object.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/thingref.h>
+#include <sdm/code/code.h>
+
 #include <sdm/things/thing.h>
 #include <sdm/hash.h>
-#include <sdm/code/code.h>
-#include <sdm/objs/args.h>
 
 struct MooObjectType moo_hash_obj_type = {
 	NULL,

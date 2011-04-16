@@ -8,19 +8,14 @@
 #include <string.h>
 
 #include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/args.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/object.h>
+#include <sdm/code/code.h>
+
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/code/code.h>
 
 
 static int room_init(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -104,7 +99,7 @@ static int room_go(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int room_accept(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	args->m_result = new MooInteger((long int) 1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 

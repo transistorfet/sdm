@@ -8,22 +8,16 @@
 #include <string.h>
 
 #include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/array.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/args.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/object.h>
+#include <sdm/code/code.h>
+
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
-#include <sdm/code/code.h>
 
 // TODO what will the generic function prototype be?  How will parameters be passed?
 // TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
@@ -94,11 +88,11 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	for (int i = 0; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i)) {
-			args->m_result = new MooInteger((long int) 0);
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger((long int) 1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 
@@ -111,31 +105,55 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 1; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i) != obj) {
-			args->m_result = new MooInteger((long int) 0);
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger((long int) 1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
-/*
+
 static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
+	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	obj = args->m_args->get(0);
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("Expected number at arg 0");
 	for (int i = 1; i < args->m_args->last(); i++) {
-		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooInteger((moo_integer_t) 0);
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("Expected number at arg %d", i);
+		if (!num1->equals(num2)) {
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 
+static int basic_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooNumber *num1, *num2;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("Expected number at arg 0");
+	for (int i = 1; i < args->m_args->last(); i++) {
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("Expected number at arg %d", i);
+		if (num1->equals(num2)) {
+			args->m_result = new MooNumber((long int) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooNumber((long int) 1);
+	return(0);
+}
+
+/*
 static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
@@ -145,11 +163,11 @@ static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 1; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooInteger((moo_integer_t) 0);
+			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooNumber(1);
 	return(0);
 }
 
@@ -162,11 +180,11 @@ static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 1; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooInteger((moo_integer_t) 0);
+			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooNumber(1);
 	return(0);
 }
 
@@ -179,11 +197,11 @@ static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 1; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooInteger((moo_integer_t) 0);
+			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooNumber(1);
 	return(0);
 }
 
@@ -196,11 +214,11 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 1; i < args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooInteger((moo_integer_t) 0);
+			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooInteger(1);
+	args->m_result = new MooNumber(1);
 	return(0);
 }
 */
@@ -315,7 +333,8 @@ int moo_load_code_basic(MooObjectHash *env)
 
 	env->set("null", new MooCodeFunc(basic_null));
 	env->set("eqv", new MooCodeFunc(basic_eqv));
-	//env->set("=", new MooCodeFunc(basic_equal));
+	env->set("=", new MooCodeFunc(basic_equal));
+	env->set("!=", new MooCodeFunc(basic_not_equal));
 	//env->set(">", new MooCodeFunc(basic_gt));
 	//env->set(">=", new MooCodeFunc(basic_ge));
 	//env->set("<", new MooCodeFunc(basic_lt));

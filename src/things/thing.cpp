@@ -17,8 +17,7 @@
 
 #include <sdm/objs/object.h>
 #include <sdm/objs/args.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
+#include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
@@ -469,7 +468,7 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 {
 	MooArgs args(2, thing, channel);
 
-	args.m_args->set(0, new MooInteger((long int) type));
+	args.m_args->set(0, new MooNumber((long int) type));
 	args.m_args->set(1, new MooString(text));
 	return(this->call_method(channel, this->resolve_method("notify"), &args));
 }

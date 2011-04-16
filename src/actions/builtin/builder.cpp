@@ -4,20 +4,16 @@
  */
 
 #include <sdm/misc.h>
-#include <sdm/hash.h>
+#include <sdm/data.h>
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 
-#include <sdm/objs/args.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/object.h>
-#include <sdm/things/user.h>
-#include <sdm/things/thing.h>
-#include <sdm/things/world.h>
 #include <sdm/code/code.h>
 
+#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
+
+#include <sdm/things/world.h>
 
 /**
 

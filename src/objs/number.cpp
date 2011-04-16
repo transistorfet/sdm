@@ -1,6 +1,6 @@
 /*
- * Object Name:	integer.cpp
- * Description:	Integer Object
+ * Object Name:	number.cpp
+ * Description:	Number Object
  */
 
 #include <stdio.h>
@@ -10,21 +10,21 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
-#include <sdm/objs/integer.h>
+#include <sdm/objs/number.h>
 
-struct MooObjectType moo_integer_obj_type = {
+struct MooObjectType moo_number_obj_type = {
 	NULL,
-	"integer",
-	typeid(MooInteger).name(),
-	(moo_type_create_t) moo_integer_create
+	"number",
+	typeid(MooNumber).name(),
+	(moo_type_create_t) moo_number_create
 };
 
-MooObject *moo_integer_create(void)
+MooObject *moo_number_create(void)
 {
-	return(new MooInteger((long int) 0));
+	return(new MooNumber((long int) 0));
 }
 
-MooInteger::MooInteger(const char *str)
+MooNumber::MooNumber(const char *str)
 {
 	char *endptr;
 
@@ -37,10 +37,10 @@ MooInteger::MooInteger(const char *str)
 		m_int = strtol(str, &endptr, 0);
 	}
 	if (*endptr != '\0')
-		throw MooException("Invalid integer, %s", str);
+		throw MooException("Invalid number, %s", str);
 }
 
-int MooInteger::read_entry(const char *type, MooDataFile *data)
+int MooNumber::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {
 		if (m_format == INT)
@@ -53,7 +53,7 @@ int MooInteger::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooInteger::write_data(MooDataFile *data)
+int MooNumber::write_data(MooDataFile *data)
 {
 	MooObject::write_data(data);
 	if (m_format == INT)
@@ -63,7 +63,7 @@ int MooInteger::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooInteger::to_string(char *buffer, int max)
+int MooNumber::to_string(char *buffer, int max)
 {
 	if (m_format == INT)
 		return(snprintf(buffer, max, "%ld", m_int));
@@ -72,7 +72,7 @@ int MooInteger::to_string(char *buffer, int max)
 	return(0);
 }
 
-void MooInteger::set_format(MooNumberFormatT format)
+void MooNumber::set_format(MooNumberFormatT format)
 {
 	if (format == FLOAT && m_format == INT) {
 		m_format = FLOAT;

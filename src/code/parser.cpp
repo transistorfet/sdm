@@ -13,9 +13,8 @@
 #include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/float.h>
+#include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/integer.h>
 
 #include <sdm/things/thing.h>
 #include <sdm/code/code.h>
@@ -79,10 +78,7 @@ MooCodeExpr *MooCodeParser::parse_token()
 		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString(m_token)));
 	    case TT_WORD: {
 		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1]))) {
-			if (strchr(m_token, '.'))
-				return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooFloat(m_token)));
-			else
-				return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooInteger(m_token)));
+			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooNumber(m_token)));
 		}
 		else
 			return(new MooCodeExpr(m_line, m_col, MCT_IDENTIFIER, new MooString(m_token)));

@@ -10,16 +10,10 @@
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
-#include <sdm/objs/object.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/thingref.h>
-#include <sdm/things/thing.h>
-#include <sdm/hash.h>
-#include <sdm/array.h>
 #include <sdm/code/code.h>
-#include <sdm/objs/args.h>
+
+#include <sdm/things/thing.h>
+#include <sdm/array.h>
 
 struct MooObjectType moo_array_obj_type = {
 	NULL,
@@ -147,9 +141,9 @@ MooObject *MooObjectArray::access_property(const char *name, MooObject *value)
 	if (value)
 		throw moo_permissions;
 	else if (!strcmp(name, "size"))
-		return(new MooInteger((long int) m_size));
+		return(new MooNumber((long int) m_size));
 	else if (!strcmp(name, "last"))
-		return(new MooInteger((long int) m_last));
+		return(new MooNumber((long int) m_last));
 	// TODO should you throw not-found?
 	return(NULL);
 }
@@ -208,7 +202,7 @@ static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
 	res = m_this->push(obj);
-	args->m_result = new MooInteger((long int) res);
+	args->m_result = new MooNumber((long int) res);
 	return(0);
 }
 
@@ -225,9 +219,9 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj = args->m_args->get(0);
 	for (int i = 0; i <= m_this->last(); i++) {
 		if (m_this->get(i) == obj)
-			args->m_result = new MooInteger((long int) i);
+			args->m_result = new MooNumber((long int) i);
 	}
-	args->m_result = new MooInteger((long int) -1);
+	args->m_result = new MooNumber((long int) -1);
 	return(0);
 }
 

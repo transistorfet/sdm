@@ -439,8 +439,7 @@
     <permissions>075</permissions>
     <params></params>
     <func><![CDATA[
-	(if (this.users:search user)
-		0		; (return)
+	(if (!= (this.users:search user) -1)
 		(block
 			(this.users:push user)
 			(this.users:foreach (lambda (cur)

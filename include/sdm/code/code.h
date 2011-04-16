@@ -6,8 +6,15 @@
 #ifndef _SDM_CODE_CODE_H
 #define _SDM_CODE_CODE_H
 
-#include <sdm/hash.h>
 #include <sdm/globals.h>
+
+#include <sdm/objs/object.h>
+
+#include <sdm/hash.h>
+#include <sdm/array.h>
+#include <sdm/objs/args.h>
+#include <sdm/objs/number.h>
+#include <sdm/objs/string.h>
 
 #include <sdm/code/func.h>
 #include <sdm/code/expr.h>

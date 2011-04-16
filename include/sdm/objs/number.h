@@ -1,10 +1,10 @@
 /*
- * Object Name:	integer.h
- * Description:	Integer Object
+ * Object Name:	number.h
+ * Description:	Number Object
  */
 
-#ifndef _SDM_OBJS_INTEGER_H
-#define _SDM_OBJS_INTEGER_H
+#ifndef _SDM_OBJS_NUMBER_H
+#define _SDM_OBJS_NUMBER_H
 
 #include <stdarg.h>
 
@@ -15,7 +15,7 @@ typedef enum {
 	FLOAT
 } MooNumberFormatT;
 
-class MooInteger : public MooObject {
+class MooNumber : public MooObject {
     public:
 	MooNumberFormatT m_format;
 	union {
@@ -23,9 +23,9 @@ class MooInteger : public MooObject {
 		double m_float;
 	};
 
-	MooInteger(long int num = 0) { m_format = INT; m_int = num; }
-	MooInteger(double num) { m_format = FLOAT; m_float = num; }
-	MooInteger(const char *str);
+	MooNumber(long int num = 0) { m_format = INT; m_int = num; }
+	MooNumber(double num) { m_format = FLOAT; m_float = num; }
+	MooNumber(const char *str);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -35,11 +35,16 @@ class MooInteger : public MooObject {
 	virtual double get_float() { if (m_format == INT) return((double) m_int); else if (m_format == FLOAT) return(m_float); else return(0); }
 
 	void set_format(MooNumberFormatT format);
+
+	inline int equals(MooNumber *num) {
+		// TODO I think this is wrong but the alternative is complicated so I should look into a better solution
+		return( this->get_float() == num->get_float() );
+	}
 };
 
-extern MooObjectType moo_integer_obj_type;
+extern MooObjectType moo_number_obj_type;
 
-MooObject *moo_integer_create(void);
+MooObject *moo_number_create(void);
 
 #endif
 

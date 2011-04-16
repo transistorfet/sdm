@@ -6,25 +6,22 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <sdm/objs/object.h>
+#include <sdm/misc.h>
+#include <sdm/colours.h>
+#include <sdm/globals.h>
+
+#include <sdm/code/code.h>
+
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/task.h>
 #include <sdm/tasks/irc/msg.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/channel.h>
 #include <sdm/things/world.h>
-
-#include <sdm/misc.h>
-#include <sdm/colours.h>
-#include <sdm/globals.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
 	&moo_task_obj_type,

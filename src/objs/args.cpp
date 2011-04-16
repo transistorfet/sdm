@@ -11,14 +11,9 @@
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
-#include <sdm/objs/object.h>
-#include <sdm/objs/float.h>
-#include <sdm/objs/integer.h>
-#include <sdm/objs/string.h>
-#include <sdm/objs/thingref.h>
-#include <sdm/things/user.h>
-#include <sdm/objs/args.h>
 #include <sdm/code/code.h>
+
+#include <sdm/things/user.h>
 
 #define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )
 
