@@ -22,7 +22,6 @@ MooObjectHash *global_env = NULL;
 
 extern int moo_load_code_basic(MooObjectHash *env);
 
-extern int moo_load_moocode_actions(MooObjectHash *env);
 extern int moo_load_basic_actions(MooObjectHash *env);
 extern int moo_load_builder_actions(MooObjectHash *env);
 extern int moo_load_channel_actions(MooObjectHash *env);
@@ -44,7 +43,6 @@ int init_moo_code(void)
 
 	moo_load_code_basic(global_env);
 
-	moo_load_moocode_actions(global_env);
 	moo_load_basic_actions(global_env);
 	moo_load_builder_actions(global_env);
 	moo_load_channel_actions(global_env);

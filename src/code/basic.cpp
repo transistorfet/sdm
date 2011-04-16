@@ -253,6 +253,11 @@ static int basic_hash(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
  * System Functions *
  ********************/
 
+static int basic_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	return(frame->push_code(args->m_args->get_string(0), args));
+}
+
 static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
@@ -290,39 +295,8 @@ static int basic_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 
 
-/*
-
-(set thing:title (lambda ()
-	(if (null this.title)
-		this.title
-		(if (null this.name)
-			this.name
-			"object")))))
-
-
-; This is an action with a helper function inside of it.  This should be made to work somehow so that complex actions can use
-; localized helper functions without poluting other namespaces.  Also, moocode actions should be able to parse the args into
-; variables in the env based an a param list, just like lambda does.
-; TODO we still need to figure out how command lines should be parsed into moocode actions...  Where will the parsing take place
-;	and based on what information (like from <params></params>)
-(action (x)
-	(set fac (lambda (n)
-		(if (= n 0)
-			1
-			(* n (fac (- n 1)))))
-	(print "The factorial of " x " is " (fac x)))
-
-*/
-
 int moo_load_code_basic(MooObjectHash *env)
 {
-	// TODO this should be an actual callable function, something that the core executor can use to call the function
-	// TODO right now, it's just a MooCodeExpr, but we should maybe add parameters? or actually... we could have the
-	//	first expression to be a (lambda (x y) ...) type function (ie. it calls a primative, "lambda", which takes
-	//	a specially parsed name list, creates a new environment, adds values (where does it get them from???) to
-	//	the environment by name, and then pushes a new event on the stack to evaluate a sub-expr using the created
-	//	environment (and then the env relies on garbage collection to be freed)
-
 	env->set("print", new MooCodeFunc(basic_print));
 	env->set("format", new MooCodeFunc(basic_format));
 
@@ -343,7 +317,8 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("array", new MooCodeFunc(basic_array));
 	env->set("hash", new MooCodeFunc(basic_hash));
 
-	env->set("load", new MooCodeFunc(basic_load));
+	env->set("@eval", new MooCodeFunc(basic_eval));
+	env->set("@load", new MooCodeFunc(basic_load));
 	env->set("@clone", new MooCodeFunc(basic_clone));
 	return(0);
 }

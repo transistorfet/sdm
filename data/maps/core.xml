@@ -60,7 +60,7 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
-    <func>moocode_eval</func>
+    <func>@eval</func>
    </entry>
    <entry type="moolambda" key="print_hi">
     <owner>-1</owner>

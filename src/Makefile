@@ -20,7 +20,6 @@ OBJS =	colours.o	\
 	actions/builtin/channel.o	\
 	actions/builtin/item.o	\
 	actions/builtin/mobile.o	\
-	actions/builtin/moocode.o	\
 	actions/builtin/room.o	\
 	actions/builtin/user.o	\
 	code/basic.o	\
@@ -182,20 +181,6 @@ actions/builtin/item.o: actions/builtin/item.cpp ../include/sdm/misc.h \
   ../include/sdm/things/references.h
 
 actions/builtin/mobile.o: actions/builtin/mobile.cpp \
-  ../include/sdm/misc.h ../include/sdm/data.h ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/memory.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/hash.h ../include/sdm/array.h \
-  ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/code/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h ../include/sdm/things/user.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/things/thing.h ../include/sdm/tree.h \
-  ../include/sdm/things/references.h
-
-actions/builtin/moocode.o: actions/builtin/moocode.cpp \
   ../include/sdm/misc.h ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/memory.h \
   ../include/sdm/code/code.h ../include/sdm/objs/object.h \

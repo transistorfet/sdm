@@ -84,7 +84,7 @@ int MooCodeLambda::map_args(MooObjectHash *env, MooArgs *args)
 	const char *id;
 	MooCodeExpr *cur;
 
-	env->set("this", arg->m_this);
+	env->set("this", args->m_this);
 	for (i = 0, cur = m_params; cur && i <= args->m_args->last(); i++, cur = cur->next()) {
 		id = cur->get_identifier();
 		if (!strcmp(id, "&all"))
