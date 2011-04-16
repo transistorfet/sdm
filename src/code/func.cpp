@@ -73,7 +73,9 @@ int MooCodeFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 {
 	if (!m_func)
 		throw MooException("Null function");
-	args->map_args(env, m_params);
+	// TODO this messes everything up because we don't have a new env here, so old values like 'this' are overwritten
+	//	We don't even use it because we give &all as the parameters
+	//args->map_args(env, m_params);
 	return(m_func(frame, env, args));
 }
 

@@ -230,8 +230,7 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int form_block(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	frame->set_return(MOO_INCREF(expr));
-	return(0);
+	return(frame->push_block(frame->env(), expr, NULL));
 }
 
 /**************************************************

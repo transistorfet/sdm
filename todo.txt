@@ -68,26 +68,23 @@
 	  and you could even contemplate a "relocatable" format, such that it automatically adjusts all IDs (like all thing refs could
 	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
+	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
-	* finish converting MooInteger into MooNumber
-	* add pop, unshift, shift functions to array
-	* should actions that are called internally have a special name designator (either from code or from the command line).  Should
-	  functions intended for internal use be inaccessible from the command line?
-
+	* convert notify(args) to be notify(env) or something else instead
+	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
+	  the appropriate people in the room (like socials.dat in SMAUG)
 	* go through all throw/catch/exceptions and make sure they make sense.  Make sure all throws end up in an appropriate place to
 	  be handled (such as frame->run()) and make sure errors are sent as notices/status/whatever to the current user
 	* should frame->run() throw the error and have the call_method, which calls run(), send the notification?
+	* fix realm_evaluate (object/target do_actions are disabled atm)
+	* consolidate/move the moo_global_table from thing into the code's global table?
+	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
+	  cascade a line/col backwards into the event during execution.
 
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will
 	  make /core/thing notation no longer work, but we can work around that
-	* convert notify() that takes args to take env or something else instead
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
-	  the appropriate people in the room (like socials.dat in SMAUG)
-	* can you get rid of parse_args()??  Perhaps integrate parts of the interpreter into various other bits
-	* rename everything to do with action to 'method'
-	* fix thing->command() (object/target do_actions are disabled atm)
 	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
 	  directly.  Objects could still have an ID but it just wont be used internally as much.  Actually right now though, the access
 	  and get_thing() virtual functions make it seem identical to a MooThing.  You just can't dynamic_cast it to a MooThing
@@ -99,21 +96,15 @@
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
 	* can you convert init/release functions to be constructor/destructor of a singleton class?
-
-	* should the NULL passed to evaluate() in some cases be changed? (only in MooThing::do_action)
 	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
-	* consolidate/move the moo_global_table from thing into the code's global table?
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
-	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
 	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
 	  notifies to that user
-	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
-	  cascade a line/col backwards into the event during execution.
 
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
 	* add permissions checking functions of some kind to all applicable locations

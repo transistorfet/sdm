@@ -30,6 +30,44 @@ static int user_passwd(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int type;
+	MooObject *obj;
+	MooUser *thing;
+	const char *name;
+	MooThing *user, *channel;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(thing = dynamic_cast<MooUser *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 3)
+		throw moo_args_mismatched;
+	// TODO this is temporary until you get notify refactored
+	name = args->m_args->get_string(0);
+	user = args->m_args->get_thing(1);
+	channel = args->m_args->get_thing(2);
+	if (!(obj = args->m_args->get(3)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	if (!strcmp(name, "status"))
+		type = TNT_STATUS;
+	else if (!strcmp(name, "join"))
+		type = TNT_JOIN;
+	else if (!strcmp(name, "leave"))
+		type = TNT_LEAVE;
+	else if (!strcmp(name, "say"))
+		type = TNT_SAY;
+	else if (!strcmp(name, "emote"))
+		type = TNT_EMOTE;
+	else if (!strcmp(name, "quit"))
+		type = TNT_QUIT;
+	else
+		throw MooException("arg 0: Invalid notify() type");
+	thing->notify(type, user, channel, buffer);
+	return(0);
+}
+
 static int user_inventory(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 /*
@@ -55,6 +93,7 @@ int moo_load_user_actions(MooObjectHash *env)
 {
 	env->set("user_init", new MooCodeFunc(user_init));
 	env->set("user_passwd", new MooCodeFunc(user_passwd));
+	env->set("user_notify", new MooCodeFunc(user_notify));
 	env->set("user_inventory", new MooCodeFunc(user_inventory));
 	return(0);
 }

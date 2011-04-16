@@ -152,6 +152,12 @@
     <params></params>
     <func>user_passwd</func>
    </entry>
+   <entry type="moofunc" key="notify">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params><![CDATA[&all]]></params>
+    <func>user_notify</func>
+   </entry>
    <entry type="moofunc" key="inv">
     <owner>-1</owner>
     <permissions>075</permissions>
@@ -347,7 +353,7 @@
     <params>text</params>
     <func><![CDATA[
 	(this.contents:foreach (lambda (cur)
-		(cur:notify SAY user channel text)))
+		(cur:notify 'say' user channel text)))
     ]]></func>
    </entry>
    <entry type="moofunc" key="whisper">
@@ -443,7 +449,7 @@
 		(block
 			(this.users:push user)
 			(this.users:foreach (lambda (cur)
-				(cur:notify TNT_JOIN user channel "")))))
+				(cur:notify 'join' user channel "")))))
     ]]></func>
    </entry>
    <entry type="moofunc" key="leave">

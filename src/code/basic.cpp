@@ -326,15 +326,15 @@ int moo_load_code_basic(MooObjectHash *env)
 
 	env->set("print", new MooCodeFunc(basic_print));
 
-	env->set("+", new MooCodeFunc(basic_add));
-	env->set("-", new MooCodeFunc(basic_subtract));
-	env->set("*", new MooCodeFunc(basic_multiply));
-	env->set("/", new MooCodeFunc(basic_divide));
+	env->set("+", new MooCodeFunc(basic_add, "&all"));
+	env->set("-", new MooCodeFunc(basic_subtract, "&all"));
+	env->set("*", new MooCodeFunc(basic_multiply, "&all"));
+	env->set("/", new MooCodeFunc(basic_divide, "&all"));
 
-	env->set("null", new MooCodeFunc(basic_null));
-	env->set("eqv", new MooCodeFunc(basic_eqv));
-	env->set("=", new MooCodeFunc(basic_equal));
-	env->set("!=", new MooCodeFunc(basic_not_equal));
+	env->set("null", new MooCodeFunc(basic_null, "&all"));
+	env->set("eqv", new MooCodeFunc(basic_eqv, "&all"));
+	env->set("=", new MooCodeFunc(basic_equal, "&all"));
+	env->set("!=", new MooCodeFunc(basic_not_equal, "&all"));
 	//env->set(">", new MooCodeFunc(basic_gt));
 	//env->set(">=", new MooCodeFunc(basic_ge));
 	//env->set("<", new MooCodeFunc(basic_lt));
