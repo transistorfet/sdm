@@ -86,11 +86,11 @@ int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs
 
 const char *MooCodeExpr::get_identifier()
 {
-	const char *str;
+	MooString *str;
 
-	if (m_type != MCT_IDENTIFIER || !(str = m_value->get_string()))
+	if (m_type != MCT_IDENTIFIER || !(str = dynamic_cast<MooString *>(m_value)))
 		throw MooException("(%s, %s) Expected identifier", m_line, m_col);
-	return(str);
+	return(str->m_str);
 }
 
 MooCodeExpr *MooCodeExpr::get_call()

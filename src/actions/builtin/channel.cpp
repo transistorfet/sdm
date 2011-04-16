@@ -258,6 +258,8 @@ static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 
 	text = MooArgs::parse_word(buffer, STRING_SIZE, text);
 	action = buffer;
+	if (text[0] == '\0')
+		text = NULL;
 
 	if ((res = args->m_user->call_method(args->m_channel, action, text)) != MOO_ACTION_NOT_FOUND)
 		return(res);
@@ -275,7 +277,7 @@ static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 		}
 		thing = ref->get();
 		if (thing && (res = thing->call_method(args->m_channel, action, text)) != MOO_ACTION_NOT_FOUND)
-			throw MooException("Action not found: %s", action);
+			throw MooException("You can't do that: %s", action);
 	}
 	catch (...) { }
 	// TODO should this be MOO_DECREF?

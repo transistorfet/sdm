@@ -43,10 +43,19 @@ MooNumber::MooNumber(const char *str)
 int MooNumber::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {
-		if (m_format == INT)
+		char buffer[STRING_SIZE];
+
+		data->read_attrib_string("format", buffer, STRING_SIZE);
+		if (!strcmp(buffer, "int")) {
+			m_format = INT;
 			m_int = data->read_integer_entry();
-		else if (m_format == FLOAT)
+		}
+		else if (!strcmp(buffer, "float")) {
+			m_format = FLOAT;
 			m_float = data->read_float_entry();
+		}
+		else
+			throw MooException("Invalid number format type");
 	}
 	else
 		return(MooObject::read_entry(type, data));

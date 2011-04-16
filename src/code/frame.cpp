@@ -115,8 +115,10 @@ int MooCodeFrame::push_code(const char *code, MooArgs *args)
 int MooCodeFrame::run(int level)
 {
 	int res;
+	MooObjectHash *base;
 	MooCodeEvent *event;
 
+	base = m_env;
 	m_exception = MooException("");
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
@@ -132,6 +134,7 @@ int MooCodeFrame::run(int level)
 		catch (MooException e) {
 			int line, col;
 
+			this->env(base);
 			if (e.severity() == E_FATAL)
 				throw e;
 			m_stack->push(event);
@@ -139,25 +142,18 @@ int MooCodeFrame::run(int level)
 				m_exception = MooException(e.severity(), "(%d, %d): %s", line, col, e.get());
 			else
 				m_exception = e;
-
-			moo_status("CODE: %s", m_exception.get());
-
-			// TODO maybe you can move this entirely out into whatever function calls this function
-			MooThing *user = MooThing::lookup(MooTask::current_user());
-			if (user)
-				// TODO send this to the current channel if possible
-				user->notify(TNT_STATUS, NULL, NULL, m_exception.get());
-			return(-1);
+			throw m_exception;
 		}
 		catch (...) {
+			this->env(base);
 			m_exception = MooException("Unknown error occurred");
-			moo_status("CODE: %s", m_exception.get());
-			return(-1);
+			throw m_exception;
 		}
 		delete event;
 		if (res < 0)
 			return(res);
 	}
+	this->env(base);
 	return(0);
 }
 
@@ -200,5 +196,15 @@ int MooCodeFrame::linecol(int &line, int &col)
 			return(1);
 	}
 	return(0);
+}
+
+void MooCodeFrame::print_stack()
+{
+	MooCodeEvent *event;
+
+	for (int i = m_stack->last(); i >= 0; i--) {
+		event = m_stack->get(i);
+		moo_status("DEBUG: %s", typeid(*event).name());
+	}
 }
 

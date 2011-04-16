@@ -19,19 +19,12 @@
 #include <sdm/things/world.h>
 
 
-// TODO what will the generic function prototype be?  How will parameters be passed?
-// TODO we could do parameters in a lispy way of adding them to the environment by name, and that would all jsut
-//	have to be parsed out (the parameter names and that).
-
 /**************************
  * Input/Output Functions *
  **************************/
 
 static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	// TODO get_string causes a type error when printing a number, which isn't caught until way up the line (at the nearest
-	//	action call, I guess).  This is potentially a very big problem, and doesn't allow for moocode handling of exceptions.
-	//args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
 	MooObject *obj;
 	char buffer[LARGE_STRING_SIZE];
 
@@ -41,6 +34,19 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	args->m_user->notify(TNT_STATUS, args, buffer);
+	return(0);
+}
+
+static int basic_format(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	const char *str;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	str = args->m_args->get_string(0);
+	MooObject::format(buffer, LARGE_STRING_SIZE, env, str);
+	args->m_result = new MooString(buffer);
 	return(0);
 }
 
@@ -252,6 +258,8 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObject *obj;
 	char buffer[LARGE_STRING_SIZE];
 
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
 	if (!(obj = args->m_args->get(0)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
@@ -260,32 +268,23 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(frame->push_code(buffer, args));
 }
 
-static int basic_create(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
 	MooThing *thing, *parent;
-	char buffer[LARGE_STRING_SIZE];
 
-	// TODO This should probably be a thing/thingref instead of a string
-	if (!(obj = args->m_args->get(0)))
+	if (args->m_args->last() < 0 || args->m_args->last() > 1)
+		throw moo_args_mismatched;
+	if (!(parent = args->m_args->get_thing(0)))
 		return(-1);
-	obj->to_string(buffer, LARGE_STRING_SIZE);
-	// TODO set parent
 
 	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
 		throw MooException("Error creating new thing from %d", parent->id());
+	// TODO clone all properties from parent
+	// TODO call thing:init ??
 
-	if ((obj = args->m_args->get(1))) {
-		try {
-			//obj->evaluate()
-			//(obj:init ...)
-		}
-		catch (MooException e) {
-			// TODO how do you destroy a thing
-			//thing->recycle();
-			throw e;
-		}
-	}
+	if ((obj = args->m_args->get(1)))
+		frame->push_call(env, obj, new MooArgs());
 	args->m_result = thing;
 	return(0);
 }
@@ -325,6 +324,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	//	environment (and then the env relies on garbage collection to be freed)
 
 	env->set("print", new MooCodeFunc(basic_print));
+	env->set("format", new MooCodeFunc(basic_format));
 
 	env->set("+", new MooCodeFunc(basic_add, "&all"));
 	env->set("-", new MooCodeFunc(basic_subtract, "&all"));
@@ -344,7 +344,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("hash", new MooCodeFunc(basic_hash));
 
 	env->set("load", new MooCodeFunc(basic_load));
-	env->set("@create", new MooCodeFunc(basic_create));
+	env->set("@clone", new MooCodeFunc(basic_clone));
 	return(0);
 }
 

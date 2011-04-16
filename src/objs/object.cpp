@@ -354,9 +354,22 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 	MooCodeFrame *frame;
 
 	frame = new MooCodeFrame(env);
+	// TODO is this no longer needed here (should be done in MooMethod do_evaluate)
 	args->m_this = this;
-	frame->push_call(frame->env(), func, args);
-	res = frame->run(0);
+	try {
+		frame->push_call(frame->env(), func, args);
+		res = frame->run(0);
+	}
+	catch (MooException e) {
+		moo_status("CODE: %s", e.get());
+
+		MooThing *user = MooThing::lookup(MooTask::current_user());
+		if (user)
+			// TODO send this to the current channel if possible
+			user->notify(TNT_STATUS, NULL, NULL, e.get());
+		frame->print_stack();
+		res = -1;
+	}
 	MOO_DECREF(frame);
 	return(res);
 }

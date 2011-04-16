@@ -70,16 +70,14 @@
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
-	* convert notify(args) to be notify(env) or something else instead
-	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
-	  the appropriate people in the room (like socials.dat in SMAUG)
-	* go through all throw/catch/exceptions and make sure they make sense.  Make sure all throws end up in an appropriate place to
-	  be handled (such as frame->run()) and make sure errors are sent as notices/status/whatever to the current user
-	* should frame->run() throw the error and have the call_method, which calls run(), send the notification?
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* consolidate/move the moo_global_table from thing into the code's global table?
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
 	  cascade a line/col backwards into the event during execution.
+	* move everything out of actions/
+	* convert notify(args) to be notify(env) or something else instead
+	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
+	  the appropriate people in the room (like socials.dat in SMAUG)
 
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will

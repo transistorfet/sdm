@@ -211,10 +211,25 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	const char *name;
+	MooObjectHash *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	name = args->m_args->get_string(0);
+	m_this->remove(name);
+	return(0);
+}
+
 void moo_load_hash_methods(MooObjectHash *env)
 {
 	env->set("get", new MooCodeFunc(hash_get));
 	env->set("set", new MooCodeFunc(hash_set));
+	env->set("remove", new MooCodeFunc(hash_remove));
 }
 
 

@@ -141,25 +141,6 @@ MooObject *MooArgs::access_property(const char *name, MooObject *value)
 	return(NULL);
 }
 
-int MooArgs::map_args(MooObjectHash *env, MooCodeExpr *params)
-{
-	int i;
-	const char *id;
-	MooCodeExpr *cur;
-
-	env->set("this", m_this);
-	for (i = 0, cur = params; cur && i <= m_args->last(); i++, cur = cur->next()) {
-		id = cur->get_identifier();
-		if (!strcmp(id, "&all"))
-			return(0);
-		else
-			env->set(id, m_args->get(i));
-	}
-	if (cur || i <= m_args->last())
-		throw moo_args_mismatched;
-	return(0);
-}
-
 MooObjectHash *MooArgs::make_env(MooObjectHash *env)
 {
 	if (!env)

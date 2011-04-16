@@ -42,6 +42,7 @@ class MooCodeFrame : public MooObject {
 	void env(MooObjectHash *env);
 
 	int linecol(int &line, int &col);
+	void print_stack();
 };
 
 extern MooObjectType moo_code_frame_obj_type;

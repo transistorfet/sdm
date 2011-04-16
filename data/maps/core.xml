@@ -41,11 +41,14 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="look_self">
+   <entry type="moolambda" key="look_self">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>basics_look_self</func>
+    <func><![CDATA[
+	(user:notify 'status' nil channel (format "<yellow>$this.title"))
+	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
+    ]]></func>
    </entry>
    <entry type="moofunc" key="print_view">
     <owner>-1</owner>

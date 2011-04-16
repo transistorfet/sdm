@@ -37,7 +37,7 @@ MooCodeExpr *MooCodeParser::parse_code(const char *code)
 
 	expr = parser.parse(code);
 	// TODO temporary
-	MooCodeParser::print(expr);
+	//MooCodeParser::print(expr);
 	return(expr);
 }
 

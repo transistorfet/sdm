@@ -78,13 +78,33 @@ int MooCodeLambda::to_string(char *buffer, int max)
 	return(0);
 }
 
+int MooCodeLambda::map_args(MooObjectHash *env, MooArgs *args)
+{
+	int i;
+	const char *id;
+	MooCodeExpr *cur;
+
+	env->set("this", arg->m_this);
+	for (i = 0, cur = m_params; cur && i <= args->m_args->last(); i++, cur = cur->next()) {
+		id = cur->get_identifier();
+		if (!strcmp(id, "&all"))
+			return(0);
+		else
+			env->set(id, args->m_args->get(i));
+	}
+	if (cur || i <= args->m_args->last())
+		throw moo_args_mismatched;
+	return(0);
+}
+
+
 int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
 {
 	MooObjectHash *env;
 
 	env = frame->env();
 	env = new MooObjectHash(env);
-	args->map_args(env, m_params);
+	this->map_args(env, args);
 	return(frame->push_block(env, m_func, args));
 }
 
