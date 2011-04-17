@@ -448,18 +448,24 @@
     <permissions>075</permissions>
     <params></params>
     <func><![CDATA[
-	(if (!= (this.users:search user) -1)
+	(if (= (this.users:search user) -1)
 		(block
 			(this.users:push user)
 			(this.users:foreach (lambda (cur)
 				(cur:notify 'join' user channel "")))))
     ]]></func>
    </entry>
-   <entry type="moofunc" key="leave">
+   <entry type="moolambda" key="leave">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>channel_leave</func>
+    <func><![CDATA[
+	(if (!= (this.users:search user) -1)
+		(block
+			(this.users:foreach (lambda (cur)
+				(cur:notify 'leave' user channel "")))
+			(this.users:remove user)))
+    ]]></func>
    </entry>
    <entry type="moofunc" key="quit">
     <owner>-1</owner>

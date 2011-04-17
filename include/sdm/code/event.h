@@ -28,6 +28,7 @@ class MooCodeEvent {
 	MooCodeEvent(MooObjectHash *env, MooArgs *args = NULL, MooCodeExpr *expr = NULL);
 	virtual ~MooCodeEvent();
 	MooObjectHash *env() { return(m_env); }
+	MooCodeExpr *expr() { return(m_expr); }
 
 	virtual int do_event(MooCodeFrame *frame);
 

@@ -190,6 +190,22 @@ static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int res;
+	MooObject *obj;
+	MooObjectArray *m_this;
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	res = m_this->remove(obj);
+	args->m_result = new MooNumber((long int) res);
+	return(0);
+}
+
 static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int res;
@@ -343,6 +359,7 @@ void moo_load_array_methods(MooObjectHash *env)
 {
 	env->set("get", new MooCodeFunc(array_get, "&all"));
 	env->set("set", new MooCodeFunc(array_set, "&all"));
+	env->set("remove", new MooCodeFunc(array_remove, "&all"));
 	env->set("push", new MooCodeFunc(array_push, "&all"));
 	env->set("pop", new MooCodeFunc(array_pop, "&all"));
 	env->set("shift", new MooCodeFunc(array_shift, "&all"));

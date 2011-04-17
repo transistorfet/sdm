@@ -171,7 +171,7 @@ T MooArray<T>::set(int index, T value)
 		if (index < m_next_space)
 			m_next_space = index;
 		if (index == m_last) {
-			for (; m_last > 0; m_last--) {
+			for (; m_last >= 0; m_last--) {
 				if (m_data[m_last])
 					break;
 			}

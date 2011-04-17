@@ -201,10 +201,16 @@ int MooCodeFrame::linecol(int &line, int &col)
 void MooCodeFrame::print_stack()
 {
 	MooCodeEvent *event;
+	char buffer[LARGE_STRING_SIZE];
 
 	for (int i = m_stack->last(); i >= 0; i--) {
 		event = m_stack->get(i);
-		moo_status("DEBUG: %s", typeid(*event).name());
+		if (event->expr()) {
+			MooCodeParser::generate(event->expr(), buffer, LARGE_STRING_SIZE, ' ');
+			moo_status("DEBUG: %s: %s", typeid(*event).name(), buffer);
+		}
+		else
+			moo_status("DEBUG: %s", typeid(*event).name());
 	}
 }
 
