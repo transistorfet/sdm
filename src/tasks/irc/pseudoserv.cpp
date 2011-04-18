@@ -558,6 +558,7 @@ int PseudoServ::send_part(const char *name)
 
 int PseudoServ::send_names(const char *name)
 {
+	MooString *names;
 	MooChannel *channel;
 	MooObject *result = NULL;
 
@@ -570,8 +571,8 @@ int PseudoServ::send_names(const char *name)
 	channel->call_method(channel, "names", NULL, &result);
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
-	if (result && result->is_a(&moo_string_obj_type))
-		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, ((MooString *) result)->m_str);
+	if (result && (names = dynamic_cast<MooString *>(result)))
+		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, names->m_str);
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
 	MOO_DECREF(result);
 	return(0);

@@ -37,6 +37,7 @@ OBJS =	colours.o	\
 	objs/array.o	\
 	objs/config.o	\
 	objs/hash.o	\
+	objs/nil.o	\
 	objs/number.o	\
 	objs/object.o	\
 	objs/string.o	\
@@ -380,6 +381,12 @@ objs/hash.o: objs/hash.cpp ../include/sdm/memory.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/things/thing.h ../include/sdm/tree.h \
   ../include/sdm/things/references.h
+
+objs/nil.o: objs/nil.cpp ../include/sdm/memory.h ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/args.h \
+  ../include/sdm/array.h ../include/sdm/data.h ../include/sdm/misc.h \
+  ../include/sdm/objs/object.h ../include/sdm/gc.h \
+  ../include/sdm/objs/nil.h
 
 objs/number.o: objs/number.cpp ../include/sdm/memory.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

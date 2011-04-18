@@ -276,16 +276,15 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 int MooThing::set_property(const char *name, MooObject *obj)
 {
 	MooObject *cur;
-	MooThing *thing;
 
 	// TODO should there be a way to store the property in the local object
 	if (!name || (*name == '\0'))
 		return(-1);
 	/// If the object is NULL, remove the entry from the table
-	if ((cur = this->get_property_raw(name, &thing))) {
+	if ((cur = m_properties->get(name))) {
 		if (!obj) {
-			thing->check_throw(MOO_PERM_W);
-			thing->m_properties->remove(name);
+			this->check_throw(MOO_PERM_W);
+			m_properties->remove(name);
 			return(1);
 		}
 		else {
@@ -293,7 +292,7 @@ int MooThing::set_property(const char *name, MooObject *obj)
 			obj->owner(cur->owner());
 			obj->permissions(cur->permissions());
 			// TODO you could also do a check here for the type (only allow the same type to overwrite)
-			return(thing->m_properties->set(name, MOO_INCREF(obj)));
+			return(m_properties->set(name, MOO_INCREF(obj)));
 		}
 	}
 	else {

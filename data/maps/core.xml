@@ -449,7 +449,7 @@
     <params></params>
     <func><![CDATA[
 	(if (= (this.users:search user) -1)
-		(block
+		(begin
 			(this.users:push user)
 			(this.users:foreach (lambda (cur)
 				(cur:notify 'join' user channel "")))))
@@ -461,17 +461,24 @@
     <params></params>
     <func><![CDATA[
 	(if (!= (this.users:search user) -1)
-		(block
+		(begin
 			(this.users:foreach (lambda (cur)
 				(cur:notify 'leave' user channel "")))
 			(this.users:remove user)))
     ]]></func>
    </entry>
-   <entry type="moofunc" key="quit">
+   <entry type="moolambda" key="quit">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>channel_quit</func>
+    <func><![CDATA[
+	(if (!= (this.users:search user) -1)
+		(begin
+			; TODO there should only be one quit message per user but we can only control the channel's quit...
+			;(this.users:foreach (lambda (cur)
+			;	(cur:notify 'quit' user channel "")))
+			(this.users:remove user)))
+    ]]></func>
    </entry>
    <entry type="moofunc" key="say">
     <owner>-1</owner>
@@ -485,11 +492,16 @@
     <params>s</params>
     <func>channel_emote</func>
    </entry>
-   <entry type="moofunc" key="names">
+   <entry type="moolambda" key="names">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>channel_names</func>
+    <func><![CDATA[
+	(define names "")
+	(this.users:foreach (lambda (cur)
+		(set names (concat names cur.name " "))))
+	;(chop names)
+    ]]></func>
    </entry>
    <entry type="moofunc" key="evaluate">
     <owner>-1</owner>

@@ -76,6 +76,8 @@ class MooObjectHash : public MooHash<MooObject *> {
 	int write_data(MooDataFile *data);
 	int to_string(char *buffer, int max);
 
+	int mutate(const char *key, MooObject *obj);
+
 	MooObject *get(const char *key);
 	MooObject *get_local(const char *key);
 	long int get_integer(const char *key);

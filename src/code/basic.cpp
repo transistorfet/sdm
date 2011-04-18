@@ -229,6 +229,27 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 */
 
+/********************
+ * String Functions *
+ ********************/
+
+static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int j = 0;
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() < 0)
+		throw moo_args_mismatched;
+	for (int i = 0; i < args->m_args->last(); i++) {
+		obj = args->m_args->get(i);
+		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
+	}
+	buffer[j] = '\0';
+	args->m_result = new MooString(buffer);
+	return(0);
+}
+
 /******************
  * Type Functions *
  ******************/
@@ -313,6 +334,8 @@ int moo_load_code_basic(MooObjectHash *env)
 	//env->set(">=", new MooCodeFunc(basic_ge));
 	//env->set("<", new MooCodeFunc(basic_lt));
 	//env->set("<=", new MooCodeFunc(basic_le));
+
+	env->set("concat", new MooCodeFunc(basic_concat, "&all"));
 
 	env->set("array", new MooCodeFunc(basic_array));
 	env->set("hash", new MooCodeFunc(basic_hash));

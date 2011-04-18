@@ -101,6 +101,17 @@ int MooObjectHash::to_string(char *buffer, int max)
 
 }
 
+int MooObjectHash::mutate(const char *key, MooObject *obj)
+{
+	MooObjectHash *cur;
+
+	for (cur = this; cur; cur = cur->m_parent) {
+		if ((obj = cur->get_local(key))) {
+			return(cur->set(key, obj));
+		}
+	}
+	return(this->set(key, obj));
+}
 
 MooObject *MooObjectHash::get(const char *key)
 {

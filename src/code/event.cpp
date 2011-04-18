@@ -163,13 +163,12 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
  ************************/
 
 /*********************************
- * Form: (set <name> <value>)    *
- *       (define <name> <value>) *
+ * Form: (define <name> <value>) *
  *********************************/
 
-class FormSetEvent : public MooCodeEvent {
+class FormDefineEvent : public MooCodeEvent {
     public:
-	FormSetEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	FormDefineEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		MooObject *obj;
 
@@ -179,20 +178,41 @@ class FormSetEvent : public MooCodeEvent {
 	}
 };
 
+static int form_define(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!MooCodeExpr::check_args(expr, 2, 2))
+		throw moo_args_mismatched;
+	frame->push_event(new FormDefineEvent(frame->env(), NULL, expr));
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
+	return(0);
+}
+
+
+/******************************
+ * Form: (set <name> <value>) *
+ ******************************/
+
+class FormSetEvent : public MooCodeEvent {
+    public:
+	FormSetEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	int do_event(MooCodeFrame *frame) {
+		const char *id;
+		MooObject *obj;
+
+		obj = frame->get_return();
+		id = m_expr->get_identifier()
+		if (strchr(id, '.') || strchr(id, ':'))
+			throw MooException("Invalid identifier in set");
+		m_env->mutate(id, obj);
+		return(0);
+	}
+};
+
 static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!MooCodeExpr::check_args(expr, 2, 2))
 		throw moo_args_mismatched;
 	frame->push_event(new FormSetEvent(frame->env(), NULL, expr));
-	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
-	return(0);
-}
-
-static int form_define(MooCodeFrame *frame, MooCodeExpr *expr)
-{
-	if (!MooCodeExpr::check_args(expr, 2, 2))
-		throw moo_args_mismatched;
-	frame->push_event(new FormSetEvent(global_env, NULL, expr));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), NULL, expr->next()));
 	return(0);
 }
@@ -225,10 +245,10 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 }
 
 /****************************
- * Form: (block <expr> ...) *
+ * Form: (begin <expr> ...) *
  ****************************/
 
-static int form_block(MooCodeFrame *frame, MooCodeExpr *expr)
+static int form_begin(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	return(frame->push_block(frame->env(), expr, NULL));
 }
@@ -252,10 +272,10 @@ int init_code_event(void)
 		return(1);
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
-	form_env->set("set", new MooFormT(form_set));
 	form_env->set("define", new MooFormT(form_define));
+	form_env->set("set", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
-	form_env->set("block", new MooFormT(form_block));
+	form_env->set("begin", new MooFormT(form_begin));
 	form_env->set("lambda", new MooFormT(form_lambda));
 	return(0);
 }
