@@ -480,17 +480,23 @@
 			(this.users:remove user)))
     ]]></func>
    </entry>
-   <entry type="moofunc" key="say">
+   <entry type="moolambda" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>s</params>
-    <func>channel_say</func>
+    <params>text</params>
+    <func><![CDATA[
+	(this.users:foreach (lambda (cur)
+		(cur:notify 'say' user channel text)))
+    ]]></func>
    </entry>
-   <entry type="moofunc" key="emote">
+   <entry type="moolambda" key="emote">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>s</params>
-    <func>channel_emote</func>
+    <params>text</params>
+    <func><![CDATA[
+	(this.users:foreach (lambda (cur)
+		(cur:notify 'emote' user channel text)))
+    ]]></func>
    </entry>
    <entry type="moolambda" key="names">
     <owner>-1</owner>

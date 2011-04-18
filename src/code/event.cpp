@@ -200,7 +200,7 @@ class FormSetEvent : public MooCodeEvent {
 		MooObject *obj;
 
 		obj = frame->get_return();
-		id = m_expr->get_identifier()
+		id = m_expr->get_identifier();
 		if (strchr(id, '.') || strchr(id, ':'))
 			throw MooException("Invalid identifier in set");
 		m_env->mutate(id, obj);
@@ -266,6 +266,30 @@ static int form_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
+/*****************************************
+ * Form: (super <identifier> <expr> ...) *
+ *****************************************/
+
+static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	MooArgs *args;
+	MooObject *obj;
+	MooObjectHash *env;
+
+	if (!expr)
+		throw moo_args_mismatched;
+	env = frame->env();
+	if (!(obj = env->get("this")))
+		throw MooException("in super: \'this\' not set");
+	obj = obj->resolve_method(expr->get_identifier());
+ 	args= new MooArgs();
+	args->m_args->set(0, MOO_INCREF(obj));
+	frame->push_event(new MooCodeEventCallExpr(env, args));
+	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));
+	MOO_DECREF(args);
+	return(0);
+}
+
 int init_code_event(void)
 {
 	if (form_env)
@@ -277,6 +301,7 @@ int init_code_event(void)
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("begin", new MooFormT(form_begin));
 	form_env->set("lambda", new MooFormT(form_lambda));
+	form_env->set("super", new MooFormT(form_super));
 	return(0);
 }
 

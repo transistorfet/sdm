@@ -6,21 +6,23 @@
  <owner>100</owner>
  <permissions>075</permissions>
  <location>12</location>
- <property type="string" name="name">
-  <owner>-1</owner>
-  <permissions>075</permissions>
-  <value>transistor</value>
- </property>
- <property type="string" name="description">
-  <owner>-1</owner>
-  <permissions>075</permissions>
-  <value>You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</value>
- </property>
- <property type="thingref" name="last_location">
-  <owner>100</owner>
-  <permissions>075</permissions>
-  <value>50</value>
- </property>
+ <properties>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>transistor</value>
+  </entry>
+  <entry type="string" key="description">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.</value>
+  </entry>
+  <entry type="thingref" key="last_location">
+   <owner>100</owner>
+   <permissions>075</permissions>
+   <value>50</value>
+  </entry>
+ </properties>
  <name>transistor</name>
  <lastseen>1284875395</lastseen>
 </user>

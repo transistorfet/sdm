@@ -89,7 +89,9 @@
 	* how will MooThings be garbage collected?
 
 	* add permissions checks to access and evaluate functions
-	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early
+	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early.  Perhaps we could use an exception
+	  system such that a special event is pushed on to the stack and if a return or exception occurs, the stack is searched backwards
+	  for the special event, and execution resumes with that event
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
