@@ -62,13 +62,16 @@ int MooCodeLambda::write_data(MooDataFile *data)
 	char buffer[STRING_SIZE];
 
 	MooObject::write_data(data);
-	MooCodeParser::generate(m_func, buffer, STRING_SIZE);
-	// TODO should this write a raw_string instead?
+	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
+	data->write_begin_entry("params");
+	data->write_raw_string(buffer);
+	data->write_end_entry();
+
+	buffer[0] = '\n';
+	MooCodeParser::generate(m_func, &buffer[1], STRING_SIZE);
 	data->write_begin_entry("code");
 	data->write_raw_string(buffer);
 	data->write_end_entry();
-	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
-	data->write_string_entry("params", buffer);
 	return(0);
 }
 
@@ -87,8 +90,10 @@ int MooCodeLambda::map_args(MooObjectHash *env, MooArgs *args)
 	env->set("this", args->m_this);
 	for (i = 0, cur = m_params; cur && i <= args->m_args->last(); i++, cur = cur->next()) {
 		id = cur->get_identifier();
-		if (!strcmp(id, "&all"))
+		if (!strcmp(id, "&all")) {
+			env->set("args", args->m_args);
 			return(0);
+		}
 		else
 			env->set(id, args->m_args->get(i));
 	}

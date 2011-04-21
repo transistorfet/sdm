@@ -534,30 +534,32 @@ int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 		return(0);
 	try {
 		{
-			MooArgs args(1, user, channel);
-			args.m_args->set(0, new MooThingRef(m_id));
-			if (to->call_method(channel, to->resolve_method("accept"), &args) < 0)
+			MooArgs *args = new MooArgs();
+			args->m_args->set(0, new MooThingRef(m_id));
+			if (to->call_method(channel, to->resolve_method("accept"), args) < 0)
 				return(-1);
-			if (MooThing::convert_result(args.m_result) != 1)
+			if (MooThing::convert_result(args->m_result) != 1)
 				return(1);
+			MOO_DECREF(args);
 		}
 
 		if (m_location) {
-			MooArgs args(1, user, channel);
-			args.m_args->set(0, new MooThingRef(m_id));
-			if (m_location->call_method(channel, m_location->resolve_method("do_exit"), &args) < 0)
+			MooArgs *args = new MooArgs();
+			args->m_args->set(0, new MooThingRef(m_id));
+			if (m_location->call_method(channel, m_location->resolve_method("do_exit"), args) < 0)
 				return(-1);
-			if (MooThing::convert_result(args.m_result) < 0)
+			if (MooThing::convert_result(args->m_result) < 0)
 				return(1);
+			MOO_DECREF(args);
 		}
 
 		if (to->add(this) < 0)
 			return(1);
 
 		if (m_location) {
-			MooArgs args(1, user, channel);
-			args.m_args->set(0, new MooThingRef(m_id));
-			return(m_location->call_method(channel, m_location->resolve_method("do_enter"), &args));
+			MooArgs *args = new MooArgs();
+			args->m_args->set(0, new MooThingRef(m_id));
+			return(m_location->call_method(channel, m_location->resolve_method("do_enter"), args));
 		}
 		return(0);
 	}

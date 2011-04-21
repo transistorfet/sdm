@@ -50,17 +50,17 @@
 	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
     ]]></func>
    </entry>
-   <entry type="moofunc" key="print_view">
+   <entry type="moolambda" key="print_view">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>basics_print_view</func>
+    <func>(call-method this basics_print_view)</func>
    </entry>
-   <entry type="moofunc" key="@eval">
+   <entry type="moolambda" key="@eval">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>s</params>
-    <func>@eval</func>
+    <params>text</params>
+    <func>(@eval text)</func>
    </entry>
    <entry type="moolambda" key="print_hi">
     <owner>-1</owner>
@@ -143,29 +143,29 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="init">
+   <entry type="moolambda" key="init">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>user_init</func>
+    <func>(call-method this user_init)</func>
    </entry>
-   <entry type="moofunc" key="passwd">
+   <entry type="moolambda" key="passwd">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>user_passwd</func>
+    <func>(call-method this user_passwd)</func>
    </entry>
-   <entry type="moofunc" key="notify">
+   <entry type="moolambda" key="notify">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params><![CDATA[&all]]></params>
-    <func>user_notify</func>
+    <func>(call-method this user_notify args)</func>
    </entry>
-   <entry type="moofunc" key="inv">
+   <entry type="moolambda" key="inv">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>user_inventory</func>
+    <func>(call-method this user_inventory)</func>
    </entry>
   </methods>
  </thing>
@@ -572,6 +572,15 @@
     </entry>
    </properties>
    <methods>
+    <entry type="moolambda" key="join">
+     <owner>-1</owner>
+     <permissions>075</permissions>
+     <params></params>
+     <func><![CDATA[
+	(super join)
+	($cryolocker:fetch user)	; I have no idea how this would work
+     ]]></func>
+    </entry>
     <entry type="moofunc" key="join">
      <owner>-1</owner>
      <permissions>075</permissions>
@@ -590,17 +599,21 @@
      <params></params>
      <func>realm_quit</func>
     </entry>
-    <entry type="moofunc" key="say">
+    <entry type="moolambda" key="say">
      <owner>-1</owner>
      <permissions>075</permissions>
-     <params>s</params>
-     <func>realm_say</func>
+     <params>text</params>
+     <func><![CDATA[
+	(user.location:say text)
+     ]]></func>
     </entry>
-    <entry type="moofunc" key="emote">
+    <entry type="moolambda" key="emote">
      <owner>-1</owner>
      <permissions>075</permissions>
-     <params>s</params>
-     <func>realm_emote</func>
+     <params>text</params>
+     <func><![CDATA[
+	(user.location:emote text)
+     ]]></func>
     </entry>
     <entry type="moofunc" key="names">
      <owner>-1</owner>

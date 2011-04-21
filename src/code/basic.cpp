@@ -316,6 +316,25 @@ static int basic_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 
 
+static int basic_call_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooArgs *newargs;
+	MooObject *obj;
+	MooObjectArray *array;
+
+	if (args->m_args->last() != 1 && args->m_args->last() != 2)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(2);
+	if (!obj || obj == &moo_nil)
+		newargs = new MooArgs();
+	else if (!(array = dynamic_cast<MooObjectArray *>(obj)))
+		throw moo_type_error;
+	else
+		newargs = new MooArgs(array);
+	newargs->m_this = dynamic_cast<MooThing *>(args->m_args->get(0));
+	return(frame->push_call(env, args->m_args->get(1), newargs));
+}
+
 int moo_load_code_basic(MooObjectHash *env)
 {
 	env->set("print", new MooCodeFunc(basic_print));
@@ -343,6 +362,8 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("@eval", new MooCodeFunc(basic_eval));
 	env->set("@load", new MooCodeFunc(basic_load));
 	env->set("@clone", new MooCodeFunc(basic_clone));
+
+	env->set("call-method", new MooCodeFunc(basic_call_method));
 	return(0);
 }
 

@@ -19,12 +19,6 @@
 #include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 
-static inline int lispy_is_identifier(char);
-static inline int lispy_is_digit(char);
-static inline int lispy_is_whitespace(char);
-static inline int lispy_is_word(char);
-static inline char lispy_escape_char(char);
-
 MooCodeParser::MooCodeParser()
 {
 
@@ -77,7 +71,7 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_STRING:
 		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString(m_token)));
 	    case TT_WORD: {
-		if (lispy_is_digit(m_token[0]) || (m_token[0] == '-' && lispy_is_digit(m_token[1]))) {
+		if (parser_is_digit(m_token[0]) || (m_token[0] == '-' && parser_is_digit(m_token[1]))) {
 			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooNumber(m_token)));
 		}
 		else
@@ -104,7 +98,7 @@ int MooCodeParser::read_token()
 	while (m_input[m_pos] != '\0') {
 		ch = this->getchar();
 
-		if (lispy_is_whitespace(ch))
+		if (parser_is_whitespace(ch))
 			continue;
 		else if (ch == ';') {
 			while (1) {
@@ -132,7 +126,7 @@ int MooCodeParser::read_token()
 					ch = this->getchar();
 					if (ch == '\0')
 						break;
-					m_token[m_len] = lispy_escape_char(ch);
+					m_token[m_len] = parser_escape_char(ch);
 				}
 				else
 					m_token[m_len] = ch;
@@ -157,7 +151,7 @@ int MooCodeParser::read_token()
 			m_token[m_len++] = ch;
 			while (m_input[m_pos] != '\0') {
 				ch = this->getchar();
-				if (lispy_is_whitespace(ch))
+				if (parser_is_whitespace(ch))
 					break;
  				if (ch == '(')
 					throw MooException("(%d, %d): Unexpected open bracket.", m_line, m_col);
@@ -173,49 +167,6 @@ int MooCodeParser::read_token()
 	}
 	return(0);
 }
-
-static inline int lispy_is_identifier(char ch)
-{
-	if ((ch != '(') && (ch != ')') && !lispy_is_whitespace(ch))
-		return(1);
-	return(0);
-}
-
-static inline int lispy_is_digit(char ch)
-{
-	if ((ch >= 0x30) && (ch <= 0x39))
-		return(1);
-	return(0);
-}
-
-static inline int lispy_is_whitespace(char ch)
-{
-	if ((ch == ' ') || (ch == '\t') || (ch == '\n') || (ch == '\r'))
-		return(1);
-	return(0);
-}
-
-static inline int lispy_is_word(char ch)
-{
-	if (((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z')) || (ch == '_'))
-		return(1);
-	return(0);
-}
-
-static inline char lispy_escape_char(char ch)
-{
-	switch (ch) {
-		case 't':
-			return('\x09');
-		case 'r':
-			return('\x0d');
-		case 'n':
-			return('\x0a');
-		default:
-			return(ch);
-	}
-}
-
 
 int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char linebr, int indent)
 {
@@ -263,6 +214,7 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char lineb
 			buffer[i++] = linebr;
 		}
 	}
+	buffer[i] = '\0';
 	return(i);
 }
 

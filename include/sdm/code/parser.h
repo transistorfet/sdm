@@ -67,5 +67,47 @@ class MooCodeParser {
 	}
 };
 
+static inline int parser_is_digit(char ch)
+{
+	if ((ch >= 0x30) && (ch <= 0x39))
+		return(1);
+	return(0);
+}
+
+static inline int parser_is_whitespace(char ch)
+{
+	if ((ch == ' ') || (ch == '\t') || (ch == '\n') || (ch == '\r'))
+		return(1);
+	return(0);
+}
+
+static inline int parser_is_word(char ch)
+{
+	if (((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z')) || (ch == '_'))
+		return(1);
+	return(0);
+}
+
+static inline int parser_is_identifier(char ch)
+{
+	if ((ch != '(') && (ch != ')') && !parser_is_whitespace(ch))
+		return(1);
+	return(0);
+}
+
+static inline char parser_escape_char(char ch)
+{
+	switch (ch) {
+		case 't':
+			return('\x09');
+		case 'r':
+			return('\x0d');
+		case 'n':
+			return('\x0a');
+		default:
+			return(ch);
+	}
+}
+
 #endif
 

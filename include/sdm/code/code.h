@@ -12,6 +12,7 @@
 
 #include <sdm/hash.h>
 #include <sdm/array.h>
+#include <sdm/objs/nil.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>

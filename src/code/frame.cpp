@@ -112,6 +112,16 @@ int MooCodeFrame::push_code(const char *code, MooArgs *args)
 	return(this->push_block(m_env, expr, args));
 }
 
+int MooCodeFrame::push_debug(const char *msg, ...)
+{
+	va_list va;
+	char buffer[STRING_SIZE];
+
+	va_start(va, msg);
+	vsnprintf(buffer, STRING_SIZE, msg, va);
+	return(m_stack->push(new MooCodeEventDebug(buffer)));
+}
+
 int MooCodeFrame::run(int level)
 {
 	int res;
@@ -201,16 +211,10 @@ int MooCodeFrame::linecol(int &line, int &col)
 void MooCodeFrame::print_stack()
 {
 	MooCodeEvent *event;
-	char buffer[LARGE_STRING_SIZE];
 
 	for (int i = m_stack->last(); i >= 0; i--) {
 		event = m_stack->get(i);
-		if (event->expr()) {
-			MooCodeParser::generate(event->expr(), buffer, LARGE_STRING_SIZE, ' ');
-			moo_status("DEBUG: %s: %s", typeid(*event).name(), buffer);
-		}
-		else
-			moo_status("DEBUG: %s", typeid(*event).name());
+		event->print_debug();
 	}
 }
 

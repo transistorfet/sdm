@@ -28,16 +28,31 @@ class MooCodeEvent {
 	MooCodeEvent(MooObjectHash *env, MooArgs *args = NULL, MooCodeExpr *expr = NULL);
 	virtual ~MooCodeEvent();
 	MooObjectHash *env() { return(m_env); }
-	MooCodeExpr *expr() { return(m_expr); }
 
 	virtual int do_event(MooCodeFrame *frame);
 
 	inline int linecol(int &line, int &col) {
-		if (!m_expr)
+		if (!m_expr) {
+			line = 0;
+			col = 0;
 			return(0);
+		}
 		line = m_expr->line();
 		col = m_expr->col();
 		return(1);
+	}
+
+	virtual void print_debug() {
+		int line, col;
+		char buffer[LARGE_STRING_SIZE];
+
+		this->linecol(line, col);
+		if (m_expr) {
+			MooCodeParser::generate(m_expr, buffer, LARGE_STRING_SIZE, ' ');
+			moo_status("DEBUG: (%d, %d) %s: %s", line, col, typeid(*this).name(), buffer);
+		}
+		else
+			moo_status("DEBUG: (%d, %d) %s", line, col, typeid(*this).name());
 	}
 };
 
@@ -69,6 +84,20 @@ class MooCodeEventAppendReturn : public MooCodeEvent {
     public:
 	MooCodeEventAppendReturn(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
 	int do_event(MooCodeFrame *frame);
+};
+
+class MooCodeEventDebug : public MooCodeEvent {
+	std::string m_msg;
+    public:
+	MooCodeEventDebug(const char *msg) : MooCodeEvent(NULL, NULL, NULL) {
+		m_msg = std::string(msg);
+	}
+
+	int do_event(MooCodeFrame *frame) { return(0); }
+
+	void print_debug() {
+		moo_status("DEBUG: %s", m_msg.c_str());
+	}
 };
 
 #endif

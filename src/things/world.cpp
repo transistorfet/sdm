@@ -125,7 +125,12 @@ int MooWorld::write()
 		return(-1);
 	m_writing = 1;
 	m_written = 0;
-	res = this->write_file(m_filename->c_str(), "world");
+
+	char buffer[STRING_SIZE];
+	strcpy(buffer, m_filename->c_str());
+	strncpy(buffer, "temp", 4);
+
+	res = this->write_file(buffer, "world");
 	m_writing = 0;
 	return(res);
 }

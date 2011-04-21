@@ -243,11 +243,54 @@ static int realm_names(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+#define MAX_WORDS	256
+
 static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	const char *action, *text;
+	int i = 0, j = 0;
+	const char *text;
+	MooObject *method;
+	char *words[MAX_WORDS];
+	char buffer[LARGE_STRING_SIZE];
+	MooArgs *newargs;
+	MooObjectHash *newenv;
 
 	text = args->m_args->get_string(0);
+	strncpy(buffer, text, LARGE_STRING_SIZE);
+	buffer[LARGE_STRING_SIZE] = '\0';
+	while (parser_is_whitespace(buffer[i]))
+		i++;
+	words[0] = &buffer[i];
+	for (; buffer[i] != '\0'; i++) {
+		if (parser_is_whitespace(buffer[i])) {
+			buffer[i++] = '\0';
+			while (parser_is_whitespace(buffer[i]))
+				i++;
+			words[++j] = &buffer[i];
+		}
+		else if (buffer[i] == '\"') {
+			// TODO implement quotes...
+		}
+	}
+
+	if (!(method = args->m_user->resolve_method(words[0]))) {
+		MooObject *location = args->m_user->resolve_property("location");
+		if (!(method = location->resolve_method(words[0]))) {
+			// TODO try to parse more and search the objects
+		}
+	}
+
+	// TODO you could push markers onto the stack like here so that if an exception occurs inside of the call we are pushing, then
+	//	it will print that it occurred inside of this evaluate function.
+	newargs = new MooArgs();
+	newenv = new MooObjectHash(env);
+	newenv->set("argstr", new MooString(text));
+	frame->push_debug("> in realm_evaluate: %s", words[0]);
+	frame->push_call(newenv, method, newargs);
+	return(0);
+
+/*
+
 	// TODO should you check to make sure this doesn't loop? (ie. the command isn't evaluate)
 	//return(args->m_user->command(args->m_user, args->m_channel, text));
 
@@ -283,6 +326,7 @@ static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 	// TODO should this be MOO_DECREF?
 	delete ref;
 	return(MOO_ACTION_NOT_FOUND);
+*/
 }
 
 

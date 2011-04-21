@@ -33,7 +33,7 @@ MooNumber::MooNumber(const char *str)
 		m_float = strtod(str, &endptr);
 	}
 	else {
-		m_format = FLOAT;
+		m_format = INT;
 		m_int = strtol(str, &endptr, 0);
 	}
 	if (*endptr != '\0')

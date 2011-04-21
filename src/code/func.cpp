@@ -56,10 +56,11 @@ int MooCodeFunc::write_data(MooDataFile *data)
 	char buffer[STRING_SIZE];
 
 	MooObject::write_data(data);
-	// TODO how do you find the function name??
-	//data->write_string_entry("func", buffer);
 	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
 	data->write_string_entry("params", buffer);
+	// TODO how do you find the function name??
+	//data->write_string_entry("func", buffer);
+	data->write_string_entry("func", "***ERROR***");
 	return(0);
 }
 
@@ -73,9 +74,6 @@ int MooCodeFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 {
 	if (!m_func)
 		throw MooException("Null function");
-	// TODO this messes everything up because we don't have a new env here, so old values like 'this' are overwritten
-	//	We don't even use it because we give &all as the parameters
-	//args->map_args(env, m_params);
 	return(m_func(frame, env, args));
 }
 
