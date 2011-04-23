@@ -120,15 +120,16 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	const MooObjectType *objtype;
 
 	if (!strcmp(type, "properties")) {
-		data->read_children();
-		res = m_properties->read_data(data);
-		data->read_parent();
+		if (data->read_children()) {
+			res = m_properties->read_data(data);
+			data->read_parent();
+		}
 	}
 	else if (!strcmp(type, "methods")) {
-		data->read_children();
-		res = m_methods->read_data(data);
-		data->read_parent();
-		// TODO should you go through all the methods and ->init() them, so that the object is set properly?
+		if (data->read_children()) {
+			res = m_methods->read_data(data);
+			data->read_parent();
+		}
 	}
 	else if (!strcmp(type, "thing")) {
 		MooThing *thing = NULL;
@@ -141,9 +142,10 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			moo_status("THING: Error loading thing.");
 			return(-1);
 		}
-		data->read_children();
-		thing->read_data(data);
-		data->read_parent();
+		if (data->read_children()) {
+			thing->read_data(data);
+			data->read_parent();
+		}
 		this->add(thing);
 	}
 	else if (!strcmp(type, "bits")) {
@@ -181,14 +183,18 @@ int MooThing::write_data(MooDataFile *data)
 		data->write_integer_entry("location", m_location->m_id);
 
 	/// Write the properties to the file
-	data->write_begin_entry("properties");
-	m_properties->write_data(data);
-	data->write_end_entry();
+	if (m_properties->entries()) {
+		data->write_begin_entry("properties");
+		m_properties->write_data(data);
+		data->write_end_entry();
+	}
 
 	/// Write the actions to the file
-	data->write_begin_entry("methods");
-	m_methods->write_data(data);
-	data->write_end_entry();
+	if (m_methods->entries()) {
+		data->write_begin_entry("methods");
+		m_methods->write_data(data);
+		data->write_end_entry();
+	}
 
 	/// Write the things we contain to the file
 	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {

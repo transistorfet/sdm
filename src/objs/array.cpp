@@ -67,12 +67,13 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 			moo_status("ARRAY: Error loading entry, %d", index);
 			return(-1);
 		}
-		data->read_children();
-		res = obj->read_data(data);
-		data->read_parent();
-		if ((res < 0) || (this->set(index, obj) < 0)) {
-			MOO_DECREF(obj);
-			return(-1);
+		if (data->read_children()) {
+			res = obj->read_data(data);
+			data->read_parent();
+			if ((res < 0) || (this->set(index, obj) < 0)) {
+				MOO_DECREF(obj);
+				return(-1);
+			}
 		}
 	}
 	else

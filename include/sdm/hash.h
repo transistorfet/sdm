@@ -64,6 +64,8 @@ class MooHash : public MooObject {
 	void reset();
 	MooHashEntry<T> *next_entry();
 	T next();
+
+	int entries() { return(m_entries); }
 };
 
 class MooObjectHash : public MooHash<MooObject *> {

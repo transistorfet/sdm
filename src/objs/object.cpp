@@ -198,7 +198,7 @@ int MooObject::read_data(MooDataFile *data)
 	do {
 		if (!(type = data->read_name()))
 			break;
-		this->read_entry(type, data);
+		res = this->read_entry(type, data);
 		if (res < 0)
 			error = 1;
 		/// We handled the whole rest of the data so just exit
@@ -226,8 +226,11 @@ int MooObject::read_entry(const char *type, MooDataFile *data)
 
 int MooObject::write_data(MooDataFile *data)
 {
-	data->write_integer_entry("owner", this->owner());
-	data->write_octal_entry("permissions", this->permissions());
+	// TODO i don't think this is right with owner, because when no owner is set, it uses the current user rather than -1
+	if (this->owner() != -1)
+		data->write_integer_entry("owner", this->owner());
+	if (this->permissions() != MOO_DEFAULT_PERMS)
+		data->write_octal_entry("permissions", this->permissions());
 	return(0);
 }
 
@@ -250,7 +253,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		remain++;
 	}
 
-	if (!remain && value) {
+	if (!method && !remain && value) {
 		if (!env)
 			env = global_env;
 		if (env->set(buffer, MOO_INCREF(value)))

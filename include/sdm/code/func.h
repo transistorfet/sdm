@@ -21,9 +21,9 @@ class MooCodeFunc : public MooObject {
 	MooCodeExpr *m_params;
 
     public:
-	MooCodeFunc(moo_code_func_t func, const char *params) { m_func = func; m_params = MooCodeParser::parse_code(params); }
-	MooCodeFunc(moo_code_func_t func, MooCodeExpr *params = NULL) { m_func = func; m_params = params; }
-	virtual ~MooCodeFunc() { }
+	MooCodeFunc(moo_code_func_t func, const char *params);
+	MooCodeFunc(moo_code_func_t func, MooCodeExpr *params = NULL);
+	virtual ~MooCodeFunc();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);

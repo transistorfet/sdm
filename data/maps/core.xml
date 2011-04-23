@@ -45,34 +45,36 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(user:notify 'status' nil channel (format "<yellow>$this.title"))
 	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
-    ]]></func>
+    ]]></code>
    </entry>
-   <entry type="moolambda" key="print_view">
+   <entry type="moofunc" key="print_view">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>(call-method this basics_print_view)</func>
+    <func>basics_print_view</func>
    </entry>
    <entry type="moolambda" key="@eval">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>text</params>
-    <func>(@eval text)</func>
+    <params></params>
+    <code><![CDATA[
+	(@eval argstr)
+    ]]></code>
    </entry>
    <entry type="moolambda" key="print_hi">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[(print #55.description)]]></func>
+    <code><![CDATA[(print #55.description)]]></code>
    </entry>
    <entry type="moolambda" key="print">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func><![CDATA[(print text)]]></func>
+    <code><![CDATA[(print text)]]></code>
    </entry>
   </methods>
  </thing>
@@ -143,29 +145,29 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moolambda" key="init">
+   <entry type="moofunc" key="init">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>(call-method this user_init)</func>
+    <func>user_init</func>
    </entry>
-   <entry type="moolambda" key="passwd">
+   <entry type="moofunc" key="passwd">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>(call-method this user_passwd)</func>
+    <func>user_passwd</func>
    </entry>
-   <entry type="moolambda" key="notify">
+   <entry type="moofunc" key="notify">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params><![CDATA[&all]]></params>
-    <func>(call-method this user_notify args)</func>
+    <func>user_notify</func>
    </entry>
-   <entry type="moolambda" key="inv">
+   <entry type="moofunc" key="inv">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>(call-method this user_inventory)</func>
+    <func>user_inventory</func>
    </entry>
   </methods>
  </thing>
@@ -284,23 +286,23 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="n">
+   <entry type="moolambda" key="n">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'north')]]></code>
    </entry>
-   <entry type="moofunc" key="e">
+   <entry type="moolambda" key="e">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'east')]]></code>
    </entry>
-   <entry type="moofunc" key="d">
+   <entry type="moolambda" key="d">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'down')]]></code>
    </entry>
    <entry type="moofunc" key="accept">
     <owner>-1</owner>
@@ -308,7 +310,7 @@
     <params>t</params>
     <func>room_accept</func>
    </entry>
-   <entry type="moofunc" key="do_enter">
+   <entry type="moolambda" key="do_enter">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>t</params>
@@ -332,38 +334,46 @@
     <params>s</params>
     <func>room_emote</func>
    </entry>
-   <entry type="moofunc" key="s">
+   <entry type="moolambda" key="s">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'south')]]></code>
    </entry>
-   <entry type="moofunc" key="w">
+   <entry type="moolambda" key="w">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'west')]]></code>
    </entry>
-   <entry type="moofunc" key="u">
+   <entry type="moolambda" key="u">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>room_direction</func>
+    <code><![CDATA[(this:go 'up')]]></code>
    </entry>
    <entry type="moolambda" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(this.contents:foreach (lambda (cur)
 		(cur:notify 'say' user channel text)))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moofunc" key="whisper">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>s</params>
     <func>room_whisper</func>
+   </entry>
+   <entry type="moolambda" key="go">
+    <owner>-1</owner>
+    <permissions>075</permissions>
+    <params>dir</params>
+    <code><![CDATA[
+
+    ]]></code>
    </entry>
   </methods>
  </thing>
@@ -447,67 +457,67 @@
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(if (= (this.users:search user) -1)
 		(begin
 			(this.users:push user)
 			(this.users:foreach (lambda (cur)
 				(cur:notify 'join' user channel "")))))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moolambda" key="leave">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(if (!= (this.users:search user) -1)
 		(begin
 			(this.users:foreach (lambda (cur)
 				(cur:notify 'leave' user channel "")))
 			(this.users:remove user)))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moolambda" key="quit">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(if (!= (this.users:search user) -1)
 		(begin
 			; TODO there should only be one quit message per user but we can only control the channel's quit...
 			;(this.users:foreach (lambda (cur)
 			;	(cur:notify 'quit' user channel "")))
 			(this.users:remove user)))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moolambda" key="say">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'say' user channel text)))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moolambda" key="emote">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params>text</params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'emote' user channel text)))
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moolambda" key="names">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func><![CDATA[
+    <code><![CDATA[
 	(define names "")
 	(this.users:foreach (lambda (cur)
 		(set names (concat names cur.name " "))))
 	;(chop names)
-    ]]></func>
+    ]]></code>
    </entry>
    <entry type="moofunc" key="evaluate">
     <owner>-1</owner>
@@ -576,10 +586,10 @@
      <owner>-1</owner>
      <permissions>075</permissions>
      <params></params>
-     <func><![CDATA[
+     <code><![CDATA[
 	(super join)
 	($cryolocker:fetch user)	; I have no idea how this would work
-     ]]></func>
+     ]]></code>
     </entry>
     <entry type="moofunc" key="join">
      <owner>-1</owner>
@@ -603,17 +613,17 @@
      <owner>-1</owner>
      <permissions>075</permissions>
      <params>text</params>
-     <func><![CDATA[
+     <code><![CDATA[
 	(user.location:say text)
-     ]]></func>
+     ]]></code>
     </entry>
     <entry type="moolambda" key="emote">
      <owner>-1</owner>
      <permissions>075</permissions>
      <params>text</params>
-     <func><![CDATA[
+     <code><![CDATA[
 	(user.location:emote text)
-     ]]></func>
+     ]]></code>
     </entry>
     <entry type="moofunc" key="names">
      <owner>-1</owner>

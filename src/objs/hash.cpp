@@ -67,12 +67,13 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 			moo_status("HASH: Error loading entry, %s", key);
 			return(-1);
 		}
-		data->read_children();
-		res = obj->read_data(data);
-		data->read_parent();
-		if ((res < 0) || (this->set(key, obj) < 0)) {
-			delete obj;
-			return(-1);
+		if (data->read_children()) {
+			res = obj->read_data(data);
+			data->read_parent();
+			if ((res < 0) || (this->set(key, obj) < 0)) {
+				delete obj;
+				return(-1);
+			}
 		}
 	}
 	else

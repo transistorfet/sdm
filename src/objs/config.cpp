@@ -40,9 +40,10 @@ int MooConfig::read_entry(const char *type, MooDataFile *data)
 	if (!strcmp(type, "listener")) {
 		MooListener *listener = new MooListener();
 		try {
-			data->read_children();
-			listener->read_data(data);
-			data->read_parent();
+			if (data->read_children()) {
+				listener->read_data(data);
+				data->read_parent();
+			}
 		}
 		catch (MooException e) {
 			moo_status("listener error: %s", e.get());

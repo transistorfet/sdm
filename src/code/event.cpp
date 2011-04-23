@@ -56,7 +56,12 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    case MCT_IDENTIFIER: {
-		frame->set_return(MooObject::resolve(m_expr->get_identifier(), m_env));
+		MooObject *obj;
+		const char *name;
+		name = m_expr->get_identifier();
+		if (!(obj = MooObject::resolve(name, m_env)))
+			throw MooException("Undefined value: %s", name);
+		frame->set_return(obj);
 		break;
 	    }
 	    case MCT_CALL: {

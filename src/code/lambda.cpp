@@ -38,7 +38,7 @@ MooCodeLambda::~MooCodeLambda()
 
 int MooCodeLambda::read_entry(const char *type, MooDataFile *data)
 {
-	if (!strcmp(type, "func")) {
+	if (!strcmp(type, "code")) {
 		char buffer[STRING_SIZE];
 
 		if (data->read_raw_string_entry(buffer, STRING_SIZE) < 0)

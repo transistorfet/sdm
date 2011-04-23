@@ -25,6 +25,26 @@ MooObject *moo_code_func_create(void)
 	return(new MooCodeFunc((moo_code_func_t) NULL));
 }
 
+MooCodeFunc::MooCodeFunc(moo_code_func_t func, const char *params)
+{
+	m_name = NULL;
+	m_func = func;
+	m_params = MooCodeParser::parse_code(params);
+}
+
+MooCodeFunc::MooCodeFunc(moo_code_func_t func, MooCodeExpr *params)
+{
+	m_name = NULL;
+	m_func = func;
+	m_params = params;
+}
+
+MooCodeFunc::~MooCodeFunc()
+{
+	if (m_name)
+		delete m_name;
+}
+
 int MooCodeFunc::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "func")) {
@@ -32,12 +52,11 @@ int MooCodeFunc::read_entry(const char *type, MooDataFile *data)
 
 		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
-		// TODO how the fuck does this all work?
 		MooCodeFunc *func = dynamic_cast<MooCodeFunc *>(global_env->get(buffer));
 		if (!func)
 			throw MooException("MooCodeFunc not found, %s", buffer);
 		m_func = func->m_func;
-		//m_string = ???
+		m_name = new std::string(buffer);
 	}
 	else if (!strcmp(type, "params")) {
 		char buffer[STRING_SIZE];
@@ -56,11 +75,9 @@ int MooCodeFunc::write_data(MooDataFile *data)
 	char buffer[STRING_SIZE];
 
 	MooObject::write_data(data);
-	MooCodeParser::generate(m_params, buffer, STRING_SIZE);
+	MooCodeParser::generate(m_params, buffer, STRING_SIZE, ' ');
 	data->write_string_entry("params", buffer);
-	// TODO how do you find the function name??
-	//data->write_string_entry("func", buffer);
-	data->write_string_entry("func", "***ERROR***");
+	data->write_string_entry("func", m_name ? m_name->c_str() : "***ERROR***");
 	return(0);
 }
 

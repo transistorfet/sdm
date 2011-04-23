@@ -70,6 +70,8 @@
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
+	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
+	  was written.
 	* add thrown exception somewhere on value not found (rather than default to NULL or something)
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* consolidate/move the moo_global_table from thing into the code's global table?

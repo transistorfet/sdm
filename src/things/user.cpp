@@ -253,17 +253,18 @@ MooUser *MooUser::login(const char *name, const char *passwd)
 			data->read_attrib_string("name", buffer, STRING_SIZE);
 			if (strcmp(buffer, name))
 				continue;
-			data->read_children();
-			do {
-				if ((str = data->read_name()) && !strcmp(str, "password")) {
-					data->read_string_entry(buffer, STRING_SIZE);
-					if (!strcmp(buffer, passwd)) {
-						delete data;
-						return(user);
+			if (data->read_children()) {
+				do {
+					if ((str = data->read_name()) && !strcmp(str, "password")) {
+						data->read_string_entry(buffer, STRING_SIZE);
+						if (!strcmp(buffer, passwd)) {
+							delete data;
+							return(user);
+						}
+						return(NULL);
 					}
-					return(NULL);
-				}
-			} while (data->read_next());
+				} while (data->read_next());
+			}
 			break;
 		}
 	} while (data->read_next());
