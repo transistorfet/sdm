@@ -385,10 +385,13 @@
 	;(chop names)
     ]]></code>
    </entry>
-   <entry type="moofunc" key="evaluate">
+   <entry type="moolambda" key="command">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <func>channel_evaluate</func>
+    <params>text</params>
+    <code><![CDATA[
+	(user:notify 'status' nil channel "Commands are not supported in this channel.")
+    ]]></code>
    </entry>
   </methods>
   <thing type="channel">
@@ -472,10 +475,10 @@
 	(user.location:emote text)
      ]]></code>
     </entry>
-    <entry type="moofunc" key="evaluate">
+    <entry type="moofunc" key="command">
      <owner>-1</owner>
      <permissions>075</permissions>
-     <func>realm_evaluate</func>
+     <func>realm_command</func>
     </entry>
    </methods>
    <name>#realm</name>

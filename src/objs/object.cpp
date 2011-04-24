@@ -15,6 +15,7 @@
 #include <sdm/funcs/method.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/thing.h>
+#include <sdm/things/user.h>
 
 #include <sdm/code/code.h>
 
@@ -224,8 +225,6 @@ int MooObject::read_entry(const char *type, MooDataFile *data)
 
 int MooObject::write_data(MooDataFile *data)
 {
-	// TODO i don't think this is right with owner, because when no owner is set, it uses the current user rather than -1
-	//if (this->owner() != -1)
 	data->write_integer_entry("owner", this->owner());
 	if (this->permissions() != MOO_DEFAULT_PERMS)
 		data->write_octal_entry("permissions", this->permissions());
@@ -322,7 +321,7 @@ int MooObject::call_method(MooObject *channel, const char *name, const char *tex
 
 	if (!(func = this->resolve_method(name)))
 		return(-1);
-	args = new MooArgs(DEFAULT_ARGS, NULL, (MooThing *) channel);
+	args = new MooArgs();
 	if (text)
 		args->m_args->set(0, new MooString(text));
 	res = this->call_method(channel, func, args);
@@ -343,12 +342,10 @@ int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
 	env->set("user", MooThing::lookup(MooTask::current_user()));
 	env->set("channel", channel);
 	res = this->call_method(func, env, args);
-	// TODO this probably doesn't always work because an exception could occur in the call, and bypass our decref
 	MOO_DECREF(env);
 	return(res);
 }
 
-// TODO i hate the name of this function already
 int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 {
 	int res;
@@ -362,13 +359,16 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 		res = frame->run(0);
 	}
 	catch (MooException e) {
+		// TODO temporary for debugging purposes??
 		moo_status("CODE: %s", e.get());
+		frame->print_stack();
 
-		MooThing *user = MooThing::lookup(MooTask::current_user());
-		if (user)
+		// TODO this is totally horrible and ugly! what is a better way to print an error
+		MooUser *user;
+		MooThing *thing = MooThing::lookup(MooTask::current_user());
+		if (user = dynamic_cast<MooUser *>(thing))
 			// TODO send this to the current channel if possible
 			user->notify(TNT_STATUS, NULL, NULL, e.get());
-		frame->print_stack();
 		res = -1;
 	}
 	MOO_DECREF(frame);

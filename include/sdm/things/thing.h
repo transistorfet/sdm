@@ -68,12 +68,6 @@ class MooThing : public MooObject {
 	static MooThing *reference(const char *name);
 
 	/// Helper Methods
-	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *text);
-	int notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...);
-	int notify(int type, MooArgs *args, const char *fmt, ...);
-	int notify_all(int type, MooThing *thing, MooThing *channel, const char *text);
-	int notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text);
-
 	int moveto(MooThing *user, MooThing *channel, MooThing *to);
 	static int attach_orphans();
 

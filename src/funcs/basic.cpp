@@ -23,15 +23,20 @@
 
 static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	MooUser *user;
 	MooObject *obj;
+	MooThing *channel;
 	char buffer[LARGE_STRING_SIZE];
 
-	// TODO this is temporary until you get notify refactored
-	args->m_channel = dynamic_cast<MooThing *>(env->get("channel"));
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
 	if (!(obj = args->m_args->get(0)))
-		return(-1);
+		throw moo_type_error;
 	obj->to_string(buffer, LARGE_STRING_SIZE);
-	args->m_user->notify(TNT_STATUS, args, buffer);
+	if (!(user = dynamic_cast<MooUser *>(env->get("user"))))
+		throw moo_type_error;
+	channel = dynamic_cast<MooThing *>(env->get("channel"));
+	user->notify(TNT_STATUS, NULL, channel, buffer);
 	return(0);
 }
 

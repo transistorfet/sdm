@@ -458,69 +458,6 @@ MooThing *MooThing::reference(const char *name)
 
 // TODO all these helper functions should be put into MooCode or else made into hardcoded functions called via a do_evaluate()
 
-int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
-{
-	MooArgs args(2, thing, channel);
-
-	args.m_args->set(0, new MooNumber((long int) type));
-	args.m_args->set(1, new MooString(text));
-	return(this->call_method(channel, this->resolve_method("notify"), &args));
-}
-
-int MooThing::notifyf(int type, MooThing *thing, MooThing *channel, const char *fmt, ...)
-{
-	va_list va;
-	char buffer[LARGE_STRING_SIZE];
-
-	va_start(va, fmt);
-	vsnprintf(buffer, LARGE_STRING_SIZE, fmt, va);
-	return(this->notify(type, thing, channel, buffer));
-}
-
-int MooThing::notify(int type, MooArgs *args, const char *fmt, ...)
-{
-	va_list va;
-	char buffer2[LARGE_STRING_SIZE];
-
-	{
-		// TODO should you have this function with va? or should you have it without, or both?  Same for MooThing::expand_str
-		MooObjectHash *env;
-		char buffer1[LARGE_STRING_SIZE];
-
-		if (args)
-			env = args->make_env();
-		va_start(va, fmt);
-		vsnprintf(buffer1, LARGE_STRING_SIZE, fmt, va);
-		MooObject::format(buffer2, LARGE_STRING_SIZE, env, buffer1);
-		MOO_DECREF(env);
-	}
-	return(this->notify(type, args->m_user, args->m_channel, buffer2));
-}
-
-int MooThing::notify_all(int type, MooThing *thing, MooThing *channel, const char *text)
-{
-	MooThing *cur;
-
-	// TODO with the new channel system, this would be different depending on the type of channel...  Should both types
-	//	of channels be defined in C++? or a common channel C++ object with the specifics and actions different?
-
-	for (cur = this->contents(); cur; cur = cur->next()) {
-		cur->notify(type, thing, channel, text);
-	}
-	return(0);
-}
-
-int MooThing::notify_all_except(MooThing *except, int type, MooThing *thing, MooThing *channel, const char *text)
-{
-	MooThing *cur;
-
-	for (cur = this->contents(); cur; cur = cur->next()) {
-		if (cur != except)
-			cur->notify(type, thing, channel, text);
-	}
-	return(0);
-}
-
 int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
 {
 	if (!to)

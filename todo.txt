@@ -75,7 +75,6 @@
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
 	  cascade a line/col backwards into the event during execution.
-	* move everything out of actions/
 	* convert notify(args) to be notify(env) or something else instead
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)

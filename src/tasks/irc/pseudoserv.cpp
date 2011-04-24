@@ -308,7 +308,7 @@ int PseudoServ::dispatch(Msg *msg)
 			if (!channel)
 				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 			if (msg->m_last[0] == '.') {
-				res = channel->call_method(channel, "evaluate", &msg->m_last[1]);
+				res = channel->call_method(channel, "command", &msg->m_last[1]);
 				if (res == MOO_ACTION_NOT_FOUND)
 					this->notify(TNT_STATUS, NULL, channel, "Pardon?");
 			}

@@ -65,29 +65,20 @@ static int builder_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int channel_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	// TODO you could also just print a message like "Commands are not supported in this channel"
-	args->m_user->notify(TNT_STATUS, NULL, NULL, "Commands are not supported in this channel.");
-
-	// TODO should you check to make sure this doesn't loop?
-	//return(args->m_user->command(args->m_text));
-	return(0);
-}
-
-
 #define MAX_WORDS	256
 
-static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int realm_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int i = 0, j = 0;
 	const char *text;
-	MooObject *method;
+	MooObject *method, *user;
 	char *words[MAX_WORDS];
 	char buffer[LARGE_STRING_SIZE];
 	MooArgs *newargs;
 	MooObjectHash *newenv;
 
+	if (!(user = env->get("user")))
+		throw MooException("No user object set.");
 	text = args->m_args->get_string(0);
 	strncpy(buffer, text, LARGE_STRING_SIZE);
 	buffer[LARGE_STRING_SIZE] = '\0';
@@ -106,8 +97,8 @@ static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 		}
 	}
 
-	if (!(method = args->m_user->resolve_method(words[0]))) {
-		MooObject *location = args->m_user->resolve_property("location");
+	if (!(method = user->resolve_method(words[0]))) {
+		MooObject *location = user->resolve_property("location");
 		if (!(method = location->resolve_method(words[0]))) {
 			// TODO try to parse more and search the objects
 		}
@@ -118,7 +109,7 @@ static int realm_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 	newargs = new MooArgs();
 	newenv = new MooObjectHash(env);
 	newenv->set("argstr", new MooString(text));
-	frame->push_debug("> in realm_evaluate: %s", words[0]);
+	frame->push_debug("> in realm_command: %s", words[0]);
 	frame->push_call(newenv, method, newargs);
 	return(0);
 
@@ -168,9 +159,7 @@ int moo_load_basic_methods(MooObjectHash *env)
 {
 	env->set("user_notify", new MooFunc(user_notify));
 	env->set("builder_save", new MooFunc(builder_save));
-	// TODO what's a better name than evaluate
-	env->set("channel_evaluate", new MooFunc(channel_evaluate));
-	env->set("realm_evaluate", new MooFunc(realm_evaluate));
+	env->set("realm_command", new MooFunc(realm_command));
 	return(0);
 }
 

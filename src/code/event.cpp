@@ -115,11 +115,6 @@ int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
 {
 	MooObject *func;
 
-	// TODO the problem here is that you can't pass the frame to evaluate(), so you can't have MooCodeExpr::evaluate()
-	//	push the expr in the frame.  It *can* create a new frame, but in this case, it might as well be such that
-	//	all MooCode functions have to be actions and they are called through the action interface.  This still does
-	//	not deal with the need for MooCodeFunc so we still need evaluate().
-
 	if (!m_args || !(func = m_args->m_args->shift()))
 		throw MooException("Null function.");
 	func->evaluate(frame, m_env, m_args);
