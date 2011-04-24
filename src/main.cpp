@@ -13,9 +13,6 @@
 #include <sdm/code/code.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/interfaces/telnet.h>
-#include <sdm/interfaces/rpc.h>
-#include <sdm/tasks/rpc-server.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
 #include <sdm/objs/number.h>
@@ -67,8 +64,6 @@ int init_moo(void)
 		moo_load_basic_methods(global_env);
 
 		moo_object_register_type(&moo_tcp_obj_type);
-		moo_object_register_type(&moo_rpc_obj_type);
-		moo_object_register_type(&moo_rpc_server_obj_type);
 		moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 		init_thing();

@@ -24,7 +24,6 @@ OBJS =	colours.o	\
 	funcs/method.o	\
 	funcs/methods.o	\
 	interfaces/interface.o	\
-	interfaces/rpc.o	\
 	interfaces/tcp.o	\
 	objs/args.o	\
 	objs/array.o	\
@@ -36,7 +35,6 @@ OBJS =	colours.o	\
 	objs/string.o	\
 	objs/thingref.o	\
 	tasks/listener.o	\
-	tasks/rpc-server.o	\
 	tasks/task.o	\
 	tasks/irc/msg.o	\
 	tasks/irc/pseudoserv.o	\
@@ -86,17 +84,16 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/telnet.h \
-  ../include/sdm/interfaces/rpc.h ../include/sdm/tasks/rpc-server.h \
-  ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/things/user.h \
-  ../include/sdm/things/thing.h ../include/sdm/things/references.h \
-  ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/commands.h \
-  ../include/sdm/objs/thingref.h ../include/sdm/objs/config.h \
-  ../include/sdm/things/channel.h ../include/sdm/things/world.h
+  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/pseudoserv.h \
+  ../include/sdm/things/user.h ../include/sdm/things/thing.h \
+  ../include/sdm/things/references.h ../include/sdm/tasks/irc/msg.h \
+  ../include/sdm/tasks/irc/commands.h ../include/sdm/objs/thingref.h \
+  ../include/sdm/objs/config.h ../include/sdm/things/channel.h \
+  ../include/sdm/things/world.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h
@@ -109,8 +106,8 @@ code/code.o: code/code.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/event.o: code/event.cpp ../include/sdm/data.h \
@@ -121,8 +118,8 @@ code/event.o: code/event.cpp ../include/sdm/data.h \
   ../include/sdm/things/references.h ../include/sdm/code/code.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/expr.o: code/expr.cpp ../include/sdm/data.h ../include/sdm/globals.h \
@@ -132,9 +129,9 @@ code/expr.o: code/expr.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/things/references.h ../include/sdm/code/code.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
 
 code/frame.o: code/frame.cpp ../include/sdm/data.h \
@@ -145,9 +142,9 @@ code/frame.o: code/frame.cpp ../include/sdm/data.h \
   ../include/sdm/things/thing.h ../include/sdm/things/references.h \
   ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
 
 code/lambda.o: code/lambda.cpp ../include/sdm/globals.h \
@@ -157,8 +154,8 @@ code/lambda.o: code/lambda.cpp ../include/sdm/globals.h \
   ../include/sdm/code/code.h ../include/sdm/objs/hash.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/parser.o: code/parser.cpp ../include/sdm/data.h \
@@ -169,8 +166,8 @@ code/parser.o: code/parser.cpp ../include/sdm/data.h \
   ../include/sdm/objs/array.h ../include/sdm/things/references.h \
   ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 funcs/basic.o: funcs/basic.cpp ../include/sdm/data.h \
@@ -180,8 +177,8 @@ funcs/basic.o: funcs/basic.cpp ../include/sdm/data.h \
   ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
@@ -193,9 +190,9 @@ funcs/func.o: funcs/func.cpp ../include/sdm/globals.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
 
 funcs/method.o: funcs/method.cpp ../include/sdm/data.h \
@@ -205,24 +202,30 @@ funcs/method.o: funcs/method.cpp ../include/sdm/data.h \
   ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h
 
-funcs/methods.o: funcs/methods.cpp
+funcs/methods.o: funcs/methods.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
+  ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
+  ../include/sdm/things/references.h ../include/sdm/things/world.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/tasks/task.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
   ../include/sdm/objs/array.h ../include/sdm/interfaces/interface.h
-
-interfaces/rpc.o: interfaces/rpc.cpp ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/rpc.h
 
 interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
@@ -236,9 +239,9 @@ objs/args.o: objs/args.cpp ../include/sdm/globals.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/things/user.h \
   ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/things/thing.h ../include/sdm/things/references.h
@@ -249,9 +252,9 @@ objs/array.o: objs/array.cpp ../include/sdm/globals.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h
 
@@ -267,9 +270,9 @@ objs/hash.o: objs/hash.cpp ../include/sdm/globals.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h
 
@@ -288,10 +291,10 @@ objs/object.o: objs/object.cpp ../include/sdm/globals.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
   ../include/sdm/funcs/method.h ../include/sdm/code/code.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/number.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/tasks/task.h \
   ../include/sdm/things/thing.h ../include/sdm/things/references.h
 
@@ -315,13 +318,6 @@ tasks/listener.o: tasks/listener.cpp ../include/sdm/data.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
   ../include/sdm/tasks/listener.h
 
-tasks/rpc-server.o: tasks/rpc-server.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/rpc.h ../include/sdm/tasks/rpc-server.h
-
 tasks/task.o: tasks/task.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
@@ -341,8 +337,8 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp ../include/sdm/colours.h \
   ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/parser.h \
-  ../include/sdm/funcs/method.h ../include/sdm/code/event.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/msg.h \
@@ -367,10 +363,10 @@ things/thing.o: things/thing.cpp ../include/sdm/data.h \
   ../include/sdm/things/references.h ../include/sdm/things/world.h \
   ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/parser.h ../include/sdm/funcs/method.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
   ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
-  ../include/sdm/code/event.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
 
 things/user.o: things/user.cpp ../include/sdm/data.h \
