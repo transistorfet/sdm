@@ -227,8 +227,8 @@ int MooObject::read_entry(const char *type, MooDataFile *data)
 int MooObject::write_data(MooDataFile *data)
 {
 	// TODO i don't think this is right with owner, because when no owner is set, it uses the current user rather than -1
-	if (this->owner() != -1)
-		data->write_integer_entry("owner", this->owner());
+	//if (this->owner() != -1)
+	data->write_integer_entry("owner", this->owner());
 	if (this->permissions() != MOO_DEFAULT_PERMS)
 		data->write_octal_entry("permissions", this->permissions());
 	return(0);

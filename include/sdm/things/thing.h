@@ -10,7 +10,6 @@
 #include <stdarg.h>
 
 #include <sdm/hash.h>
-#include <sdm/tree.h>
 #include <sdm/data.h>
 #include <sdm/array.h>
 #include <sdm/objs/object.h>
@@ -48,8 +47,6 @@ class MooThing : public MooObject {
 
 	static MooThing *create(moo_id_t parent);
 	MooThing *clone();
-	// TODO should this be moved to moo_code??
-	static void add_global(const char *name, MooObject *obj);
 
     public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
@@ -112,7 +109,6 @@ extern MooObjectType moo_thing_obj_type;
 int init_thing(void);
 void release_thing(void);
 MooObject *moo_thing_create(void);
-
 
 inline int MooThing::is_a_thing(moo_id_t id)
 {

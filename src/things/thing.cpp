@@ -40,7 +40,6 @@ MooObjectType moo_thing_obj_type = {
 	(moo_type_create_t) moo_thing_create
 };
 
-MooObjectHash *moo_global_table = NULL;
 MooArray<MooThing *> *moo_thing_table = NULL;
 
 int init_thing(void)
@@ -48,16 +47,12 @@ int init_thing(void)
 	if (moo_thing_table)
 		return(1);
 	moo_object_register_type(&moo_thing_obj_type);
-	// TODO should the global table be read/written to a file?
-	moo_global_table = new MooObjectHash();
 	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
 	return(0);
 }
 
 void release_thing(void)
 {
-	if (moo_global_table)
-		delete moo_global_table;
 	if (moo_thing_table)
 		delete moo_thing_table;
 	moo_object_deregister_type(&moo_thing_obj_type);
@@ -247,11 +242,6 @@ MooThing *MooThing::clone()
 	return(thing);
 }
 */
-
-void MooThing::add_global(const char *name, MooObject *obj)
-{
-	moo_global_table->set(name, obj);
-}
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
@@ -457,7 +447,7 @@ MooThing *MooThing::reference(const char *name)
 	// TODO should we just get rid of this entirely?
 	else if (name[0] == '$') {
 		// TODO should we break up the reference??
-		MooObject *ref = moo_global_table->get(&name[1]);
+		MooObject *ref = global_env->get(&name[1]);
 		if (!ref)
 			return(NULL);
 		return(ref->get_thing());

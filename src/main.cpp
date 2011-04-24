@@ -71,13 +71,14 @@ int init_moo(void)
 
 		load_global_config();
 
-		MooThing::add_global("start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
-		MooThing::add_global("user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
-		MooThing::add_global("room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
-		MooThing::add_global("exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
-		MooThing::add_global("mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
-		MooThing::add_global("cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
-		MooThing::add_global("channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
+		// TODO what should we use as the name mangle to signify global values (@ isn't very good becuase it's used by funcs)
+		global_env->set("@start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
+		global_env->set("@user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
+		global_env->set("@room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
+		global_env->set("@exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
+		global_env->set("@mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
+		global_env->set("@cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
+		global_env->set("@channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());

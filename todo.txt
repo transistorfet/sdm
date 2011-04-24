@@ -72,9 +72,7 @@
 
 	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
 	  was written.
-	* add thrown exception somewhere on value not found (rather than default to NULL or something)
 	* fix realm_evaluate (object/target do_actions are disabled atm)
-	* consolidate/move the moo_global_table from thing into the code's global table?
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
 	  cascade a line/col backwards into the event during execution.
 	* move everything out of actions/

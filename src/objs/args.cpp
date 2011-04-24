@@ -64,57 +64,6 @@ void MooArgs::set_args(MooObjectArray *&args)
 	args = NULL;
 }
 
-int MooArgs::find_whitespace(const char *text)
-{
-	int i;
-
-	for (i = 0; text[i] != '\0' && !MOO_IS_WHITESPACE(text[i]); i++)
-		;
-	return(i);
-}
-
-int MooArgs::find_character(const char *text)
-{
-	int i;
-
-	for (i = 0; text[i] != '\0' && MOO_IS_WHITESPACE(text[i]); i++)
-		;
-	return(i);
-}
-
-const char *MooArgs::parse_word(char *buffer, int max, const char *text)
-{
-	char *remain;
-
-	strncpy(buffer, text, max);
-	buffer[max - 1] = '\0';
-	remain = MooArgs::parse_word(buffer);
-	return(&text[remain - buffer]);
-}
-
-char *MooArgs::parse_word(char *buffer)
-{
-	int i;
-
-	/// Get rid of any whitespace at the start of the string (??)
-	i = MooArgs::find_character(buffer);
-	if (buffer[i] == '\"') {
-		for (i++; buffer[i] != '\0' && buffer[i] != '\"'; i++)
-			;
-	}
-	else {
-		/// Find the first word, ending in a space, and isolate it
-		i += MooArgs::find_whitespace(&buffer[i]);
-	}
-
-	if (buffer[i] != '\0') {
-		buffer[i++] = '\0';
-		/// Find the start of the next word and return this as the arguments string
-		i += MooArgs::find_character(&buffer[i]);
-	}
-	return(&buffer[i]);
-}
-
 MooObject *MooArgs::access_property(const char *name, MooObject *value)
 {
 	if (!strcmp(name, "args")) {

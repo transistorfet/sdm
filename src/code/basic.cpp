@@ -335,6 +335,33 @@ static int basic_call_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 	return(frame->push_call(env, args->m_args->get(1), newargs));
 }
 
+static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	char buffer[STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	obj->to_string(buffer, STRING_SIZE);
+	throw MooException("%s", buffer);
+}
+
+/*
+
+(define move (lambda (obj location)
+	(define oldloc obj.location)
+	(if (not (location:acceptable obj))
+		(return))
+	(oldloc:exitfunc obj)
+	(oldloc.contents:remove obj)
+	(location.contents:add obj)
+	(define obj.location location)
+	(location:enterfunc obj)
+))
+
+*/
+
 int moo_load_code_basic(MooObjectHash *env)
 {
 	env->set("print", new MooCodeFunc(basic_print));
@@ -364,6 +391,7 @@ int moo_load_code_basic(MooObjectHash *env)
 	env->set("@clone", new MooCodeFunc(basic_clone));
 
 	env->set("call-method", new MooCodeFunc(basic_call_method));
+	env->set("throw", new MooCodeFunc(basic_throw));
 	return(0);
 }
 

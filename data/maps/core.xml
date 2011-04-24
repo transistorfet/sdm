@@ -50,11 +50,13 @@
 	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
     ]]></code>
    </entry>
-   <entry type="moofunc" key="print_view">
+   <entry type="moolambda" key="print_view">
     <owner>-1</owner>
     <permissions>075</permissions>
     <params></params>
-    <func>basics_print_view</func>
+    <code><![CDATA[
+	(user:notify 'status' nil channel (format "<b><lightblue>You see $this.name here."))
+    ]]></code>
    </entry>
    <entry type="moolambda" key="@eval">
     <owner>-1</owner>
@@ -63,12 +65,6 @@
     <code><![CDATA[
 	(@eval argstr)
     ]]></code>
-   </entry>
-   <entry type="moolambda" key="print_hi">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <code><![CDATA[(print #55.description)]]></code>
    </entry>
    <entry type="moolambda" key="print">
     <owner>-1</owner>
@@ -247,20 +243,6 @@
     <value>item</value>
    </entry>
   </properties>
-  <methods>
-   <entry type="moofunc" key="get">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>item_get</func>
-   </entry>
-   <entry type="moofunc" key="drop">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>item_drop</func>
-   </entry>
-  </methods>
  </thing>
  <thing>
   <id>10</id>

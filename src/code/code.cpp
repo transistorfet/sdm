@@ -25,8 +25,6 @@ extern int moo_load_code_basic(MooObjectHash *env);
 extern int moo_load_basic_actions(MooObjectHash *env);
 extern int moo_load_builder_actions(MooObjectHash *env);
 extern int moo_load_channel_actions(MooObjectHash *env);
-extern int moo_load_item_actions(MooObjectHash *env);
-extern int moo_load_mobile_actions(MooObjectHash *env);
 extern int moo_load_room_actions(MooObjectHash *env);
 extern int moo_load_user_actions(MooObjectHash *env);
 
@@ -46,8 +44,6 @@ int init_moo_code(void)
 	moo_load_basic_actions(global_env);
 	moo_load_builder_actions(global_env);
 	moo_load_channel_actions(global_env);
-	moo_load_item_actions(global_env);
-	moo_load_mobile_actions(global_env);
 	moo_load_room_actions(global_env);
 	moo_load_user_actions(global_env);
 	return(0);

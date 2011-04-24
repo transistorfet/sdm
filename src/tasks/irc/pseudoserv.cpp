@@ -580,20 +580,21 @@ int PseudoServ::send_names(const char *name)
 
 int PseudoServ::send_who(const char *mask)
 {
-	MooThing *cur;
+	MooObject *cur;
 	const char *thing_name;
+	MooObjectArray *contents;
 
 	// TODO convert this to a generic channel method
 	if (!strcmp(mask, "#realm")) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
-		cur = m_user->location();
-		if (cur)
-			cur = cur->contents();
-		for (; cur; cur = cur->next()) {
-			// TODO we should check that things are invisible, and also add @ for wizards or something
-			if ((thing_name = cur->name())) {
-				Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
+		if ((cur = m_user->resolve_property("location")) && (contents = dynamic_cast<MooObjectArray *>(cur->resolve_property("contents")))) {
+			for (int i = 0; i <= contents->last(); i++) {
+				cur = contents->get(i);
+				// TODO we should check that things are invisible, and also add @ for wizards or something
+				if ((cur = cur->resolve_property("name")) && (thing_name = cur->get_string())) {
+					Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
+				}
 			}
 		}
 	}

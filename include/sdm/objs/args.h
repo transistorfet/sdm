@@ -57,11 +57,6 @@ class MooArgs : public MooObject {
 	void init(MooThing *user, MooThing *channel, MooObject *thing = NULL);
 	void set_args(MooObjectArray *&args);
 
-	static int find_whitespace(const char *text);
-	static int find_character(const char *text);
-	static const char *parse_word(char *buffer, int max, const char *text);
-	static char *parse_word(char *buffer);
-
 	MooObjectHash *make_env(MooObjectHash *env = NULL);
 
     private:

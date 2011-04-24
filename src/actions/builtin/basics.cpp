@@ -29,7 +29,7 @@ static int basics_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	// TODO should this be the typical way you reference arguments?
 	// TODO i don't really like this, with the type reference...
-	args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
+	//args->m_user->notify(TNT_STATUS, args, args->m_args->get_string(0));
 	return(0);
 }
 
@@ -49,8 +49,8 @@ static int basics_look_self(MooCodeFrame *frame, MooObjectHash *env, MooArgs *ar
 	MooString *str;
 
 	// TODO this should somehow check if title and description exist and don't print the message if it doesn't exist
-	args->m_user->notify(TNT_STATUS, args, "<yellow>$this.title");
-	args->m_user->notify(TNT_STATUS, args, "<lightgreen>$this.description");
+	//args->m_user->notify(TNT_STATUS, args, "<yellow>$this.title");
+	//args->m_user->notify(TNT_STATUS, args, "<lightgreen>$this.description");
 	/// Print the views of all objects contained in the target
 	//for (cur = args->m_this->contents(); cur; cur = cur->next()) {
 	//	if (cur == args->m_user)
