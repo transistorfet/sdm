@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <sdm/misc.h>
 #include <sdm/colours.h>
 #include <sdm/globals.h>
 

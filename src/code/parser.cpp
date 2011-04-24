@@ -7,11 +7,9 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
+
 #include <sdm/objs/object.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>

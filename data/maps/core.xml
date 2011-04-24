@@ -141,29 +141,10 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="init">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>user_init</func>
-   </entry>
-   <entry type="moofunc" key="passwd">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>user_passwd</func>
-   </entry>
    <entry type="moofunc" key="notify">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params><![CDATA[&all]]></params>
     <func>user_notify</func>
-   </entry>
-   <entry type="moofunc" key="inv">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>user_inventory</func>
    </entry>
   </methods>
  </thing>
@@ -186,46 +167,9 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="teleport">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>builder_teleport</func>
-   </entry>
-   <entry type="moofunc" key="@create">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>builder_create</func>
-   </entry>
-   <entry type="moofunc" key="@add_exit">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>builder_add_exit</func>
-   </entry>
-   <entry type="moofunc" key="@dig">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>builder_dig</func>
-   </entry>
-   <entry type="moofunc" key="@info">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>builder_info</func>
-   </entry>
-   <entry type="moofunc" key="@set">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>builder_set</func>
-   </entry>
    <entry type="moofunc" key="@save">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params></params>
     <func>builder_save</func>
    </entry>
   </methods>
@@ -286,36 +230,6 @@
     <params></params>
     <code><![CDATA[(this:go 'down')]]></code>
    </entry>
-   <entry type="moofunc" key="accept">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>room_accept</func>
-   </entry>
-   <entry type="moolambda" key="do_enter">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>room_do_enter</func>
-   </entry>
-   <entry type="moofunc" key="do_leave">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>room_do_exit</func>
-   </entry>
-   <entry type="moofunc" key="look">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>[s]</params>
-    <func>room_look</func>
-   </entry>
-   <entry type="moofunc" key="emote">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>s</params>
-    <func>room_emote</func>
-   </entry>
    <entry type="moolambda" key="s">
     <owner>-1</owner>
     <permissions>075</permissions>
@@ -342,12 +256,6 @@
 	(this.contents:foreach (lambda (cur)
 		(cur:notify 'say' user channel text)))
     ]]></code>
-   </entry>
-   <entry type="moofunc" key="whisper">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>s</params>
-    <func>room_whisper</func>
    </entry>
    <entry type="moolambda" key="go">
     <owner>-1</owner>
@@ -377,24 +285,6 @@
     <value>an exit</value>
    </entry>
   </properties>
-  <methods>
-   <entry type="moofunc" key="go">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>basics_go</func>
-   </entry>
-   <entry type="moofunc" key="move">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params>t</params>
-    <func>basics_go</func>
-   </entry>
-   <entry type="moofunc" key="print_view">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-   </entry>
-  </methods>
  </thing>
  <thing>
   <id>12</id>
@@ -429,12 +319,6 @@
    </entry>
   </properties>
   <methods>
-   <entry type="moofunc" key="init">
-    <owner>-1</owner>
-    <permissions>075</permissions>
-    <params></params>
-    <func>channel_init</func>
-   </entry>
    <entry type="moolambda" key="join">
     <owner>-1</owner>
     <permissions>075</permissions>
@@ -504,7 +388,6 @@
    <entry type="moofunc" key="evaluate">
     <owner>-1</owner>
     <permissions>075</permissions>
-    <params>s</params>
     <func>channel_evaluate</func>
    </entry>
   </methods>
@@ -573,24 +456,6 @@
 	($cryolocker:fetch user)	; I have no idea how this would work
      ]]></code>
     </entry>
-    <entry type="moofunc" key="join">
-     <owner>-1</owner>
-     <permissions>075</permissions>
-     <params></params>
-     <func>realm_join</func>
-    </entry>
-    <entry type="moofunc" key="leave">
-     <owner>-1</owner>
-     <permissions>075</permissions>
-     <params></params>
-     <func>realm_leave</func>
-    </entry>
-    <entry type="moofunc" key="quit">
-     <owner>-1</owner>
-     <permissions>075</permissions>
-     <params></params>
-     <func>realm_quit</func>
-    </entry>
     <entry type="moolambda" key="say">
      <owner>-1</owner>
      <permissions>075</permissions>
@@ -607,16 +472,9 @@
 	(user.location:emote text)
      ]]></code>
     </entry>
-    <entry type="moofunc" key="names">
-     <owner>-1</owner>
-     <permissions>075</permissions>
-     <params></params>
-     <func>realm_names</func>
-    </entry>
     <entry type="moofunc" key="evaluate">
      <owner>-1</owner>
      <permissions>075</permissions>
-     <params>s</params>
      <func>realm_evaluate</func>
     </entry>
    </methods>

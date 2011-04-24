@@ -8,15 +8,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include <sdm/globals.h>
+
+#include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/irc/commands.h>
 #include <sdm/tasks/irc/msg.h>
-
-#include <sdm/misc.h>
-#include <sdm/hash.h>
-#include <sdm/globals.h>
 
 using namespace MooIRC;
 

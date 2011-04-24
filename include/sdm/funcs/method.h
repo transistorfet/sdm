@@ -1,12 +1,11 @@
 /*
  * Header Name:	method.h
- * Description:	MooCode Action Header
+ * Description:	Methodifying Object Header
  */
 
-#ifndef _SDM_ACTIONS_METHOD_H
-#define _SDM_ACTIONS_METHOD_H
+#ifndef _SDM_FUNCS_METHOD_H
+#define _SDM_FUNCS_METHOD_H
 
-#include <sdm/hash.h>
 #include <sdm/globals.h>
 #include <sdm/code/code.h>
 #include <sdm/objs/object.h>

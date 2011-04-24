@@ -8,7 +8,6 @@
 #define _SDM_HASH_H
 
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 
@@ -114,7 +113,7 @@ MooHash<T>::MooHash(int size, int bits, void (*destroy)(T))
 	m_size = size;
 	m_entries = 0;
 	m_destroy = destroy;
-	if (!(m_table = (MooHashEntry<T> **) memory_alloc(m_size * sizeof(MooHashEntry<T> *))))
+	if (!(m_table = (MooHashEntry<T> **) malloc(m_size * sizeof(MooHashEntry<T> *))))
 		throw moo_mem_error;
 	memset(m_table, '\0', m_size * sizeof(MooHashEntry<T> *));
 }
@@ -135,7 +134,7 @@ MooHash<T>::~MooHash()
 			cur = next;
 		}
 	}
-	memory_free(m_table);
+	free(m_table);
 }
 
 template<typename T>
@@ -159,7 +158,7 @@ int MooHash<T>::set(const char *key, T data)
 		}
 	}
 
-	if (!(entry =  (MooHashEntry<T> *) memory_alloc(sizeof(MooHashEntry<T>) + strlen(key) + 1)))
+	if (!(entry =  (MooHashEntry<T> *) malloc(sizeof(MooHashEntry<T>) + strlen(key) + 1)))
 		return(-1);
 	entry->m_key = (char *) (entry + 1);
 	strcpy(entry->m_key, key);
@@ -195,7 +194,7 @@ int MooHash<T>::remove(const char *key)
 				m_table[hash] = cur->m_next;
 			if (m_bits & MOO_HBF_DELETE && m_destroy)
 				m_destroy(cur->m_data);
-			memory_free(cur);
+			free(cur);
 			m_entries--;
 			return(0);
 		}
@@ -291,7 +290,7 @@ int MooHash<T>::rehash(int newsize)
 	MooHashEntry<T> **newtable;
 	MooHashEntry<T> *cur, *next;
 
-	if (!(newtable = (MooHashEntry<T> **) memory_alloc(newsize * sizeof(MooHashEntry<T> *))))
+	if (!(newtable = (MooHashEntry<T> **) malloc(newsize * sizeof(MooHashEntry<T> *))))
 		return(-1);
 	memset(newtable, '\0', newsize * sizeof(MooHashEntry<T> *));
 	oldsize = m_size;
@@ -306,7 +305,7 @@ int MooHash<T>::rehash(int newsize)
 			cur = next;
 		}
 	}
-	memory_free(m_table);
+	free(m_table);
 	m_table = newtable;
 	return(0);
 }

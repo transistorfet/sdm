@@ -1,24 +1,23 @@
 /*
  * Name:	method.cpp
- * Description:	MooCode Action
+ * Description:	Methodifying Object
  */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/code/code.h>
+
+#include <sdm/objs/hash.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thingref.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/actions/method.h>
+#include <sdm/funcs/method.h>
 
 MooObjectType moo_method_obj_type = {
 	NULL,

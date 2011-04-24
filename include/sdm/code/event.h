@@ -6,11 +6,12 @@
 #ifndef _SDM_CODE_EVENT_H
 #define _SDM_CODE_EVENT_H
 
-#include <sdm/array.h>
 #include <sdm/globals.h>
+#include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
 
 #include <sdm/code/expr.h>
+#include <sdm/code/parser.h>
 
 class MooCodeEvent;
 class MooCodeFrame;

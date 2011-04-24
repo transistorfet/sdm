@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/misc.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
 

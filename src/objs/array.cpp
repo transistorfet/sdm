@@ -6,14 +6,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
 #include <sdm/code/code.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/array.h>
+#include <sdm/objs/array.h>
 
 struct MooObjectType moo_array_obj_type = {
 	NULL,
@@ -358,17 +357,17 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 void moo_load_array_methods(MooObjectHash *env)
 {
-	env->set("get", new MooCodeFunc(array_get, "&all"));
-	env->set("set", new MooCodeFunc(array_set, "&all"));
-	env->set("remove", new MooCodeFunc(array_remove, "&all"));
-	env->set("push", new MooCodeFunc(array_push, "&all"));
-	env->set("pop", new MooCodeFunc(array_pop, "&all"));
-	env->set("shift", new MooCodeFunc(array_shift, "&all"));
-	env->set("unshift", new MooCodeFunc(array_unshift, "&all"));
-	env->set("insert", new MooCodeFunc(array_insert, "&all"));
-	env->set("splice", new MooCodeFunc(array_splice, "&all"));
+	env->set("get", new MooFunc(array_get));
+	env->set("set", new MooFunc(array_set));
+	env->set("remove", new MooFunc(array_remove));
+	env->set("push", new MooFunc(array_push));
+	env->set("pop", new MooFunc(array_pop));
+	env->set("shift", new MooFunc(array_shift));
+	env->set("unshift", new MooFunc(array_unshift));
+	env->set("insert", new MooFunc(array_insert));
+	env->set("splice", new MooFunc(array_splice));
 
-	env->set("search", new MooCodeFunc(array_search, "&all"));
-	env->set("foreach", new MooCodeFunc(array_foreach, "&all"));
+	env->set("search", new MooFunc(array_search));
+	env->set("foreach", new MooFunc(array_foreach));
 }
 

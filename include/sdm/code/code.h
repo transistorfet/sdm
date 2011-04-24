@@ -10,14 +10,16 @@
 
 #include <sdm/objs/object.h>
 
-#include <sdm/hash.h>
-#include <sdm/array.h>
+#include <sdm/objs/hash.h>
+#include <sdm/objs/array.h>
 #include <sdm/objs/nil.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 
-#include <sdm/code/func.h>
+#include <sdm/funcs/func.h>
+#include <sdm/funcs/method.h>
+
 #include <sdm/code/expr.h>
 #include <sdm/code/event.h>
 #include <sdm/code/frame.h>

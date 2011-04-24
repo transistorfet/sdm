@@ -7,7 +7,6 @@
 #define _MOO_DATA_H
 
 #include <sdm/globals.h>
-#include <sdm/misc.h>
 #include <libxml/tree.h>
 #include <libxml/xmlwriter.h>
 
@@ -17,7 +16,7 @@
 
 class MooDataFile {
     private:
-	string_t filename;
+	char *filename;
 	xmlDoc *doc;
 	xmlNode *root;
 	xmlNode *current;

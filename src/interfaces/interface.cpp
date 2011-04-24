@@ -12,11 +12,10 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
-#include <sdm/array.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 
 #include <sdm/tasks/task.h>
+#include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 

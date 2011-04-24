@@ -6,7 +6,6 @@
 #ifndef _SDM_CODE_PARSER_H
 #define _SDM_CODE_PARSER_H
 
-#include <sdm/array.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 

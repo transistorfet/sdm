@@ -7,12 +7,10 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <sdm/misc.h>
 #include <sdm/data.h>
-#include <sdm/hash.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 
+#include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/task.h>

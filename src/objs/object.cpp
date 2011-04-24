@@ -6,17 +6,15 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/misc.h>
-#include <sdm/hash.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
-
+#include <sdm/objs/hash.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
+#include <sdm/funcs/func.h>
+#include <sdm/funcs/method.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/thing.h>
-#include <sdm/actions/method.h>
 
 #include <sdm/code/code.h>
 

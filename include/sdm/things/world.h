@@ -10,7 +10,6 @@
 #include <stdarg.h>
 
 #include <sdm/data.h>
-#include <sdm/misc.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/thing.h>
 

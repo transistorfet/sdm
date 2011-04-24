@@ -5,14 +5,13 @@
 
 #include <stdarg.h>
 
-#include <sdm/hash.h>
-#include <sdm/array.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
 #include <sdm/code/code.h>
 
+#include <sdm/objs/hash.h>
+#include <sdm/objs/array.h>
 #include <sdm/things/user.h>
 
 #define MOO_IS_WHITESPACE(ch)	( (ch) == ' ' || (ch) == '\n' || (ch) == '\r' )

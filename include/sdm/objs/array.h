@@ -7,7 +7,6 @@
 #define _SDM_ARRAY_H
 
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 
@@ -114,7 +113,7 @@ MooArray<T>::~MooArray()
 				m_destroy(m_data[i]);
 		}
 	}
-	memory_free(m_data);
+	free(m_data);
 }
 
 template<typename T>
@@ -286,7 +285,7 @@ int MooArray<T>::resize(int size)
 	if (size == m_size)
 		return(-1);
 
-	if (!(newdata = (T *) memory_realloc(m_data, size * sizeof(T))))
+	if (!(newdata = (T *) realloc(m_data, size * sizeof(T))))
 		throw moo_mem_error;
 	m_data = newdata;
 	memset(&m_data[m_size], '\0', (size - m_size) * sizeof(T));

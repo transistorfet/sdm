@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/array.h>
+#include <sdm/objs/hash.h>
+#include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
 #include <sdm/things/references.h>
 

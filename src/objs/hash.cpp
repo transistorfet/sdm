@@ -6,14 +6,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/exception.h>
 
 #include <sdm/code/code.h>
 
 #include <sdm/things/thing.h>
-#include <sdm/hash.h>
+#include <sdm/objs/hash.h>
 
 struct MooObjectType moo_hash_obj_type = {
 	NULL,
@@ -239,9 +238,9 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 void moo_load_hash_methods(MooObjectHash *env)
 {
-	env->set("get", new MooCodeFunc(hash_get));
-	env->set("set", new MooCodeFunc(hash_set));
-	env->set("remove", new MooCodeFunc(hash_remove));
+	env->set("get", new MooFunc(hash_get));
+	env->set("set", new MooFunc(hash_set));
+	env->set("remove", new MooFunc(hash_remove));
 }
 
 

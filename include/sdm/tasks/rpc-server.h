@@ -9,7 +9,6 @@
 #include <string>
 #include <stdarg.h>
 
-#include <sdm/misc.h>
 #include <sdm/data.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>

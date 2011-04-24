@@ -19,12 +19,10 @@
 #include <sys/select.h>
 #include <netinet/in.h>
 
+#include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
-
-#include <sdm/misc.h>
-#include <sdm/globals.h>
 
 #ifndef TCP_CONNECT_ATTEMPTS
 #define TCP_CONNECT_ATTEMPTS		3

@@ -7,11 +7,11 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/misc.h>
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
+
+#include <sdm/objs/hash.h>
+#include <sdm/objs/array.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
@@ -124,7 +124,6 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 
 int MooCodeFrame::run(int level)
 {
-	int res;
 	MooObjectHash *base;
 	MooCodeEvent *event;
 
@@ -139,7 +138,7 @@ int MooCodeFrame::run(int level)
 			continue;
 		try {
 			this->env(event->env());
-			res = event->do_event(this);
+			event->do_event(this);
 		}
 		catch (MooException e) {
 			int line, col;
@@ -160,8 +159,6 @@ int MooCodeFrame::run(int level)
 			throw m_exception;
 		}
 		delete event;
-		if (res < 0)
-			return(res);
 	}
 	this->env(base);
 	return(0);

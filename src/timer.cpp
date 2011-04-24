@@ -6,7 +6,6 @@
 #include <time.h>
 
 #include <sdm/timer.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 
 class MooTimer *timer_list = NULL;

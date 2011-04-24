@@ -6,8 +6,6 @@
 #include <stdarg.h>
 
 #include <sdm/data.h>
-#include <sdm/misc.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>

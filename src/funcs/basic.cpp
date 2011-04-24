@@ -1,5 +1,5 @@
 /*
- * Name:	basic.c
+ * Name:	basic.cpp
  * Description:	Basic Functions
  */
 
@@ -7,9 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/misc.h>
 #include <sdm/data.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
@@ -362,36 +360,36 @@ static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 */
 
-int moo_load_code_basic(MooObjectHash *env)
+int moo_load_basic_funcs(MooObjectHash *env)
 {
-	env->set("print", new MooCodeFunc(basic_print));
-	env->set("format", new MooCodeFunc(basic_format));
+	env->set("print", new MooFunc(basic_print));
+	env->set("format", new MooFunc(basic_format));
 
-	env->set("+", new MooCodeFunc(basic_add, "&all"));
-	env->set("-", new MooCodeFunc(basic_subtract, "&all"));
-	env->set("*", new MooCodeFunc(basic_multiply, "&all"));
-	env->set("/", new MooCodeFunc(basic_divide, "&all"));
+	env->set("+", new MooFunc(basic_add));
+	env->set("-", new MooFunc(basic_subtract));
+	env->set("*", new MooFunc(basic_multiply));
+	env->set("/", new MooFunc(basic_divide));
 
-	env->set("null", new MooCodeFunc(basic_null, "&all"));
-	env->set("eqv", new MooCodeFunc(basic_eqv, "&all"));
-	env->set("=", new MooCodeFunc(basic_equal, "&all"));
-	env->set("!=", new MooCodeFunc(basic_not_equal, "&all"));
-	//env->set(">", new MooCodeFunc(basic_gt));
-	//env->set(">=", new MooCodeFunc(basic_ge));
-	//env->set("<", new MooCodeFunc(basic_lt));
-	//env->set("<=", new MooCodeFunc(basic_le));
+	env->set("null", new MooFunc(basic_null));
+	env->set("eqv", new MooFunc(basic_eqv));
+	env->set("=", new MooFunc(basic_equal));
+	env->set("!=", new MooFunc(basic_not_equal));
+	//env->set(">", new MooFunc(basic_gt));
+	//env->set(">=", new MooFunc(basic_ge));
+	//env->set("<", new MooFunc(basic_lt));
+	//env->set("<=", new MooFunc(basic_le));
 
-	env->set("concat", new MooCodeFunc(basic_concat, "&all"));
+	env->set("concat", new MooFunc(basic_concat));
 
-	env->set("array", new MooCodeFunc(basic_array));
-	env->set("hash", new MooCodeFunc(basic_hash));
+	env->set("array", new MooFunc(basic_array));
+	env->set("hash", new MooFunc(basic_hash));
 
-	env->set("@eval", new MooCodeFunc(basic_eval));
-	env->set("@load", new MooCodeFunc(basic_load));
-	env->set("@clone", new MooCodeFunc(basic_clone));
+	env->set("@eval", new MooFunc(basic_eval));
+	env->set("@load", new MooFunc(basic_load));
+	env->set("@clone", new MooFunc(basic_clone));
 
-	env->set("call-method", new MooCodeFunc(basic_call_method));
-	env->set("throw", new MooCodeFunc(basic_throw));
+	env->set("call-method", new MooFunc(basic_call_method));
+	env->set("throw", new MooFunc(basic_throw));
 	return(0);
 }
 

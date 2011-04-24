@@ -7,9 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/memory.h>
 #include <sdm/globals.h>
-
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
@@ -41,7 +39,7 @@ MooString::MooString(const char *fmt, ...)
 
 MooString::~MooString()
 {
-	memory_free(m_str);
+	free(m_str);
 }
 
 int MooString::read_entry(const char *type, MooDataFile *data)
@@ -78,14 +76,14 @@ int MooString::to_string(char *buffer, int max)
 int MooString::set(const char *str)
 {
 	if (m_str)
-		memory_free(m_str);
+		free(m_str);
 	if (!str) {
 		m_str = "";
 		return(0);
 	}
 
 	m_len = strlen(str);
-	if (!(m_str = (char *) memory_alloc(m_len + 1))) {
+	if (!(m_str = (char *) malloc(m_len + 1))) {
 		m_len = 0;
 		return(-1);
 	}

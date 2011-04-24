@@ -5,25 +5,24 @@
 
 #include <stdarg.h>
 
-#include <sdm/hash.h>
 #include <sdm/data.h>
-#include <sdm/misc.h>
-#include <sdm/array.h>
-#include <sdm/memory.h>
 #include <sdm/globals.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/user.h>
 #include <sdm/things/world.h>
 
+#include <sdm/objs/hash.h>
+#include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/thingref.h>
+#include <sdm/funcs/func.h>
+#include <sdm/funcs/method.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
-#include <sdm/actions/method.h>
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 #define THING_PROPERTIES_SIZE		5

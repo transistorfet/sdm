@@ -9,13 +9,11 @@
 #include <libxml/xmlwriter.h>
 
 #include <sdm/data.h>
-#include <sdm/misc.h>
-#include <sdm/memory.h>
 
 #define IS_WHITESPACE(ch)	\
 	( ((ch) == ' ') || ((ch) == '\t') || ((ch) == '\n') || ((ch) == '\r') )
 
-static string_t data_path = NULL;
+static char *data_path = NULL;
 
 static int moo_data_strip_copy(char *, const char *, int);
 
@@ -30,10 +28,24 @@ void release_data(void)
 	xmlCleanupParser();
 }
 
+static char *make_string(char *fmt, ...)
+{
+	char *str;
+	va_list va;
+	char buffer[STRING_SIZE];
+
+	va_start(va, fmt);
+	vsnprintf(buffer, STRING_SIZE, fmt, va);
+	if (!(str = (char *) malloc(strlen(buffer) + 1)))
+		return(NULL);
+	strcpy(str, buffer);
+	return(str);
+}
+
 int moo_set_data_path(const char *path)
 {
 	if (data_path)
-		memory_free(data_path);
+		free(data_path);
 	if (!(data_path = make_string("%s/", path)))
 		return(-1);
 	return(0);
@@ -121,7 +133,7 @@ MooDataFile::~MooDataFile()
 		xmlBufferFree(this->buffer);
 	}
 	if (this->filename)
-		memory_free(this->filename);
+		free(this->filename);
 	if (this->doc)
 		xmlFreeDoc(this->doc);
 }

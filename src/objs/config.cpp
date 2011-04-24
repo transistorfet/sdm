@@ -7,9 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <sdm/memory.h>
 #include <sdm/globals.h>
-
 #include <sdm/objs/object.h>
 #include <sdm/objs/config.h>
 #include <sdm/tasks/listener.h>

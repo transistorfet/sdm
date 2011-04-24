@@ -8,8 +8,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <sdm/misc.h>
-#include <sdm/memory.h>
 #include <sdm/exception.h>
 
 #define EXCEPTION_STRING	256
