@@ -22,7 +22,7 @@ OBJS =	colours.o	\
 	funcs/basic.o	\
 	funcs/func.o	\
 	funcs/method.o	\
-	funcs/methods.o	\
+	funcs/things.o	\
 	interfaces/interface.o	\
 	interfaces/tcp.o	\
 	objs/args.o	\
@@ -208,7 +208,7 @@ funcs/method.o: funcs/method.cpp ../include/sdm/data.h \
   ../include/sdm/objs/thingref.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h
 
-funcs/methods.o: funcs/methods.cpp ../include/sdm/data.h \
+funcs/things.o: funcs/things.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/code/code.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/objs/hash.h \
@@ -296,7 +296,8 @@ objs/object.o: objs/object.cpp ../include/sdm/globals.h \
   ../include/sdm/code/expr.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/tasks/task.h \
-  ../include/sdm/things/thing.h ../include/sdm/things/references.h
+  ../include/sdm/things/thing.h ../include/sdm/things/references.h \
+  ../include/sdm/things/user.h ../include/sdm/interfaces/interface.h
 
 objs/string.o: objs/string.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/args.h \

@@ -34,7 +34,7 @@ int serverloop(void);
 static void handle_sigint(int);
 
 extern int moo_load_basic_funcs(MooObjectHash *env);
-extern int moo_load_basic_methods(MooObjectHash *env);
+extern int moo_load_thing_methods(MooObjectHash *env);
 
 int init_moo(void)
 {
@@ -61,7 +61,7 @@ int init_moo(void)
 		init_moo_code();
 
 		moo_load_basic_funcs(global_env);
-		moo_load_basic_methods(global_env);
+		moo_load_thing_methods(global_env);
 
 		moo_object_register_type(&moo_tcp_obj_type);
 		moo_object_register_type(&moo_irc_pseudoserv_obj_type);

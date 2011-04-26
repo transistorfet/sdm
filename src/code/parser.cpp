@@ -185,6 +185,16 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char lineb
 			if (!(obj = expr->value()))
 				return(0);
 			if (dynamic_cast<MooString *>(obj)) {
+				// TODO this really isn't very good.  We don't check and convert control codes to escape characters
+				//	and we don't preserve the original quotes.  Do we even need 2 kinds of quoted strings??
+				//	Should there be a format/context arg passed to to_string??  We haven't been very consistent in
+				//	our use of to_string versus get_string
+				// TODO a possible solution is to not use an object here but to use a real string or number since those
+				//	should be the only object types we ever find here (unless of course we want to generate some
+				//	kind of bizzare intermediate code, but we should never have to do that... I can't think of why
+				//	we ever would...)  Oh, or it could be MooCodeExpr the way we have things, because when we
+				//	have an MCT_CALL type, it uses the object member to store the expression, but again, if it's a
+				//	call type, we should never have anything *except* MooCodeExpr there
 				buffer[i++] = '\'';
 				i += obj->to_string(&buffer[i], max - i);
 				buffer[i++] = '\'';

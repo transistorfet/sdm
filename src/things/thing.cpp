@@ -208,39 +208,6 @@ int MooThing::write_data(MooDataFile *data)
 	return(0);
 }
 
-/*
-// TODO you should probably move these to basics.cpp or builder.cpp, or make them accept user/channel args
-MooThing *MooThing::create(moo_id_t parent)
-{
-	MooThing *thing;
-
-	// TODO how do we know if this fails?  we should destroy the object if it does
-	// TODO check if current task owner has create permissions
-	thing = new MooThing(MOO_NEW_ID, parent);
-	thing->init();
-	thing->moveto(thing->owner_thing());
-	return(thing);
-}
-
-MooThing *MooThing::clone()
-{
-	MooThing *thing;
-
-	// TODO check if current task owner has create permissions
-	// TODO check if the parent object is cloneable
-	thing = new MooThing(MOO_NEW_ID, m_parent);
-	// TODO how do we know if this fails?  we should destroy the object if it does
-
-	// TODO copy all properties
-	// TODO copy all actions
-
-	//thing->permissions(THING_DEFAULT_PERMISSIONS);
-	// TODO do we call init at any point??
-
-	thing->moveto(thing->owner_thing());
-	return(thing);
-}
-*/
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
@@ -352,21 +319,6 @@ MooObject *MooThing::get_method(const char *name)
 	return(NULL);
 }
 
-int MooThing::convert_result(MooObject *&result, int def)
-{
-	int res;
-
-	if (result) {
-		res = result->get_integer();
-		MOO_DECREF(result);
-		result = NULL;
-	}
-	else
-		res = def;
-	return(res);
-}
-
-
 ///// Search Methods /////
 
 MooThing *MooThing::find(const char *name)
@@ -455,51 +407,6 @@ MooThing *MooThing::reference(const char *name)
 }
 
 ///// Helper Methods /////
-
-// TODO all these helper functions should be put into MooCode or else made into hardcoded functions called via a do_evaluate()
-
-int MooThing::moveto(MooThing *user, MooThing *channel, MooThing *to)
-{
-	if (!to)
-		return(-1);
-	if (to == m_location)
-		return(0);
-	try {
-		{
-			MooArgs *args = new MooArgs();
-			args->m_args->set(0, new MooThingRef(m_id));
-			if (to->call_method(channel, to->resolve_method("accept"), args) < 0)
-				return(-1);
-			if (MooThing::convert_result(args->m_result) != 1)
-				return(1);
-			MOO_DECREF(args);
-		}
-
-		if (m_location) {
-			MooArgs *args = new MooArgs();
-			args->m_args->set(0, new MooThingRef(m_id));
-			if (m_location->call_method(channel, m_location->resolve_method("do_exit"), args) < 0)
-				return(-1);
-			if (MooThing::convert_result(args->m_result) < 0)
-				return(1);
-			MOO_DECREF(args);
-		}
-
-		if (to->add(this) < 0)
-			return(1);
-
-		if (m_location) {
-			MooArgs *args = new MooArgs();
-			args->m_args->set(0, new MooThingRef(m_id));
-			return(m_location->call_method(channel, m_location->resolve_method("do_enter"), args));
-		}
-		return(0);
-	}
-	catch (...) {
-		// TODO print error
-		return(-1);
-	}
-}
 
 int MooThing::attach_orphans()
 {
@@ -611,6 +518,32 @@ const char *MooThing::name()
 	if (!name)
 		return("???");
 	return(name);
+}
+
+MooThing *MooThing::location()
+{
+	MooObject *obj;
+	if (!(obj = this->resolve_property("contents")))
+		return(NULL);
+	// TODO should all get_things be turned in to dynamic casts when we get rid of thingref?
+	return(obj->get_thing());
+}
+
+int MooThing::move(MooThing *where)
+{
+	MooThing *was;
+	MooObjectArray *contents;
+
+	this->check_throw(MOO_PERM_W);
+	if ((was = this->location()) && (contents = was->contents()))
+		contents->remove(this);
+	if ((contents = where->contents())) {
+		// TODO do you need to check permissions on the contents array to be sure you can write to them?
+		if (contents->add(this) < 0)
+			return(-1);
+		this->resolve_property("location", where);
+	}
+	return(0);
 }
 
 

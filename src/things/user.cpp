@@ -110,11 +110,10 @@ MooUser *MooUser::make_guest(const char *name)
 		throw moo_thing_not_found;
 	user = new MooUser(name, MOO_UBF_GUEST, MOO_NEW_ID, parent->id());
 	user->resolve_property("name", new MooString(name));
-	//user->init();
 	user->owner(user->m_id);
 	user->resolve_property("description", new MooString("You see a new person who looks rather out-of-place."));
 	// TODO is this the correct way to moving a user to the starting location?
-	user->moveto(user, NULL, MooThing::reference(MOO_START_ROOM));
+	//user->moveto(user, NULL, MooThing::reference(MOO_START_ROOM));
 	return(user);
 }
 

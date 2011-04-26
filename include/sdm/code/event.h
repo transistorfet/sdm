@@ -59,13 +59,13 @@ class MooCodeEvent {
 
 class MooCodeEventEvalExpr : public MooCodeEvent {
     public:
-	MooCodeEventEvalExpr(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	MooCodeEventEvalExpr(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame);
 };
 
 class MooCodeEventEvalBlock : public MooCodeEvent {
     public:
-	MooCodeEventEvalBlock(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr) : MooCodeEvent(env, args, expr) { };
+	MooCodeEventEvalBlock(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame);
 };
 
@@ -85,6 +85,15 @@ class MooCodeEventAppendReturn : public MooCodeEvent {
     public:
 	MooCodeEventAppendReturn(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
 	int do_event(MooCodeFrame *frame);
+};
+
+class MooCodeEventCatch : public MooCodeEvent {
+    public:
+	MooCodeEventCatch(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+
+	/// If we try to evaluate this during the normal run loop then just do nothing
+	int do_event(MooCodeFrame *frame) { return(0); }
+	int handle(MooCodeFrame *frame);
 };
 
 class MooCodeEventDebug : public MooCodeEvent {

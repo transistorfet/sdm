@@ -22,6 +22,8 @@ class MooCodeExpr : public MooObject {
 	int m_type;
 	MooObject *m_value;
 	MooCodeExpr *m_next;
+	// TODO we could store a string here which has all the whitespace between what was parsed into this expr and the next token
+	//	which we can use when regenerating the code to get the exact same formatting
 
     public:
 	MooCodeExpr(int line, int col, int type, MooObject *value = NULL, MooCodeExpr *next = NULL);

@@ -53,6 +53,9 @@
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
 
+	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
+	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
+
     TODO:
 	* should you modify the writing system to write each MooThing into it's own file?  Or to just write it all together but forget
 	  about the idea of seperate world systems, and the whole /path system of referencing
@@ -70,12 +73,12 @@
 	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
+	* add (ignore ...) form which catches all exceptions and ignores them (???)
 	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
 	  was written.
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
 	  cascade a line/col backwards into the event during execution.
-	* convert notify(args) to be notify(env) or something else instead
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
 

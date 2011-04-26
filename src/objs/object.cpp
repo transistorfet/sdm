@@ -140,7 +140,6 @@ void MooObject::check_throw(moo_perm_t perms)
 
 int MooObject::check(moo_perm_t perms)
 {
-	int tmp;
 	moo_id_t current;
 
 	current = MooTask::current_owner();
@@ -148,8 +147,7 @@ int MooObject::check(moo_perm_t perms)
 		return(1);
 	if (m_owner == MooTask::current_owner())
 		perms <<= 3;
-	tmp = m_permissions & perms;
-	if (tmp == perms)
+	if ((m_permissions & perms) == perms)
 		return(1);
 	return(0);
 }
@@ -356,7 +354,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 	args->m_this = this;
 	try {
 		frame->push_call(frame->env(), func, args);
-		res = frame->run(0);
+		res = frame->run();
 	}
 	catch (MooException e) {
 		// TODO temporary for debugging purposes??

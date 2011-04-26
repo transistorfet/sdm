@@ -42,11 +42,7 @@ class MooThing : public MooObject {
 	virtual ~MooThing();
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-
 	virtual MooThing *get_thing() { return(this); }
-
-	static MooThing *create(moo_id_t parent);
-	MooThing *clone();
 
     public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
@@ -56,10 +52,9 @@ class MooThing : public MooObject {
 	// TODO integrate these directly into the access* methods?
 	int set_property(const char *name, MooObject *obj);
 	MooObject *get_property(const char *name, MooObjectType *type);
+	MooObject *get_property_raw(const char *name, MooThing **thing);
 	int set_method(const char *name, MooObject *action);
 	MooObject *get_method(const char *name);
-
-	static int convert_result(MooObject *&result, int def = 0);
 
     public:
 	/// Search Methods
@@ -68,7 +63,6 @@ class MooThing : public MooObject {
 	static MooThing *reference(const char *name);
 
 	/// Helper Methods
-	int moveto(MooThing *user, MooThing *channel, MooThing *to);
 	static int attach_orphans();
 
 	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
@@ -80,22 +74,20 @@ class MooThing : public MooObject {
 	inline moo_id_t parent_id() { return(m_parent); }
 	inline MooThing *parent() { return(MooThing::lookup(m_parent)); }
 	inline MooThing *owner_thing() { return(MooThing::lookup(this->owner())); }
-	inline MooThing *contents() { return(m_objects); }
-	inline MooThing *next() { return(m_next); }
-	inline MooThing *location() { return(m_location); }
 	inline int is_a_thing(moo_id_t id);
 	inline int is_a_thing(const char *name);
 	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
 	const char *name();
+	MooThing *location();
+	inline MooObjectArray *contents() { return(dynamic_cast<MooObjectArray *>(this->resolve_property("contents"))); }
+	int move(MooThing *where);
 
     protected:
 	int assign_id(moo_id_t id);
 
 	int add(MooThing *thing);
 	int remove(MooThing *thing);
-	int do_action(MooObject *action, MooArgs *args, MooObject **result = NULL);
-	MooObject *get_property_raw(const char *name, MooThing **thing);
 };
 
 extern MooObjectType moo_thing_obj_type;

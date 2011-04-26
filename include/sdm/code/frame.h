@@ -15,9 +15,7 @@
 class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
-	MooException m_exception;
-
-	// TODO you should probably have MooArgs here, right?  It could always be NULL if there are no args. YES WE SHOULD!!
+	MooException *m_exception;
 	MooObjectHash *m_env;
 
     public:
@@ -28,11 +26,12 @@ class MooCodeFrame : public MooObject {
 	virtual int write_data(MooDataFile *data);
 
 	int push_event(MooCodeEvent *event);
-	int push_block(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args);
+	int push_block(MooObjectHash *env, MooCodeExpr *expr);
 	int push_call(MooObjectHash *env, MooObject *func, MooArgs *args);
-	int push_code(const char *code, MooArgs *args = NULL);
+	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
-	int run(int level = 0);
+	int run();
+	int handle_exception();
 
 	int eval(const char *code, MooArgs *args = NULL);
 

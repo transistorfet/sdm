@@ -279,7 +279,7 @@ static int basic_hash(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	return(frame->push_code(args->m_args->get_string(0), args));
+	return(frame->push_code(args->m_args->get_string(0)));
 }
 
 static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
@@ -294,30 +294,8 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	if (moo_data_read_file(buffer, buffer, LARGE_STRING_SIZE) <= 0)
 		throw MooException("Unable to read file %s", buffer);
-	return(frame->push_code(buffer, args));
+	return(frame->push_code(buffer));
 }
-
-static int basic_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooObject *obj;
-	MooThing *thing, *parent;
-
-	if (args->m_args->last() < 0 || args->m_args->last() > 1)
-		throw moo_args_mismatched;
-	if (!(parent = args->m_args->get_thing(0)))
-		return(-1);
-
-	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
-		throw MooException("Error creating new thing from %d", parent->id());
-	// TODO clone all properties from parent
-	// TODO call thing:init ??
-
-	if ((obj = args->m_args->get(1)))
-		frame->push_call(env, obj, new MooArgs());
-	args->m_result = thing;
-	return(0);
-}
-
 
 static int basic_call_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -350,21 +328,6 @@ static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	throw MooException("%s", buffer);
 }
 
-/*
-
-(define move (lambda (obj location)
-	(define oldloc obj.location)
-	(if (not (location:acceptable obj))
-		(return))
-	(oldloc:exitfunc obj)
-	(oldloc.contents:remove obj)
-	(location.contents:add obj)
-	(define obj.location location)
-	(location:enterfunc obj)
-))
-
-*/
-
 int moo_load_basic_funcs(MooObjectHash *env)
 {
 	env->set("print", new MooFunc(basic_print));
@@ -384,6 +347,8 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	//env->set("<", new MooFunc(basic_lt));
 	//env->set("<=", new MooFunc(basic_le));
 
+	//env->set("not", new MooFunc(basic_not));
+
 	env->set("concat", new MooFunc(basic_concat));
 
 	env->set("array", new MooFunc(basic_array));
@@ -391,7 +356,6 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("@eval", new MooFunc(basic_eval));
 	env->set("@load", new MooFunc(basic_load));
-	env->set("@clone", new MooFunc(basic_clone));
 
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));

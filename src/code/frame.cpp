@@ -35,11 +35,11 @@ MooObject *moo_code_frame_create(void)
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
 {
-	m_exception = MooException();
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
+	m_return = NULL;
+	m_exception = NULL;
 	m_env = NULL;
 	this->env(new MooObjectHash(parent));
-	m_return = NULL;
 }
 
 MooCodeFrame::~MooCodeFrame()
@@ -47,6 +47,8 @@ MooCodeFrame::~MooCodeFrame()
 	MOO_DECREF(m_stack);
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_return);
+	if (m_exception)
+		delete m_exception;
 }
 
 int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
@@ -88,9 +90,9 @@ int MooCodeFrame::push_event(MooCodeEvent *event)
 	return(m_stack->push(event));
 }
 
-int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr, MooArgs *args)
+int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr)
 {
-	return(m_stack->push(new MooCodeEventEvalBlock(env, args, expr)));
+	return(m_stack->push(new MooCodeEventEvalBlock(env, expr)));
 }
 
 int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
@@ -99,7 +101,7 @@ int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
 	return(m_stack->push(new MooCodeEventCallExpr(env, args)));
 }
 
-int MooCodeFrame::push_code(const char *code, MooArgs *args)
+int MooCodeFrame::push_code(const char *code)
 {
 	MooCodeExpr *expr;
 
@@ -109,7 +111,7 @@ int MooCodeFrame::push_code(const char *code, MooArgs *args)
 	expr = parser.parse(code);
 	// TODO temporary
 	MooCodeParser::print(expr);
-	return(this->push_block(m_env, expr, args));
+	return(this->push_block(m_env, expr));
 }
 
 int MooCodeFrame::push_debug(const char *msg, ...)
@@ -122,20 +124,23 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 	return(m_stack->push(new MooCodeEventDebug(buffer)));
 }
 
-int MooCodeFrame::run(int level)
+int MooCodeFrame::run()
 {
 	MooObjectHash *base;
 	MooCodeEvent *event;
 
 	base = m_env;
-	m_exception = MooException("");
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
-	if (level < 0)
-		level = 0;
-	while (m_stack->last() >= level) {
+	while (m_stack->last() >= 0) {
 		if (!(event = m_stack->pop()))
 			continue;
+
+		if (m_exception) {
+			delete m_exception;
+			m_exception = NULL;
+		}
+
 		try {
 			this->env(event->env());
 			event->do_event(this);
@@ -143,38 +148,59 @@ int MooCodeFrame::run(int level)
 		catch (MooException e) {
 			int line, col;
 
-			this->env(base);
 			if (e.severity() == E_FATAL)
 				throw e;
-			m_stack->push(event);
-			if (this->linecol(line, col))
-				m_exception = MooException(e.severity(), "(%d, %d): %s", line, col, e.get());
-			else
-				m_exception = e;
-			throw m_exception;
+			this->linecol(line, col);
+			m_exception = new MooException(e.severity(), "(%d, %d): %s", line, col, e.get());
 		}
 		catch (...) {
-			this->env(base);
-			m_exception = MooException("Unknown error occurred");
-			throw m_exception;
+			m_exception = new MooException("Unknown error occurred");
 		}
-		delete event;
+
+		if (m_exception) {
+			m_stack->push(event);
+			if (!this->handle_exception()) {
+				this->env(base);
+				throw *m_exception;
+			}
+		}
+		else
+			delete event;
 	}
 	this->env(base);
 	return(0);
 }
 
+int MooCodeFrame::handle_exception()
+{
+	MooCodeEvent *event;
+	MooCodeEventCatch *handler;
+
+	for (int i = m_stack->last(); i >= 0; i--) {
+		if ((handler = dynamic_cast<MooCodeEventCatch *>(m_stack->get(i)))) {
+			// TODO I guess temporarily here we rewind the stack until we think out exception handling more
+			for (int j = m_stack->last(); j > i; j--) {
+				if ((event = m_stack->pop()))
+					delete event;
+			}
+			m_stack->pop();		/// Pop the handler off the stack but don't delete it yet
+			handler->handle(this);
+			delete handler;
+			return(1);
+		}
+	}
+	return(0);
+}
+
+
 int MooCodeFrame::eval(const char *code, MooArgs *args)
 {
-	int level;
-
 	try {
-		level = m_stack->last();
-		this->push_code(code, args);
-		return(this->run(level));
+		this->push_code(code);
+		return(this->run());
 	}
 	catch (MooException e) {
-		moo_status("CODE: %s", e.get());
+		moo_status("EVAL: %s", e.get());
 		return(-1);
 	}
 }

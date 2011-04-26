@@ -45,41 +45,42 @@ MooCodeExpr::~MooCodeExpr()
 
 int MooCodeExpr::read_entry(const char *type, MooDataFile *data)
 {
-/*
 	if (!strcmp(type, "code")) {
+		MooCodeExpr *expr;
 		char buffer[STRING_SIZE];
 
-		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
+		if (data->read_raw_string_entry(buffer, STRING_SIZE) < 0)
 			return(-1);
-		this->set(buffer);
-	}
-	else if (!strcmp(type, "params")) {
-		char buffer[STRING_SIZE];
-
-		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
-			return(-1);
-		this->params(buffer);
+		expr = MooCodeParser::parse_code(buffer);
+		// TODO this is a horrible hack...
+		m_line = expr->m_line;
+		m_col = expr->m_col;
+		m_value = expr->m_value;
+		m_type = expr->m_type;
+		m_next = expr->m_next;
 	}
 	else
 		return(MooObject::read_entry(type, data));
-*/
 	return(MOO_HANDLED);
 }
 
 int MooCodeExpr::write_data(MooDataFile *data)
 {
-	//const char *name;
+	char buffer[STRING_SIZE];
 
 	MooObject::write_data(data);
-	// TODO write the code to the file
-	//data->write_string_entry("code", name);
-	//data->write_string_entry("params", this->params());
+
+	buffer[0] = '\n';
+	MooCodeParser::generate(this, &buffer[1], STRING_SIZE);
+	data->write_begin_entry("code");
+	data->write_raw_string(buffer);
+	data->write_end_entry();
 	return(0);
 }
 
 int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
 {
-	return(frame->push_block(parent, this, args));
+	return(frame->push_block(parent, this));
 }
 
 const char *MooCodeExpr::get_identifier()
