@@ -36,7 +36,7 @@ MooObjectType moo_thing_obj_type = {
 	NULL,
 	"thing",
 	typeid(MooThing).name(),
-	(moo_type_create_t) moo_thing_create
+	(moo_type_make_t) make_moo_thing
 };
 
 MooArray<MooThing *> *moo_thing_table = NULL;
@@ -57,9 +57,13 @@ void release_thing(void)
 	moo_object_deregister_type(&moo_thing_obj_type);
 }
 
-MooObject *moo_thing_create(void)
+MooObject *make_moo_thing(MooDataFile *data)
 {
-	return(new MooThing());
+	int id;
+	MooThing *thing;
+
+	id = data->read_integer();
+	return(MooThing::lookup(id));
 }
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)
@@ -107,6 +111,19 @@ MooThing::~MooThing()
 	}
 }
 
+MooThing *MooThing::lookup(moo_id_t id)
+{
+	MooThing *thing;
+
+	if (id < 0)
+		return(NULL);
+	if (!(thing = moo_thing_table->get(id))) {
+		thing = new MooThing(id);
+		thing->load();
+	}
+	return(thing);
+}
+
 int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
@@ -125,6 +142,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			data->read_parent();
 		}
 	}
+/*
 	else if (!strcmp(type, "thing")) {
 		MooThing *thing = NULL;
 		data->read_attrib_string("type", buffer, STRING_SIZE);
@@ -142,6 +160,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		}
 		this->add(thing);
 	}
+*/
 	else if (!strcmp(type, "bits")) {
 		int bits = data->read_integer_entry();
 		m_bits = bits;
@@ -157,8 +176,8 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	else if (!strcmp(type, "location")) {
 		moo_id_t id = data->read_integer_entry();
 		MooThing *thing = MooThing::lookup(id);
-		if (thing && this != thing)
-			thing->add(this);
+		//if (thing && this != thing)
+		//	thing->add(this);
 	}
 	else
 		return(MooObject::read_entry(type, data));
@@ -167,6 +186,10 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 
 int MooThing::write_data(MooDataFile *data)
 {
+	// TODO this should be all we need now
+	data->write_integer(m_id);
+	return(0);
+
 	data->write_integer_entry("id", m_id);
 	if (m_parent >= 0)
 		data->write_integer_entry("parent", m_parent);
@@ -191,6 +214,7 @@ int MooThing::write_data(MooDataFile *data)
 	}
 
 	/// Write the things we contain to the file
+/*
 	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {
 		if (cur->is_a(&moo_user_obj_type))
 			continue;
@@ -205,6 +229,60 @@ int MooThing::write_data(MooDataFile *data)
 			data->write_end_entry();
 		}
 	}
+*/
+	return(0);
+}
+
+int MooThing::load()
+{
+	char buffer[STRING_SIZE];
+
+	if (m_id < 0) {
+		moo_status("THING: attempting to write thing with an invalid ID");
+		return(-1);
+	}
+	snprintf(buffer, STRING_SIZE, "objs/%04d.xml", m_id);
+	return(this->read_file(buffer, "thing"));
+}
+
+int MooThing::save()
+{
+	MooDataFile *data;
+	char file[STRING_SIZE];
+
+	if (m_id < 0) {
+		moo_status("THING: attempting to write thing with an invalid ID");
+		return(-1);
+	}
+	//snprintf(file, STRING_SIZE, "objs/%04d/%04d.xml", m_id / 10000, m_id % 10000);
+	snprintf(file, STRING_SIZE, "objs/%04d.xml", m_id);
+	moo_status("Writing thing data to file \"%s\".", file);
+	data = new MooDataFile(file, MOO_DATA_WRITE, "thing");
+
+	data->write_integer_entry("id", m_id);
+	if (m_parent >= 0)
+		data->write_integer_entry("parent", m_parent);
+	if (m_bits != 0)
+		data->write_hex_entry("bits", m_bits);
+	MooObject::write_data(data);
+	if (m_location)
+		data->write_integer_entry("location", m_location->m_id);
+
+	/// Write the properties to the file
+	if (m_properties->entries()) {
+		data->write_begin_entry("properties");
+		m_properties->write_data(data);
+		data->write_end_entry();
+	}
+
+	/// Write the actions to the file
+	if (m_methods->entries()) {
+		data->write_begin_entry("methods");
+		m_methods->write_data(data);
+		data->write_end_entry();
+	}
+
+	delete data;
 	return(0);
 }
 
@@ -327,6 +405,7 @@ MooThing *MooThing::find(const char *name)
 
 	if ((thing = MooThing::reference(name)))
 		return(thing);
+/*
 	else if (!strcmp(name, "me"))
 		return(this);
 	else if (!strcmp(name, "here") && m_location)
@@ -335,9 +414,11 @@ MooThing *MooThing::find(const char *name)
 		return(thing);
 	else if (m_location && (thing = m_location->find_named(name)))
 		return(thing);
+*/
 	return(NULL);
 }
 
+/*
 MooThing *MooThing::find_named(const char *name)
 {
 	int len;
@@ -361,7 +442,7 @@ MooThing *MooThing::find_named(const char *name)
 			return(NULL);
 		for (cur = thing->m_objects; cur; cur = cur->m_next) {
 			// TODO modify this to use the aliases list or something
-			if (!(str = (MooString *) cur->get_property("name", &moo_string_obj_type)))
+			if (!(str = dynamic_cast<MooString *>(cur->get_property("name", NULL))))
 				continue;
 			if (!str->compare(name, len)) {
 				if (name[len] == '\0')
@@ -378,6 +459,7 @@ MooThing *MooThing::find_named(const char *name)
 	}
 	return(NULL);
 }
+*/
 
 MooThing *MooThing::reference(const char *name)
 {
@@ -387,14 +469,14 @@ MooThing *MooThing::reference(const char *name)
 		id = ::atoi(&name[1]);
 		if (id <= 0 || id > MOO_THING_MAX_SIZE)
 			return(NULL);
-		return(moo_thing_table->get(id));
+		return(MooThing::lookup(id));
 	}
-	else if (name[0] == '/') {
-		MooWorld *world = MooWorld::root();
-		if (!world)
-			return(NULL);
-		return(world->find_named(name));
-	}
+	//else if (name[0] == '/') {
+		//MooWorld *world = MooWorld::root();
+		//if (!world)
+		//	return(NULL);
+		//return(world->find_named(name));
+	//}
 	// TODO should we just get rid of this entirely?
 	else if (name[0] == '$') {
 		// TODO should we break up the reference??
@@ -408,6 +490,7 @@ MooThing *MooThing::reference(const char *name)
 
 ///// Helper Methods /////
 
+/*
 int MooThing::attach_orphans()
 {
 	MooThing *cur;
@@ -424,7 +507,7 @@ int MooThing::attach_orphans()
 	}
 	return(0);
 }
-
+*/
 
 int MooThing::is_wizard(moo_id_t id)
 {

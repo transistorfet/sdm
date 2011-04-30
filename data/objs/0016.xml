@@ -1,0 +1,21 @@
+<thing type="channel">
+ <id>16</id>
+ <parent>14</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   13
+  </entry>
+  <entry type="array" key="users">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>#wartalk</value>
+  </entry>
+ </properties>
+ <name>#wartalk</name>
+</thing>

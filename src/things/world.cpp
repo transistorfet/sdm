@@ -12,11 +12,12 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/world.h>
 
+/*
 MooObjectType moo_world_obj_type = {
 	&moo_thing_obj_type,
 	"world",
 	typeid(MooWorld).name(),
-	(moo_type_create_t) moo_world_create
+	(moo_type_make_t) make_moo_world
 };
 
 MooWorld *moo_root_world = NULL;
@@ -29,7 +30,7 @@ int init_world(void)
 	// TODO alternatively you can pass over all things and fix them so if their location is NULL, add them to the root world
 	/// Create the world object with ID = 1, and parent ID = -1 since the world has no parent
 	//moo_root_world = new MooWorld("maps/world.xml", 1, -1);
-	moo_root_world = new MooWorld("maps/core.xml", 1, -1);
+	//moo_root_world = new MooWorld("maps/core.xml", 1, -1);
 	moo_object_register_type(&moo_world_obj_type);
 	return(0);
 }
@@ -46,9 +47,12 @@ void release_world(void)
 	moo_object_deregister_type(&moo_world_obj_type);
 }
 
-MooObject *moo_world_create(void)
+MooObject *make_moo_world(MooDataFile *data)
 {
-	return(new MooWorld());
+	MooWorld *obj = new MooWorld();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooWorld::MooWorld()
@@ -138,5 +142,5 @@ MooWorld *MooWorld::root()
 {
 	return(moo_root_world);
 }
-
+*/
 

@@ -67,9 +67,9 @@ int init_moo(void)
 		moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 		init_thing();
-		init_channel();
-		init_world();
 		init_user();
+		//init_channel();
+		//init_world();
 
 		load_global_config();
 
@@ -94,8 +94,8 @@ int init_moo(void)
 void release_moo(void)
 {
 	release_user();
-	release_world();
-	release_channel();
+	//release_world();
+	//release_channel();
 	release_thing();
 
 	release_moo_code();

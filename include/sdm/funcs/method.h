@@ -27,7 +27,7 @@ class MooMethod : public MooObject {
 
 extern MooObjectType moo_method_obj_type;
 
-MooObject *moo_method_create(void);
+MooObject *make_moo_method(MooDataFile *data);
 
 #endif
 

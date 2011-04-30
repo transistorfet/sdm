@@ -1,0 +1,28 @@
+<thing>
+ <id>6</id>
+ <parent>5</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>user</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>someone</value>
+  </entry>
+ </properties>
+ <methods>
+  <entry type="moofunc" key="notify">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>user_notify</func>
+  </entry>
+ </methods>
+</thing>

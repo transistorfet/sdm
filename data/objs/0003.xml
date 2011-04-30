@@ -1,0 +1,64 @@
+<thing>
+ <id>3</id>
+ <parent>1</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name examines $this.name.</value>
+  </entry>
+  <entry type="string" key="description">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You're not sure what it is.</value>
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>thing</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>something</value>
+  </entry>
+ </properties>
+ <methods>
+  <entry type="moolambda" key="look_self">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (user:notify 'status' nil channel (format "<yellow>$this.title"))
+       (user:notify 'status' nil channel (format "<lightgreen>$this.description"))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="print_view">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (user:notify 'status' nil channel (format "<b><lightblue>You see $this.name here."))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="@eval">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (@eval argstr)
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="print">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[(print text)]]></code>
+  </entry>
+ </methods>
+</thing>

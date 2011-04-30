@@ -33,7 +33,7 @@ class MooString : public MooObject {
 
 extern MooObjectType moo_string_obj_type;
 
-MooObject *moo_string_create(void);
+MooObject *make_moo_string(MooDataFile *data);
 
 #endif
 

@@ -21,12 +21,15 @@ MooObjectType moo_listener_obj_type = {
 	&moo_task_obj_type,
 	"listener",
 	typeid(MooListener).name(),
-	(moo_type_create_t) moo_listener_create
+	(moo_type_make_t) make_moo_listener
 };
 
-MooObject *moo_listener_create(void)
+MooObject *make_moo_listener(MooDataFile *data)
 {
-	return(new MooListener());
+	MooListener *obj = new MooListener();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooListener::MooListener()
@@ -106,12 +109,12 @@ int MooListener::handle(MooInterface *inter, int ready)
 		delete inter;
 		return(-1);
 	}
-	if (!(newtcp = (MooTCP *) moo_make_object(m_itype))) {
+	if (!(newtcp = (MooTCP *) moo_make_object(m_itype, NULL))) {
 		delete this;
 		return(-1);
 	}
 	if ((m_inter->accept(newtcp) < 0)
-	    || !(newtask = (MooTask *) moo_make_object(m_ttype))) {
+	    || !(newtask = (MooTask *) moo_make_object(m_ttype, NULL))) {
 		delete newtcp;
 		return(-1);
 	}

@@ -31,7 +31,7 @@ class MooFunc : public MooObject {
 
 extern MooObjectType moo_func_obj_type;
 
-MooObject *moo_func_create(void);
+MooObject *make_moo_func(MooDataFile *data);
 
 #endif
 

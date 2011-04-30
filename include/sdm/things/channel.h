@@ -18,7 +18,7 @@ class MooChannel : public MooThing {
 	std::string *m_name;
 
     public:
-	MooChannel(const char *name = NULL, int bits = 0, moo_id_t id = -1, moo_id_t parent = 0);
+	MooChannel(const char *name = NULL, int bits = 0, moo_id_t id = -1, moo_id_t parent = -1);
 	virtual ~MooChannel();
 	static MooChannel *make_channel(const char *name);
 
@@ -30,7 +30,7 @@ class MooChannel : public MooThing {
 	/// Authentication Methods
 	static int exists(const char *name);
 	static int valid_channelname(const char *name);
-	static MooChannel *get(const char *name);
+	static MooThing *get(const char *name);
 
     public:
 	/// Accessors
@@ -41,7 +41,7 @@ extern MooObjectType moo_channel_obj_type;
 
 int init_channel(void);
 void release_channel(void);
-MooObject *moo_channel_create(void);
+MooObject *make_moo_channel(MooDataFile *data);
 
 #endif
 

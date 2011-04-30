@@ -24,7 +24,7 @@ class MooUser : public MooThing {
 	std::string *m_name;
 
     public:
-	MooUser(const char *name, int bits = 0, moo_id_t id = -1, moo_id_t parent = 0);
+	MooUser(const char *name, int bits = 0, moo_id_t id = -1, moo_id_t parent = -1);
 	virtual ~MooUser();
 	static MooUser *make_guest(const char *name);
 	int convert_guest();
@@ -56,7 +56,7 @@ extern MooObjectType moo_user_obj_type;
 
 int init_user(void);
 void release_user(void);
-MooObject *moo_user_create(void);
+MooObject *make_moo_user(MooDataFile *data);
 
 #endif
 

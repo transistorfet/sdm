@@ -63,17 +63,9 @@
 	  you possibly save the database back to that code system?  I guess the main benefit of that would be ease of editing a live
 	  database offline.  It wouldn't be trivial to get the system to write back to MooCode, but it would save on having libxml and
 	  essentially 2 possible formats for databases.
-	* Another problem though is thing id assignment and the possibility of overlapping IDs.  We could use a
-	  quota system such that each object has a certain range of IDs from which it can create new objects.  You could even have
-	  limit inheritence such that it looks for the object with the first defined min ID and the first max ID from which it gets
-	  its range when creating a new things.  It might still be possible to have overlapping IDs and anyways, you might still have
-	  references to objects in other files.  It would improve some things though, and it would allow programming access with limits
-	  and you could even contemplate a "relocatable" format, such that it automatically adjusts all IDs (like all thing refs could
-	  start allocating from 0 and then the file could be loaded as relocatable (or have a tag at the top) and the loader could
-	  decide what range to put them in, so long as it just updates all the IDs as they are loaded.
 	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
-	* add (ignore ...) form which catches all exceptions and ignores them (???)
+	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
 	  was written.
 	* fix realm_evaluate (object/target do_actions are disabled atm)

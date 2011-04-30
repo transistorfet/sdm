@@ -15,12 +15,15 @@ struct MooObjectType moo_code_lambda_obj_type = {
 	NULL,
 	"moolambda",
 	typeid(MooCodeLambda).name(),
-	(moo_type_create_t) moo_code_lambda_create
+	(moo_type_make_t) make_moo_code_lambda
 };
 
-MooObject *moo_code_lambda_create(void)
+MooObject *make_moo_code_lambda(MooDataFile *data)
 {
-	return(new MooCodeLambda(NULL, NULL));
+	MooCodeLambda *obj = new MooCodeLambda(NULL, NULL);
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooCodeLambda::MooCodeLambda(MooCodeExpr *params, MooCodeExpr *func)

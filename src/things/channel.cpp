@@ -18,13 +18,14 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/channel.h>
 
+/*
 #define USER_INIT_SIZE		64
 
 MooObjectType moo_channel_obj_type = {
 	&moo_thing_obj_type,
 	"channel",
 	typeid(MooChannel).name(),
-	(moo_type_create_t) moo_channel_create
+	(moo_type_make_t) make_moo_channel
 };
 
 static MooHash<MooChannel *> *channel_list = NULL;
@@ -36,6 +37,9 @@ int init_channel(void)
 	// TODO should this be DELETEALL if the things are also in the thing database, which is also DELETEALL?
 	channel_list = new MooHash<MooChannel *>(USER_INIT_SIZE, MOO_HBF_REMOVE | MOO_HBF_DELETEALL);
 	moo_object_register_type(&moo_channel_obj_type);
+
+	/// Pre-cache channels
+	MooThing::reference(MOO_CHANNELS);
 	return(0);
 }
 
@@ -47,9 +51,12 @@ void release_channel(void)
 	channel_list = NULL;
 }
 
-MooObject *moo_channel_create(void)
+MooObject *make_moo_channel(MooDataFile *data)
 {
-	return(new MooChannel());
+	MooChannel *obj = new MooChannel();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooChannel::MooChannel(const char *name, int bits, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
@@ -78,22 +85,22 @@ MooChannel::~MooChannel()
 MooChannel *MooChannel::make_channel(const char *name)
 {
 	MooChannel *channel;
-/*
-	MooThing *parent;
 
-	if (MooChannel::exists(name))
-		throw MooException("User already exists.  Cannot make guest.");
-	// TODO should these references perhaps be stored in a hash table of some kind which is searched with $thing references
-	if (!(parent = MooThing::reference(MOO_GENERIC_USER)))
-		throw moo_thing_not_found;
-	channel = new MooChannel(name, MOO_UBF_GUEST, MOO_NEW_ID, parent->id());
-	channel->set_property("name", name);
-	channel->init();
-	channel->owner(channel->m_id);
-	channel->set_property("description", "You see a new person who looks rather out-of-place.");
-	// TODO is this the correct way to moving a channel to the starting location?
-	channel->moveto(MooThing::reference(MOO_START_ROOM));
-*/
+//	MooThing *parent;
+//
+//	if (MooChannel::exists(name))
+//		throw MooException("User already exists.  Cannot make guest.");
+//	// TODO should these references perhaps be stored in a hash table of some kind which is searched with $thing references
+//	if (!(parent = MooThing::reference(MOO_GENERIC_USER)))
+//		throw moo_thing_not_found;
+//	channel = new MooChannel(name, MOO_UBF_GUEST, MOO_NEW_ID, parent->id());
+//	channel->set_property("name", name);
+//	channel->init();
+//	channel->owner(channel->m_id);
+//	channel->set_property("description", "You see a new person who looks rather out-of-place.");
+//	// TODO is this the correct way to moving a channel to the starting location?
+//	channel->moveto(MooThing::reference(MOO_START_ROOM));
+
 	return(channel);
 }
 
@@ -136,11 +143,11 @@ int MooChannel::quit(MooThing *user)
 	}
 	return(0);
 }
-
+*/
 
 int MooChannel::exists(const char *name)
 {
-	if (channel_list->get(name))
+	if (MooChannel::get(name))
 		return(1);
 	return(0);
 }
@@ -163,9 +170,20 @@ int MooChannel::valid_channelname(const char *name)
 	return(1);
 }
 
-MooChannel *MooChannel::get(const char *name)
+MooThing *MooChannel::get(const char *name)
 {
-	return(channel_list->get(name));
+	MooThing *channels;
+	MooObjectHash *list;
+
+	if (!(channels = MooThing::reference(MOO_CHANNELS))) {
+		moo_status("CHANNEL: channels object not found");
+		return(NULL);
+	}
+	if (!(list = dynamic_cast<MooObjectHash *>(channels->resolve_property("list")))) {
+		moo_status("CHANNEL: channel list not found on channels object");
+		return(NULL);
+	}
+	return(dynamic_cast<MooThing *>(list->get(name)));
 }
 
 

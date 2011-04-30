@@ -1,0 +1,21 @@
+<thing>
+ <id>11</id>
+ <parent>3</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>exit</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>an exit</value>
+  </entry>
+ </properties>
+</thing>

@@ -14,12 +14,15 @@ struct MooObjectType moo_number_obj_type = {
 	NULL,
 	"number",
 	typeid(MooNumber).name(),
-	(moo_type_create_t) moo_number_create
+	(moo_type_make_t) make_moo_number
 };
 
-MooObject *moo_number_create(void)
+MooObject *make_moo_number(MooDataFile *data)
 {
-	return(new MooNumber((long int) 0));
+	MooNumber *obj = new MooNumber((long int) 0);
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooNumber::MooNumber(const char *str)

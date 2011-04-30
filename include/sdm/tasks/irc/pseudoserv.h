@@ -72,7 +72,7 @@ extern MooObjectType moo_irc_pseudoserv_obj_type;
 
 int init_irc_pseudoserv(void);
 void release_irc_pseudoserv(void);
-MooObject *moo_irc_pseudoserv_create(void);
+MooObject *make_moo_irc_pseudoserv(MooDataFile *data);
 
 int irc_write_attrib(int type, char *buffer, int max);
 

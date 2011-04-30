@@ -38,11 +38,15 @@ class MooThing : public MooObject {
 	MooThing *m_end_objects;
 
     public:
-	MooThing(moo_id_t id = -1, moo_id_t parent = 0);
+	MooThing(moo_id_t id = -1, moo_id_t parent = -1);
 	virtual ~MooThing();
+	static MooThing *lookup(moo_id_t id);
+
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 	virtual MooThing *get_thing() { return(this); }
+	int load();
+	int save();
 
     public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
@@ -76,7 +80,6 @@ class MooThing : public MooObject {
 	inline MooThing *owner_thing() { return(MooThing::lookup(this->owner())); }
 	inline int is_a_thing(moo_id_t id);
 	inline int is_a_thing(const char *name);
-	static inline MooThing *lookup(moo_id_t id) { return(moo_thing_table->get(id)); }
 
 	const char *name();
 	MooThing *location();
@@ -94,7 +97,7 @@ extern MooObjectType moo_thing_obj_type;
 
 int init_thing(void);
 void release_thing(void);
-MooObject *moo_thing_create(void);
+MooObject *make_moo_thing(MooDataFile *data);
 
 inline int MooThing::is_a_thing(moo_id_t id)
 {

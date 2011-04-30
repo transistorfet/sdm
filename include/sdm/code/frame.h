@@ -46,7 +46,7 @@ class MooCodeFrame : public MooObject {
 
 extern MooObjectType moo_code_frame_obj_type;
 
-MooObject *moo_code_frame_create(void);
+MooObject *make_moo_code_frame(MooDataFile *data);
 
 #endif
 

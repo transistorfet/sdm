@@ -16,12 +16,12 @@ MooObjectType moo_nil_obj_type = {
 	NULL,
 	"nil",
 	typeid(MooNil).name(),
-	(moo_type_create_t) moo_nil_create
+	(moo_type_make_t) make_moo_nil
 };
 
 MooNil moo_nil;
 
-MooObject *moo_nil_create(void)
+MooObject *make_moo_nil(MooDataFile *data)
 {
 	return(&moo_nil);
 }

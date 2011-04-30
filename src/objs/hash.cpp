@@ -18,7 +18,7 @@ struct MooObjectType moo_hash_obj_type = {
 	NULL,
 	"hash",
 	typeid(MooObjectHash).name(),
-	(moo_type_create_t) moo_hash_create
+	(moo_type_make_t) make_moo_hash
 };
 
 static MooObjectHash *hash_methods = new MooObjectHash();
@@ -37,9 +37,12 @@ void release_hash(void)
 	moo_object_deregister_type(&moo_hash_obj_type);
 }
 
-MooObject *moo_hash_create(void)
+MooObject *make_moo_hash(MooDataFile *data)
 {
-	return(new MooObjectHash());
+	MooObjectHash *obj = new MooObjectHash();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooObjectHash::MooObjectHash(MooObjectHash *parent, int size, int bits) : MooHash<MooObject *>(size, bits, (void (*)(MooObject *)) MooGC::decref)
@@ -62,18 +65,14 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 			return(-1);
 		}
 		data->read_attrib_string("key", key, STRING_SIZE);
-		if (!(obj = moo_make_object(objtype))) {
+		res = data->read_children();
+		if (!(obj = moo_make_object(objtype, res ? data : NULL))) {
 			moo_status("HASH: Error loading entry, %s", key);
 			return(-1);
 		}
-		if (data->read_children()) {
-			res = obj->read_data(data);
+		if (res)
 			data->read_parent();
-			if ((res < 0) || (this->set(key, obj) < 0)) {
-				delete obj;
-				return(-1);
-			}
-		}
+		this->set(key, obj);
 	}
 	else
 		return(MooObject::read_entry(type, data));

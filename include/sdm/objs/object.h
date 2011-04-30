@@ -15,13 +15,15 @@
 #define MOO_HANDLED		1
 #define MOO_HANDLED_ALL		2
 
-typedef class MooObject *(*moo_type_create_t)(void);
+class MooDataFile;
+
+typedef class MooObject *(*moo_type_make_t)(MooDataFile *data);
 
 typedef struct MooObjectType {
 	const MooObjectType *m_parent;
 	const char *m_name;
 	const char *m_realname;
-	moo_type_create_t m_create;
+	moo_type_make_t m_make;
 } MooObjectType;
 
 class MooArgs;
@@ -114,7 +116,7 @@ int moo_object_register_type(const MooObjectType *type);
 int moo_object_deregister_type(const MooObjectType *type);
 const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base);
 
-MooObject *moo_make_object(const MooObjectType *type);
+MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data);
 
 inline int MooObject::is_a(const MooObjectType *type) {
 	const MooObjectType *cur;

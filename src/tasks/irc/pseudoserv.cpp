@@ -26,7 +26,7 @@ MooObjectType moo_irc_pseudoserv_obj_type = {
 	&moo_task_obj_type,
 	"irc-pseudoserv",
 	typeid(MooIRC::PseudoServ).name(),
-	(moo_type_create_t) moo_irc_pseudoserv_create
+	(moo_type_make_t) make_moo_irc_pseudoserv
 };
 
 time_t server_start = 0;
@@ -48,9 +48,12 @@ void release_irc_pseudoserv(void)
 
 }
 
-MooObject *moo_irc_pseudoserv_create(void)
+MooObject *make_moo_irc_pseudoserv(MooDataFile *data)
 {
-	return(new MooIRC::PseudoServ());
+	MooIRC::PseudoServ *obj = new MooIRC::PseudoServ();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 using namespace MooIRC;
@@ -464,7 +467,7 @@ int PseudoServ::handle_join(const char *name)
 	//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
 	//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
 
-	MooChannel *channel = MooChannel::get(name);
+	MooThing *channel = MooChannel::get(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	return(channel->call_method(channel, "join", NULL));
@@ -473,7 +476,7 @@ int PseudoServ::handle_join(const char *name)
 int PseudoServ::handle_leave(const char *name)
 {
 	// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
-	MooChannel *channel = MooChannel::get(name);
+	MooThing *channel = MooChannel::get(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	return(channel->call_method(channel, "leave", NULL));
@@ -558,7 +561,7 @@ int PseudoServ::send_part(const char *name)
 int PseudoServ::send_names(const char *name)
 {
 	MooString *names;
-	MooChannel *channel;
+	MooThing *channel;
 	MooObject *result = NULL;
 
 	if (!m_user)

@@ -27,7 +27,7 @@ MooObjectType moo_interface_obj_type = {
 	NULL,
 	"interface",
 	typeid(MooInterface).name(),
-	(moo_type_create_t) NULL
+	(moo_type_make_t) NULL
 };
 
 int init_interface(void)

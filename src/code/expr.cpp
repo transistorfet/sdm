@@ -19,13 +19,16 @@ MooObjectType moo_code_expr_obj_type = {
 	&moo_object_obj_type,
 	"expr",
 	typeid(MooCodeExpr).name(),
-	(moo_type_create_t) moo_code_expr_create
+	(moo_type_make_t) make_moo_code_expr
 };
 
 
-MooObject *moo_code_expr_create(void)
+MooObject *make_moo_code_expr(MooDataFile *data)
 {
-	return(new MooCodeExpr(-1, -1, 0));
+	MooCodeExpr *obj = new MooCodeExpr(-1, -1, 0);
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooCodeExpr::MooCodeExpr(int line, int col, int type, MooObject *value, MooCodeExpr *next)

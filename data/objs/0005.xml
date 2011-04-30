@@ -1,0 +1,36 @@
+<thing>
+ <id>5</id>
+ <parent>4</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="self_look_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$this.name looks at himself, quizically.</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>a creature</value>
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>mobile</value>
+  </entry>
+  <entry type="string" key="look_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks at you, menicingly.</value>
+  </entry>
+  <entry type="string" key="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks at $this.name.</value>
+  </entry>
+ </properties>
+</thing>

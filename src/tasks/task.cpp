@@ -18,7 +18,7 @@ MooObjectType moo_task_obj_type = {
 	NULL,
 	"task",
 	typeid(MooTask).name(),
-	(moo_type_create_t) NULL
+	(moo_type_make_t) NULL
 };
 
 static moo_id_t g_current_owner = -1;

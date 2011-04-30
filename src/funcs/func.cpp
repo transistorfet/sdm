@@ -17,12 +17,15 @@ struct MooObjectType moo_func_obj_type = {
 	NULL,
 	"moofunc",
 	typeid(MooFunc).name(),
-	(moo_type_create_t) moo_func_create
+	(moo_type_make_t) make_moo_func
 };
 
-MooObject *moo_func_create(void)
+MooObject *make_moo_func(MooDataFile *data)
 {
-	return(new MooFunc((moo_func_t) NULL));
+	MooFunc *obj = new MooFunc((moo_func_t) NULL);
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooFunc::MooFunc(moo_func_t func)

@@ -18,7 +18,7 @@ struct MooObjectType moo_array_obj_type = {
 	NULL,
 	"array",
 	typeid(MooObjectArray).name(),
-	(moo_type_create_t) moo_array_create
+	(moo_type_make_t) make_moo_array
 };
 
 static MooObjectHash *array_methods = new MooObjectHash();
@@ -37,9 +37,12 @@ void release_array(void)
 	moo_object_deregister_type(&moo_array_obj_type);
 }
 
-MooObject *moo_array_create(void)
+MooObject *make_moo_array(MooDataFile *data)
 {
-	return(new MooObjectArray(MOO_ARRAY_DEFAULT_SIZE, -1, MOO_OBJECT_ARRAY_DEFAULT_BITS));
+	MooObjectArray *obj = new MooObjectArray();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooObjectArray::MooObjectArray(int size, int max, int bits) : MooArray<MooObject *>(size, max, bits, (void (*)(MooObject *)) MooGC::decref)
@@ -62,18 +65,14 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 			return(-1);
 		}
 		index = data->read_attrib_integer("index");
-		if (!(obj = moo_make_object(objtype))) {
+		res = data->read_children();
+		if (!(obj = moo_make_object(objtype, res ? data : NULL))) {
 			moo_status("ARRAY: Error loading entry, %d", index);
 			return(-1);
 		}
-		if (data->read_children()) {
-			res = obj->read_data(data);
+		if (res)
 			data->read_parent();
-			if ((res < 0) || (this->set(index, obj) < 0)) {
-				MOO_DECREF(obj);
-				return(-1);
-			}
-		}
+		this->set(index, obj);
 	}
 	else
 		return(MooObject::read_entry(type, data));

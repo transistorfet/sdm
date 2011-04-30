@@ -36,7 +36,7 @@ class MooArgs : public MooObject {
 
 extern MooObjectType moo_args_obj_type;
 
-MooObject *moo_args_create(void);
+MooObject *make_moo_args(MooDataFile *data);
 
 #endif
 

@@ -57,11 +57,15 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int builder_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+/*
 	MooWorld *root;
 
 	if (!(root = MooWorld::root()))
 		return(-1);
 	root->write();
+*/
+	// TODO do something like this
+	//MooThing::write_all();
 	return(0);
 }
 
@@ -181,8 +185,7 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
-	MooThing *thing, *where, *was;
-	MooObjectArray *contents;
+	MooThing *thing, *where;
 
 	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;

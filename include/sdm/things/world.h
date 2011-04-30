@@ -35,7 +35,7 @@ extern MooObjectType moo_world_obj_type;
 
 int init_world(void);
 void release_world(void);
-MooObject *moo_world_create(void);
+MooObject *make_moo_world(MooDataFile *data);
 
 #endif
 

@@ -1,0 +1,81 @@
+<thing>
+ <id>10</id>
+ <parent>4</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="looked_at">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>$user.name looks around the room.</value>
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>room</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>someplace</value>
+  </entry>
+ </properties>
+ <methods>
+  <entry type="moolambda" key="n">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'north')]]></code>
+  </entry>
+  <entry type="moolambda" key="e">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'east')]]></code>
+  </entry>
+  <entry type="moolambda" key="d">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'down')]]></code>
+  </entry>
+  <entry type="moolambda" key="s">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'south')]]></code>
+  </entry>
+  <entry type="moolambda" key="w">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'west')]]></code>
+  </entry>
+  <entry type="moolambda" key="u">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[(this:go 'up')]]></code>
+  </entry>
+  <entry type="moolambda" key="say">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+       (this.contents:foreach (lambda (cur)
+       	(cur:notify 'say' user channel text)))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="go">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>dir</params>
+   <code><![CDATA[
+
+   ]]></code>
+  </entry>
+ </methods>
+</thing>

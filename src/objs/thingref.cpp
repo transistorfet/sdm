@@ -15,12 +15,15 @@ struct MooObjectType moo_thingref_obj_type = {
 	NULL,
 	"thingref",
 	typeid(MooThingRef).name(),
-	(moo_type_create_t) moo_thingref_create
+	(moo_type_make_t) make_moo_thingref
 };
 
-MooObject *moo_thingref_create(void)
+MooObject *make_moo_thingref(MooDataFile *data)
 {
-	return(new MooThingRef());
+	MooThingRef *obj = new MooThingRef();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooThingRef::MooThingRef(const char *str)

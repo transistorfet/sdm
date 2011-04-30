@@ -34,7 +34,7 @@ class MooThingRef : public MooObject {
 
 extern MooObjectType moo_thingref_obj_type;
 
-MooObject *moo_thingref_create(void);
+MooObject *make_moo_thingref(MooDataFile *data);
 
 #endif
 

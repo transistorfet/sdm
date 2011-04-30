@@ -18,12 +18,15 @@ MooObjectType moo_args_obj_type = {
 	NULL,
 	"args",
 	typeid(MooArgs).name(),
-	(moo_type_create_t) moo_args_create
+	(moo_type_make_t) make_moo_args
 };
 
-MooObject *moo_args_create(void)
+MooObject *make_moo_args(MooDataFile *data)
 {
-	return(new MooArgs());
+	MooArgs *obj = new MooArgs();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooArgs::MooArgs(int init_size)

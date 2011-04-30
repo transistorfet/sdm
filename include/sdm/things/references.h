@@ -12,7 +12,7 @@
 #define MOO_GENERIC_EXIT	"/core/exit"
 #define MOO_GENERIC_MOBILE	"/core/mobile"
 #define MOO_CRYOLOCKER		"/core/cryolocker"
-#define MOO_CHANNELS		"/core/channels"
+#define MOO_CHANNELS		"#13"
 
 #endif
 

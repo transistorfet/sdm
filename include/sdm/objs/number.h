@@ -44,7 +44,7 @@ class MooNumber : public MooObject {
 
 extern MooObjectType moo_number_obj_type;
 
-MooObject *moo_number_create(void);
+MooObject *make_moo_number(MooDataFile *data);
 
 #endif
 

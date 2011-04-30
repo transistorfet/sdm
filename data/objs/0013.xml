@@ -1,0 +1,31 @@
+<thing>
+ <id>13</id>
+ <parent>1</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   2
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>channels</value>
+  </entry>
+  <entry type="hash" key="list">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <entry type="thing" key="#help">
+    15
+   </entry>
+   <entry type="thing" key="#wartalk">
+    16
+   </entry>
+   <entry type="thing" key="#realm">
+    17
+   </entry>
+  </entry>
+ </properties>
+ <methods>
+ </methods>
+</thing>

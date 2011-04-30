@@ -83,12 +83,12 @@ const MooObjectType *moo_object_find_type(const char *name, const MooObjectType 
 }
 
 
-MooObject *moo_make_object(const MooObjectType *type)
+MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data)
 {
 	if (!type)
 		return(NULL);
 	try {
-		return(type->m_create());
+		return(type->m_make(data));
 	} catch(...) {
 		return(NULL);
 	}
@@ -193,14 +193,24 @@ int MooObject::read_data(MooDataFile *data)
 	const char *type;
 
 	do {
-		if (!(type = data->read_name()))
-			break;
-		res = this->read_entry(type, data);
-		if (res < 0)
-			error = 1;
-		/// We handled the whole rest of the data so just exit
-		else if (res == MOO_HANDLED_ALL)
-			return(error);
+		type = NULL;
+		try {
+			if (!(type = data->read_name()))
+				break;
+			res = this->read_entry(type, data);
+			if (res < 0)
+				error = 1;
+			/// We handled the whole rest of the data so just exit
+			else if (res == MOO_HANDLED_ALL)
+				return(error);
+		}
+		catch (MooException e) {
+			if (type)
+				moo_status("DATA: (at <%s>) %s", type, e.get());
+			else
+				moo_status("DATA: %s", e.get());
+			return(-1);
+		}
 	} while (data->read_next());
 	/// We return if the file loaded incorrectly but we don't stop trying to load the file
 	return(error);
@@ -364,7 +374,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 		// TODO this is totally horrible and ugly! what is a better way to print an error
 		MooUser *user;
 		MooThing *thing = MooThing::lookup(MooTask::current_user());
-		if (user = dynamic_cast<MooUser *>(thing))
+		if ((user = dynamic_cast<MooUser *>(thing)))
 			// TODO send this to the current channel if possible
 			user->notify(TNT_STATUS, NULL, NULL, e.get());
 		res = -1;

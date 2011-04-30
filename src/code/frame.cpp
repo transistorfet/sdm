@@ -23,14 +23,17 @@ MooObjectType moo_code_frame_obj_type = {
 	&moo_object_obj_type,
 	"frame",
 	typeid(MooCodeFrame).name(),
-	(moo_type_create_t) moo_code_frame_create
+	(moo_type_make_t) make_moo_code_frame
 };
 
 extern MooObjectHash *global_env;
 
-MooObject *moo_code_frame_create(void)
+MooObject *make_moo_code_frame(MooDataFile *data)
 {
-	return(new MooCodeFrame());
+	MooCodeFrame *obj = new MooCodeFrame();
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *parent)

@@ -84,7 +84,7 @@ class MooObjectArray : public MooArray<MooObject *> {
 };
 
 extern MooObjectType moo_array_obj_type;
-MooObject *moo_array_create(void);
+MooObject *make_moo_array(MooDataFile *data);
 
 int init_array(void);
 void release_array(void);

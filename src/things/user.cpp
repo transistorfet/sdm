@@ -27,7 +27,7 @@ MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
 	typeid(MooUser).name(),
-	(moo_type_create_t) NULL
+	(moo_type_make_t) NULL
 };
 
 static MooHash<MooUser *> *user_list = NULL;
@@ -155,8 +155,9 @@ int MooUser::connect(MooTask *task)
 void MooUser::disconnect()
 {
 	try {
+		// TODO ***CRITICAL*** we need to replace this MooChannel::quit with something equivalent (possibly a call_method)
 		/// Remove the user from all channels
-		MooChannel::quit(this);
+		//MooChannel::quit(this);
 
 		/// Save the user information to the user's file only if we were already connected
 		if (m_task) {

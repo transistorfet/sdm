@@ -1,0 +1,26 @@
+<thing>
+ <id>50</id>
+ <parent>10</parent>
+ <owner>7</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   1
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>The Test Room</value>
+  </entry>
+  <entry type="string" key="description">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value>
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>start</value>
+  </entry>
+ </properties>
+</thing>

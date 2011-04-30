@@ -16,12 +16,15 @@ MooObjectType moo_string_obj_type = {
 	NULL,
 	"string",
 	typeid(MooString).name(),
-	(moo_type_create_t) moo_string_create
+	(moo_type_make_t) make_moo_string
 };
 
-MooObject *moo_string_create(void)
+MooObject *make_moo_string(MooDataFile *data)
 {
-	return(new MooString(""));
+	MooString *obj = new MooString("");
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooString::MooString(const char *fmt, ...)

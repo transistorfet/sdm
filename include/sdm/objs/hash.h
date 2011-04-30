@@ -92,7 +92,7 @@ class MooObjectHash : public MooHash<MooObject *> {
 };
 
 extern MooObjectType moo_hash_obj_type;
-MooObject *moo_hash_create(void);
+MooObject *make_moo_hash(MooDataFile *data);
 
 int init_hash(void);
 void release_hash(void);

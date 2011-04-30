@@ -23,12 +23,15 @@ MooObjectType moo_method_obj_type = {
 	NULL,
 	"method",
 	typeid(MooMethod).name(),
-	(moo_type_create_t) moo_method_create
+	(moo_type_make_t) make_moo_method
 };
 
-MooObject *moo_method_create(void)
+MooObject *make_moo_method(MooDataFile *data)
 {
-	return(new MooMethod(NULL, NULL));
+	MooMethod *obj = new MooMethod(NULL, NULL);
+	if (data)
+		obj->read_data(data);
+	return(obj);
 }
 
 MooMethod::MooMethod(MooObject *obj, MooObject *func)

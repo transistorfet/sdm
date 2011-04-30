@@ -23,7 +23,7 @@ class MooNil : public MooObject {
 extern MooNil moo_nil;
 extern MooObjectType moo_nil_obj_type;
 
-MooObject *moo_nil_create(void);
+MooObject *make_moo_nil(MooDataFile *data);
 
 #endif
 

@@ -1,0 +1,13 @@
+<thing>
+ <id>1</id>
+ <owner>-1</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>root</value>
+  </entry>
+ </properties>
+</thing>
+
