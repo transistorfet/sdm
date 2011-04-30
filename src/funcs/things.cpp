@@ -14,7 +14,6 @@
 
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/world.h>
 
 
 static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)

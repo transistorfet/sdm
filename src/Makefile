@@ -40,8 +40,7 @@ OBJS =	colours.o	\
 	tasks/irc/pseudoserv.o	\
 	things/channel.o	\
 	things/thing.o	\
-	things/user.o	\
-	things/world.o
+	things/user.o
 
 LIBS =	-lcrypt
 
@@ -92,8 +91,7 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/things/user.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h ../include/sdm/tasks/irc/msg.h \
   ../include/sdm/tasks/irc/commands.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/objs/config.h ../include/sdm/things/channel.h \
-  ../include/sdm/things/world.h
+  ../include/sdm/objs/config.h ../include/sdm/things/channel.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h
@@ -182,7 +180,7 @@ funcs/basic.o: funcs/basic.cpp ../include/sdm/data.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/things/references.h ../include/sdm/things/world.h
+  ../include/sdm/things/references.h
 
 funcs/func.o: funcs/func.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
@@ -220,7 +218,7 @@ funcs/things.o: funcs/things.cpp ../include/sdm/data.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/things/user.h ../include/sdm/tasks/task.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
-  ../include/sdm/things/references.h ../include/sdm/things/world.h
+  ../include/sdm/things/references.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/tasks/task.h \
@@ -346,7 +344,7 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp ../include/sdm/colours.h \
   ../include/sdm/tasks/irc/commands.h \
   ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/things/user.h \
   ../include/sdm/things/thing.h ../include/sdm/things/references.h \
-  ../include/sdm/things/channel.h ../include/sdm/things/world.h
+  ../include/sdm/things/channel.h
 
 things/channel.o: things/channel.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -361,14 +359,13 @@ things/thing.o: things/thing.cpp ../include/sdm/data.h \
   ../include/sdm/gc.h ../include/sdm/things/user.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/things/thing.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/things/references.h ../include/sdm/things/world.h \
-  ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/things/references.h ../include/sdm/objs/args.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/thingref.h ../include/sdm/funcs/func.h \
+  ../include/sdm/funcs/method.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/nil.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -378,11 +375,4 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/things/thing.h ../include/sdm/objs/array.h \
   ../include/sdm/things/references.h ../include/sdm/things/channel.h \
   ../include/sdm/things/user.h
-
-things/world.o: things/world.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/things/thing.h ../include/sdm/objs/hash.h \
-  ../include/sdm/objs/array.h ../include/sdm/things/references.h \
-  ../include/sdm/things/world.h
 

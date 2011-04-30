@@ -9,7 +9,6 @@
 #include <sdm/globals.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/user.h>
-#include <sdm/things/world.h>
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
@@ -21,7 +20,6 @@
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/world.h>
 
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
@@ -60,7 +58,6 @@ void release_thing(void)
 MooObject *make_moo_thing(MooDataFile *data)
 {
 	int id;
-	MooThing *thing;
 
 	id = data->read_integer();
 	return(MooThing::lookup(id));
@@ -88,27 +85,14 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	else if (m_id == MOO_NEW_ID)
 		m_id = moo_thing_table->add(this);
 	m_parent = parent;
-	m_location = NULL;
-	m_next = NULL;
-	m_objects = NULL;
-	m_end_objects = NULL;
 }
 
 MooThing::~MooThing()
 {
-	MooThing *cur, *tmp;
-
-	if (m_location)
-		m_location->remove(this);
 	MOO_DECREF(m_properties);
 	MOO_DECREF(m_methods);
 	if (m_id >= 0)
 		moo_thing_table->set(m_id, NULL);
-
-	for (cur = m_objects; cur; cur = tmp) {
-		tmp = cur->m_next;
-		delete cur;
-	}
 }
 
 MooThing *MooThing::lookup(moo_id_t id)
@@ -127,8 +111,6 @@ MooThing *MooThing::lookup(moo_id_t id)
 int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
-	char buffer[STRING_SIZE];
-	const MooObjectType *objtype;
 
 	if (!strcmp(type, "properties")) {
 		if (data->read_children()) {
@@ -142,25 +124,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			data->read_parent();
 		}
 	}
-/*
-	else if (!strcmp(type, "thing")) {
-		MooThing *thing = NULL;
-		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type((*buffer != '\0') ? buffer : "thing", &moo_thing_obj_type))) {
-			moo_status("THING: Unable to find thing type, %s", buffer);
-			return(-1);
-		}
-		if (!(thing = (MooThing *) moo_make_object(objtype))) {
-			moo_status("THING: Error loading thing.");
-			return(-1);
-		}
-		if (data->read_children()) {
-			thing->read_data(data);
-			data->read_parent();
-		}
-		this->add(thing);
-	}
-*/
 	else if (!strcmp(type, "bits")) {
 		int bits = data->read_integer_entry();
 		m_bits = bits;
@@ -173,12 +136,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		moo_id_t id = data->read_integer_entry();
 		m_parent = id;
 	}
-	else if (!strcmp(type, "location")) {
-		moo_id_t id = data->read_integer_entry();
-		MooThing *thing = MooThing::lookup(id);
-		//if (thing && this != thing)
-		//	thing->add(this);
-	}
 	else
 		return(MooObject::read_entry(type, data));
 	return(MOO_HANDLED);
@@ -186,50 +143,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 
 int MooThing::write_data(MooDataFile *data)
 {
-	// TODO this should be all we need now
 	data->write_integer(m_id);
-	return(0);
-
-	data->write_integer_entry("id", m_id);
-	if (m_parent >= 0)
-		data->write_integer_entry("parent", m_parent);
-	if (m_bits != 0)
-		data->write_hex_entry("bits", m_bits);
-	MooObject::write_data(data);
-	if (m_location)
-		data->write_integer_entry("location", m_location->m_id);
-
-	/// Write the properties to the file
-	if (m_properties->entries()) {
-		data->write_begin_entry("properties");
-		m_properties->write_data(data);
-		data->write_end_entry();
-	}
-
-	/// Write the actions to the file
-	if (m_methods->entries()) {
-		data->write_begin_entry("methods");
-		m_methods->write_data(data);
-		data->write_end_entry();
-	}
-
-	/// Write the things we contain to the file
-/*
-	for (MooThing *cur = m_objects; cur; cur = cur->m_next) {
-		if (cur->is_a(&moo_user_obj_type))
-			continue;
-		else if (cur->is_a(&moo_world_obj_type)) {
-			cur->write_data(data);
-		}
-		else {
-			data->write_begin_entry("thing");
-			if (cur->type() != &moo_thing_obj_type)
-				data->write_attrib_string("type", cur->type_name());
-			cur->write_data(data);
-			data->write_end_entry();
-		}
-	}
-*/
 	return(0);
 }
 
@@ -238,7 +152,7 @@ int MooThing::load()
 	char buffer[STRING_SIZE];
 
 	if (m_id < 0) {
-		moo_status("THING: attempting to write thing with an invalid ID");
+		moo_status("THING: attempting to read thing with an invalid ID");
 		return(-1);
 	}
 	snprintf(buffer, STRING_SIZE, "objs/%04d.xml", m_id);
@@ -265,8 +179,6 @@ int MooThing::save()
 	if (m_bits != 0)
 		data->write_hex_entry("bits", m_bits);
 	MooObject::write_data(data);
-	if (m_location)
-		data->write_integer_entry("location", m_location->m_id);
 
 	/// Write the properties to the file
 	if (m_properties->entries()) {
@@ -397,69 +309,7 @@ MooObject *MooThing::get_method(const char *name)
 	return(NULL);
 }
 
-///// Search Methods /////
-
-MooThing *MooThing::find(const char *name)
-{
-	MooThing *thing;
-
-	if ((thing = MooThing::reference(name)))
-		return(thing);
-/*
-	else if (!strcmp(name, "me"))
-		return(this);
-	else if (!strcmp(name, "here") && m_location)
-		return(m_location);
-	else if ((thing = this->find_named(name)))
-		return(thing);
-	else if (m_location && (thing = m_location->find_named(name)))
-		return(thing);
-*/
-	return(NULL);
-}
-
-/*
-MooThing *MooThing::find_named(const char *name)
-{
-	int len;
-	MooString *str;
-	const char *end;
-	MooThing *cur, *thing;
-
-	if (name[0] == '/') {
-		thing = (MooThing *) MooWorld::root();
-		name = &name[1];
-	}
-	else
-		thing = this;
-
-	while (thing) {
-		if ((end = strchr(name, '/')))
-			len = end - name;
-		else
-			len = strlen(name);
-		if (len <= 0)
-			return(NULL);
-		for (cur = thing->m_objects; cur; cur = cur->m_next) {
-			// TODO modify this to use the aliases list or something
-			if (!(str = dynamic_cast<MooString *>(cur->get_property("name", NULL))))
-				continue;
-			if (!str->compare(name, len)) {
-				if (name[len] == '\0')
-					return(cur);
-				else {
-					thing = cur;
-					name = &name[len + 1];
-					break;
-				}
-			}
-		}
-		if (!cur)
-			return(NULL);
-	}
-	return(NULL);
-}
-*/
+///// Helper Methods /////
 
 MooThing *MooThing::reference(const char *name)
 {
@@ -471,12 +321,6 @@ MooThing *MooThing::reference(const char *name)
 			return(NULL);
 		return(MooThing::lookup(id));
 	}
-	//else if (name[0] == '/') {
-		//MooWorld *world = MooWorld::root();
-		//if (!world)
-		//	return(NULL);
-		//return(world->find_named(name));
-	//}
 	// TODO should we just get rid of this entirely?
 	else if (name[0] == '$') {
 		// TODO should we break up the reference??
@@ -487,27 +331,6 @@ MooThing *MooThing::reference(const char *name)
 	}
 	return(NULL);
 }
-
-///// Helper Methods /////
-
-/*
-int MooThing::attach_orphans()
-{
-	MooThing *cur;
-	MooThing *root;
-
-	// TODO should this instead be a sign that we need to recycle these things?
-	if (!(root = MooWorld::root()))
-		return(-1);
-	for (int i = 0; i <= moo_thing_table->last(); i++) {
-		if ((cur = moo_thing_table->get(i))) {
-			if (!cur->m_location)
-				root->add(cur);
-		}
-	}
-	return(0);
-}
-*/
 
 int MooThing::is_wizard(moo_id_t id)
 {
@@ -536,55 +359,6 @@ int MooThing::assign_id(moo_id_t id)
 		moo_status("Error: Attempted to reassign ID, %d", id);
 	return(m_id);
 }
-
-int MooThing::add(MooThing *obj)
-{
-	if (obj->m_location == this)
-		return(0);
-	/// Make sure this addition doesn't create a loop
-	for (MooThing *cur = this; cur; cur = cur->m_location) {
-		if (cur == obj) {
-			moo_status("THING: Adding thing will create loop, %d", obj->id());
-			return(-1);
-		}
-	}
-
-	/// If this object is in another object and it can't be removed, then we don't add it
-	if (obj->m_location && obj->m_location->remove(obj))
-		return(-1);
-	obj->m_location = this;
-	obj->m_next = NULL;
-	if (m_end_objects) {
-		m_end_objects->m_next = obj;
-		m_end_objects = obj;
-	}
-	else {
-		m_objects = obj;
-		m_end_objects = obj;
-	}
-	return(0);
-}
-
-int MooThing::remove(MooThing *obj)
-{
-	MooThing *cur, *prev;
-
-	for (prev = NULL, cur = m_objects; cur; prev = cur, cur = cur->m_next) {
-		if (cur == obj) {
-			if (prev)
-				prev->m_next = cur->m_next;
-			else
-				m_objects = cur->m_next;
-			if (m_end_objects == cur)
-				m_end_objects = prev;
-			cur->m_location = NULL;
-			return(0);
-		}
-	}
-	return(1);
-}
-
-///// Accessors /////
 
 const char *MooThing::name()
 {
@@ -628,5 +402,39 @@ int MooThing::move(MooThing *where)
 	}
 	return(0);
 }
+
+MooThing *MooThing::get_channel(const char *name)
+{
+	MooThing *channels;
+	MooObjectHash *list;
+
+	if (!(channels = MooThing::reference(MOO_CHANNELS))) {
+		moo_status("CHANNEL: channels object not found");
+		return(NULL);
+	}
+	if (!(list = dynamic_cast<MooObjectHash *>(channels->resolve_property("list")))) {
+		moo_status("CHANNEL: channel list not found on channels object");
+		return(NULL);
+	}
+	return(dynamic_cast<MooThing *>(list->get(name)));
+}
+
+/*
+int MooChannel::valid_channelname(const char *name)
+{
+	int i;
+
+	if (name[0] != '#')
+		return(0);
+	for (i = 1; name[i] != '\0'; i++) {
+		if (!(((name[i] >= 0x30) && (name[i] <= 0x39))
+		    || ((name[i] >= 0x41) && (name[i] <= 0x5a))
+		    || ((name[i] >= 0x61) && (name[i] <= 0x7a))
+		    || (name[i] == '-') || (name[i] == '.') || (name[i] == '_')))
+			return(0);
+	}
+	return(1);
+}
+*/
 
 

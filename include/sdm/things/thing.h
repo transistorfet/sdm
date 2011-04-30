@@ -29,13 +29,8 @@ class MooThing : public MooObject {
 	int m_bits;
 	moo_id_t m_id;
 	moo_id_t m_parent;
-	MooThing *m_location;
 	MooObjectHash *m_properties;
 	MooObjectHash *m_methods;
-
-	MooThing *m_next;
-	MooThing *m_objects;
-	MooThing *m_end_objects;
 
     public:
 	MooThing(moo_id_t id = -1, moo_id_t parent = -1);
@@ -44,9 +39,10 @@ class MooThing : public MooObject {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
-	virtual MooThing *get_thing() { return(this); }
 	int load();
 	int save();
+
+	virtual MooThing *get_thing() { return(this); }
 
     public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
@@ -61,18 +57,6 @@ class MooThing : public MooObject {
 	MooObject *get_method(const char *name);
 
     public:
-	/// Search Methods
-	MooThing *find(const char *name);
-	MooThing *find_named(const char *name);
-	static MooThing *reference(const char *name);
-
-	/// Helper Methods
-	static int attach_orphans();
-
-	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
-	static int is_wizard(moo_id_t id);
-
-    public:
 	/// Accessors
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent_id() { return(m_parent); }
@@ -81,16 +65,20 @@ class MooThing : public MooObject {
 	inline int is_a_thing(moo_id_t id);
 	inline int is_a_thing(const char *name);
 
+    public:
+	/// Helper Methods
+	static MooThing *reference(const char *name);
+	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
+	static int is_wizard(moo_id_t id);
+
 	const char *name();
 	MooThing *location();
 	inline MooObjectArray *contents() { return(dynamic_cast<MooObjectArray *>(this->resolve_property("contents"))); }
 	int move(MooThing *where);
+	static MooThing *get_channel(const char *name);
 
     protected:
 	int assign_id(moo_id_t id);
-
-	int add(MooThing *thing);
-	int remove(MooThing *thing);
 };
 
 extern MooObjectType moo_thing_obj_type;

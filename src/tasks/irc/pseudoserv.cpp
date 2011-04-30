@@ -20,7 +20,6 @@
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
 #include <sdm/things/channel.h>
-#include <sdm/things/world.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
 	&moo_task_obj_type,
@@ -304,7 +303,7 @@ int PseudoServ::dispatch(Msg *msg)
 
 			// TODO will the channel list eventually become part of an object?
 			if (moo_is_channel_name(msg->m_params[0]))
-				channel = MooChannel::get(msg->m_params[0]);
+				channel = MooThing::get_channel(msg->m_params[0]);
 			else
 				channel = MooUser::get(msg->m_params[0]);
 
@@ -467,7 +466,7 @@ int PseudoServ::handle_join(const char *name)
 	//	return(Msg::send(m_inter, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
 	//	return(Msg::send(m_inter, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
 
-	MooThing *channel = MooChannel::get(name);
+	MooThing *channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	return(channel->call_method(channel, "join", NULL));
@@ -476,7 +475,7 @@ int PseudoServ::handle_join(const char *name)
 int PseudoServ::handle_leave(const char *name)
 {
 	// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
-	MooThing *channel = MooChannel::get(name);
+	MooThing *channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	return(channel->call_method(channel, "leave", NULL));
@@ -566,7 +565,7 @@ int PseudoServ::send_names(const char *name)
 
 	if (!m_user)
 		return(-1);
-	channel = MooChannel::get(name);
+	channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	// TODO change this to a throwing do_action so that if an error occurs, it can recover

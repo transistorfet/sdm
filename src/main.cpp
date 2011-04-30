@@ -25,7 +25,6 @@
 #include <sdm/funcs/method.h>
 #include <sdm/things/channel.h>
 #include <sdm/things/user.h>
-#include <sdm/things/world.h>
 
 static int exit_flag = 1;
 
@@ -68,8 +67,6 @@ int init_moo(void)
 
 		init_thing();
 		init_user();
-		//init_channel();
-		//init_world();
 
 		load_global_config();
 
@@ -94,8 +91,6 @@ int init_moo(void)
 void release_moo(void)
 {
 	release_user();
-	//release_world();
-	//release_channel();
 	release_thing();
 
 	release_moo_code();
