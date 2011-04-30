@@ -18,7 +18,6 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/string.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/channel.h>
 #include <sdm/things/user.h>
 
 #define USER_INIT_SIZE		64

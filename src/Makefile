@@ -38,7 +38,6 @@ OBJS =	colours.o	\
 	tasks/task.o	\
 	tasks/irc/msg.o	\
 	tasks/irc/pseudoserv.o	\
-	things/channel.o	\
 	things/thing.o	\
 	things/user.o
 
@@ -91,7 +90,7 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/things/user.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h ../include/sdm/tasks/irc/msg.h \
   ../include/sdm/tasks/irc/commands.h ../include/sdm/objs/thingref.h \
-  ../include/sdm/objs/config.h ../include/sdm/things/channel.h
+  ../include/sdm/objs/config.h
 
 timer.o: timer.cpp ../include/sdm/timer.h ../include/sdm/globals.h \
   ../include/sdm/exception.h
@@ -343,15 +342,7 @@ tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp ../include/sdm/colours.h \
   ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/msg.h \
   ../include/sdm/tasks/irc/commands.h \
   ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/things/user.h \
-  ../include/sdm/things/thing.h ../include/sdm/things/references.h \
-  ../include/sdm/things/channel.h
-
-things/channel.o: things/channel.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
-  ../include/sdm/things/thing.h ../include/sdm/objs/array.h \
-  ../include/sdm/things/references.h ../include/sdm/things/channel.h
+  ../include/sdm/things/thing.h ../include/sdm/things/references.h
 
 things/thing.o: things/thing.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -373,6 +364,5 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/gc.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/string.h \
   ../include/sdm/things/thing.h ../include/sdm/objs/array.h \
-  ../include/sdm/things/references.h ../include/sdm/things/channel.h \
-  ../include/sdm/things/user.h
+  ../include/sdm/things/references.h ../include/sdm/things/user.h
 

@@ -19,7 +19,6 @@
 
 #include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/channel.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
 	&moo_task_obj_type,

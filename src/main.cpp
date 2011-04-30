@@ -23,7 +23,6 @@
 #include <sdm/objs/hash.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
-#include <sdm/things/channel.h>
 #include <sdm/things/user.h>
 
 static int exit_flag = 1;
