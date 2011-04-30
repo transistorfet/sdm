@@ -57,13 +57,6 @@
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
 
     TODO:
-	* should you modify the writing system to write each MooThing into it's own file?  Or to just write it all together but forget
-	  about the idea of seperate world systems, and the whole /path system of referencing
-	* now that you have the MooCode system, and possibly a format for loading in an entire functional database from code, could
-	  you possibly save the database back to that code system?  I guess the main benefit of that would be ease of editing a live
-	  database offline.  It wouldn't be trivial to get the system to write back to MooCode, but it would save on having libxml and
-	  essentially 2 possible formats for databases.
-	* data/maps/ is not a good dir name.  Perhaps it should be data/objs/ or soemthing like that (or data/worlds/)
 
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
@@ -78,9 +71,6 @@
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will
 	  make /core/thing notation no longer work, but we can work around that
 	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
-	* it might be possible to not use ThingRef and instead use reference counting and garbage collection of pointers to MooThing
-	  directly.  Objects could still have an ID but it just wont be used internally as much.  Actually right now though, the access
-	  and get_thing() virtual functions make it seem identical to a MooThing.  You just can't dynamic_cast it to a MooThing
 	* how will MooThings be garbage collected?
 
 	* add permissions checks to access and evaluate functions
@@ -90,12 +80,9 @@
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
-	* can you convert init/release functions to be constructor/destructor of a singleton class?
-	* go through all read/write functions and make sure everything is covered and everything works (MooThing, MooWorld, MooUser, etc)
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
-	* should you try to replace all make_string references with std::string stuff? Should all strings be one or the other?
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
 	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as

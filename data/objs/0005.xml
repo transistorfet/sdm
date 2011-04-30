@@ -1,6 +1,6 @@
 <thing>
  <id>5</id>
- <parent>4</parent>
+ <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
@@ -11,30 +11,86 @@
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="self_look_at">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>$this.name looks at himself, quizically.</value>
-  </entry>
-  <entry type="string" key="title">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>a creature</value>
-  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>mobile</value>
-  </entry>
-  <entry type="string" key="look_at">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>$user.name looks at you, menicingly.</value>
-  </entry>
-  <entry type="string" key="looked_at">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>$user.name looks at $this.name.</value>
+   <value>generic channel</value>
   </entry>
  </properties>
+ <methods>
+  <entry type="moolambda" key="join">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (if (= (this.users:search user) -1)
+       	(begin
+       		(this.users:push user)
+       		(this.users:foreach (lambda (cur)
+       			(cur:notify 'join' user channel "")))))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="leave">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (if (!= (this.users:search user) -1)
+       	(begin
+       		(this.users:foreach (lambda (cur)
+       			(cur:notify 'leave' user channel "")))
+       		(this.users:remove user)))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="quit">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (if (!= (this.users:search user) -1)
+       	(begin
+       		; TODO there should only be one quit message per user but we can only control the channel's quit...
+       		;(this.users:foreach (lambda (cur)
+       		;	(cur:notify 'quit' user channel "")))
+       		(this.users:remove user)))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="say">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+       (this.users:foreach (lambda (cur)
+       	(cur:notify 'say' user channel text)))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="emote">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+       (this.users:foreach (lambda (cur)
+       	(cur:notify 'emote' user channel text)))
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="names">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+       (define names "")
+       (this.users:foreach (lambda (cur)
+       	(set names (concat names cur.name " "))))
+       ;(chop names)
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="command">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+       (user:notify 'status' nil channel "Commands are not supported in this channel.")
+   ]]></code>
+  </entry>
+ </methods>
 </thing>

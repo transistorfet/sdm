@@ -122,6 +122,16 @@ int MooUser::convert_guest()
 	return(0);
 }
 
+int MooUser::read_entry(const char *type, MooDataFile *data)
+{
+	if (!strcmp(type, "name")) {
+		// TODO this should already have been set but maybe we can generate an error if it doesn't match
+	}
+	else
+		return(MooThing::read_entry(type, data));
+	return(0);
+}
+
 int MooUser::load()
 {
 	char buffer[STRING_SIZE];
@@ -141,6 +151,9 @@ int MooUser::save()
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
 	// TODO disable user writing for now since it doesn't work (it just writes the thing id rather than the whole thing)
 	//return(MooObject::write_file(buffer, "user"));
+	//MooThing::write_data(data);
+	//data->write_string_entry("name", m_name->c_str());
+	//data->write_integer_entry("lastseen", time(NULL));
 	return(0);
 }
 
@@ -175,26 +188,6 @@ void MooUser::disconnect()
 		moo_status("USER: Error saving user data, %s", m_name->c_str());
 	}
 }
-
-
-int MooUser::read_entry(const char *type, MooDataFile *data)
-{
-	if (!strcmp(type, "name")) {
-		// TODO this should already have been set but maybe we can generate an error if it doesn't match
-	}
-	else
-		return(MooThing::read_entry(type, data));
-	return(0);
-}
-
-int MooUser::write_data(MooDataFile *data)
-{
-	MooThing::write_data(data);
-	data->write_string_entry("name", m_name->c_str());
-	data->write_integer_entry("lastseen", time(NULL));
-	return(0);
-}
-
 
 int MooUser::notify(int type, MooThing *thing, MooThing *channel, const char *text)
 {

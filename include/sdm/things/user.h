@@ -30,10 +30,11 @@ class MooUser : public MooThing {
 	int convert_guest();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
+	virtual int load();
+	virtual int save();
 
-	int load();
-	int save();
+	virtual MooThing *get_thing() { return(this); }
+
 	int connect(MooTask *task);
 	void disconnect();
 

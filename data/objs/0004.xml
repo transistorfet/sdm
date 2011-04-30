@@ -1,6 +1,6 @@
 <thing>
  <id>4</id>
- <parent>3</parent>
+ <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
@@ -14,7 +14,19 @@
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>container</value>
+   <value>channels</value>
+  </entry>
+  <entry type="hash" key="list">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <entry type="thing" key="#realm">
+    6
+   </entry>
+   <entry type="thing" key="#help">
+    13
+   </entry>
   </entry>
  </properties>
+ <methods>
+ </methods>
 </thing>

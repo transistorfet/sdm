@@ -1,6 +1,6 @@
 <thing>
  <id>13</id>
- <parent>1</parent>
+ <parent>5</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
@@ -11,25 +11,14 @@
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
+  <entry type="array" key="users">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>channels</value>
-  </entry>
-  <entry type="hash" key="list">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <entry type="thing" key="#help">
-    15
-   </entry>
-   <entry type="thing" key="#wartalk">
-    16
-   </entry>
-   <entry type="thing" key="#realm">
-    17
-   </entry>
+   <value>#help</value>
   </entry>
  </properties>
- <methods>
- </methods>
 </thing>

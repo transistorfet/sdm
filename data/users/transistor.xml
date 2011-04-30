@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <user>
  <id>100</id>
- <parent>7</parent>
+ <parent>3</parent>
  <bits>0x1</bits>
  <owner>100</owner>
  <permissions>075</permissions>

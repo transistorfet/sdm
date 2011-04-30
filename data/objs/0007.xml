@@ -1,6 +1,6 @@
 <thing>
- <id>16</id>
- <parent>14</parent>
+ <id>7</id>
+ <parent>9</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
@@ -11,15 +11,22 @@
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="array" key="users">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>#wartalk</value>
+   <value>user</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>someone</value>
   </entry>
  </properties>
- <name>#wartalk</name>
+ <methods>
+  <entry type="moofunc" key="notify">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>user_notify</func>
+  </entry>
+ </methods>
 </thing>

@@ -1,6 +1,6 @@
 <thing>
  <id>2</id>
- <parent>6</parent>
+ <parent>3</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
@@ -23,10 +23,5 @@
   </entry>
  </properties>
  <methods>
-  <entry type="moofunc" key="@save">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>builder_save</func>
-  </entry>
  </methods>
 </thing>

@@ -11,22 +11,46 @@
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
+  <entry type="array" key="users">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>user</value>
-  </entry>
-  <entry type="string" key="title">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>someone</value>
+   <value>#realm</value>
   </entry>
  </properties>
  <methods>
-  <entry type="moofunc" key="notify">
+  <!--<entry type="moolambda" key="join">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>user_notify</func>
+   <params></params>
+   <code><![CDATA[
+      ;(super join)
+      ;($cryolocker:fetch user)	; I have no idea how this would work
+   ]]></code>
+  </entry>-->
+  <entry type="moolambda" key="say">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+      (user.location:say text)
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="emote">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+      (user.location:emote text)
+   ]]></code>
+  </entry>
+  <entry type="moofunc" key="command">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>realm_command</func>
   </entry>
  </methods>
 </thing>

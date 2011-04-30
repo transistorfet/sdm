@@ -1,6 +1,6 @@
 <thing>
  <id>12</id>
- <parent>10</parent>
+ <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>

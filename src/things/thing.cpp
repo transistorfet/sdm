@@ -62,7 +62,7 @@ MooObject *make_moo_thing(MooDataFile *data)
 	id = data->read_integer();
 	// TODO is this right to return the nil value, or should you create a new nil value
 	if (!(thing = MooThing::lookup(id)))
-		return(&moo_nil);
+		return(make_moo_nil(NULL));
 	return(thing);
 }
 
