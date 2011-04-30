@@ -12,7 +12,6 @@
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/thingref.h>
 #include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 

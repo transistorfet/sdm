@@ -8,6 +8,13 @@
    <permissions>075</permissions>
    <value>root</value>
   </entry>
+  <entry type="thing" key="location">
+   -1
+  </entry>
+  <entry type="array" key="contents">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
  </properties>
 </thing>
 

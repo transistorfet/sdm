@@ -28,6 +28,7 @@ MooObject *make_moo_nil(MooDataFile *data)
 
 MooNil::MooNil()
 {
+	this->set_nofree();
 }
 
 MooNil::~MooNil()

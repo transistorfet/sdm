@@ -1,16 +1,32 @@
 <thing>
  <id>2</id>
- <parent>1</parent>
- <owner>7</owner>
+ <parent>6</parent>
+ <owner>2</owner>
  <permissions>075</permissions>
  <properties>
+  <entry type="thing" key="location">
+   -1
+  </entry>
+  <entry type="array" key="contents">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>core</value>
+   <value>wizard</value>
   </entry>
-  <entry type="thing" key="location">
-   1
+  <entry type="string" key="title">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>a powerful wizard</value>
   </entry>
  </properties>
+ <methods>
+  <entry type="moofunc" key="@save">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>builder_save</func>
+  </entry>
+ </methods>
 </thing>

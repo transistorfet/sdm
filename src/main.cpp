@@ -17,7 +17,6 @@
 
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/thingref.h>
 #include <sdm/objs/config.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/hash.h>
@@ -44,7 +43,6 @@ int init_moo(void)
 
 		moo_object_register_type(&moo_number_obj_type);
 		moo_object_register_type(&moo_string_obj_type);
-		moo_object_register_type(&moo_thingref_obj_type);
 		init_array();
 		init_hash();
 
@@ -70,13 +68,13 @@ int init_moo(void)
 		load_global_config();
 
 		// TODO what should we use as the name mangle to signify global values (@ isn't very good becuase it's used by funcs)
-		global_env->set("@start", new MooThingRef(MooThing::reference(MOO_START_ROOM)));
-		global_env->set("@user", new MooThingRef(MooThing::reference(MOO_GENERIC_USER)));
-		global_env->set("@room", new MooThingRef(MooThing::reference(MOO_GENERIC_ROOM)));
-		global_env->set("@exit", new MooThingRef(MooThing::reference(MOO_GENERIC_EXIT)));
-		global_env->set("@mobile", new MooThingRef(MooThing::reference(MOO_GENERIC_MOBILE)));
-		global_env->set("@cryolocker", new MooThingRef(MooThing::reference(MOO_CRYOLOCKER)));
-		global_env->set("@channels", new MooThingRef(MooThing::reference(MOO_CHANNELS)));
+		global_env->set("@start", MooThing::reference(MOO_START_ROOM));
+		global_env->set("@user", MooThing::reference(MOO_GENERIC_USER));
+		global_env->set("@room", MooThing::reference(MOO_GENERIC_ROOM));
+		global_env->set("@exit", MooThing::reference(MOO_GENERIC_EXIT));
+		global_env->set("@mobile", MooThing::reference(MOO_GENERIC_MOBILE));
+		global_env->set("@cryolocker", MooThing::reference(MOO_CRYOLOCKER));
+		global_env->set("@channels", MooThing::reference(MOO_CHANNELS));
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());

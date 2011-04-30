@@ -1,11 +1,15 @@
 <thing>
  <id>12</id>
  <parent>10</parent>
- <owner>7</owner>
+ <owner>2</owner>
  <permissions>075</permissions>
  <properties>
   <entry type="thing" key="location">
-   2
+   -1
+  </entry>
+  <entry type="array" key="contents">
+   <owner>-1</owner>
+   <permissions>075</permissions>
   </entry>
   <entry type="string" key="name">
    <owner>-1</owner>

@@ -16,7 +16,6 @@
 #include <sdm/objs/args.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/thingref.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
 #include <sdm/things/thing.h>
@@ -58,9 +57,13 @@ void release_thing(void)
 MooObject *make_moo_thing(MooDataFile *data)
 {
 	int id;
+	MooThing *thing;
 
 	id = data->read_integer();
-	return(MooThing::lookup(id));
+	// TODO is this right to return the nil value, or should you create a new nil value
+	if (!(thing = MooThing::lookup(id)))
+		return(&moo_nil);
+	return(thing);
 }
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent)

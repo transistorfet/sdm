@@ -139,7 +139,9 @@ int MooUser::save()
 	if (m_bits & MOO_UBF_GUEST)
 		return(-1);
 	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
-	return(MooObject::write_file(buffer, "user"));
+	// TODO disable user writing for now since it doesn't work (it just writes the thing id rather than the whole thing)
+	//return(MooObject::write_file(buffer, "user"));
+	return(0);
 }
 
 int MooUser::connect(MooTask *task)
