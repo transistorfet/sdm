@@ -4,19 +4,19 @@
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
+  <entry key="location" type="thing">
    -1
   </entry>
-  <entry type="array" key="contents">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>exit</value>
   </entry>
-  <entry type="string" key="title">
+  <entry key="title" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>an exit</value>

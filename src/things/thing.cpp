@@ -172,7 +172,7 @@ int MooThing::save()
 		return(-1);
 	}
 	//snprintf(file, STRING_SIZE, "objs/%04d/%04d.xml", m_id / 10000, m_id % 10000);
-	snprintf(file, STRING_SIZE, "objs/%04d.xml", m_id);
+	snprintf(file, STRING_SIZE, "objs-temp/%04d.xml", m_id);
 	moo_status("Writing thing data to file \"%s\".", file);
 	data = new MooDataFile(file, MOO_DATA_WRITE, "thing");
 

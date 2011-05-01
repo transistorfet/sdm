@@ -41,6 +41,7 @@ int init_moo(void)
 
 		init_object();
 
+		moo_object_register_type(&moo_nil_obj_type);
 		moo_object_register_type(&moo_number_obj_type);
 		moo_object_register_type(&moo_string_obj_type);
 		init_array();

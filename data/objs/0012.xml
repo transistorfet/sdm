@@ -4,26 +4,26 @@
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
+  <entry key="location" type="thing">
    -1
   </entry>
-  <entry type="array" key="contents">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>cryolocker</value>
   </entry>
-  <entry type="string" key="title">
+  <entry key="title" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>The Cryolocker</value>
   </entry>
  </properties>
  <methods>
-  <entry type="moolambda" key="fetch">
+  <entry key="fetch" type="moolambda">
    <owner>2</owner>
    <permissions>0475</permissions>
    <params>user</params>
@@ -31,7 +31,7 @@
 	(user:move user.last_location)
    ]]></code>
   </entry>
-  <entry type="moolambda" key="store">
+  <entry key="store" type="moolambda">
    <owner>2</owner>
    <permissions>0475</permissions>
    <params>user</params>

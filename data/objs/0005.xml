@@ -4,21 +4,21 @@
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
+  <entry key="location" type="thing">
    -1
   </entry>
-  <entry type="array" key="contents">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>generic channel</value>
   </entry>
  </properties>
  <methods>
-  <entry type="moolambda" key="join">
+  <entry key="join" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
@@ -30,7 +30,7 @@
 				(cur:notify 'join' user channel "")))))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="leave">
+  <entry key="leave" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
@@ -42,7 +42,7 @@
        		(this.users:remove user)))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="quit">
+  <entry key="quit" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
@@ -55,7 +55,7 @@
        		(this.users:remove user)))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="say">
+  <entry key="say" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params>text</params>
@@ -64,7 +64,7 @@
        	(cur:notify 'say' user channel text)))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="emote">
+  <entry key="emote" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params>text</params>
@@ -73,7 +73,7 @@
        	(cur:notify 'emote' user channel text)))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="names">
+  <entry key="names" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
@@ -84,7 +84,7 @@
        ;(chop names)
    ]]></code>
   </entry>
-  <entry type="moolambda" key="command">
+  <entry key="command" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params>text</params>

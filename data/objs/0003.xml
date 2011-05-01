@@ -26,10 +26,10 @@
        (@eval argstr)
    ]]></code>
   </entry>
-  <entry type="moofunc" key="@save">
+  <entry type="moofunc" key="@save_all">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>builder_save</func>
+   <func>thing_save_all</func>
   </entry>
  </methods>
 </thing>

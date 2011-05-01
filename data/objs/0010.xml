@@ -4,67 +4,67 @@
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
+  <entry key="location" type="thing">
    -1
   </entry>
-  <entry type="array" key="contents">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="looked_at">
+  <entry key="looked_at" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>$user.name looks around the room.</value>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>room</value>
   </entry>
-  <entry type="string" key="title">
+  <entry key="title" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>someplace</value>
   </entry>
  </properties>
  <methods>
-  <entry type="moolambda" key="n">
+  <entry key="n" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'north')]]></code>
   </entry>
-  <entry type="moolambda" key="e">
+  <entry key="e" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'east')]]></code>
   </entry>
-  <entry type="moolambda" key="d">
+  <entry key="d" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'down')]]></code>
   </entry>
-  <entry type="moolambda" key="s">
+  <entry key="s" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'south')]]></code>
   </entry>
-  <entry type="moolambda" key="w">
+  <entry key="w" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'west')]]></code>
   </entry>
-  <entry type="moolambda" key="u">
+  <entry key="u" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[(this:go 'up')]]></code>
   </entry>
-  <entry type="moolambda" key="say">
+  <entry key="say" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params>text</params>
@@ -73,7 +73,7 @@
        	(cur:notify 'say' user channel text)))
    ]]></code>
   </entry>
-  <entry type="moolambda" key="go">
+  <entry key="go" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params>dir</params>

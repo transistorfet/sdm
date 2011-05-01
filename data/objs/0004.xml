@@ -4,25 +4,25 @@
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
+  <entry key="location" type="thing">
    -1
   </entry>
-  <entry type="array" key="contents">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>channels</value>
   </entry>
-  <entry type="hash" key="list">
+  <entry key="list" type="hash">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <entry type="thing" key="#realm">
+   <entry key="#realm" type="thing">
     6
    </entry>
-   <entry type="thing" key="#help">
+   <entry key="#help" type="thing">
     13
    </entry>
   </entry>

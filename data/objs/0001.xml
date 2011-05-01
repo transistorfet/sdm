@@ -17,6 +17,11 @@
   </entry>
  </properties>
  <methods>
+  <entry type="moofunc" key="@save">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>thing_save</func>
+  </entry>
   <entry type="moofunc" key="move">
    <owner>-1</owner>
    <permissions>075</permissions>

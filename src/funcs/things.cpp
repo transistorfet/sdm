@@ -54,15 +54,63 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int builder_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->save();
+	return(0);
+}
+
+static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing::save_all();
 	return(0);
 }
 
+static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *func;
+	MooThing *thing, *parent;
+
+	// TODO is this good being a method? will we run into problems with initializing objects?
+	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() <= 0)
+		throw moo_args_mismatched;
+	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
+		throw MooException("Error creating new thing from %d", parent->id());
+
+	// TODO clone all properties from parent
+	// TODO call thing:init ??
+
+	if ((func = args->m_args->get(0)))
+		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
+	args->m_result = thing;
+	return(0);
+}
+
+static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	MooThing *thing, *where;
+
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(obj = args->m_args->get(0)) || !(where = obj->get_thing()))
+		throw moo_type_error;
+	return(thing->move(where));
+}
+
 #define MAX_WORDS	256
 
-static int realm_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int i = 0, j = 0;
 	const char *text;
@@ -112,49 +160,14 @@ static int realm_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooObject *func;
-	MooThing *thing, *parent;
-
-	// TODO is this good being a method? will we run into problems with initializing objects?
-	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() <= 0)
-		throw moo_args_mismatched;
-	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
-		throw MooException("Error creating new thing from %d", parent->id());
-
-	// TODO clone all properties from parent
-	// TODO call thing:init ??
-
-	if ((func = args->m_args->get(0)))
-		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
-	args->m_result = thing;
-	return(0);
-}
-
-static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooObject *obj;
-	MooThing *thing, *where;
-
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() != 0)
-		throw moo_args_mismatched;
-	if (!(obj = args->m_args->get(0)) || !(where = obj->get_thing()))
-		throw moo_type_error;
-	return(thing->move(where));
-}
-
 int moo_load_thing_methods(MooObjectHash *env)
 {
 	env->set("user_notify", new MooFunc(user_notify));
-	env->set("builder_save", new MooFunc(builder_save));
-	env->set("realm_command", new MooFunc(realm_command));
+	env->set("thing_save", new MooFunc(thing_save));
+	env->set("thing_save_all", new MooFunc(thing_save_all));
 	env->set("thing_clone", new MooFunc(thing_clone));
 	env->set("thing_move", new MooFunc(thing_move));
+	env->set("parse_command", new MooFunc(parse_command));
 	return(0);
 }
 
