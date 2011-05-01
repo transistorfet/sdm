@@ -24,10 +24,10 @@
    <params></params>
    <code><![CDATA[
 	(if (= (this.users:search user) -1)
-	(begin
-		(this.users:push user)
-		(this.users:foreach (lambda (cur)
-			(cur:notify 'join' user channel "")))))
+		(begin
+			(this.users:push user)
+			(this.users:foreach (lambda (cur)
+				(cur:notify 'join' user channel "")))))
    ]]></code>
   </entry>
   <entry type="moolambda" key="leave">

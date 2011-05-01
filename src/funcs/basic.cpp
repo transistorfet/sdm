@@ -63,7 +63,7 @@ static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObject *obj;
 
 	// TODO what type? double? long int? a different function or something for each?
-	for (int i = 0; i < args->m_args->last(); i++) {
+	for (int i = 0; i <= args->m_args->last(); i++) {
 		//obj = args->m_args->get(i);
 		// TODO wtf, seriously
 	}
@@ -94,7 +94,7 @@ static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	for (int i = 0; i < args->m_args->last(); i++) {
+	for (int i = 0; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i)) {
 			args->m_result = new MooNumber((long int) 0);
 			return(0);
@@ -111,7 +111,7 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i) != obj) {
 			args->m_result = new MooNumber((long int) 0);
 			return(0);
@@ -129,7 +129,7 @@ static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
 		throw MooException("Expected number at arg 0");
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("Expected number at arg %d", i);
 		if (!num1->equals(num2)) {
@@ -149,7 +149,7 @@ static int basic_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *arg
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
 		throw MooException("Expected number at arg 0");
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("Expected number at arg %d", i);
 		if (num1->equals(num2)) {
@@ -169,7 +169,7 @@ static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
 			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
@@ -186,7 +186,7 @@ static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
 			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
@@ -203,7 +203,7 @@ static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
 			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
@@ -220,7 +220,7 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 1; i < args->m_args->last(); i++) {
+	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (args->m_args->get(i) == obj) {
 			args->m_result = new MooNumber((moo_integer_t) 0);
 			return(0);
@@ -243,7 +243,7 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	if (args->m_args->last() < 0)
 		throw moo_args_mismatched;
-	for (int i = 0; i < args->m_args->last(); i++) {
+	for (int i = 0; i <= args->m_args->last(); i++) {
 		obj = args->m_args->get(i);
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
