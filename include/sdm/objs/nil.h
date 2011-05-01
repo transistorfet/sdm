@@ -19,7 +19,7 @@ class MooNil : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int to_string(char *buffer, int max);
 
-	virtual MooThing *get_thing() { return(NULL); }
+	MooThing *get_thing() { return(NULL); }
 };
 
 extern MooNil moo_nil;

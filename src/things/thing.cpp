@@ -201,6 +201,19 @@ int MooThing::save()
 	return(0);
 }
 
+int MooThing::save_all()
+{
+	MooThing *thing;
+
+	for (int i = 0; i <= moo_thing_table->last(); i++) {
+		thing = moo_thing_table->get(i);
+		if (!thing || dynamic_cast<MooUser *>(thing))
+			continue;
+		thing->save();
+	}
+	return(0);
+}
+
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
@@ -238,12 +251,14 @@ int MooThing::set_property(const char *name, MooObject *obj)
 	/// If the object is NULL, remove the entry from the table
 	if ((cur = m_properties->get(name))) {
 		if (!obj) {
-			this->check_throw(MOO_PERM_W);
+			// TODO no perms checks for now
+			//this->check_throw(MOO_PERM_W);
 			m_properties->remove(name);
 			return(1);
 		}
 		else {
-			cur->check_throw(MOO_PERM_W);
+			// TODO no perms checks for now
+			//cur->check_throw(MOO_PERM_W);
 			obj->owner(cur->owner());
 			obj->permissions(cur->permissions());
 			// TODO you could also do a check here for the type (only allow the same type to overwrite)
@@ -253,7 +268,8 @@ int MooThing::set_property(const char *name, MooObject *obj)
 	else {
 		if (!obj)
 			return(1);
-		this->check_throw(MOO_PERM_W);
+		// TODO no perms checks for now
+		//this->check_throw(MOO_PERM_W);
 		return(m_properties->set(name, MOO_INCREF(obj)));
 	}
 }
@@ -264,7 +280,8 @@ MooObject *MooThing::get_property(const char *name, MooObjectType *type)
 
 	if (!(obj = this->get_property_raw(name, NULL)))
 		return(NULL);
-	obj->check_throw(MOO_PERM_R);
+	// TODO no perms checks for now
+	//obj->check_throw(MOO_PERM_R);
 	if (!type || obj->is_a(type))
 		return(obj);
 	return(NULL);
@@ -386,7 +403,7 @@ MooThing *MooThing::location()
 	if (!(obj = this->resolve_property("contents")))
 		return(NULL);
 	// TODO should all get_things be turned in to dynamic casts when we get rid of thingref?
-	return(obj->get_thing());
+	return(dynamic_cast<MooThing *>(obj));
 }
 
 int MooThing::move(MooThing *where)
@@ -394,7 +411,8 @@ int MooThing::move(MooThing *where)
 	MooThing *was;
 	MooObjectArray *contents;
 
-	this->check_throw(MOO_PERM_W);
+	// TODO add permissions checks (this wasn't working)
+	//this->check_throw(MOO_PERM_W);
 	if ((was = this->location()) && (contents = was->contents()))
 		contents->remove(this);
 	if ((contents = where->contents())) {

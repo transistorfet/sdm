@@ -113,6 +113,8 @@ const MooObjectType *MooObject::type()
 
 moo_id_t MooObject::owner(moo_id_t id)
 {
+	if (this == MooTask::current_task())
+		MooTask::current_owner(id);
 	return(m_owner = id);
 }
 

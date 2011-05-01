@@ -22,15 +22,15 @@
   </entry>
  </properties>
  <methods>
-  <!--<entry type="moolambda" key="join">
+  <entry type="moolambda" key="join">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[
-      ;(super join)
-      ;($cryolocker:fetch user)	; I have no idea how this would work
+	(super join)
+	(@cryolocker:fetch user)	; I have no idea how this would work
    ]]></code>
-  </entry>-->
+  </entry>
   <entry type="moolambda" key="say">
    <owner>-1</owner>
    <permissions>075</permissions>

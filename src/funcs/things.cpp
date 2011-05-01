@@ -56,15 +56,7 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int builder_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-/*
-	MooWorld *root;
-
-	if (!(root = MooWorld::root()))
-		return(-1);
-	root->write();
-*/
-	// TODO do something like this
-	//MooThing::write_all();
+	MooThing::save_all();
 	return(0);
 }
 

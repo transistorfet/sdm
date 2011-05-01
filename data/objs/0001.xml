@@ -16,5 +16,12 @@
    <permissions>075</permissions>
   </entry>
  </properties>
+ <methods>
+  <entry type="moofunc" key="move">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>thing_move</func>
+  </entry>
+ </methods>
 </thing>
 

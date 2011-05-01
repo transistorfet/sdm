@@ -62,7 +62,7 @@ int Msg::send(MooTCP *inter, const char *fmt, ...)
 		return(-1);
 	va_start(va, fmt);
 	vsnprintf(buffer, STRING_SIZE, fmt, va);
-	//moo_status("IRC: SEND DEBUG: %s", buffer);
+	moo_status("IRC: SEND DEBUG: %s", buffer);
 	return(inter->send(buffer));
 }
 
@@ -72,7 +72,7 @@ int Msg::receive(MooTCP *inter)
 
 	if ((size = inter->receive(m_buffer, IRC_MAX_MSG, '\n')) <= 0)
 		return(1);
-	//moo_status("IRC: RCVD DEBUG: %s", m_buffer);
+	moo_status("IRC: RCVD DEBUG: %s", m_buffer);
 	if (this->unmarshal(m_buffer, size) < 0)
 		return(-1);
 	return(0);

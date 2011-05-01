@@ -41,8 +41,9 @@ class MooThing : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int load();
 	virtual int save();
+	static int save_all();
 
-	virtual MooThing *get_thing() { return(this); }
+	MooThing *get_thing() { return(this); }
 
     public:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);

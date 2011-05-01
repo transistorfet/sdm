@@ -286,16 +286,25 @@ static int form_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	MooArgs *args;
-	MooObject *obj;
+	MooObject *othis, *obj;
+	MooThing *thing;
+	MooMethod *method;
 	MooObjectHash *env;
 
 	if (!expr)
 		throw moo_args_mismatched;
 	env = frame->env();
-	if (!(obj = env->get("this")))
+	if (!(othis = env->get("this")))
 		throw MooException("in super: \'this\' not set");
+	// TODO  which way should we check for thing? (this is inconsistent with everything else)
+	if (!(thing = dynamic_cast<MooThing *>(othis)))
+		throw MooException("in super: \'this\' is not a thing");
+	if (!(obj = thing->parent()))
+		throw MooException("in super: object has no parent");
 	obj = obj->resolve_method(expr->get_identifier());
- 	args= new MooArgs();
+	if ((method = dynamic_cast<MooMethod *>(obj)))
+		method->m_obj = othis;
+ 	args = new MooArgs();
 	args->m_args->set(0, MOO_INCREF(obj));
 	frame->push_event(new MooCodeEventCallExpr(env, args));
 	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));

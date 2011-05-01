@@ -52,15 +52,14 @@ int init_moo(void)
 		init_timer();
 		init_task();
 		init_interface();
+		moo_object_register_type(&moo_tcp_obj_type);
 		init_irc_pseudoserv();
+		moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 		init_moo_code();
 
 		moo_load_basic_funcs(global_env);
 		moo_load_thing_methods(global_env);
-
-		moo_object_register_type(&moo_tcp_obj_type);
-		moo_object_register_type(&moo_irc_pseudoserv_obj_type);
 
 		init_thing();
 		init_user();

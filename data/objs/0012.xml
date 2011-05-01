@@ -22,4 +22,23 @@
    <value>The Cryolocker</value>
   </entry>
  </properties>
+ <methods>
+  <entry type="moolambda" key="fetch">
+   <owner>2</owner>
+   <permissions>0475</permissions>
+   <params>user</params>
+   <code><![CDATA[
+	(user:move user.last_location)
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="store">
+   <owner>2</owner>
+   <permissions>0475</permissions>
+   <params>user</params>
+   <code><![CDATA[
+	(define user.last_location user.location)
+	(user:move this)
+   ]]></code>
+  </entry>
+ </methods>
 </thing>

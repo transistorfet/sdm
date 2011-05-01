@@ -587,6 +587,8 @@ int PseudoServ::send_who(const char *mask)
 
 	// TODO convert this to a generic channel method
 	if (!strcmp(mask, "#realm")) {
+	// TODO this for some reason keeps throwing an "Unable to convert to thing" error
+/*
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
 		if ((location = m_user->location()) && (contents = location->contents())) {
@@ -598,6 +600,7 @@ int PseudoServ::send_who(const char *mask)
 				}
 			}
 		}
+*/
 	}
 	Msg::send(m_inter, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, m_nick->c_str(), mask);
 	return(0);

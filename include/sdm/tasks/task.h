@@ -61,6 +61,7 @@ class MooTask : public MooObject {
 	static moo_id_t current_user();
 
     private:
+	friend class MooObject;
 	static moo_id_t current_owner(moo_id_t id);
 	static moo_id_t current_owner(MooTask *task, moo_id_t id);
 	static int switch_task(MooTask *task);

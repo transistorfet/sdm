@@ -11,10 +11,10 @@
 #include <sdm/objs/object.h>
 
 class MooMethod : public MooObject {
+    public:
 	MooObject *m_obj;
 	MooObject *m_func;
 
-    public:
 	MooMethod(MooObject *obj, MooObject *func);
 	virtual ~MooMethod() { }
 

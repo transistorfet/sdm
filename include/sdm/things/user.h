@@ -33,7 +33,7 @@ class MooUser : public MooThing {
 	virtual int load();
 	virtual int save();
 
-	virtual MooThing *get_thing() { return(this); }
+	MooThing *get_thing() { return(this); }
 
 	int connect(MooTask *task);
 	void disconnect();
