@@ -28,7 +28,25 @@
    <params></params>
    <code><![CDATA[
 	(super join)
-	(@cryolocker:fetch user)	; I have no idea how this would work
+	(@cryolocker:fetch user)
+   ]]></code>
+  </entry>
+  <entry key="leave" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+	(super leave)
+	(@cryolocker:store user)
+   ]]></code>
+  </entry>
+  <entry key="quit" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+	(super quit)
+	(@cryolocker:store user)
    ]]></code>
   </entry>
   <entry key="say" type="moolambda">

@@ -25,6 +25,7 @@ int init_moo_code(void)
 	if (global_env)
 		return(1);
 	global_env = new MooObjectHash();
+	global_env->set("nil", &moo_nil);
 	init_code_event();
 	return(0);
 }
