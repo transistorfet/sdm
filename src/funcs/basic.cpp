@@ -54,9 +54,7 @@ static int basic_format(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooUser *user;
 	MooObject *obj;
-	MooThing *channel;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (args->m_args->last() != 0)

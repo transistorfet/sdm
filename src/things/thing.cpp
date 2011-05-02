@@ -159,6 +159,8 @@ int MooThing::load()
 		return(-1);
 	}
 	snprintf(buffer, STRING_SIZE, "objs/%04d.xml", m_id);
+	m_properties->clear();
+	m_methods->clear();
 	return(this->read_file(buffer, "thing"));
 }
 
@@ -214,6 +216,10 @@ int MooThing::save_all()
 	return(0);
 }
 
+int MooThing::to_string(char *buffer, int max)
+{
+	return(snprintf(buffer, max, "#%d", m_id));
+}
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {

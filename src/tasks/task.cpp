@@ -11,6 +11,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
 #include <sdm/interfaces/interface.h>
+#include <sdm/code/code.h>
 
 #define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
@@ -62,38 +63,6 @@ int MooTask::bestow(MooInterface *inter)
 	return(-1);
 }
 
-int MooTask::suid_evaluate(MooObject *obj, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	int res;
-	MooTask *prev_task;
-	moo_id_t prev_owner;
-
-	if (!obj)
-		return(-1);
-	/// We save the current task and when we restore the owner, we make sure the same task is running, so that we don't
-	/// accidentally change the owner for a different task, giving it erronous permissions
-	prev_task = MooTask::current_task();
-	prev_owner = MooTask::current_owner();
-	MooTask::current_owner(obj->owner());
-	try {
-		res = obj->do_evaluate(frame, env, args);
-	}
-	catch (int e) {
-		MooTask::current_owner(prev_task, prev_owner);
-		throw e;
-	}
-	catch (MooException e) {
-		MooTask::current_owner(prev_task, prev_owner);
-		throw e;
-	}
-	catch (...) {
-		MooTask::current_owner(prev_task, prev_owner);
-		throw MooException("Error in elevated evaluate");
-	}
-	MooTask::current_owner(prev_task, prev_owner);
-	return(res);
-}
-
 int MooTask::switch_handle(MooInterface *inter, int ready)
 {
 	MooTask::switch_task(this);
@@ -120,6 +89,7 @@ moo_id_t MooTask::current_user()
 moo_id_t MooTask::current_owner(moo_id_t id)
 {
 	g_current_owner = id;
+	moo_status("Task Owner is now: %d", g_current_owner);
 	return(g_current_owner);
 }
 
@@ -128,6 +98,7 @@ moo_id_t MooTask::current_owner(MooTask *task, moo_id_t id)
 	if (g_current_task != task)
 		return(g_current_owner);
 	g_current_owner = id;
+	moo_status("Task Owner is now: %d", g_current_owner);
 	return(g_current_owner);
 }
 
@@ -136,6 +107,32 @@ int MooTask::switch_task(MooTask *task)
 	g_current_task = task;
 	if (task)
 		g_current_owner = task->owner();
+	moo_status("Task Owner is now: %d", g_current_owner);
 	return(0);
 }
+
+
+class TaskEventSuid : public MooCodeEvent {
+	MooTask *m_task;
+	moo_id_t m_owner;
+
+    public:
+	TaskEventSuid(MooTask *task, moo_id_t owner) : MooCodeEvent(NULL, NULL, NULL) {
+		m_task = task;
+		m_owner = owner;
+	}
+
+	int do_event(MooCodeFrame *frame) {
+		MooTask::current_owner(m_task, m_owner);
+		return(0);
+	}
+};
+
+int MooTask::suid(MooObject *obj, MooCodeFrame *frame)
+{
+	frame->push_event(new TaskEventSuid(MooTask::current_task(), MooTask::current_owner()));
+	MooTask::current_owner(obj->owner());
+	return(0);
+}
+
 

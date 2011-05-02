@@ -79,7 +79,15 @@ int MooCodeLambda::write_data(MooDataFile *data)
 
 int MooCodeLambda::to_string(char *buffer, int max)
 {
-//	return(snprintf(buffer, max, "%ld", m_num));
+	int i = 0;
+
+	strcpy(buffer, "(lambda (");
+	i += 9;
+	i += MooCodeParser::generate(m_params, &buffer[i], STRING_SIZE - i);
+	strcpy(&buffer[i], ") ");
+	i += 2;
+	i += MooCodeParser::generate(m_func, &buffer[i], STRING_SIZE -i);
+	buffer[i] = ')';
 	return(0);
 }
 

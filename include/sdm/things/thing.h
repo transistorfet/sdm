@@ -43,6 +43,7 @@ class MooThing : public MooObject {
 	virtual int save();
 	static int save_all();
 
+	virtual int to_string(char *buffer, int max);
 	MooThing *get_thing() { return(this); }
 
     public:

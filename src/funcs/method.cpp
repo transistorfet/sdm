@@ -49,6 +49,12 @@ int MooMethod::write_data(MooDataFile *data)
 	//return(MooCodeLambda::write_data(data));
 }
 
+int MooMethod::to_string(char *buffer, int max)
+{
+	// TODO should this print the object as well somehow??
+	return(m_func->to_string(buffer, max));
+}
+
 int MooMethod::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	args->m_this = m_obj;

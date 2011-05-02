@@ -54,6 +54,18 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->load();
+	return(0);
+}
+
 static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *thing;
@@ -163,6 +175,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 int moo_load_thing_methods(MooObjectHash *env)
 {
 	env->set("user_notify", new MooFunc(user_notify));
+	env->set("thing_load", new MooFunc(thing_load));
 	env->set("thing_save", new MooFunc(thing_save));
 	env->set("thing_save_all", new MooFunc(thing_save_all));
 	env->set("thing_clone", new MooFunc(thing_clone));

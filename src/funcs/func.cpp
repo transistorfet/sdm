@@ -68,7 +68,7 @@ int MooFunc::write_data(MooDataFile *data)
 
 int MooFunc::to_string(char *buffer, int max)
 {
-//	return(snprintf(buffer, max, "%ld", m_num));
+	strncpy(buffer, m_name ? m_name->c_str() : "***UNKNOWN-FUNC***", max);
 	return(0);
 }
 

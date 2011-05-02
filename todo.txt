@@ -80,6 +80,8 @@
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
+	* SUID kinda doesn't work.  Should you use the frame's owner instead of the task's owner for permissions checks?  How would you
+	  get the current frame?  Through env?
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>

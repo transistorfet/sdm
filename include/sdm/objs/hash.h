@@ -53,6 +53,7 @@ class MooHash : public MooObject {
 	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
+	void clear();
 	int set(const char *key, T data);
 	int remove(const char *key);
 
@@ -121,6 +122,13 @@ MooHash<T>::MooHash(int size, int bits, void (*destroy)(T))
 template<typename T>
 MooHash<T>::~MooHash()
 {
+	this->clear();
+	free(m_table);
+}
+
+template<typename T>
+void MooHash<T>::clear()
+{
 	int i;
 	MooHashEntry<T> *cur, *next;
 
@@ -133,8 +141,8 @@ MooHash<T>::~MooHash()
 			delete cur;
 			cur = next;
 		}
+		m_table[i] = NULL;
 	}
-	free(m_table);
 }
 
 template<typename T>

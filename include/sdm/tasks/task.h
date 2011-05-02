@@ -52,8 +52,6 @@ class MooTask : public MooObject {
 
 	virtual int purge(MooUser *user) { return(-1); }
 
-	static int suid_evaluate(MooObject *obj, MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
-
 	/// Accessors
 	int switch_handle(MooInterface *inter, int ready);
 	static MooTask *current_task();
@@ -62,9 +60,11 @@ class MooTask : public MooObject {
 
     private:
 	friend class MooObject;
+	friend class TaskEventSuid;
 	static moo_id_t current_owner(moo_id_t id);
 	static moo_id_t current_owner(MooTask *task, moo_id_t id);
 	static int switch_task(MooTask *task);
+	static int suid(MooObject *obj, MooCodeFrame *frame);
 };
 
 extern MooObjectType moo_task_obj_type;

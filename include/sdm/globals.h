@@ -35,7 +35,7 @@ typedef int moo_perm_t;
 #define MOO_PERM_OR		0040
 #define MOO_PERM_SUID		0400
 
-#define MOO_DEFAULT_PERMS	0075
+#define MOO_DEFAULT_PERMS	0077
 
 #define SBIT(bits, flag)	( (bits) |= (flag) )
 #define RBIT(bits, flag)	( (bits) &= ~(flag) )

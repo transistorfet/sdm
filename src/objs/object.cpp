@@ -236,8 +236,7 @@ int MooObject::read_entry(const char *type, MooDataFile *data)
 int MooObject::write_data(MooDataFile *data)
 {
 	data->write_integer_entry("owner", this->owner());
-	if (this->permissions() != MOO_DEFAULT_PERMS)
-		data->write_octal_entry("permissions", this->permissions());
+	data->write_octal_entry("permissions", this->permissions());
 	return(0);
 }
 
@@ -392,9 +391,8 @@ int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	this->check_throw(MOO_PERM_X);
 	if (this->permissions() & MOO_PERM_SUID)
-		res = MooTask::suid_evaluate(this, frame, env, args);
-	else
-		res = this->do_evaluate(frame, env, args);
+		MooTask::suid(this, frame);
+	res = this->do_evaluate(frame, env, args);
 	return(res);
 }
 
