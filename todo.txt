@@ -56,6 +56,10 @@
 	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
 
+    BUGS:
+	* in normal channels, when an action occurs, it prints it correctly for the user who says it but adds an extra space between
+	  the nick and message.
+
     TODO:
 
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env

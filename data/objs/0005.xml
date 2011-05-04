@@ -60,8 +60,8 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-       (this.users:foreach (lambda (cur)
-       	(cur:notify 'say' user channel text)))
+	(this.users:foreach (lambda (cur)
+		(cur:notify 'say' user channel text)))
    ]]></code>
   </entry>
   <entry key="emote" type="moolambda">
@@ -69,8 +69,8 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-       (this.users:foreach (lambda (cur)
-       	(cur:notify 'emote' user channel text)))
+	(this.users:foreach (lambda (cur)
+		(cur:notify 'emote' user channel text)))
    ]]></code>
   </entry>
   <entry key="names" type="moolambda">
@@ -78,10 +78,12 @@
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[
-       (define names "")
-       (this.users:foreach (lambda (cur)
-       	(set names (concat names cur.name " "))))
-       ;(chop names)
+	(define names "")
+	(this.users:foreach (lambda (cur)
+		(print "here")
+		(set names (concat names cur.name " "))))
+	names
+	;(chop names)
    ]]></code>
   </entry>
   <entry key="command" type="moolambda">
@@ -89,7 +91,7 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-       (user:notify 'status' nil channel "Commands are not supported in this channel.")
+	(user:notify 'status' nil channel "Commands are not supported in this channel.")
    ]]></code>
   </entry>
  </methods>

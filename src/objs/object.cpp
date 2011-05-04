@@ -380,6 +380,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 			user->notify(TNT_STATUS, NULL, NULL, e.get());
 		res = -1;
 	}
+	args->m_result = frame->get_return();
 	MOO_DECREF(frame);
 	return(res);
 }

@@ -76,9 +76,9 @@ MooUser::MooUser(const char *name, int bits, moo_id_t id, moo_id_t parent) : Moo
 		throw MooException("User name error");
 	m_name = new std::string(name);
 
+	this->load();
 	if (user_list->set(name, this))
 		throw MooException("Unable to add user to list: %s", name);
-	this->load();
 }
 
 MooUser::~MooUser()
