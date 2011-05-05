@@ -317,6 +317,7 @@ static int basic_chop(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int j, k;
 	MooObject *obj;
 	MooNumber *num;
 	int pos, len = -1;
@@ -331,14 +332,21 @@ static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		pos = num->get_integer();
 	else
 		throw moo_type_error;
+	if (pos < 0) {
+		args->m_result = new MooString("");
+		return(0);
+	}
 
-	if (args->m_args->last() == 2 && (num = dynamic_cast<MooNumber *>(args->m_args->get(2))))
-		len = num->get_integer();
-	else
-		throw moo_type_error;
+	if (args->m_args->last() == 2) {
+		if ((num = dynamic_cast<MooNumber *>(args->m_args->get(2))))
+			len = num->get_integer();
+		else
+			throw moo_type_error;
+	}
 	obj->to_string(buffer, LARGE_STRING_SIZE);
-	for (int j = pos, k = 0; buffer[j] != '\0' && k < LARGE_STRING_SIZE && (len == -1 || k < len); j++, k++)
+	for (j = pos, k = 0; buffer[j] != '\0' && k < LARGE_STRING_SIZE && (len == -1 || k < len); j++, k++)
 		buffer[k] = buffer[j];
+	buffer[k] = '\0';
 	args->m_result = new MooString(buffer);
 	return(0);
 }
