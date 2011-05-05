@@ -69,8 +69,8 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-       (this.contents:foreach (lambda (cur)
-       	(cur:notify 'say' user channel text)))
+	(this.contents:foreach (lambda (cur)
+		(cur:notify 'say' user channel text)))
    ]]></code>
   </entry>
   <entry key="go" type="moolambda">

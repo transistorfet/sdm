@@ -35,11 +35,11 @@
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[
-       (if (!= (this.users:search user) -1)
-       	(begin
-       		(this.users:foreach (lambda (cur)
-       			(cur:notify 'leave' user channel "")))
-       		(this.users:remove user)))
+	(if (!= (this.users:search user) -1)
+		(begin
+			(this.users:foreach (lambda (cur)
+				(cur:notify 'leave' user channel "")))
+			(this.users:remove user)))
    ]]></code>
   </entry>
   <entry key="quit" type="moolambda">
@@ -47,12 +47,12 @@
    <permissions>075</permissions>
    <params></params>
    <code><![CDATA[
-       (if (!= (this.users:search user) -1)
-       	(begin
-       		; TODO there should only be one quit message per user but we can only control the channel's quit...
-       		;(this.users:foreach (lambda (cur)
-       		;	(cur:notify 'quit' user channel "")))
-       		(this.users:remove user)))
+	(if (!= (this.users:search user) -1)
+		(begin
+			; TODO there should only be one quit message per user but we can only control the channel's quit...
+			;(this.users:foreach (lambda (cur)
+			;	(cur:notify 'quit' user channel "")))
+			(this.users:remove user)))
    ]]></code>
   </entry>
   <entry key="say" type="moolambda">
@@ -60,6 +60,7 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
+	(debug "in Say")
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'say' user channel text)))
    ]]></code>
@@ -69,6 +70,7 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
+	(debug "in Emote")
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'emote' user channel text)))
    ]]></code>
@@ -80,10 +82,8 @@
    <code><![CDATA[
 	(define names "")
 	(this.users:foreach (lambda (cur)
-		(print "here")
 		(set names (concat names cur.name " "))))
-	names
-	;(chop names)
+	(chop names)
    ]]></code>
   </entry>
   <entry key="command" type="moolambda">

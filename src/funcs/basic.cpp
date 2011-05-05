@@ -135,6 +135,23 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int basic_neqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	for (int i = 1; i <= args->m_args->last(); i++) {
+		if (args->m_args->get(i) != obj) {
+			args->m_result = new MooNumber((long int) 1);
+			return(0);
+		}
+	}
+	args->m_result = new MooNumber((long int) 0);
+	return(0);
+}
+
 static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooNumber *num1, *num2;
@@ -245,6 +262,21 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 */
 
+static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooNumber *num;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw moo_type_error;
+	if (num->get_float())
+		args->m_result = new MooNumber((long int) 0);
+	else
+		args->m_result = new MooNumber((long int) 1);
+	return(0);
+}
+
 /********************
  * String Functions *
  ********************/
@@ -263,6 +295,68 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	}
 	buffer[j] = '\0';
 	args->m_result = new MooString(buffer);
+	return(0);
+}
+
+static int basic_chop(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int i;
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(obj = args->m_args->get(0)))
+		throw moo_type_error;
+	i = obj->to_string(buffer, LARGE_STRING_SIZE);
+	if (--i >= 0)
+		buffer[i] = '\0';
+	args->m_result = new MooString(buffer);
+	return(0);
+}
+
+static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	MooNumber *num;
+	int pos, len = -1;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 1 && args->m_args->last() != 2)
+		throw moo_args_mismatched;
+	if (!(obj = args->m_args->get(0)))
+		throw moo_type_error;
+
+	if ((num = dynamic_cast<MooNumber *>(args->m_args->get(1))))
+		pos = num->get_integer();
+	else
+		throw moo_type_error;
+
+	if (args->m_args->last() == 2 && (num = dynamic_cast<MooNumber *>(args->m_args->get(2))))
+		len = num->get_integer();
+	else
+		throw moo_type_error;
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	for (int j = pos, k = 0; buffer[j] != '\0' && k < LARGE_STRING_SIZE && (len == -1 || k < len); j++, k++)
+		buffer[k] = buffer[j];
+	args->m_result = new MooString(buffer);
+	return(0);
+}
+
+static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int i;
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(obj = args->m_args->get(0)))
+		throw moo_type_error;
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	for (i = 0; buffer[i] != '\0' && (buffer[i] == ' ' || buffer[i] == '\t' || buffer[i] == '\n' || buffer[i] == '\r'); i++)
+		;
+	args->m_result = new MooString(&buffer[i]);
 	return(0);
 }
 
@@ -354,6 +448,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("null", new MooFunc(basic_null));
 	env->set("eqv", new MooFunc(basic_eqv));
+	env->set("!eqv", new MooFunc(basic_neqv));
 	env->set("=", new MooFunc(basic_equal));
 	env->set("!=", new MooFunc(basic_not_equal));
 	//env->set(">", new MooFunc(basic_gt));
@@ -361,9 +456,12 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	//env->set("<", new MooFunc(basic_lt));
 	//env->set("<=", new MooFunc(basic_le));
 
-	//env->set("not", new MooFunc(basic_not));
+	env->set("not", new MooFunc(basic_not));
 
 	env->set("concat", new MooFunc(basic_concat));
+	env->set("chop", new MooFunc(basic_chop));
+	env->set("substr", new MooFunc(basic_substr));
+	env->set("ltrim", new MooFunc(basic_ltrim));
 
 	env->set("array", new MooFunc(basic_array));
 	env->set("hash", new MooFunc(basic_hash));

@@ -562,6 +562,7 @@ int PseudoServ::send_names(const char *name)
 	MooThing *channel;
 	MooObject *result = NULL;
 
+	// TODO should we do this like we do WHO instead of having the special 'names' method?
 	if (!m_user)
 		return(-1);
 	channel = MooThing::get_channel(name);
@@ -582,25 +583,23 @@ int PseudoServ::send_who(const char *mask)
 {
 	MooObject *cur;
 	const char *thing_name;
-	MooThing *location;
-	MooObjectArray *contents;
+	MooThing *channel;
+	MooObjectArray *users;
 
-	// TODO convert this to a generic channel method
-	if (!strcmp(mask, "#realm")) {
-	// TODO this for some reason keeps throwing an "Unable to convert to thing" error
-/*
+	// TODO can you make this more generic instead of just working for channels?
+	channel = MooThing::get_channel(mask);
+	if (channel) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
 		//	are in the cryolocker, for example)
-		if ((location = m_user->location()) && (contents = location->contents())) {
-			for (int i = 0; i <= contents->last(); i++) {
-				cur = contents->get(i);
+		if ((users = dynamic_cast<MooObjectArray *>(channel->resolve_property("users")))) {
+			for (int i = 0; i <= users->last(); i++) {
+				cur = users->get(i);
 				// TODO we should check that things are invisible, and also add @ for wizards or something
 				if ((cur = cur->resolve_property("name")) && (thing_name = cur->get_string())) {
 					Msg::send(m_inter, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
 				}
 			}
 		}
-*/
 	}
 	Msg::send(m_inter, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, m_nick->c_str(), mask);
 	return(0);
@@ -610,7 +609,7 @@ int PseudoServ::process_ctcp(Msg *msg, MooThing *channel)
 {
 	if (!strncmp(&msg->m_last[1], "ACTION", 6)) {
 		char buffer[STRING_SIZE];
-		strncpy(buffer, &msg->m_last[7], STRING_SIZE);
+		strncpy(buffer, (msg->m_last[7] == ' ') ? &msg->m_last[8] : &msg->m_last[7], STRING_SIZE);
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
 		if (channel)

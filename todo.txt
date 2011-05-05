@@ -57,11 +57,11 @@
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
 
     BUGS:
-	* in normal channels, when an action occurs, it prints it correctly for the user who says it but adds an extra space between
-	  the nick and message.
+	* when saying things in #realm, it prints the line twice for everybody except the person who sent the message
 
     TODO:
 
+	* add a (type <obj>) function which returns a string name of the type
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
 	  was written.
