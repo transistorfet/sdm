@@ -21,7 +21,7 @@
   <entry type="moolambda" key="@eval">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params><![CDATA[&all]]></params>
    <code><![CDATA[
        (@eval argstr)
    ]]></code>

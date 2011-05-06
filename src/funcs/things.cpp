@@ -128,17 +128,24 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	const char *text;
 	MooObject *method, *user;
 	char *words[MAX_WORDS];
-	char buffer[LARGE_STRING_SIZE];
 	MooArgs *newargs;
 	MooObjectHash *newenv;
 
 	if (!(user = env->get("user")))
 		throw MooException("No user object set.");
 	text = args->m_args->get_string(0);
+
+/*
 	strncpy(buffer, text, LARGE_STRING_SIZE);
 	buffer[LARGE_STRING_SIZE] = '\0';
 	while (parser_is_whitespace(buffer[i]))
 		i++;
+	// TODO alternatively, you can send this all to the lisp parser and traverse the expr you get back.
+	//	If you come across a CALL, convert it to a string or do something else with it so that you end up
+	//	with a list of numbers, strings (including code in string form), and identifiers.
+	//	Identifiers would also actually be strings, unless perhaps they were of a certain form, such as #<num>
+	//	You couldn't directly try to resolve all identifiers into values because some barewords for commands are
+	//	intended to be strings
 	words[0] = &buffer[i];
 	for (; buffer[i] != '\0'; i++) {
 		if (parser_is_whitespace(buffer[i])) {
@@ -151,20 +158,52 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 			// TODO implement quotes...
 		}
 	}
+*/
 
-	if (!(method = user->resolve_method(words[0]))) {
+	newargs = new MooArgs();
+	newenv = new MooObjectHash(env);
+	newenv->set("argstr", new MooString(text));
+
+	MooCodeExpr *expr;
+
+	if (!(expr = MooCodeParser::parse_code(text)))
+		MooException("Unable to parse input.");
+	for (MooCodeExpr *cur = expr; cur; cur = cur->next()) {
+		switch (expr->expr_type()) {
+		    case MCT_OBJECT:
+			newargs->m_args->push(cur->value());
+			break;
+		    case MCT_IDENTIFIER:
+			newargs->m_args->push(new MooString(cur->get_identifier()));
+			break;
+		    case MCT_CALL: {
+			char buffer[LARGE_STRING_SIZE];
+			MooCodeParser::generate(dynamic_cast<MooCodeExpr *>(cur->value()), buffer, LARGE_STRING_SIZE, ' ');
+			newargs->m_args->push(new MooString(buffer));
+			break;
+		    }
+		    default:
+			break;
+		}
+	}
+
+	MooObject *obj;
+	const char *cmd;
+
+	if (!(obj = newargs->m_args->shift()) || !(cmd = obj->get_string()))
+		throw MooException("No command given");
+	frame->push_debug("> in realm_command: %s", cmd);
+
+	if (!(method = user->resolve_method(cmd))) {
 		MooObject *location = user->resolve_property("location");
-		if (!(method = location->resolve_method(words[0]))) {
+		if (!(method = location->resolve_method(cmd))) {
 			// TODO try to parse more and search the objects
 		}
 	}
 
 	// TODO you could push markers onto the stack like here so that if an exception occurs inside of the call we are pushing, then
 	//	it will print that it occurred inside of this evaluate function.
-	newargs = new MooArgs();
-	newenv = new MooObjectHash(env);
-	newenv->set("argstr", new MooString(text));
-	frame->push_debug("> in realm_command: %s", words[0]);
+
 	frame->push_call(newenv, method, newargs);
 
 	// TODO you could have a call here to an optional method on the user after a command has been executed (like a prompt)

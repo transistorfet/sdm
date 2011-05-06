@@ -5,8 +5,10 @@
  <bits>0x1</bits>
  <owner>100</owner>
  <permissions>075</permissions>
- <location>12</location>
  <properties>
+  <entry type="thing" key="location">
+   12
+  </entry>
   <entry type="string" key="name">
    <owner>-1</owner>
    <permissions>075</permissions>

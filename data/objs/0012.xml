@@ -29,7 +29,8 @@
    <params>user</params>
    <code><![CDATA[
 	(debug "in cryolocker fetch")
-	(user:move user.last_location)
+	(if (eqv user.location this)
+		(user:move user.last_location))
    ]]></code>
   </entry>
   <entry key="store" type="moolambda">
@@ -38,7 +39,7 @@
    <params>user</params>
    <code><![CDATA[
 	(debug "in cryolocker store")
-	(if (!= user.location this)
+	(if (!eqv user.location this)
 		(begin	
 			(define user.last_location user.location)
 			(user:move this)

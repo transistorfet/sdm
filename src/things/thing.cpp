@@ -406,9 +406,8 @@ const char *MooThing::name()
 MooThing *MooThing::location()
 {
 	MooObject *obj;
-	if (!(obj = this->resolve_property("contents")))
+	if (!(obj = this->resolve_property("location")))
 		return(NULL);
-	// TODO should all get_things be turned in to dynamic casts when we get rid of thingref?
 	return(dynamic_cast<MooThing *>(obj));
 }
 

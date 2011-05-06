@@ -56,10 +56,6 @@
 	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
 
-    BUGS:
-	* when saying things in #realm, it prints the line twice for everybody except the person who sent the message, This is because
-	  there are 2 entries in the array for each user.
-
     TODO:
 
 	* fix inconsistent uses of nil and NULL
