@@ -91,7 +91,7 @@ const char *MooCodeExpr::get_identifier()
 	MooString *str;
 
 	if (m_type != MCT_IDENTIFIER || !(str = dynamic_cast<MooString *>(m_value)))
-		throw MooException("(%s, %s) Expected identifier", m_line, m_col);
+		throw MooException("(%d, %d) Expected identifier", m_line, m_col);
 	return(str->m_str);
 }
 
@@ -100,7 +100,7 @@ MooCodeExpr *MooCodeExpr::get_call()
 	MooCodeExpr *expr;
 
 	if (m_type != MCT_CALL || !(expr = dynamic_cast<MooCodeExpr *>(m_value)))
-		throw MooException("(%s, %s) Expected expression", m_line, m_col);
+		throw MooException("(%d, %d) Expected expression", m_line, m_col);
 	return(expr);
 }
 

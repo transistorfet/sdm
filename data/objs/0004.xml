@@ -28,5 +28,15 @@
   </entry>
  </properties>
  <methods>
+  <entry key="quit" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params><![CDATA[&all]]></params>
+   <code><![CDATA[
+	(this.list:foreach (lambda (cur)
+		(define channel cur)
+		(cur:leave)))
+   ]]></code>
+  </entry>
  </methods>
 </thing>

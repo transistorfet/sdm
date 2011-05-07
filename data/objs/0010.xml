@@ -73,6 +73,15 @@
 		(cur:notify 'say' user channel text)))
    ]]></code>
   </entry>
+  <entry key="emote" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params>text</params>
+   <code><![CDATA[
+	(this.contents:foreach (lambda (cur)
+		(cur:notify 'emote' user channel text)))
+   ]]></code>
+  </entry>
   <entry key="go" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>

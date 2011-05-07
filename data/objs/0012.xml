@@ -28,7 +28,6 @@
    <permissions>0475</permissions>
    <params>user</params>
    <code><![CDATA[
-	(debug "in cryolocker fetch")
 	(if (eqv user.location this)
 		(user:move user.last_location))
    ]]></code>
@@ -38,7 +37,6 @@
    <permissions>0475</permissions>
    <params>user</params>
    <code><![CDATA[
-	(debug "in cryolocker store")
 	(if (!eqv user.location this)
 		(begin	
 			(define user.last_location user.location)

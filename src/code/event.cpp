@@ -69,7 +69,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 
 		/// If the expr's value is not itself an expr, then the AST is invalid
 		if (!(expr = dynamic_cast<MooCodeExpr *>(m_expr->value())))
-			throw MooException("(%s, %s) Invalid AST; expected MooCodeExpr.", m_expr->line(), m_expr->col());
+			throw MooException("(%d, %d) Invalid AST; expected MooCodeExpr.", m_expr->line(), m_expr->col());
 
 		if (expr->expr_type() == MCT_IDENTIFIER) {
 			if ((form = form_env->get(expr->get_identifier())))
@@ -82,7 +82,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    default:
-		throw MooException("(%s, %s) Invalid expression type, %d", m_expr->line(), m_expr->col(), m_expr->expr_type());
+		throw MooException("(%d, %d) Invalid expression type, %d", m_expr->line(), m_expr->col(), m_expr->expr_type());
 	}
 	return(0);
 }

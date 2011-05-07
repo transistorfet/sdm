@@ -90,6 +90,8 @@ class MooObjectHash : public MooHash<MooObject *> {
     private:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
+
+	friend class HashEventForeach;
 };
 
 extern MooObjectType moo_hash_obj_type;

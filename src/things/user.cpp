@@ -20,6 +20,8 @@
 #include <sdm/things/thing.h>
 #include <sdm/things/user.h>
 
+#include <sdm/code/code.h>
+
 #define USER_INIT_SIZE		64
 
 MooObjectType moo_user_obj_type = {
@@ -168,10 +170,15 @@ int MooUser::connect(MooTask *task)
 
 void MooUser::disconnect()
 {
+	MooObject *channels;
+
 	try {
 		// TODO ***CRITICAL*** we need to replace this MooChannel::quit with something equivalent (possibly a call_method)
 		/// Remove the user from all channels
 		//MooChannel::quit(this);
+		if ((channels = MooObject::resolve("@channels", global_env))) {
+			channels->call_method(NULL, "quit", "");
+		}
 
 		/// Save the user information to the user's file only if we were already connected
 		if (m_task) {

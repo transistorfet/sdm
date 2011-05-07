@@ -60,7 +60,6 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-	(debug "in Say")
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'say' user channel text)))
    ]]></code>
@@ -70,7 +69,6 @@
    <permissions>075</permissions>
    <params>text</params>
    <code><![CDATA[
-	(debug "in Emote")
 	(this.users:foreach (lambda (cur)
 		(cur:notify 'emote' user channel text)))
    ]]></code>
