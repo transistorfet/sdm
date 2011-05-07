@@ -78,6 +78,7 @@ class MooThing : public MooObject {
 	inline MooObjectArray *contents() { return(dynamic_cast<MooObjectArray *>(this->resolve_property("contents"))); }
 	int move(MooThing *where);
 	static MooThing *get_channel(const char *name);
+	void quit();
 
     protected:
 	int assign_id(moo_id_t id);

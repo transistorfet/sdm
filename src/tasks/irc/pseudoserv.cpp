@@ -136,6 +136,9 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 	const char *thing_name = NULL;
 	const char *channel_name = NULL;
 
+	if (!m_inter)
+		return(0);
+
 	if (thing)
 		thing_name = thing->name();
 	if (channel)
@@ -386,6 +389,8 @@ int PseudoServ::dispatch(Msg *msg)
 		return(Msg::send(m_inter, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
 	    }
 	    case IRC_MSG_QUIT: {
+		if (m_user)
+			m_user->quit();
 		Msg::send(m_inter, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_inter->host());
 		delete this;
 		return(0);

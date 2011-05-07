@@ -170,21 +170,14 @@ int MooUser::connect(MooTask *task)
 
 void MooUser::disconnect()
 {
-	MooObject *channels;
+	/// If no task is set, then we aren't connected, and therefore should not disconnect
+	if (!m_task)
+		return;
 
 	try {
-		// TODO ***CRITICAL*** we need to replace this MooChannel::quit with something equivalent (possibly a call_method)
-		/// Remove the user from all channels
-		//MooChannel::quit(this);
-		if ((channels = MooObject::resolve("@channels", global_env))) {
-			channels->call_method(NULL, "quit", "");
-		}
-
 		/// Save the user information to the user's file only if we were already connected
-		if (m_task) {
-			this->save();
-			m_task->purge(this);
-		}
+		this->save();
+		m_task->purge(this);
 		m_task = NULL;
 
 		if (m_bits & MOO_UBF_GUEST) {
