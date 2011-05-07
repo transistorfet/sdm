@@ -64,6 +64,30 @@
    <params></params>
    <code><![CDATA[(this:go 'up')]]></code>
   </entry>
+  <entry key="look" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params><![CDATA[&all]]></params>
+   <code><![CDATA[
+	(if (null (args:get 0))
+		(this:look_self)
+		(begin
+			; TODO lookup the argument if it's a string and call look_self on it
+		)
+	)
+   ]]></code>
+  </entry>
+  <entry type="moolambda" key="look_self">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+	(user:notify 'status' nil channel (format "<yellow>$this.title"))
+	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
+	(user.location.contents:foreach (lambda (cur)
+		(user:notify 'status' nil channel (format "<blue>$cur.title"))))
+   ]]></code>
+  </entry>
   <entry key="say" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>

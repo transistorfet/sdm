@@ -40,8 +40,6 @@
    <code><![CDATA[
 	(user:notify 'status' nil channel (format "<yellow>$this.title"))
 	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
-	(user.location.contents:foreach (lambda (cur)
-		(user:notify 'status' nil channel (format "<blue>$cur.title"))))
    ]]></code>
   </entry>
   <entry type="moolambda" key="print_view">

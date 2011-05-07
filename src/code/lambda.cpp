@@ -98,14 +98,24 @@ int MooCodeLambda::map_args(MooObjectHash *env, MooArgs *args)
 	MooCodeExpr *cur;
 
 	env->set("this", args->m_this);
-	for (i = 0, cur = m_params; cur && i <= args->m_args->last(); i++, cur = cur->next()) {
+	for (i = 0, cur = m_params; cur; i++, cur = cur->next()) {
 		id = cur->get_identifier();
 		if (!strcmp(id, "&all")) {
 			env->set("args", args->m_args);
 			return(0);
 		}
-		else
+		else if (!strcmp(id, "&rest")) {
+			MooObjectArray *array = new MooObjectArray();
+			for (; i <= args->m_args->last(); i++)
+				array->push(MOO_INCREF(args->m_args->get(i)));
+			env->set("args", array);
+			return(0);
+		}
+		else {
+			if (i > args->m_args->last())
+				break;
 			env->set(id, args->m_args->get(i));
+		}
 	}
 	if (cur || i <= args->m_args->last())
 		throw moo_args_mismatched;
