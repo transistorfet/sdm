@@ -47,6 +47,7 @@ class MooArray : public MooObject {
 	T set(int index, T value);
 	int add(T value);
 	int remove(T value);
+	int search(T value);
 
 	int push(T value);
 	T pop();
@@ -212,6 +213,18 @@ int MooArray<T>::remove(T value)
 		}
 	}
 	return(0);
+}
+
+template<typename T>
+int MooArray<T>::search(T value)
+{
+	int i;
+
+	for (i = 0; i <= m_last; i++) {
+		if (m_data[i] == value)
+			return(i);
+	}
+	return(-1);
 }
 
 template<typename T>

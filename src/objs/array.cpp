@@ -296,6 +296,7 @@ static int array_splice(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int res;
 	MooObject *obj;
 	MooObjectArray *m_this;
 
@@ -304,13 +305,8 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	for (int i = 0; i <= m_this->last(); i++) {
-		if (m_this->get(i) == obj) {
-			args->m_result = new MooNumber((long int) i);
-			return(0);
-		}
-	}
-	args->m_result = new MooNumber((long int) -1);
+	res = m_this->search(obj);
+	args->m_result = new MooNumber((long int) res);
 	return(0);
 }
 

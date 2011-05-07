@@ -378,10 +378,19 @@ int PseudoServ::dispatch(Msg *msg)
 		break;
 	    }
 	    case IRC_MSG_NAMES: {
-		// TODO check for ',' in channels names (a list of channels vs just one channel)
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
 			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
-		this->send_names(msg->m_params[0]);
+		/// Cycle through the comma-seperated list of channels to leave
+		char *name = &msg->m_params[0][0];
+		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
+			if (msg->m_params[0][i] == ',') {
+				msg->m_params[0][i] = '\0';
+				this->send_names(name);
+				msg->m_params[0][i] = ',';
+				name = &msg->m_params[0][i + 1];
+			}
+		}
+		this->send_names(name);
 		return(0);
 	    }
 	    case IRC_MSG_WHOIS: {
@@ -401,6 +410,22 @@ int PseudoServ::dispatch(Msg *msg)
 		this->send_who(msg->m_params[0]);
 		return(0);
 	    }
+	    case IRC_MSG_LIST: {
+		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
+			return(Msg::send(m_inter, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+		/// Cycle through the comma-seperated list of channels to leave
+		char *name = &msg->m_params[0][0];
+		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
+			if (msg->m_params[0][i] == ',') {
+				msg->m_params[0][i] = '\0';
+				this->send_list(name);
+				msg->m_params[0][i] = ',';
+				name = &msg->m_params[0][i + 1];
+			}
+		}
+		this->send_list(name);
+		return(0);
+	    }
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
 		return(Msg::send(m_inter, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
@@ -412,7 +437,6 @@ int PseudoServ::dispatch(Msg *msg)
 	MODE
 	NICK
 	TOPIC
-	LIST
 	NOTICE
 	WALLOPS
 
@@ -478,10 +502,15 @@ int PseudoServ::handle_join(const char *name)
 
 int PseudoServ::handle_leave(const char *name)
 {
-	// TODO should you check for NOTONCHANNEL?  Or should the 'leave' action send that as an error message via notify
+	MooObjectArray *users;
+
 	MooThing *channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	if ((users = dynamic_cast<MooObjectArray *>(channel->resolve_property("users")))) {
+		if (users->search(m_user) < 0)
+			return(Msg::send(m_inter, ":%s %03d %s :You're not on that channel\r\n", server_name, IRC_ERR_NOTONCHANNEL, name));
+	}
 	return(channel->call_method(channel, "leave", NULL));
 }
 
@@ -573,7 +602,6 @@ int PseudoServ::send_names(const char *name)
 	channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-	// TODO change this to a throwing do_action so that if an error occurs, it can recover
 	channel->call_method(channel, "names", NULL, &result);
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
@@ -591,7 +619,7 @@ int PseudoServ::send_who(const char *mask)
 	MooThing *channel;
 	MooObjectArray *users;
 
-	// TODO can you make this more generic instead of just working for channels?
+	// TODO should you make this do more than just list channels? (like work with users and stuff as well)
 	channel = MooThing::get_channel(mask);
 	if (channel) {
 		// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
@@ -607,6 +635,26 @@ int PseudoServ::send_who(const char *mask)
 		}
 	}
 	Msg::send(m_inter, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, m_nick->c_str(), mask);
+	return(0);
+}
+
+int PseudoServ::send_list(const char *name)
+{
+	const char *str;
+	MooObjectHash *list;
+	MooObject *channels, *cur, *obj;
+
+	if ((channels = MooObject::resolve("@channels", global_env))) {
+		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("list")))) {
+			list->reset();
+			while ((cur = list->next())) {
+				if ((obj = cur->resolve_property("name")) && (str = obj->get_string()))
+					Msg::send(m_inter, ":%s %03d %s %s 1 :\r\n", server_name, IRC_RPL_LIST, m_nick->c_str(), str);
+			}
+		}
+	}
+
+	Msg::send(m_inter, ":%s %03d %s :End of LIST.\r\n", server_name, IRC_RPL_ENDOFLIST, m_nick->c_str());
 	return(0);
 }
 

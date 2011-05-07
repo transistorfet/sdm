@@ -63,6 +63,7 @@ class PseudoServ : public MooTask {
 	int send_part(const char *name);
 	int send_names(const char *name);
 	int send_who(const char *mask);
+	int send_list(const char *name);
 	int process_ctcp(Msg *msg, MooThing *channel);
 };
 

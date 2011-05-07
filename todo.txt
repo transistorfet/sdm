@@ -58,6 +58,12 @@
 
     TODO:
 
+	* add the 'and' and 'or' forms (i guess we'll make them forms like scheme so that sideeffects take place)
+	* get @clone working
+
+	* should system-y commands like those called by PseudoSern always start with a distinguishing character?  Should it be '@' for
+	  all?  Should some use '@' and others use '*' or something else?  Should special variables have the same character?  Should
+	  they have a distinguishing one?  Or perhaps one on each side, such as '*channels*'?
 	* fix inconsistent uses of nil and NULL
 	* add a (type <obj>) function which returns a string name of the type
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
@@ -68,11 +74,12 @@
 	  cascade a line/col backwards into the event during execution.
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
+	* SUID kinda doesn't work.  Should you use the frame's owner instead of the task's owner for permissions checks?  How would you
+	  get the current frame?  Through env?
 
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will
 	  make /core/thing notation no longer work, but we can work around that
-	* make a clone() function that copies all properties and actions (such that they can be overridden without changing??).
 	* how will MooThings be garbage collected?
 
 	* add permissions checks to access and evaluate functions
@@ -82,8 +89,6 @@
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
-	* SUID kinda doesn't work.  Should you use the frame's owner instead of the task's owner for permissions checks?  How would you
-	  get the current frame?  Through env?
 
 	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
 	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>

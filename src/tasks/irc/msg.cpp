@@ -174,7 +174,7 @@ int init_irc_msg()
 	irc_add_command("MODE", IRC_MSG_MODE, 0, 1, 0);
 	irc_add_command("TOPIC", IRC_MSG_TOPIC, 1, 1, 2);
 	irc_add_command("NAMES", IRC_MSG_NAMES, 0, 0, 2);
-	irc_add_command("LIST", IRC_MSG_LIST, 0, 0, 1);
+	irc_add_command("LIST", IRC_MSG_LIST, 0, 0, 2);
 	irc_add_command("INVITE", IRC_MSG_INVITE, 0, 2, 2);
 	irc_add_command("KICK", IRC_MSG_KICK, 1, 2, 3);
 	irc_add_command("PRIVMSG", IRC_MSG_PRIVMSG, 1, 0, 2);

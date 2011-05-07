@@ -126,7 +126,7 @@ class IRCException : public MooException {
 #define IRC_RPL_WHOISSPECIAL		320
 #define IRC_RPL_LISTSTART		321
 #define IRC_RPL_LIST			322
-#define IRC_RPL_LISTEND			323
+#define IRC_RPL_ENDOFLIST		323
 #define IRC_RPL_CHANNELMODEIS		324
 #define IRC_RPL_UNIQOPIS		325
 #define IRC_RPL_NOTOPIC			331
