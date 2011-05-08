@@ -41,6 +41,18 @@ MooNumber::MooNumber(const char *str)
 		throw MooException("Invalid number, %s", str);
 }
 
+MooNumber::MooNumber(MooNumber *num)
+{
+	if (num->m_format == FLOAT) {
+		m_format = FLOAT;
+		m_float = num->m_float;
+	}
+	else {
+		m_format = INT;
+		m_int = num->m_int;
+	}
+}
+
 int MooNumber::read_entry(const char *type, MooDataFile *data)
 {
 	if (!strcmp(type, "value")) {

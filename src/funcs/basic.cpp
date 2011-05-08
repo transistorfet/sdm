@@ -72,8 +72,6 @@ static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	int i = 0;
-	double d = 0;
 	MooNumber *result, *num;
 
 	if (args->m_args->last() < 1)
@@ -90,19 +88,55 @@ static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_subtract(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	MooNumber *result, *num;
 
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 1: Invalid type. Expected number", 0);
+	result = new MooNumber(num);
+	for (int i = 1; i <= args->m_args->last(); i++) {
+		if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		result->subtract(num);
+	}
+	args->m_result = result;
 	return(0);
 }
 
 static int basic_multiply(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	MooNumber *result, *num;
 
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 1: Invalid type. Expected number", 0);
+	result = new MooNumber(num);
+	for (int i = 1; i <= args->m_args->last(); i++) {
+		if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		result->multiply(num);
+	}
+	args->m_result = result;
 	return(0);
 }
 
 static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	MooNumber *result, *num;
 
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 1: Invalid type. Expected number", 0);
+	result = new MooNumber(num);
+	for (int i = 1; i <= args->m_args->last(); i++) {
+		if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		result->divide(num);
+	}
+	args->m_result = result;
 	return(0);
 }
 
@@ -189,7 +223,7 @@ static int basic_num_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *arg
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
@@ -209,7 +243,7 @@ static int basic_num_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
@@ -229,7 +263,7 @@ static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
@@ -249,7 +283,7 @@ static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
@@ -269,7 +303,7 @@ static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
@@ -289,7 +323,7 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("arg 0: Invalid type. Expected number");
+		throw MooException("arg 1: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);

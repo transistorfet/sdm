@@ -30,6 +30,7 @@ class MooNumber : public MooObject {
 	MooNumber(long int num = 0) { m_format = INT; m_int = num; }
 	MooNumber(double num) { m_format = FLOAT; m_float = num; }
 	MooNumber(const char *str);
+	MooNumber(MooNumber *num);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -62,6 +63,41 @@ class MooNumber : public MooObject {
 			m_int += num->get_integer();
 		else if (m_format == FLOAT)
 			m_float += num->get_float();
+	}
+
+	inline void subtract(MooNumber *num) {
+		if (m_format != num->m_format && m_format == INT)
+			this->set_format(FLOAT);
+		if (m_format == INT)
+			m_int -= num->get_integer();
+		else if (m_format == FLOAT)
+			m_float -= num->get_float();
+	}
+
+	inline void multiply(MooNumber *num) {
+		if (m_format != num->m_format && m_format == INT)
+			this->set_format(FLOAT);
+		if (m_format == INT)
+			m_int *= num->get_integer();
+		else if (m_format == FLOAT)
+			m_float *= num->get_float();
+	}
+
+	inline void divide(MooNumber *num) {
+		if (m_format != num->m_format && m_format == INT)
+			this->set_format(FLOAT);
+		if (m_format == INT) {
+			long int div = num->get_integer();
+			if (div == 0)
+				throw MooException("Attempted to divide by zero");
+			m_int /= div;
+		}
+		else if (m_format == FLOAT) {
+			double div = num->get_float();
+			if (div == 0)
+				throw MooException("Attempted to divide by zero");
+			m_float /= div;
+		}
 	}
 };
 

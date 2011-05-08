@@ -21,6 +21,7 @@
 #define MOO_NEW_ID		-2
 
 #define MOO_TBF_WIZARD		0x01
+#define MOO_TBF_WRITING		0x80
 
 extern MooArray<MooThing *> *moo_thing_table;
 

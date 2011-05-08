@@ -161,6 +161,9 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 
 int MooThing::write_data(MooDataFile *data)
 {
+	// TODO you should either save this object (if not currently being saved) or queue it up or something, or
+	//	perhaps you can have some kind of 'modified/dirty' bit (which would prevent repeated or unnecessary saving (but this
+	//	wouldn't necessarily work because a subvalue could be modified and we woludn't save it)
 	data->write_integer(m_id);
 	return(0);
 }
@@ -184,6 +187,10 @@ int MooThing::save()
 	MooDataFile *data;
 	char file[STRING_SIZE];
 
+	/// If we are currently writing the file to disc then don't write it again
+	if (m_bits & MOO_TBF_WRITING)
+		return(0);
+
 	if (m_id < 0) {
 		moo_status("THING: attempting to write thing with an invalid ID");
 		return(-1);
@@ -193,26 +200,34 @@ int MooThing::save()
 	moo_status("Writing thing data to file \"%s\".", file);
 	data = new MooDataFile(file, MOO_DATA_WRITE, "thing");
 
-	data->write_integer_entry("id", m_id);
-	if (m_parent >= 0)
-		data->write_integer_entry("parent", m_parent);
-	if (m_bits != 0)
-		data->write_hex_entry("bits", m_bits);
-	MooObject::write_data(data);
+	m_bits |= MOO_TBF_WRITING;
+	try {
+		data->write_integer_entry("id", m_id);
+		if (m_parent >= 0)
+			data->write_integer_entry("parent", m_parent);
+		if (m_bits != 0)
+			data->write_hex_entry("bits", m_bits);
+		MooObject::write_data(data);
 
-	/// Write the properties to the file
-	if (m_properties->entries()) {
-		data->write_begin_entry("properties");
-		m_properties->write_data(data);
-		data->write_end_entry();
-	}
+		/// Write the properties to the file
+		if (m_properties->entries()) {
+			data->write_begin_entry("properties");
+			m_properties->write_data(data);
+			data->write_end_entry();
+		}
 
-	/// Write the actions to the file
-	if (m_methods->entries()) {
-		data->write_begin_entry("methods");
-		m_methods->write_data(data);
-		data->write_end_entry();
+		/// Write the actions to the file
+		if (m_methods->entries()) {
+			data->write_begin_entry("methods");
+			m_methods->write_data(data);
+			data->write_end_entry();
+		}
 	}
+	catch (MooException e) {
+		m_bits &= ~MOO_TBF_WRITING;
+		throw e;
+	}
+	m_bits &= ~MOO_TBF_WRITING;
 
 	delete data;
 	return(0);
