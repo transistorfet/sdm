@@ -33,7 +33,6 @@ const char *server_version = "0.1";
 
 int init_irc_pseudoserv(void)
 {
-	// TODO why wont this compile
 	extern int init_irc_msg();
 	init_irc_msg();
 
@@ -303,7 +302,6 @@ int PseudoServ::dispatch(Msg *msg)
 		else {
 			MooThing *channel;
 
-			// TODO will the channel list eventually become part of an object?
 			if (moo_is_channel_name(msg->m_params[0]))
 				channel = MooThing::get_channel(msg->m_params[0]);
 			else

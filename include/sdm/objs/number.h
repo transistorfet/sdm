@@ -15,6 +15,10 @@ typedef enum {
 	FLOAT
 } MooNumberFormatT;
 
+// TODO We could instead implement this as 2 subclasses of MooNumber, one for each type, and virtual functions for all the operations.
+//	This, however, would not allow the number to mutate into a different kind, and thus all operation non-idempotent functions would
+//	have to create a new number and return it (we wouldn't allow any it, even if the type doesn't have to change, in order to keep
+//	behaviour consistent)
 class MooNumber : public MooObject {
     public:
 	MooNumberFormatT m_format;
@@ -39,6 +43,15 @@ class MooNumber : public MooObject {
 	inline int equals(MooNumber *num) {
 		// TODO I think this is wrong but the alternative is complicated so I should look into a better solution
 		return( this->get_float() == num->get_float() );
+	}
+
+	inline void add(MooNumber *num) {
+		if (m_format != num->m_format && m_format == INT)
+			this->set_format(FLOAT);
+		if (m_format == INT)
+			m_int += num->get_integer();
+		else if (m_format == FLOAT)
+			m_float += num->get_float();
 	}
 };
 

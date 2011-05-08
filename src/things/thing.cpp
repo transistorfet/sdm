@@ -111,6 +111,21 @@ MooThing *MooThing::lookup(moo_id_t id)
 	return(thing);
 }
 
+MooThing *MooThing::clone()
+{
+	MooThing *thing;
+	MooHashEntry<MooObject *> *entry;
+
+	if (!(thing = new MooThing(MOO_NEW_ID, this->m_id)))
+		throw MooException("Error creating new thing from %d", this->m_id);
+
+	this->m_properties->reset();
+	while ((entry = this->m_properties->next_entry()))
+		thing->m_properties->set(entry->m_key, MOO_INCREF(entry->m_data));
+	// TODO call thing:init ??
+	return(thing);
+}
+
 int MooThing::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
@@ -378,9 +393,12 @@ int MooThing::assign_id(moo_id_t id)
 		if (moo_thing_table->set(id, this))
 			m_id = id;
 	}
-	else
+	else {
+		// TODO you should check to make sure the id being assigned isn't already used by an object that's just not loaded.
+
 		// TODO should this only assign if the ID is -2 (MOO_NEW_ID)
 		m_id = moo_thing_table->add(this);
+	}
 	if (m_id < 0)
 		moo_status("Error: Attempted to reassign ID, %d", id);
 	return(m_id);

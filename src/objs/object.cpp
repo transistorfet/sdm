@@ -325,6 +325,7 @@ MooObject *MooObject::resolve_method(const char *name, MooObject *value)
 int MooObject::call_method(MooObject *channel, const char *name, const char *text, MooObject **result)
 {
 	int res;
+	clock_t start;
 	MooArgs *args;
 	MooObject *func;
 
@@ -333,7 +334,9 @@ int MooObject::call_method(MooObject *channel, const char *name, const char *tex
 	args = new MooArgs();
 	if (text)
 		args->m_args->set(0, new MooString(text));
+	start = clock();
 	res = this->call_method(channel, func, args);
+	moo_status("Executed (%s \"%s\") in %f seconds", name, text, ((float) clock() - start) / CLOCKS_PER_SEC);
 	if (result) {
 		*result = args->m_result;
 		args->m_result = NULL;

@@ -92,14 +92,10 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	// TODO is this good being a method? will we run into problems with initializing objects?
 	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
-	if (args->m_args->last() <= 0)
+	if (args->m_args->last() != 0 && args->m_args->last() != 1)
 		throw moo_args_mismatched;
-	if (!(thing = new MooThing(MOO_NEW_ID, parent->id())))
-		throw MooException("Error creating new thing from %d", parent->id());
 
-	// TODO clone all properties from parent
-	// TODO call thing:init ??
-
+	thing = parent->clone();
 	if ((func = args->m_args->get(0)))
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
 	args->m_result = thing;

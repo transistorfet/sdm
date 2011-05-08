@@ -74,13 +74,15 @@ static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int i = 0;
 	double d = 0;
-	MooObject *obj;
+	MooNumber *result, *num;
 
-	// TODO what type? double? long int? a different function or something for each?
+	result = new MooNumber((long int) 0);
 	for (int i = 0; i <= args->m_args->last(); i++) {
-		//obj = args->m_args->get(i);
-		// TODO wtf, seriously
+		if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw moo_type_error;
+		result->add(num);
 	}
+	args->m_result = result;
 	return(0);
 }
 

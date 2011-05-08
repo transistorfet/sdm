@@ -36,6 +36,7 @@ class MooThing : public MooObject {
 	MooThing(moo_id_t id = -1, moo_id_t parent = -1);
 	virtual ~MooThing();
 	static MooThing *lookup(moo_id_t id);
+	MooThing *clone();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
