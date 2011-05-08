@@ -40,9 +40,19 @@ class MooNumber : public MooObject {
 
 	void set_format(MooNumberFormatT format);
 
-	inline int equals(MooNumber *num) {
+	inline int compare(MooNumber *num) {
 		// TODO I think this is wrong but the alternative is complicated so I should look into a better solution
-		return( this->get_float() == num->get_float() );
+		float num1, num2;
+
+		num1 = this->get_float();
+		num2 = num->get_float();
+
+		if (num1 > num2)
+			return(1);
+		else if (num1 < num2)
+			return(-1);
+		else
+			return(0);
 	}
 
 	inline void add(MooNumber *num) {

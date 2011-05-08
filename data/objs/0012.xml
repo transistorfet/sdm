@@ -28,7 +28,7 @@
    <permissions>0475</permissions>
    <params>user</params>
    <code><![CDATA[
-	(if (eqv user.location this)
+	(if (eqv? user.location this)
 		(user:move user.last_location))
    ]]></code>
   </entry>
@@ -37,7 +37,7 @@
    <permissions>0475</permissions>
    <params>user</params>
    <code><![CDATA[
-	(if (!eqv user.location this)
+	(if (!eqv? user.location this)
 		(begin	
 			(define user.last_location user.location)
 			(user:move this)

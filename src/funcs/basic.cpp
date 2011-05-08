@@ -76,10 +76,12 @@ static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	double d = 0;
 	MooNumber *result, *num;
 
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
 	result = new MooNumber((long int) 0);
 	for (int i = 0; i <= args->m_args->last(); i++) {
 		if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(i))))
-			throw moo_type_error;
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		result->add(num);
 	}
 	args->m_result = result;
@@ -137,7 +139,7 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int basic_neqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_not_eqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
 
@@ -156,16 +158,22 @@ static int basic_neqv(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooNumber *num1, *num2;
+	MooObject *obj;
+	char buffer1[LARGE_STRING_SIZE];
+	char buffer2[LARGE_STRING_SIZE];
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("Expected number at arg 0");
+
+	if (!(obj = args->m_args->get(0)))
+		throw moo_type_error;
+	obj->to_string(buffer1, LARGE_STRING_SIZE);
+
 	for (int i = 1; i <= args->m_args->last(); i++) {
-		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
-			throw MooException("Expected number at arg %d", i);
-		if (!num1->equals(num2)) {
+		if (!(obj = args->m_args->get(i)))
+			throw moo_type_error;
+		obj->to_string(buffer2, LARGE_STRING_SIZE);
+		if (strcmp(buffer1, buffer2)) {
 			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
@@ -174,18 +182,18 @@ static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int basic_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_num_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
 	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw MooException("Expected number at arg 0");
+		throw MooException("arg 0: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
 		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
-			throw MooException("Expected number at arg %d", i);
-		if (num1->equals(num2)) {
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (num1->compare(num2)) {
 			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
@@ -194,75 +202,105 @@ static int basic_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *arg
 	return(0);
 }
 
-/*
+static int basic_num_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooNumber *num1, *num2;
+
+	if (args->m_args->last() < 1)
+		throw moo_args_mismatched;
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 0: Invalid type. Expected number");
+	for (int i = 1; i <= args->m_args->last(); i++) {
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (!num1->compare(num2)) {
+			args->m_result = new MooNumber((long int) 0);
+			return(0);
+		}
+	}
+	args->m_result = new MooNumber((long int) 1);
+	return(0);
+}
+
 static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
+	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	obj = args->m_args->get(0);
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 0: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
-		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooNumber((moo_integer_t) 0);
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (num1->compare(num2) != 1) {
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooNumber(1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 
 static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
+	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	obj = args->m_args->get(0);
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 0: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
-		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooNumber((moo_integer_t) 0);
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (num1->compare(num2) == -1) {
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooNumber(1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 
 static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
+	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	obj = args->m_args->get(0);
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 0: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
-		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooNumber((moo_integer_t) 0);
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (num1->compare(num2) != -1) {
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooNumber(1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
 
 static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
+	MooNumber *num1, *num2;
 
 	if (args->m_args->last() < 1)
 		throw moo_args_mismatched;
-	obj = args->m_args->get(0);
+	if (!(num1 = dynamic_cast<MooNumber *>(args->m_args->get(0))))
+		throw MooException("arg 0: Invalid type. Expected number");
 	for (int i = 1; i <= args->m_args->last(); i++) {
-		if (args->m_args->get(i) == obj) {
-			args->m_result = new MooNumber((moo_integer_t) 0);
+		if (!(num2 = dynamic_cast<MooNumber *>(args->m_args->get(i))))
+			throw MooException("arg %d: Invalid type. Expected number", i + 1);
+		if (num1->compare(num2) == 1) {
+			args->m_result = new MooNumber((long int) 0);
 			return(0);
 		}
 	}
-	args->m_result = new MooNumber(1);
+	args->m_result = new MooNumber((long int) 1);
 	return(0);
 }
-*/
 
 static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -282,6 +320,18 @@ static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 /********************
  * String Functions *
  ********************/
+
+static int basic_strlen(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooString *str;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(str = dynamic_cast<MooString *>(args->m_args->get(0))))
+		throw moo_type_error;
+	args->m_result = new MooNumber((long int) str->m_len);
+	return(0);
+}
 
 static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -456,18 +506,20 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("*", new MooFunc(basic_multiply));
 	env->set("/", new MooFunc(basic_divide));
 
-	env->set("null", new MooFunc(basic_null));
-	env->set("eqv", new MooFunc(basic_eqv));
-	env->set("!eqv", new MooFunc(basic_neqv));
-	env->set("=", new MooFunc(basic_equal));
-	env->set("!=", new MooFunc(basic_not_equal));
-	//env->set(">", new MooFunc(basic_gt));
-	//env->set(">=", new MooFunc(basic_ge));
-	//env->set("<", new MooFunc(basic_lt));
-	//env->set("<=", new MooFunc(basic_le));
+	env->set("null?", new MooFunc(basic_null));
+	env->set("eqv?", new MooFunc(basic_eqv));
+	env->set("!eqv?", new MooFunc(basic_not_eqv));
+	env->set("equal?", new MooFunc(basic_equal));
+	env->set("=", new MooFunc(basic_num_equal));
+	env->set("!=", new MooFunc(basic_num_not_equal));
+	env->set(">", new MooFunc(basic_gt));
+	env->set(">=", new MooFunc(basic_ge));
+	env->set("<", new MooFunc(basic_lt));
+	env->set("<=", new MooFunc(basic_le));
 
 	env->set("not", new MooFunc(basic_not));
 
+	env->set("strlen", new MooFunc(basic_strlen));
 	env->set("concat", new MooFunc(basic_concat));
 	env->set("chop", new MooFunc(basic_chop));
 	env->set("substr", new MooFunc(basic_substr));
@@ -481,6 +533,36 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));
+
+/*
+	Possible Future Primatives:
+
+	abs
+	modulo
+	floor
+	ceiling
+	round
+	truncate
+
+	sqrt
+	exp
+	expt
+	log
+	sin
+	cos
+	tan
+	asin
+	acos
+	atan
+
+	string-length
+
+	(the whole character type)
+	(the whole pairs type)
+	(the whole symbols type)
+
+*/
+
 	return(0);
 }
 
