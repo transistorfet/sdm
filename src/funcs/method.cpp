@@ -41,12 +41,14 @@ MooMethod::MooMethod(MooObject *obj, MooObject *func)
 
 int MooMethod::read_entry(const char *type, MooDataFile *data)
 {
-	//return(MooCodeLambda::read_entry(type, data));
+	moo_status("DATA: Attempting to read unreadable type: MooMethod (%x)", this);
+	return(0);
 }
 
 int MooMethod::write_data(MooDataFile *data)
 {
-	//return(MooCodeLambda::write_data(data));
+	moo_status("DATA: Attempting to write unwritable type: MooMethod (%x)", this);
+	return(0);
 }
 
 int MooMethod::to_string(char *buffer, int max)

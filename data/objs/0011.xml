@@ -22,4 +22,12 @@
    <value>an exit</value>
   </entry>
  </properties>
+  <entry type="moolambda" key="invoke">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params></params>
+   <code><![CDATA[
+	
+   ]]></code>
+  </entry>
 </thing>

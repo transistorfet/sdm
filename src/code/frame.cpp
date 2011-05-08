@@ -56,35 +56,13 @@ MooCodeFrame::~MooCodeFrame()
 
 int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
 {
-/*
-	if (!strcmp(type, "code")) {
-		char buffer[STRING_SIZE];
-
-		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
-			return(-1);
-		this->set(buffer);
-	}
-	else if (!strcmp(type, "params")) {
-		char buffer[STRING_SIZE];
-
-		if (data->read_string_entry(buffer, STRING_SIZE) < 0)
-			return(-1);
-		this->params(buffer);
-	}
-	else
-		return(MooObject::read_entry(type, data));
-*/
-	return(MOO_HANDLED);
+	moo_status("DATA: Attempting to read unreadable type: MooCodeFrame (%x)", this);
+	return(0);
 }
 
 int MooCodeFrame::write_data(MooDataFile *data)
 {
-	//const char *name;
-
-	MooObject::write_data(data);
-	// TODO write the code to the file
-	//data->write_string_entry("code", name);
-	//data->write_string_entry("params", this->params());
+	moo_status("DATA: Attempting to write unwritable type: MooCodeFrame (%x)", this);
 	return(0);
 }
 

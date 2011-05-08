@@ -56,6 +56,18 @@ void MooArgs::set_args(MooObjectArray *&args)
 	args = NULL;
 }
 
+int MooArgs::read_entry(const char *type, MooDataFile *data)
+{
+	moo_status("DATA: Attempting to read unreadable type: MooArgs (%x)", this);
+	return(0);
+}
+
+int MooArgs::write_data(MooDataFile *data)
+{
+	moo_status("DATA: Attempting to write unwritable type: MooArgs (%x)", this);
+	return(0);
+}
+
 MooObject *MooArgs::access_property(const char *name, MooObject *value)
 {
 	if (!strcmp(name, "args")) {

@@ -30,6 +30,9 @@ class MooArgs : public MooObject {
 	virtual ~MooArgs();
 	void set_args(MooObjectArray *&args);
 
+	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int write_data(MooDataFile *data);
+
     private:
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 };
