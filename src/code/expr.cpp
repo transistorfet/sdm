@@ -97,9 +97,9 @@ const char *MooCodeExpr::get_identifier()
 
 MooCodeExpr *MooCodeExpr::get_call()
 {
-	MooCodeExpr *expr;
+	MooCodeExpr *expr = NULL;
 
-	if (m_type != MCT_CALL || !(expr = dynamic_cast<MooCodeExpr *>(m_value)))
+	if (m_type != MCT_CALL || (m_value && !(expr = dynamic_cast<MooCodeExpr *>(m_value))))
 		throw MooException("(%d, %d) Expected expression", m_line, m_col);
 	return(expr);
 }

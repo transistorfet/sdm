@@ -77,8 +77,6 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    }
 	    case TT_OPEN: {
 		MooCodeExpr *expr = this->parse_list();
-		if (!expr)
-			throw MooException("(%d, %d): Empty list?", m_line, m_col);
 		return(new MooCodeExpr(m_line, m_col, MCT_CALL, expr));
 	    }
 	    default:
@@ -210,12 +208,10 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char lineb
 			buffer[i++] = linebr;
 		}
 		else if (expr->expr_type() == MCT_CALL) {
-			if (!(obj = expr->value()))
-				return(0);
-			if (!(call = dynamic_cast<MooCodeExpr *>(obj)))
-				return(0);
+			call = dynamic_cast<MooCodeExpr *>(expr->value());
 			buffer[i++] = '(';
-			i += MooCodeParser::generate(call, &buffer[i], max - i, linebr, (indent + 1) * -1);
+			if (call)
+				i += MooCodeParser::generate(call, &buffer[i], max - i, linebr, (indent + 1) * -1);
 			if (buffer[i - 1] == linebr)
 				i--;
 			buffer[i++] = ')';
