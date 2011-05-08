@@ -58,7 +58,6 @@
 
     TODO:
 
-	* add the 'and' and 'or' forms (i guess we'll make them forms like scheme so that sideeffects take place)
 	* get @clone working
 
 	* should system-y commands like those called by PseudoSern always start with a distinguishing character?  Should it be '@' for

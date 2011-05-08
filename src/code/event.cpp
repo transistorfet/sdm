@@ -257,6 +257,72 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
+/**************************
+ * Form: (and <expr> ...) *
+ **************************/
+
+class FormAndEvent : public MooCodeEvent {
+    public:
+	FormAndEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	int do_event(MooCodeFrame *frame) {
+		MooObject *obj;
+
+		if (!(obj = frame->get_return()) || !obj->is_true())
+			frame->set_return(new MooNumber((long int) 0));
+		else {
+			if (!m_expr)
+				frame->set_return(new MooNumber((long int) 1));
+			else {
+				frame->push_event(new FormAndEvent(frame->env(), m_expr->next()));
+				frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
+			}
+		}
+		return(0);
+	}
+};
+
+static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!expr)
+		throw moo_args_mismatched;
+	frame->push_event(new FormAndEvent(frame->env(), expr->next()));
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
+	return(0);
+}
+
+/**************************
+ * Form: (or <expr> ...) *
+ **************************/
+
+class FormOrEvent : public MooCodeEvent {
+    public:
+	FormOrEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	int do_event(MooCodeFrame *frame) {
+		MooObject *obj;
+
+		if ((obj = frame->get_return()) && obj->is_true())
+			frame->set_return(new MooNumber((long int) 1));
+		else {
+			if (!m_expr)
+				frame->set_return(new MooNumber((long int) 0));
+			else {
+				frame->push_event(new FormOrEvent(frame->env(), m_expr->next()));
+				frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
+			}
+		}
+		return(0);
+	}
+};
+
+static int form_or(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!expr)
+		throw moo_args_mismatched;
+	frame->push_event(new FormOrEvent(frame->env(), expr->next()));
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
+	return(0);
+}
+
 /****************************
  * Form: (begin <expr> ...) *
  ****************************/
@@ -332,6 +398,8 @@ int init_code_event(void)
 	form_env->set("define", new MooFormT(form_define));
 	form_env->set("set", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
+	form_env->set("and", new MooFormT(form_and));
+	form_env->set("or", new MooFormT(form_or));
 	form_env->set("begin", new MooFormT(form_begin));
 	form_env->set("lambda", new MooFormT(form_lambda));
 	form_env->set("super", new MooFormT(form_super));
