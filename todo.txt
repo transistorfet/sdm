@@ -56,69 +56,57 @@
 	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
 
+	* we could possibly make the MooUser connect/disconnect functions actually be methods call on an object (the user object) which
+	  would allow you to remove MooUser as a special subclass of MooThing.  You might want a user manager object similar to the
+	  channels list object 
+
     TODO:
 
-	* get @clone working
-
-	* should system-y commands like those called by PseudoSern always start with a distinguishing character?  Should it be '@' for
+	* get timers working
+	* add permissions checks to access and evaluate functions (and so on)
+	* should system-y commands like those called by PseudoServ always start with a distinguishing character?  Should it be '@' for
 	  all?  Should some use '@' and others use '*' or something else?  Should special variables have the same character?  Should
 	  they have a distinguishing one?  Or perhaps one on each side, such as '*channels*'?
 	* fix inconsistent uses of nil and NULL
 	* add a (type <obj>) function which returns a string name of the type
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
-	* make all objects that cannot be written instead write an XML comment with some debug info so that we know an invalid object
-	  was written.
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
 	  cascade a line/col backwards into the event during execution.
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
-	* SUID kinda doesn't work.  Should you use the frame's owner instead of the task's owner for permissions checks?  How would you
-	  get the current frame?  Through env?
+	* add support for notices from clients to other clients
 
+	* make the code use the "title" property instead of the "name" property for displaying the name
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will
 	  make /core/thing notation no longer work, but we can work around that
-	* how will MooThings be garbage collected?
-
-	* add permissions checks to access and evaluate functions
+	* how can you delete MooThings from the system?
 	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early.  Perhaps we could use an exception
 	  system such that a special event is pushed on to the stack and if a return or exception occurs, the stack is searched backwards
 	  for the special event, and execution resumes with that event
+	* add irc server-to-client pinging & connection timeouts
+
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
 	* should you store a pointer to frame in the env?  this might have a lot of problems 
+	* fix 'quit' function to send an actual quit message to each client rather than just having the user part all channels
 
-	* add a <script> tag or something to the world loader which allows you to specify an external file which contains source code
-	  such that it is loaded by an appropriate loader. <script type="lua" ref="scripts/core.lua"/>
 	* make sure it is not possible for a user to change his/her last_location value, logout, log back in, and get teleported to
 	  some place they aren't supposed to be
-	* could you make a special channel that forwards all text to another mud via a telnet-like connection, and returns all data as
-	  notifies to that user
 
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
-	* add permissions checking functions of some kind to all applicable locations
-	* add support for notices from clients to other clients
 	* add a 'register' and 'login' commands to basics
-	* implement client quit in the channels
 	* perhaps add "TheRealm" to any channel users list (names)
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
-	* add irc server-to-client pinging & connection timeouts
 	* fill in all other IRC message processing
 
 
     Old Stuff:
 	* make @destroy command
-	* add a @get command for returning the raw property values
-	* should you make the announce action add a "\n" before each output to the user in order to prevent
-	  interrupting the current line being typed instead of putting it in all the places that generate
-	  output sent to the announce action?
-	* make the code use the "title" property instead of the "name" property for displaying the name
-	  of an object
-	* change the name of tell_view
 
 	* parser format:   command[/modifier] [-flags] [object [preposition indirect-object]
 
@@ -127,18 +115,10 @@
 	  as a location for the direct object.  Either object searching can include an object specified in
 	  the command, or wehre to search can be specified in the action definition, or just a string can
 	  be passed and it will be up to the action code to resolve the string.
-	* can you use regexes to do parsing? or would that be waaaay too slow and painful?
 	* clean up/add parsing functions to lua to make it easy to parse the args
-	* make object name matching match part of a word like if the name is "The Thing" somehow match "thing"
 	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
 	  matching of the string given.
 
-	* should a list use the object itself to hold the next pointer (part of object) which means that
-	  exact object can only be in one list at a time?
-	* should objects have a pointer to the list they are contained in so that they can be removed from
-	  that list when they are destroyed?
-
-	* fix the 'get' action to actually use the second arg properly
 	* how do you prevent a user from directly calling actions that he shouldn't call directly on the
 	  command line
 	* add command shortcuts like lambdamoo's \" for say and : for emote
@@ -166,25 +146,8 @@
 	* try to remove the direct references to sdm_user the the args of the processor virtual functions
 	* try to make thing not directly reference user and world in it's load/save functions
 
-	* should you add a flag to objects somewhere that specifies that the object should be written to a
-	  seperate file (sdm_user) for checking when writing a container instead of a hardcoded check for user?
-	* make the lua error print to the user (or at least optionally)
-
-	* have an etc/telnet.xml file with <server> entries to run servers and the data on what registration
-	  restrictions and objects to use will be there
-	* should the connect/disconnect functions call an action on the object to allow for extra stuff to
-	  be done?
-
 Structural Issues:
 
-	* i don't like the sdm_moveto function in that the action it calls must guess what the hell is
-	  supposed to be happening based on what the arguments are.  For example, if i steal an object from
-	  another user, it would be moveto(me, obj, me, NULL) but that looks exactly like picking up an
-	  object or getting an object out of a container.  It's only because the container is not owned by
-	  me that it's stealing.
-	* can/should there be a way of doing an overridden action? (knowingly passing an object to an action
-	  on a parent of that object to avoid an overloaded action? (to change it's overt behaviour without
-	  reimplementing the functionality) (eg. override the say command to prevent talking while asleep)
 	* should you change format codes to something like bbcode ( [red] instead of <red> )
 
     Output Formatting/Interfaces:

@@ -144,7 +144,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	}
 	else if (!strcmp(type, "bits")) {
 		int bits = data->read_integer_entry();
-		m_bits = bits;
+		m_bits = (bits & ~MOO_TBF_WRITING);
 	}
 	else if (!strcmp(type, "id")) {
 		moo_id_t id = data->read_integer_entry();
@@ -205,7 +205,7 @@ int MooThing::save()
 		data->write_integer_entry("id", m_id);
 		if (m_parent >= 0)
 			data->write_integer_entry("parent", m_parent);
-		if (m_bits != 0)
+		if (m_bits & ~MOO_TBF_WRITING)
 			data->write_hex_entry("bits", m_bits);
 		MooObject::write_data(data);
 
