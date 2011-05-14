@@ -62,6 +62,12 @@
 
     TODO:
 
+	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
+	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
+	  socket or task or something is deleted.
+	* get user writing working
+	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
+	  if the database is read from disc rather than being in the cryolocker
 	* get timers working
 	* add permissions checks to access and evaluate functions (and so on)
 	* should system-y commands like those called by PseudoServ always start with a distinguishing character?  Should it be '@' for
@@ -86,6 +92,9 @@
 	  system such that a special event is pushed on to the stack and if a return or exception occurs, the stack is searched backwards
 	  for the special event, and execution resumes with that event
 	* add irc server-to-client pinging & connection timeouts
+
+	* add infinite loop protection
+	* add flood protection of some kind (???)  (could this somehow be an add-on or a coded thing)
 
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?

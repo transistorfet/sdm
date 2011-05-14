@@ -21,15 +21,12 @@
 class MooUser : public MooThing {
 	int m_bits;
 	MooTask *m_task;
-	std::string *m_name;
 
     public:
 	MooUser(const char *name, int bits = 0, moo_id_t id = -1, moo_id_t parent = -1);
 	virtual ~MooUser();
 	static MooUser *make_guest(const char *name);
-	int convert_guest();
 
-	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int load();
 	virtual int save();
 
@@ -41,16 +38,11 @@ class MooUser : public MooThing {
 	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 
 	/// Authentication Methods
-	static int exists(const char *name);
 	static int logged_in(const char *name);
 	static int valid_username(const char *name);
 	static MooUser *login(const char *name, const char *passwd);
+	static int exists(const char *name);
 	static void encrypt_password(const char *salt, char *passwd, int max);
-	static MooUser *get(const char *name);
-
-    public:
-	/// Accessors
-	const char *name() { return(m_name->c_str()); }
 };
 
 extern MooObjectType moo_user_obj_type;

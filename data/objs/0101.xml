@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing>
+ <id>101</id>
+ <parent>3</parent>
+ <owner>101</owner>
+ <permissions>075</permissions>
+ <properties>
+  <entry type="thing" key="location">
+   12
+  </entry>
+  <entry type="string" key="name">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>trans</value>
+  </entry>
+  <entry type="string" key="title">
+   <owner>101</owner>
+   <permissions>075</permissions>
+   <value>Trans2</value>
+  </entry>
+  <entry type="string" key="description">
+   <owner>101</owner>
+   <permissions>075</permissions>
+   <value>You see a funny little man.</value>
+  </entry>
+  <entry type="thing" key="last_location">
+   50
+  </entry>
+ </properties>
+</thing>

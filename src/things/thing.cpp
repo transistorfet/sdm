@@ -106,7 +106,8 @@ MooThing *MooThing::lookup(moo_id_t id)
 		return(NULL);
 	if (!(thing = moo_thing_table->get(id))) {
 		thing = new MooThing(id);
-		thing->load();
+		if (thing->load() < 0)
+			MOO_DECREF(thing);
 	}
 	return(thing);
 }
@@ -196,7 +197,7 @@ int MooThing::save()
 		return(-1);
 	}
 	//snprintf(file, STRING_SIZE, "objs/%04d/%04d.xml", m_id / 10000, m_id % 10000);
-	snprintf(file, STRING_SIZE, "objs-temp/%04d.xml", m_id);
+	snprintf(file, STRING_SIZE, "objs/%04d.xml", m_id);
 	moo_status("Writing thing data to file \"%s\".", file);
 	data = new MooDataFile(file, MOO_DATA_WRITE, "thing");
 
@@ -254,7 +255,11 @@ int MooThing::to_string(char *buffer, int max)
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
 	// TODO do you need to do permissions checks here?
-	if (value) {
+	if (!strcmp(name, "id"))
+		return(value ? NULL : new MooNumber((long int) this->m_id));
+	else if (!strcmp(name, "parent"))
+		return(value ? NULL : new MooNumber((long int) this->m_parent));
+	else if (value) {
 		if (this->set_property(name, value) < 0)
 			return(NULL);
 		return(value);

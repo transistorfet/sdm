@@ -1,60 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>8</id>
  <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
-   -1
-  </entry>
-  <entry type="array" key="contents">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-  </entry>
-  <entry type="string" key="looked_at">
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="looked_at" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>$user.name examines $this.name.</value>
   </entry>
-  <entry type="string" key="description">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>You're not sure what it is.</value>
-  </entry>
-  <entry type="string" key="name">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>generic thing</value>
-  </entry>
-  <entry type="string" key="title">
+  <entry key="location" type="nil"/>
+  <entry key="title" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>something</value>
   </entry>
+  <entry key="contents" type="array">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
+  <entry key="name" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>generic thing</value>
+  </entry>
+  <entry key="description" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You're not sure what it is.</value>
+  </entry>
  </properties>
  <methods>
-  <entry type="moolambda" key="look_self">
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="print_view" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params><![CDATA[]]></params>
    <code><![CDATA[
-	(user:notify 'status' nil channel (format "<yellow>$this.title"))
-	(user:notify 'status' nil channel (format "<lightgreen>$this.description"))
-   ]]></code>
+(user:notify
+ 'status'
+ nil
+ channel
+ (format
+  '<b><lightblue>You see $this.name here.'))
+]]></code>
   </entry>
-  <entry type="moolambda" key="print_view">
+  <entry key="look_self" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params></params>
+   <params><![CDATA[]]></params>
    <code><![CDATA[
-       (user:notify 'status' nil channel (format "<b><lightblue>You see $this.name here."))
-   ]]></code>
+(user:notify
+ 'status'
+ nil
+ channel
+ (format
+  '<yellow>$this.title'))
+(user:notify
+ 'status'
+ nil
+ channel
+ (format
+  '<lightgreen>$this.description'))
+]]></code>
   </entry>
-  <entry type="moolambda" key="print">
+  <entry key="print" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params>text</params>
-   <code><![CDATA[(print text)]]></code>
+   <params><![CDATA[text
+]]></params>
+   <code><![CDATA[
+(print
+ text)
+]]></code>
   </entry>
  </methods>
 </thing>

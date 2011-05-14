@@ -1,11 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>11</id>
  <parent>8</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry key="location" type="thing">
-   -1
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="location" type="nil"/>
+  <entry key="title" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>an exit</value>
   </entry>
   <entry key="contents" type="array">
    <owner>-1</owner>
@@ -16,18 +22,5 @@
    <permissions>075</permissions>
    <value>exit</value>
   </entry>
-  <entry key="title" type="string">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>an exit</value>
-  </entry>
  </properties>
-  <entry type="moolambda" key="invoke">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <params></params>
-   <code><![CDATA[
-	
-   ]]></code>
-  </entry>
 </thing>

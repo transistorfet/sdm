@@ -1,30 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>50</id>
  <parent>10</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
-   -1
-  </entry>
-  <entry type="array" key="contents">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-  </entry>
-  <entry type="string" key="title">
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="location" type="nil"/>
+  <entry key="title" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>The Test Room</value>
   </entry>
-  <entry type="string" key="description">
+  <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value>
   </entry>
-  <entry type="string" key="name">
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>start</value>
+  </entry>
+  <entry key="description" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.</value>
   </entry>
  </properties>
 </thing>

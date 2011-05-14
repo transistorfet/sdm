@@ -86,33 +86,15 @@ PseudoServ::~PseudoServ()
 
 int PseudoServ::read_entry(const char *type, MooDataFile *data)
 {
-/*
-	if (!strcmp(type, "port")) {
-		m_port = data->read_integer_entry();
-		//this->listen(m_port);
-	}
-	else if (!strcmp(type, "type")) {
-		// TODO read in string and find type
-	}
-	else
-		return(MOO_NOT_HANDLED);
-*/
-	return(MOO_HANDLED);
-}
-
-
-int PseudoServ::write_data(MooDataFile *data)
-{
-/*
-	data->write_integer_entry("port", m_port);
-	if (m_itype)
-		data->write_string_entry("type", m_itype->m_name);
-	if (m_ttype)
-		data->write_string_entry("task", m_ttype->m_name);
-*/
+	moo_status("DATA: Attempting to read unreadable type: MooIRC::PseudoServ (%x)", this);
 	return(0);
 }
 
+int PseudoServ::write_data(MooDataFile *data)
+{
+	moo_status("DATA: Attempting to write unwritable type: MooIRC::PseudoServ (%x)", this);
+	return(0);
+}
 
 int PseudoServ::initialize()
 {
@@ -304,8 +286,10 @@ int PseudoServ::dispatch(Msg *msg)
 
 			if (moo_is_channel_name(msg->m_params[0]))
 				channel = MooThing::get_channel(msg->m_params[0]);
-			else
-				channel = MooUser::get(msg->m_params[0]);
+			// TODO fix/add user-to-user privmsging
+			//else
+				// TODO i don't think this really makes sense anymore.  It should maybe be a special case
+				//channel = MooUser::get(msg->m_params[0]);
 
 			if (!channel)
 				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));

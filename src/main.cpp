@@ -67,7 +67,8 @@ int init_moo(void)
 
 		load_global_config();
 
-		// TODO what should we use as the name mangle to signify global values (@ isn't very good becuase it's used by funcs)
+		// TODO what should i use for these names:
+		//	*start*, %room%, +user+, T/CRYOLOCKER, $channels
 		global_env->set("@start", MooThing::reference(MOO_START_ROOM));
 		global_env->set("@user", MooThing::reference(MOO_GENERIC_USER));
 		global_env->set("@room", MooThing::reference(MOO_GENERIC_ROOM));

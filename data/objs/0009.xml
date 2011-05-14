@@ -1,40 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>9</id>
  <parent>8</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
-   -1
-  </entry>
-  <entry type="array" key="contents">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-  </entry>
-  <entry type="string" key="self_look_at">
+  <owner>2</owner>
+  <permissions>077</permissions>
+  <entry key="self_look_at" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>$this.name looks at himself, quizically.</value>
   </entry>
-  <entry type="string" key="title">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>a creature</value>
-  </entry>
-  <entry type="string" key="name">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>mobile</value>
-  </entry>
-  <entry type="string" key="look_at">
+  <entry key="look_at" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>$user.name looks at you, menicingly.</value>
   </entry>
-  <entry type="string" key="looked_at">
+  <entry key="looked_at" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>$user.name looks at $this.name.</value>
+  </entry>
+  <entry key="location" type="nil"/>
+  <entry key="title" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>a creature</value>
+  </entry>
+  <entry key="contents" type="array">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
+  <entry key="name" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>mobile</value>
   </entry>
  </properties>
 </thing>

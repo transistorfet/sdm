@@ -1,12 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>4</id>
  <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
  <properties>
-  <entry key="location" type="thing">
-   -1
-  </entry>
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="location" type="nil"/>
   <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>075</permissions>
@@ -19,24 +20,27 @@
   <entry key="list" type="hash">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <entry key="#realm" type="thing">
-    6
-   </entry>
-   <entry key="#help" type="thing">
-    13
-   </entry>
+   <entry key="#help" type="thing">13</entry>
+   <entry key="#realm" type="thing">6</entry>
   </entry>
  </properties>
  <methods>
+  <owner>-1</owner>
+  <permissions>077</permissions>
   <entry key="quit" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params><![CDATA[&all]]></params>
+   <params><![CDATA[&all
+]]></params>
    <code><![CDATA[
-	(this.list:foreach (lambda (cur)
-		(define channel cur)
-		(cur:leave)))
-   ]]></code>
+(this.list:foreach
+ (lambda
+  (cur)
+  (define
+   channel
+   cur)
+  (cur:leave)))
+]]></code>
   </entry>
  </methods>
 </thing>

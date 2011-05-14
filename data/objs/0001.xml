@@ -1,42 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>1</id>
  <owner>-1</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="string" key="name">
+  <owner>2</owner>
+  <permissions>077</permissions>
+  <entry key="location" type="nil"/>
+  <entry key="contents" type="array">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+  </entry>
+  <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
    <value>root</value>
   </entry>
-  <entry type="thing" key="location">
-   -1
-  </entry>
-  <entry type="array" key="contents">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-  </entry>
  </properties>
  <methods>
-  <entry type="moofunc" key="@clone">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>thing_clone</func>
-  </entry>
-  <entry type="moofunc" key="@save">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>thing_save</func>
-  </entry>
-  <entry type="moofunc" key="@load">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>thing_load</func>
-  </entry>
-  <entry type="moofunc" key="move">
+  <owner>2</owner>
+  <permissions>077</permissions>
+  <entry key="move" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>thing_move</func>
   </entry>
+  <entry key="@load" type="moofunc">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>thing_load</func>
+  </entry>
+  <entry key="@save" type="moofunc">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>thing_save</func>
+  </entry>
+  <entry key="@clone" type="moofunc">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>thing_clone</func>
+  </entry>
  </methods>
 </thing>
-

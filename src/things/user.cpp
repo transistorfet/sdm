@@ -28,13 +28,14 @@ MooObjectType moo_user_obj_type = {
 	&moo_thing_obj_type,
 	"user",
 	typeid(MooUser).name(),
-	(moo_type_make_t) NULL
+	(moo_type_make_t) make_moo_user
 };
 
 static MooHash<MooUser *> *user_list = NULL;
 
 int init_user(void)
 {
+	moo_id_t id;
 	const char *str;
 	char buffer[STRING_SIZE];
 	MooDataFile *data;
@@ -50,9 +51,17 @@ int init_user(void)
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
 			data->read_attrib_string("name", buffer, STRING_SIZE);
-			user = new MooUser(buffer);
-			// TODO should this be fixed?
-			//user->cryolocker_store();
+			if (data->read_children()) {
+				while (data->read_next()) {
+					str = data->read_name();
+					if (!strcmp(str, "thing"))
+						id = data->read_integer_entry();
+				}
+				data->read_parent();
+				user = new MooUser(buffer, 0, id);
+				// TODO should this be fixed?
+				//user->cryolocker_store();
+			}
 		}
 	} while (data->read_next());
 	delete data;
@@ -68,15 +77,25 @@ void release_user(void)
 }
 
 
+MooObject *make_moo_user(MooDataFile *data)
+{
+	int id;
+	MooThing *thing;
+
+	id = data->read_integer();
+	// TODO is this right to return the nil value, or should you create a new nil value
+	if (!(thing = MooThing::lookup(id)))
+		return(make_moo_nil(NULL));
+	return(dynamic_cast<MooUser *>(thing));
+}
+
 MooUser::MooUser(const char *name, int bits, moo_id_t id, moo_id_t parent) : MooThing(id, parent)
 {
 	m_bits = bits;
 	m_task = NULL;
-	m_name = NULL;
 
 	if (!name || !MooUser::valid_username(name))
 		throw MooException("User name error");
-	m_name = new std::string(name);
 
 	this->load();
 	if (user_list->set(name, this))
@@ -91,12 +110,6 @@ MooUser::~MooUser()
 	///If we are associated with a task, then notify it that we are dying
 	if (m_task)
 		m_task->purge(this);
-
-	/// Release the user's other resources
-	if (m_name) {
-		user_list->remove(m_name->c_str());
-		delete m_name;
-	}
 }
 
 MooUser *MooUser::make_guest(const char *name)
@@ -118,45 +131,18 @@ MooUser *MooUser::make_guest(const char *name)
 	return(user);
 }
 
-int MooUser::convert_guest()
-{
-	// TODO Convert a guest user into full user??
-	return(0);
-}
-
-int MooUser::read_entry(const char *type, MooDataFile *data)
-{
-	if (!strcmp(type, "name")) {
-		// TODO this should already have been set but maybe we can generate an error if it doesn't match
-	}
-	else
-		return(MooThing::read_entry(type, data));
-	return(0);
-}
-
 int MooUser::load()
 {
-	char buffer[STRING_SIZE];
-
 	if (m_bits & MOO_UBF_GUEST)
 		return(-1);
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
-	return(MooObject::read_file(buffer, "user"));
+	return(MooThing::load());
 }
 
 int MooUser::save()
 {
-	char buffer[STRING_SIZE];
-
 	if (m_bits & MOO_UBF_GUEST)
 		return(-1);
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", m_name->c_str());
-	// TODO disable user writing for now since it doesn't work (it just writes the thing id rather than the whole thing)
-	//return(MooObject::write_file(buffer, "user"));
-	//MooThing::write_data(data);
-	//data->write_string_entry("name", m_name->c_str());
-	//data->write_integer_entry("lastseen", time(NULL));
-	return(0);
+	return(MooThing::save());
 }
 
 int MooUser::connect(MooTask *task)
@@ -185,7 +171,7 @@ void MooUser::disconnect()
 		}
 	}
 	catch (...) {
-		moo_status("USER: Error saving user data, %s", m_name->c_str());
+		moo_status("USER: Error saving user data, %d", m_id);
 	}
 }
 
@@ -197,14 +183,6 @@ int MooUser::notify(int type, MooThing *thing, MooThing *channel, const char *te
 	return(m_task->notify(type, thing, channel, text));
 }
 
-
-int MooUser::exists(const char *name)
-{
-	char buffer[STRING_SIZE];
-
-	snprintf(buffer, STRING_SIZE, "users/%s.xml", name);
-	return(moo_data_file_exists(buffer));
-}
 
 int MooUser::logged_in(const char *name)
 {
@@ -231,14 +209,11 @@ int MooUser::valid_username(const char *name)
 
 MooUser *MooUser::login(const char *name, const char *passwd)
 {
-	MooUser *user;
-	MooDataFile *data;
+	moo_id_t id;
 	const char *str;
+	MooDataFile *data;
 	char buffer[STRING_SIZE];
 
-	// TODO overwrite buffers used to store password as a security measure
-	if (!(user = user_list->get(name)) || user->m_task)
-		return(NULL);
 	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
 	do {
 		if ((str = data->read_name()) && !strcmp(str, "user")) {
@@ -247,15 +222,23 @@ MooUser *MooUser::login(const char *name, const char *passwd)
 				continue;
 			if (data->read_children()) {
 				do {
-					if ((str = data->read_name()) && !strcmp(str, "password")) {
+					str = data->read_name();
+					if (!strcmp(str, "thing"))
+						id = data->read_integer_entry();
+					else if (!strcmp(str, "password")) {
 						data->read_string_entry(buffer, STRING_SIZE);
-						if (!strcmp(buffer, passwd)) {
+						if (!strcmp(buffer, passwd))
+							passwd = NULL;
+						else {
 							delete data;
-							return(user);
+							return(NULL);
 						}
-						return(NULL);
 					}
 				} while (data->read_next());
+				if (passwd)
+					break;
+				memset(buffer, '\0', STRING_SIZE);
+				return(dynamic_cast<MooUser *>(MooThing::lookup(id)));
 			}
 			break;
 		}
@@ -263,6 +246,27 @@ MooUser *MooUser::login(const char *name, const char *passwd)
 	delete data;
 	return(NULL);
 }
+
+int MooUser::exists(const char *name)
+{
+	const char *str;
+	MooDataFile *data;
+	char buffer[STRING_SIZE];
+
+	data = new MooDataFile("etc/passwd.xml", MOO_DATA_READ, "passwd");
+	do {
+		if ((str = data->read_name()) && !strcmp(str, "user")) {
+			data->read_attrib_string("name", buffer, STRING_SIZE);
+			if (!strcmp(buffer, name)) {
+				delete data;
+				return(1);
+			}
+		}
+	} while (data->read_next());
+	delete data;
+	return(0);
+}
+
 
 void MooUser::encrypt_password(const char *salt, char *passwd, int max)
 {
@@ -272,8 +276,4 @@ void MooUser::encrypt_password(const char *salt, char *passwd, int max)
 	strncpy(passwd, enc, max);
 }
 
-MooUser *MooUser::get(const char *name)
-{
-	return(user_list->get(name));
-}
 

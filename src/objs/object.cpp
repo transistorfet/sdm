@@ -85,7 +85,7 @@ const MooObjectType *moo_object_find_type(const char *name, const MooObjectType 
 
 MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data)
 {
-	if (!type)
+	if (!type || !type->m_make)
 		return(NULL);
 	try {
 		return(type->m_make(data));
