@@ -15,7 +15,7 @@
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>generic builder</value>
+   <value>generic_builder</value>
   </entry>
  </properties>
  <methods>
@@ -31,7 +31,7 @@
  argstr)
 ]]></code>
   </entry>
-  <entry key="@save_all" type="moofunc">
+  <entry key="%save_all" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>thing_save_all</func>

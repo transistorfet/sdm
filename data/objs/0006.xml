@@ -25,18 +25,18 @@
  <methods>
   <owner>-1</owner>
   <permissions>077</permissions>
-  <entry key="leave" type="moolambda">
+  <entry key="%leave" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (super
- leave)
+ %leave)
 (@cryolocker:store
  user)
 ]]></code>
   </entry>
-  <entry key="emote" type="moolambda">
+  <entry key="%emote" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[text
@@ -46,23 +46,23 @@
  text)
 ]]></code>
   </entry>
-  <entry key="join" type="moolambda">
+  <entry key="%join" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (super
- join)
+ %join)
 (@cryolocker:fetch
  user)
 ]]></code>
   </entry>
-  <entry key="command" type="moofunc">
+  <entry key="%command" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>parse_command</func>
   </entry>
-  <entry key="say" type="moolambda">
+  <entry key="%say" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[text
@@ -72,13 +72,13 @@
  text)
 ]]></code>
   </entry>
-  <entry key="quit" type="moolambda">
+  <entry key="%quit" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (super
- quit)
+ %quit)
 (@cryolocker:store
  user)
 ]]></code>

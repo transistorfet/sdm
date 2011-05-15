@@ -158,7 +158,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	newargs = new MooArgs();
 	newenv = new MooObjectHash(env);
-	newenv->set("argstr", new MooString(text));
+	newenv->set("argstr", new MooString("%s", text));
 
 	MooCodeExpr *expr;
 
@@ -170,12 +170,12 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 			newargs->m_args->push(cur->value());
 			break;
 		    case MCT_IDENTIFIER:
-			newargs->m_args->push(new MooString(cur->get_identifier()));
+			newargs->m_args->push(new MooString("%s", cur->get_identifier()));
 			break;
 		    case MCT_CALL: {
 			char buffer[LARGE_STRING_SIZE];
 			MooCodeParser::generate(dynamic_cast<MooCodeExpr *>(cur->value()), buffer, LARGE_STRING_SIZE, ' ');
-			newargs->m_args->push(new MooString(buffer));
+			newargs->m_args->push(new MooString("%s", buffer));
 			break;
 		    }
 		    default:

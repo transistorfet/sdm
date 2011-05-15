@@ -60,6 +60,8 @@
 	  would allow you to remove MooUser as a special subclass of MooThing.  You might want a user manager object similar to the
 	  channels list object 
 
+	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
+
     TODO:
 
 	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all

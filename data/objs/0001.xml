@@ -20,17 +20,17 @@
  <methods>
   <owner>2</owner>
   <permissions>077</permissions>
-  <entry key="move" type="moofunc">
+  <entry key="%move" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>thing_move</func>
   </entry>
-  <entry key="@load" type="moofunc">
+  <entry key="%load" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>thing_load</func>
   </entry>
-  <entry key="@save" type="moofunc">
+  <entry key="%save" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>thing_save</func>

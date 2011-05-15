@@ -40,7 +40,7 @@
   (define
    user.last_location
    user.location)
-  (user:move
+  (user:%move
    this)))
 ]]></code>
   </entry>
@@ -54,7 +54,7 @@
  (eqv?
   user.location
   this)
- (user:move
+ (user:%move
   user.last_location))
 ]]></code>
   </entry>

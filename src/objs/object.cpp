@@ -333,7 +333,7 @@ int MooObject::call_method(MooObject *channel, const char *name, const char *tex
 		return(-1);
 	args = new MooArgs();
 	if (text)
-		args->m_args->set(0, new MooString(text));
+		args->m_args->set(0, new MooString("%s", text));
 	start = clock();
 	res = this->call_method(channel, func, args);
 	moo_status("Executed (%s \"%s\") in %f seconds", name, text, ((float) clock() - start) / CLOCKS_PER_SEC);

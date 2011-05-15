@@ -48,7 +48,7 @@ static int basic_format(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	str = args->m_args->get_string(0);
 	MooObject::format(buffer, LARGE_STRING_SIZE, env, str);
-	args->m_result = new MooString(buffer);
+	args->m_result = new MooString("%s", buffer);
 	return(0);
 }
 
@@ -380,7 +380,7 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
 	buffer[j] = '\0';
-	args->m_result = new MooString(buffer);
+	args->m_result = new MooString("%s", buffer);
 	return(0);
 }
 
@@ -397,7 +397,7 @@ static int basic_chop(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	i = obj->to_string(buffer, LARGE_STRING_SIZE);
 	if (--i >= 0)
 		buffer[i] = '\0';
-	args->m_result = new MooString(buffer);
+	args->m_result = new MooString("%s", buffer);
 	return(0);
 }
 
@@ -433,7 +433,7 @@ static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	for (j = pos, k = 0; buffer[j] != '\0' && k < LARGE_STRING_SIZE && (len == -1 || k < len); j++, k++)
 		buffer[k] = buffer[j];
 	buffer[k] = '\0';
-	args->m_result = new MooString(buffer);
+	args->m_result = new MooString("%s", buffer);
 	return(0);
 }
 
@@ -450,7 +450,7 @@ static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	for (i = 0; buffer[i] != '\0' && (buffer[i] == ' ' || buffer[i] == '\t' || buffer[i] == '\n' || buffer[i] == '\r'); i++)
 		;
-	args->m_result = new MooString(&buffer[i]);
+	args->m_result = new MooString("%s", &buffer[i]);
 	return(0);
 }
 

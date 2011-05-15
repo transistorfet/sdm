@@ -25,7 +25,7 @@
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>generic thing</value>
+   <value>generic_thing</value>
   </entry>
   <entry key="description" type="string">
    <owner>-1</owner>

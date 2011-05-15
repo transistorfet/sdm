@@ -15,13 +15,13 @@
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>generic channel</value>
+   <value>generic_channel</value>
   </entry>
  </properties>
  <methods>
   <owner>101</owner>
   <permissions>077</permissions>
-  <entry key="leave" type="moolambda">
+  <entry key="%leave" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
@@ -44,7 +44,7 @@
    user)))
 ]]></code>
   </entry>
-  <entry key="names" type="moolambda">
+  <entry key="%names" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
@@ -65,7 +65,7 @@
  names)
 ]]></code>
   </entry>
-  <entry key="emote" type="moolambda">
+  <entry key="%emote" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[text
@@ -81,7 +81,7 @@
    text)))
 ]]></code>
   </entry>
-  <entry key="join" type="moolambda">
+  <entry key="%join" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>
@@ -104,7 +104,7 @@
      '')))))
 ]]></code>
   </entry>
-  <entry key="command" type="moolambda">
+  <entry key="%command" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[text
@@ -117,7 +117,7 @@
  'Commands are not supported in this channel.')
 ]]></code>
   </entry>
-  <entry key="say" type="moolambda">
+  <entry key="%say" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[text
@@ -133,7 +133,7 @@
    text)))
 ]]></code>
   </entry>
-  <entry key="quit" type="moolambda">
+  <entry key="%quit" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[]]></params>

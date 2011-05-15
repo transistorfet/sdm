@@ -67,13 +67,13 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_CLOSE:
 		return(NULL);
 	    case TT_STRING:
-		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString(m_token)));
+		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString("%s", m_token)));
 	    case TT_WORD: {
 		if (parser_is_digit(m_token[0]) || (m_token[0] == '-' && parser_is_digit(m_token[1]))) {
 			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooNumber(m_token)));
 		}
 		else
-			return(new MooCodeExpr(m_line, m_col, MCT_IDENTIFIER, new MooString(m_token)));
+			return(new MooCodeExpr(m_line, m_col, MCT_IDENTIFIER, new MooString("%s", m_token)));
 	    }
 	    case TT_OPEN: {
 		MooCodeExpr *expr = this->parse_list();
