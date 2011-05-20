@@ -64,10 +64,10 @@
 
     TODO:
 
+	* add a hash table function to convert the table to an array
 	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
 	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
 	  socket or task or something is deleted.
-	* get user writing working
 	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
 	  if the database is read from disc rather than being in the cryolocker
 	* get timers working
@@ -87,8 +87,7 @@
 
 	* make the code use the "title" property instead of the "name" property for displaying the name
 
-	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation (which will
-	  make /core/thing notation no longer work, but we can work around that
+	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
 	* how can you delete MooThings from the system?
 	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early.  Perhaps we could use an exception
 	  system such that a special event is pushed on to the stack and if a return or exception occurs, the stack is searched backwards

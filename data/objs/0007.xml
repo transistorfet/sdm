@@ -31,5 +31,13 @@
    <permissions>075</permissions>
    <func>user_notify</func>
   </entry>
+  <entry key="tell" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params><![CDATA[text]]></params>
+   <code><![CDATA[
+	(this:notify 'status' channel text)
+   ]]></code>
+  </entry>
  </methods>
 </thing>

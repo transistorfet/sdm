@@ -40,5 +40,10 @@
    <permissions>075</permissions>
    <func>thing_clone</func>
   </entry>
+  <entry key="tell" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <code>"Do nothing."</code>
+  </entry>
  </methods>
 </thing>

@@ -23,4 +23,27 @@
    <value>exit</value>
   </entry>
  </properties>
+ <methods>
+  <entry key="invoke" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <params><![CDATA[what]]></params>
+   <code><![CDATA[
+	(define start what.location)
+	(if (and this.dest.unlocked (this.dest:acceptable what))
+		(what:%move this.dest)
+		(if (neqv? what.location start)
+			(start:tell_all (expand-refs this.msg_leave))
+			; TODO print fail message?? (optional) "So and So tries to goes east but critically fails."
+		)
+		(if (eqv? what.location this.dest)
+			; TODO print the join messages to what.location
+			; TODO print an error message to the object's location so at least they know something wrong happened?? (assuming
+			;	that this is the only way anybody in that object will know that someone entered)
+		)
+		(user:tell (expand-refs this.msg_user_success))
+	)
+]]></code>
+  </entry>
+ </methods>
 </thing>

@@ -310,6 +310,40 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int array_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int len;
+	int j = 0;
+	MooObject *obj;
+	MooObjectArray *m_this;
+	char filler[STRING_SIZE];
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(m_this = dynamic_cast<MooObjectArray *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	len = obj->to_string(filler, STRING_SIZE);
+
+	if (m_this->last() < 0) {
+		args->m_result = new MooString("");
+		return(0);
+	}
+
+	obj = m_this->get(0);
+	j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
+	for (int i = 1; i <= m_this->last() && j < LARGE_STRING_SIZE; i++) {
+		strncpy(&buffer[j], filler, LARGE_STRING_SIZE - j);
+		j += len;
+		obj = m_this->get(i);
+		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
+	}
+	buffer[j] = '\0';
+	args->m_result = new MooString("%s", buffer);
+	return(0);
+}
+
 class ArrayEventForeach : public MooCodeEvent {
 	int m_index;
 	MooObjectArray *m_this;
@@ -365,6 +399,8 @@ void moo_load_array_methods(MooObjectHash *env)
 	env->set("splice", new MooFunc(array_splice));
 
 	env->set("search", new MooFunc(array_search));
+	env->set("join", new MooFunc(array_join));
+
 	env->set("foreach", new MooFunc(array_foreach));
 }
 

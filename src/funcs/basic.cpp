@@ -39,19 +39,6 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int basic_format(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	const char *str;
-	char buffer[LARGE_STRING_SIZE];
-
-	if (args->m_args->last() != 0)
-		throw moo_args_mismatched;
-	str = args->m_args->get_string(0);
-	MooObject::format(buffer, LARGE_STRING_SIZE, env, str);
-	args->m_result = new MooString("%s", buffer);
-	return(0);
-}
-
 static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
@@ -65,6 +52,8 @@ static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	moo_status("%s", buffer);
 	return(0);
 }
+
+
 
 /******************
  * Math Functions *
@@ -355,6 +344,19 @@ static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
  * String Functions *
  ********************/
 
+static int basic_expand_string(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	const char *str;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	str = args->m_args->get_string(0);
+	MooObject::format(buffer, LARGE_STRING_SIZE, env, str);
+	args->m_result = new MooString("%s", buffer);
+	return(0);
+}
+
 static int basic_strlen(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooString *str;
@@ -375,7 +377,7 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	if (args->m_args->last() < 0)
 		throw moo_args_mismatched;
-	for (int i = 0; i <= args->m_args->last(); i++) {
+	for (int i = 0; i <= args->m_args->last() && j < LARGE_STRING_SIZE; i++) {
 		obj = args->m_args->get(i);
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
@@ -532,7 +534,6 @@ static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 int moo_load_basic_funcs(MooObjectHash *env)
 {
 	env->set("print", new MooFunc(basic_print));
-	env->set("format", new MooFunc(basic_format));
 	env->set("debug", new MooFunc(basic_debug));
 
 	env->set("+", new MooFunc(basic_add));
@@ -553,6 +554,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("not", new MooFunc(basic_not));
 
+	env->set("expand-string", new MooFunc(basic_expand_string));
 	env->set("strlen", new MooFunc(basic_strlen));
 	env->set("concat", new MooFunc(basic_concat));
 	env->set("chop", new MooFunc(basic_chop));

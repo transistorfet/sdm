@@ -82,6 +82,12 @@
    <params><![CDATA[dir
 ]]></params>
    <code><![CDATA[
+	(try
+		(define exit (this.exits:get dir))
+	(catch (e)
+		(user:tell "You can't go that way.")
+	))
+	(exit.invoke user)
 ]]></code>
   </entry>
   <entry key="emote" type="moolambda">
