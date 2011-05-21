@@ -460,6 +460,17 @@ static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
  * Type Functions *
  ******************/
 
+static int basic_type(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	args->m_result = new MooString("%s", obj->type_name());
+	return(0);
+}
+
 static int basic_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	args->m_result = args->m_args;
@@ -561,6 +572,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("substr", new MooFunc(basic_substr));
 	env->set("ltrim", new MooFunc(basic_ltrim));
 
+	env->set("type", new MooFunc(basic_type));
 	env->set("array", new MooFunc(basic_array));
 	env->set("hash", new MooFunc(basic_hash));
 

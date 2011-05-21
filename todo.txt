@@ -64,7 +64,6 @@
 
     TODO:
 
-	* add a hash table function to convert the table to an array
 	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
 	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
 	  socket or task or something is deleted.
@@ -76,7 +75,6 @@
 	  all?  Should some use '@' and others use '*' or something else?  Should special variables have the same character?  Should
 	  they have a distinguishing one?  Or perhaps one on each side, such as '*channels*'?
 	* fix inconsistent uses of nil and NULL
-	* add a (type <obj>) function which returns a string name of the type
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
@@ -108,6 +106,7 @@
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
 	* add a 'register' and 'login' commands to basics
 	* perhaps add "TheRealm" to any channel users list (names)
+	* implement an automatic testing system somehow (so you can verify the moocode core at least)
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
