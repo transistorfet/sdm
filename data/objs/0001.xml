@@ -43,6 +43,7 @@
   <entry key="tell" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
+   <params><![CDATA[&all]]></params>
    <code>"Do nothing."</code>
   </entry>
  </methods>

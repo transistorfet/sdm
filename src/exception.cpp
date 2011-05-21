@@ -30,23 +30,23 @@ MooException::MooException(const char *msg, ...)
 	this->init(E_NORMAL, msg, va);
 }
 
-MooException::MooException(int severity, const char *msg, ...)
+MooException::MooException(int type, const char *msg, ...)
 {
 	va_list va;
 	va_start(va, msg);
-	this->init(severity, msg, va);
+	this->init(type, msg, va);
 }
 
-MooException::MooException(int severity, const char *msg, va_list va)
+MooException::MooException(int type, const char *msg, va_list va)
 {
-	this->init(severity, msg, va);
+	this->init(type, msg, va);
 }
 
-void MooException::init(int severity, const char *msg, va_list va)
+void MooException::init(int type, const char *msg, va_list va)
 {
 	char buffer[EXCEPTION_STRING];
 
-	m_severity = severity;
+	m_type = type;
 	vsnprintf(buffer, EXCEPTION_STRING, msg, va);
 	m_msg = std::string(buffer);
 }

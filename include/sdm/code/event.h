@@ -69,9 +69,9 @@ class MooCodeEventEvalBlock : public MooCodeEvent {
 	int do_event(MooCodeFrame *frame);
 };
 
-class MooCodeEventCallExpr : public MooCodeEvent {
+class MooCodeEventCallFunc : public MooCodeEvent {
     public:
-	MooCodeEventCallExpr(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
+	MooCodeEventCallFunc(MooObjectHash *env, MooArgs *args) : MooCodeEvent(env, args, NULL) { };
 	int do_event(MooCodeFrame *frame);
 };
 

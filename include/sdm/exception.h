@@ -12,16 +12,22 @@
 #define E_NORMAL	2
 
 class MooException {
-	int m_severity;
+	int m_type;
 	std::string m_msg;
     public:
-	MooException() { m_severity = 0; m_msg = std::string(""); }
+	MooException() { m_type = 0; m_msg = std::string(""); }
 	MooException(const char *msg, ...);
-	MooException(int severity, const char *msg, ...);
-	MooException(int severity, const char *msg, va_list va);
-	void init(int severity, const char *msg, va_list va);
+	MooException(int type, const char *msg, ...);
+	MooException(int type, const char *msg, va_list va);
+	void init(int type, const char *msg, va_list va);
 	const char *get() const { return(m_msg.c_str()); }
-	inline int severity() { return(m_severity); }
+	inline int type() { return(m_type); }
+	inline int is_fatal() { return(m_type == E_FATAL); }
+};
+
+class MooArgsError : public MooException {
+    public:
+	MooArgsError(int expected) : MooException("Argument error; expected %d args.") { }
 };
 
 extern MooException moo_mem_error;

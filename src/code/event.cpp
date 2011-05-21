@@ -76,7 +76,9 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 				return((*form)(frame, expr->next()));
 		}
 		MooArgs *args = new MooArgs();
-		frame->push_event(new MooCodeEventCallExpr(m_env, args));
+		// TODO add debug information
+		//frame->push_debug("> call to %s");
+		frame->push_event(new MooCodeEventCallFunc(m_env, args));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
 		MOO_DECREF(args);
 		break;
@@ -108,10 +110,10 @@ int MooCodeEventEvalBlock::do_event(MooCodeFrame *frame)
 
 
 /*************************
- * MooCodeEventCallExpr *
+ * MooCodeEventCallFunc *
  *************************/
 
-int MooCodeEventCallExpr::do_event(MooCodeFrame *frame)
+int MooCodeEventCallFunc::do_event(MooCodeFrame *frame)
 {
 	MooObject *func;
 
@@ -372,7 +374,7 @@ static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
 		method->m_obj = othis;
  	args = new MooArgs();
 	args->m_args->set(0, MOO_INCREF(obj));
-	frame->push_event(new MooCodeEventCallExpr(env, args));
+	frame->push_event(new MooCodeEventCallFunc(env, args));
 	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));
 	MOO_DECREF(args);
 	return(0);
@@ -389,6 +391,18 @@ static int form_ignore(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
+/*****************************
+ * Form: (try <expr> ... (catch (...) <expr> ...) *
+ *****************************/
+
+static int form_try(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	// TODO implement try
+	//frame->push_event(new MooCodeEventCatch(frame->env(), NULL));
+	//frame->push_event(new MooCodeEventEvalBlock(frame->env(), expr));
+	//return(0);
+	throw MooException("(try ...) form has not been implemented");
+}
 int init_code_event(void)
 {
 	if (form_env)
@@ -404,6 +418,7 @@ int init_code_event(void)
 	form_env->set("lambda", new MooFormT(form_lambda));
 	form_env->set("super", new MooFormT(form_super));
 	form_env->set("ignore", new MooFormT(form_ignore));
+	form_env->set("try", new MooFormT(form_try));
 	return(0);
 }
 

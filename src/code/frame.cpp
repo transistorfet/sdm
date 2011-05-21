@@ -79,7 +79,7 @@ int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr)
 int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
 {
 	args->m_args->unshift(func);
-	return(m_stack->push(new MooCodeEventCallExpr(env, args)));
+	return(m_stack->push(new MooCodeEventCallFunc(env, args)));
 }
 
 int MooCodeFrame::push_code(const char *code)
@@ -129,10 +129,10 @@ int MooCodeFrame::run()
 		catch (MooException e) {
 			int line, col;
 
-			if (e.severity() == E_FATAL)
+			if (e.is_fatal())
 				throw e;
 			this->linecol(line, col);
-			m_exception = new MooException(e.severity(), "(%d, %d): %s", line, col, e.get());
+			m_exception = new MooException(e.type(), "(%d, %d): %s", line, col, e.get());
 		}
 		catch (...) {
 			m_exception = new MooException("Unknown error occurred");

@@ -235,6 +235,42 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObjectHash *m_this;
+	MooObjectArray *array;
+	MooHashEntry<MooObject *> *entry;
+
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	array = new MooObjectArray();
+	m_this->reset();
+	while ((entry = m_this->next_entry()))
+		array->push(new MooString("%s", entry->m_key));
+	args->m_result = array;
+	return(0);
+}
+
+static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObjectHash *m_this;
+	MooObjectArray *array;
+	MooHashEntry<MooObject *> *entry;
+
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	array = new MooObjectArray();
+	m_this->reset();
+	while ((entry = m_this->next_entry()))
+		array->push(MOO_INCREF(entry->m_data));
+	args->m_result = array;
+	return(0);
+}
+
 class HashEventForeach : public MooCodeEvent {
 	int m_index;
 	MooHashEntry<MooObject *> *m_next;
@@ -273,7 +309,7 @@ class HashEventForeach : public MooCodeEvent {
 		args = new MooArgs();
 		args->m_args->set(0, MOO_INCREF(m_func));
 		args->m_args->set(1, MOO_INCREF(entry->m_data));
-		frame->push_event(new MooCodeEventCallExpr(m_env, args));
+		frame->push_event(new MooCodeEventCallFunc(m_env, args));
 		return(0);
 	}
 };
@@ -297,6 +333,8 @@ void moo_load_hash_methods(MooObjectHash *env)
 	env->set("get", new MooFunc(hash_get));
 	env->set("set", new MooFunc(hash_set));
 	env->set("remove", new MooFunc(hash_remove));
+	env->set("keys", new MooFunc(hash_keys));
+	env->set("->array", new MooFunc(hash_to_array));
 	env->set("foreach", new MooFunc(hash_foreach));
 }
 

@@ -367,7 +367,7 @@ class ArrayEventForeach : public MooCodeEvent {
 		args = new MooArgs();
 		args->m_args->set(0, MOO_INCREF(m_func));
 		args->m_args->set(1, MOO_INCREF(m_this->get(m_index)));
-		frame->push_event(new MooCodeEventCallExpr(m_env, args));
+		frame->push_event(new MooCodeEventCallFunc(m_env, args));
 		return(0);
 	}
 };
