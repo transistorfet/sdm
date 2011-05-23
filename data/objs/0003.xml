@@ -34,7 +34,7 @@
   <entry key="%save_all" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>thing_save_all</func>
+   <func>%thing_save_all</func>
   </entry>
  </methods>
 </thing>

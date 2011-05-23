@@ -209,13 +209,13 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 int moo_load_thing_methods(MooObjectHash *env)
 {
-	env->set("user_notify", new MooFunc(user_notify));
-	env->set("thing_load", new MooFunc(thing_load));
-	env->set("thing_save", new MooFunc(thing_save));
-	env->set("thing_save_all", new MooFunc(thing_save_all));
-	env->set("thing_clone", new MooFunc(thing_clone));
-	env->set("thing_move", new MooFunc(thing_move));
-	env->set("parse_command", new MooFunc(parse_command));
+	env->set("%user_notify", new MooFunc(user_notify));
+	env->set("%thing_load", new MooFunc(thing_load));
+	env->set("%thing_save", new MooFunc(thing_save));
+	env->set("%thing_save_all", new MooFunc(thing_save_all));
+	env->set("%thing_clone", new MooFunc(thing_clone));
+	env->set("%thing_move", new MooFunc(thing_move));
+	env->set("%parse_command", new MooFunc(parse_command));
 	return(0);
 }
 

@@ -29,7 +29,7 @@
   <entry key="notify" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>user_notify</func>
+   <func>%user_notify</func>
   </entry>
   <entry key="tell" type="moolambda">
    <owner>-1</owner>

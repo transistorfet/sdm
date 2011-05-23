@@ -71,9 +71,6 @@
 	  if the database is read from disc rather than being in the cryolocker
 	* get timers working
 	* add permissions checks to access and evaluate functions (and so on)
-	* should system-y commands like those called by PseudoServ always start with a distinguishing character?  Should it be '@' for
-	  all?  Should some use '@' and others use '*' or something else?  Should special variables have the same character?  Should
-	  they have a distinguishing one?  Or perhaps one on each side, such as '*channels*'?
 	* fix inconsistent uses of nil and NULL
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 	* fix realm_evaluate (object/target do_actions are disabled atm)

@@ -20,25 +20,25 @@
  <methods>
   <owner>2</owner>
   <permissions>077</permissions>
-  <entry key="%move" type="moofunc">
+  <entry key="move" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>thing_move</func>
+   <func>%thing_move</func>
   </entry>
   <entry key="%load" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>thing_load</func>
+   <func>%thing_load</func>
   </entry>
   <entry key="%save" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>thing_save</func>
+   <func>%thing_save</func>
   </entry>
   <entry key="@clone" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <func>thing_clone</func>
+   <func>%thing_clone</func>
   </entry>
   <entry key="tell" type="moolambda">
    <owner>-1</owner>

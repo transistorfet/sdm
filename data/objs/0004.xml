@@ -27,7 +27,7 @@
  <methods>
   <owner>-1</owner>
   <permissions>077</permissions>
-  <entry key="%quit" type="moolambda">
+  <entry key="quit" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
    <params><![CDATA[&all

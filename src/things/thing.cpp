@@ -488,7 +488,7 @@ void MooThing::quit()
 	MooObject *channels;
 
 	if ((channels = MooObject::resolve("@channels", global_env)))
-		channels->call_method(NULL, "%quit", "");
+		channels->call_method(NULL, "quit", "");
 }
 
 
