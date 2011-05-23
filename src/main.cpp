@@ -15,6 +15,7 @@
 #include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
+#include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/objs/config.h>
@@ -42,6 +43,7 @@ int init_moo(void)
 		init_object();
 
 		moo_object_register_type(&moo_nil_obj_type);
+		moo_object_register_type(&moo_boolean_obj_type);
 		moo_object_register_type(&moo_number_obj_type);
 		moo_object_register_type(&moo_string_obj_type);
 		init_array();

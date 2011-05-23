@@ -33,7 +33,7 @@
 	(if (and this.dest.unlocked (this.dest:acceptable what))
 		; TODO does this need to be protected somehow so that somebody can't bypass it by typing "move #14"???
 		(what:move this.dest)
-		(if (neqv? what.location start)
+		(if (!eqv? what.location start)
 			(start:tell_all (expand-refs this.msg_leave))
 			; TODO print fail message?? (optional) "So and So tries to goes east but critically fails."
 		)

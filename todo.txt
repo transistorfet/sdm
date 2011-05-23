@@ -60,21 +60,26 @@
 
 	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
 	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
+	* if you kept the permissions system on values, you could implement automatic permissions checks on array and hash functions
+	  (would this incur too much performance penalty?).  This would allow automatic handling of the global environment ('add'
+	  permissions would only allow wizards to add new values for example)
+	* we could also do permissions checks only in the array and hash MooFunc functions and then just be careful everywhere you use
+	  the C++ methods directly.
 
 	* completely revamp the error reporting and debugging part of the interpreter
 	* add permissions checks to access and evaluate functions (and so on)
 	* fix inconsistent uses of nil and NULL
 	* add infinite loop protection
+	* fix id assignment to make sure it does not use an id which is already used but not loaded
+	* add a boolean type just like scheme.  Check that nothing will break when using get_integer() or something like that.
 
+	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
+	  if the database is read from disc rather than being in the cryolocker
+	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
+	* get timers working
 	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
 	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
 	  socket or task or something is deleted.
-	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
-	  if the database is read from disc rather than being in the cryolocker
-	* add a boolean type just like scheme.  Check that nothing will break when using get_integer() or something like that.  Make sure
-	  you wouldn't have to add a get_boolean().
-	* get timers working
-	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
 
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* make the code use the "title" property instead of the "name" property for displaying the name
@@ -105,6 +110,7 @@
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
+	* make a bot which randomly pieces together lojban sentances (which may or may not make sense)
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 	* fill in all other IRC message processing
 

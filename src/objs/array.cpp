@@ -201,7 +201,7 @@ static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
 	res = m_this->remove(obj);
-	args->m_result = new MooNumber((long int) res);
+	args->m_result = new MooBoolean(res != 0);
 	return(0);
 }
 
@@ -217,7 +217,7 @@ static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
 	res = m_this->push(obj);
-	args->m_result = new MooNumber((long int) res);
+	args->m_result = new MooBoolean(res == 0);
 	return(0);
 }
 
@@ -257,7 +257,7 @@ static int array_unshift(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
 	res = m_this->unshift(obj);
-	args->m_result = new MooNumber((long int) res);
+	args->m_result = new MooBoolean(res == 0);
 	return(0);
 }
 
@@ -275,7 +275,7 @@ static int array_insert(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	index = args->m_args->get_integer(0);
 	obj = args->m_args->get(1);
 	res = m_this->insert(index, obj);
-	args->m_result = new MooNumber((long int) res);
+	args->m_result = new MooBoolean(res == 0);
 	return(0);
 }
 
@@ -296,7 +296,7 @@ static int array_splice(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	int res;
+	int index;
 	MooObject *obj;
 	MooObjectArray *m_this;
 
@@ -305,8 +305,8 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	res = m_this->search(obj);
-	args->m_result = new MooNumber((long int) res);
+	index = m_this->search(obj);
+	args->m_result = new MooNumber((long int) index);
 	return(0);
 }
 

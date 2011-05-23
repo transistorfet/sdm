@@ -11,6 +11,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/object.h>
+#include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 
@@ -69,9 +70,12 @@ MooCodeExpr *MooCodeParser::parse_token()
 	    case TT_STRING:
 		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString("%s", m_token)));
 	    case TT_WORD: {
-		if (parser_is_digit(m_token[0]) || (m_token[0] == '-' && parser_is_digit(m_token[1]))) {
+		if (!strcasecmp(m_token, "#t"))
+			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooBoolean(B_TRUE)));
+		else if (!strcasecmp(m_token, "#f"))
+			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooBoolean(B_FALSE)));
+		else if (parser_is_digit(m_token[0]) || (m_token[0] == '-' && parser_is_digit(m_token[1])))
 			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooNumber(m_token)));
-		}
 		else
 			return(new MooCodeExpr(m_line, m_col, MCT_IDENTIFIER, new MooString("%s", m_token)));
 	    }

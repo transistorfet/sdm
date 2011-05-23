@@ -166,7 +166,7 @@
 ]]></params>
    <code><![CDATA[
 (if
- (null
+ (null?
   (args:get
    0))
  (this:look_self)

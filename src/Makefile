@@ -27,6 +27,7 @@ OBJS =	colours.o	\
 	interfaces/tcp.o	\
 	objs/args.o	\
 	objs/array.o	\
+	objs/boolean.o	\
 	objs/config.o	\
 	objs/hash.o	\
 	objs/nil.o	\
@@ -252,6 +253,10 @@ objs/array.o: objs/array.cpp ../include/sdm/globals.h \
   ../include/sdm/code/lambda.h ../include/sdm/things/thing.h \
   ../include/sdm/things/references.h
 
+objs/boolean.o: objs/boolean.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/boolean.h
+
 objs/config.o: objs/config.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/config.h \
@@ -309,7 +314,14 @@ tasks/listener.o: tasks/listener.cpp ../include/sdm/data.h \
 tasks/task.o: tasks/task.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/args.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h
 
 tasks/irc/msg.o: tasks/irc/msg.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
@@ -354,5 +366,11 @@ things/user.o: things/user.cpp ../include/sdm/data.h \
   ../include/sdm/gc.h ../include/sdm/interfaces/interface.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/string.h \
   ../include/sdm/things/thing.h ../include/sdm/objs/array.h \
-  ../include/sdm/things/references.h ../include/sdm/things/user.h
+  ../include/sdm/things/references.h ../include/sdm/things/user.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/args.h ../include/sdm/objs/number.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h
 

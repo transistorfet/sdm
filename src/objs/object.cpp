@@ -10,6 +10,7 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/boolean.h>
 #include <sdm/objs/string.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
@@ -129,9 +130,11 @@ moo_perm_t MooObject::permissions(moo_perm_t perms)
 
 int MooObject::is_true()
 {
-	if (this->get_float() == 0)
-		return(0);
-	return(1);
+	MooBoolean *b;
+
+	if (!(b = dynamic_cast<MooBoolean *>(this)))
+		return(1);
+	return(b->m_bool != B_FALSE);
 }
 
 void MooObject::check_throw(moo_perm_t perms)

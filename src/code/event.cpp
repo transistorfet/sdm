@@ -270,7 +270,7 @@ class FormAndEvent : public MooCodeEvent {
 		MooObject *obj;
 
 		if (!(obj = frame->get_return()) || !obj->is_true())
-			frame->set_return(new MooNumber((long int) 0));
+			frame->set_return(new MooBoolean(B_FALSE));
 		else if (!m_expr)
 			frame->set_return(obj);
 		else {
@@ -284,7 +284,7 @@ class FormAndEvent : public MooCodeEvent {
 static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!expr) {
-		frame->set_return(new MooNumber((long int) 1));
+		frame->set_return(new MooBoolean(B_TRUE));
 		return(0);
 	}
 	frame->push_event(new FormAndEvent(frame->env(), expr->next()));
@@ -317,7 +317,7 @@ class FormOrEvent : public MooCodeEvent {
 static int form_or(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!expr) {
-		frame->set_return(new MooNumber((long int) 0));
+		frame->set_return(new MooBoolean(B_FALSE));
 		return(0);
 	}
 

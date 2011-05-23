@@ -207,6 +207,7 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int res;
 	MooObject *obj;
 	const char *name;
 	MooObjectHash *m_this;
@@ -217,12 +218,14 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	name = args->m_args->get_string(0);
 	obj = args->m_args->get(1);
-	m_this->set(name, obj);
+	res = m_this->set(name, obj);
+	args->m_result = new MooBoolean(res == 0);
 	return(0);
 }
 
 static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int res;
 	const char *name;
 	MooObjectHash *m_this;
 
@@ -231,7 +234,8 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	name = args->m_args->get_string(0);
-	m_this->remove(name);
+	res = m_this->remove(name);
+	args->m_result = new MooBoolean(res == 0);
 	return(0);
 }
 
