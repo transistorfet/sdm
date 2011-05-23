@@ -271,13 +271,11 @@ class FormAndEvent : public MooCodeEvent {
 
 		if (!(obj = frame->get_return()) || !obj->is_true())
 			frame->set_return(new MooNumber((long int) 0));
+		else if (!m_expr)
+			frame->set_return(obj);
 		else {
-			if (!m_expr)
-				frame->set_return(new MooNumber((long int) 1));
-			else {
-				frame->push_event(new FormAndEvent(frame->env(), m_expr->next()));
-				frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
-			}
+			frame->push_event(new FormAndEvent(frame->env(), m_expr->next()));
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
 		}
 		return(0);
 	}
@@ -285,8 +283,10 @@ class FormAndEvent : public MooCodeEvent {
 
 static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	if (!expr)
-		throw moo_args_mismatched;
+	if (!expr) {
+		frame->set_return(new MooNumber((long int) 1));
+		return(0);
+	}
 	frame->push_event(new FormAndEvent(frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
@@ -303,14 +303,12 @@ class FormOrEvent : public MooCodeEvent {
 		MooObject *obj;
 
 		if ((obj = frame->get_return()) && obj->is_true())
-			frame->set_return(new MooNumber((long int) 1));
+			frame->set_return(obj);
+		else if (!m_expr)
+			frame->set_return(obj);
 		else {
-			if (!m_expr)
-				frame->set_return(new MooNumber((long int) 0));
-			else {
-				frame->push_event(new FormOrEvent(frame->env(), m_expr->next()));
-				frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
-			}
+			frame->push_event(new FormOrEvent(frame->env(), m_expr->next()));
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
 		}
 		return(0);
 	}
@@ -318,8 +316,11 @@ class FormOrEvent : public MooCodeEvent {
 
 static int form_or(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	if (!expr)
-		throw moo_args_mismatched;
+	if (!expr) {
+		frame->set_return(new MooNumber((long int) 0));
+		return(0);
+	}
+
 	frame->push_event(new FormOrEvent(frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
