@@ -43,54 +43,53 @@
 	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
 	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
 	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
-
-	* should some properties have a fixed type such that a value of another type cannot be assigned and when reading, don't check type?
-
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
 	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
 	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
+	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
 
-	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
-	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
-
+	* you could have NickServ and ChanServ as user-like objects which you can talk to for basic registration
 	* we could possibly make the MooUser connect/disconnect functions actually be methods call on an object (the user object) which
 	  would allow you to remove MooUser as a special subclass of MooThing.  You might want a user manager object similar to the
 	  channels list object 
 
-	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
-
     TODO:
+
+	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
+	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
+
+	* completely revamp the error reporting and debugging part of the interpreter
+	* add permissions checks to access and evaluate functions (and so on)
+	* fix inconsistent uses of nil and NULL
+	* add infinite loop protection
 
 	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
 	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
 	  socket or task or something is deleted.
 	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
 	  if the database is read from disc rather than being in the cryolocker
+	* add a boolean type just like scheme.  Check that nothing will break when using get_integer() or something like that.  Make sure
+	  you wouldn't have to add a get_boolean().
 	* get timers working
-	* add permissions checks to access and evaluate functions (and so on)
-	* fix inconsistent uses of nil and NULL
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
+
 	* fix realm_evaluate (object/target do_actions are disabled atm)
-	* improve the line/col error reporting (Some errors like Null Function don't report the correct line/col) Perhaps you could
-	  cascade a line/col backwards into the event during execution.
+	* make the code use the "title" property instead of the "name" property for displaying the name
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
-	* add support for notices from clients to other clients
 
-	* make the code use the "title" property instead of the "name" property for displaying the name
+	* add support for notices from clients to other clients
+	* add irc server-to-client pinging & connection timeouts
+	* add flood protection of some kind (???)  (could this somehow be an add-on or a coded thing)
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
 	* how can you delete MooThings from the system?
 	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early.  Perhaps we could use an exception
 	  system such that a special event is pushed on to the stack and if a return or exception occurs, the stack is searched backwards
 	  for the special event, and execution resumes with that event
-	* add irc server-to-client pinging & connection timeouts
-
-	* add infinite loop protection
-	* add flood protection of some kind (???)  (could this somehow be an add-on or a coded thing)
 
 	* add caching to environments
 	* should you have private environments that are skipped when doing nested lookups?
@@ -102,7 +101,6 @@
 
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
 	* add a 'register' and 'login' commands to basics
-	* perhaps add "TheRealm" to any channel users list (names)
 	* implement an automatic testing system somehow (so you can verify the moocode core at least)
 
 	* make a pet kitty cat object as a scripting test
@@ -121,7 +119,6 @@
 	  as a location for the direct object.  Either object searching can include an object specified in
 	  the command, or wehre to search can be specified in the action definition, or just a string can
 	  be passed and it will be up to the action code to resolve the string.
-	* clean up/add parsing functions to lua to make it easy to parse the args
 	* make sdm_interpreter_find_thing() use the aliases of an object for matching as well as doing partial
 	  matching of the string given.
 
