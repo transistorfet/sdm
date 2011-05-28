@@ -101,10 +101,14 @@ MooThing::~MooThing()
 MooThing *MooThing::lookup(moo_id_t id)
 {
 	MooThing *thing;
+	char buffer[STRING_SIZE];
 
 	if (id < 0)
 		return(NULL);
 	if (!(thing = moo_thing_table->get(id))) {
+		snprintf(buffer, STRING_SIZE, "objs/%04d.xml", id);
+		if (!moo_data_file_exists(buffer))
+			return(NULL);
 		thing = new MooThing(id);
 		if (thing->load() < 0)
 			MOO_DECREF(thing);
@@ -375,16 +379,19 @@ int MooThing::assign_id(moo_id_t id)
 		moo_thing_table->set(m_id, NULL);
 	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
 	m_id = -1;
-	if (id >= 0) {
-		if (moo_thing_table->set(id, this))
-			m_id = id;
+	if (id < 0) {
+		// TODO this will load every object in to the system, we need no change this if we want to only load the needed objs
+		id = moo_thing_table->next_space();
+		for (; id < MOO_THING_MAX_SIZE; id++) {
+			if (!MooThing::lookup(id))
+				break;
+		}
 	}
-	else {
-		// TODO you should check to make sure the id being assigned isn't already used by an object that's just not loaded.
 
-		// TODO should this only assign if the ID is -2 (MOO_NEW_ID)
-		m_id = moo_thing_table->add(this);
-	}
+	if (id >= MOO_THING_MAX_SIZE)
+		throw MooException("THING: Maximum number of things reached; assignment failed.");
+	if (moo_thing_table->set(id, this))
+		m_id = id;
 	if (m_id < 0)
 		moo_status("Error: Attempted to reassign ID, %d", id);
 	return(m_id);

@@ -60,18 +60,12 @@
 
     TODO:
 
+	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
+	* get timers working
+
 	* completely revamp the error reporting and debugging part of the interpreter
 	* fix inconsistent uses of nil and NULL
 	* add infinite loop protection
-	* fix id assignment to make sure it does not use an id which is already used but not loaded
-
-	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
-	  if the database is read from disc rather than being in the cryolocker
-	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
-	* get timers working
-	* users should have a connected and disconnected state, such that ALWAYS, when an object transitions between the states, all
-	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
-	  socket or task or something is deleted.
 
 	* make it easier for C++ functions to use object array and hash functions with a permissions check
 	* review all code for permissions check errors and bugs.  Evaluate system security.
@@ -79,6 +73,9 @@
 	* make the code use the "title" property instead of the "name" property for displaying the name
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
+
+	* if possible/needed, you could have a method on NickServ which goes through all the users at startup and makes sure they are
+	  in the cryolocker or something
 
 	* add support for notices from clients to other clients
 	* add irc server-to-client pinging & connection timeouts
@@ -101,6 +98,7 @@
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
 	* add a 'register' and 'login' commands to basics
 	* implement an automatic testing system somehow (so you can verify the moocode core at least)
+	* make it so that not all objects are loaded into the system (your ID assignment hack makes this impossible)
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
