@@ -50,6 +50,8 @@
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
 	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
+	* should you have permissions checks only where needed instead of all objects?  This would probably mean only MooThings would
+	  have permissions controls, although it might be possible to have permission controls in MooObjectHash as well.
 
 	* you could have NickServ and ChanServ as user-like objects which you can talk to for basic registration
 	* we could possibly make the MooUser connect/disconnect functions actually be methods call on an object (the user object) which
@@ -58,20 +60,10 @@
 
     TODO:
 
-	* we could possibly remove the permissions system from individual values and put it into the array and hash tables themselves
-	  (possibly as an option enabled by default on MooObjectArray and MooObjectHash
-	* if you kept the permissions system on values, you could implement automatic permissions checks on array and hash functions
-	  (would this incur too much performance penalty?).  This would allow automatic handling of the global environment ('add'
-	  permissions would only allow wizards to add new values for example)
-	* we could also do permissions checks only in the array and hash MooFunc functions and then just be careful everywhere you use
-	  the C++ methods directly.
-
 	* completely revamp the error reporting and debugging part of the interpreter
-	* add permissions checks to access and evaluate functions (and so on)
 	* fix inconsistent uses of nil and NULL
 	* add infinite loop protection
 	* fix id assignment to make sure it does not use an id which is already used but not loaded
-	* add a boolean type just like scheme.  Check that nothing will break when using get_integer() or something like that.
 
 	* you are going to have a problem when saving the entire database with users in rooms, because they will be saved in those places
 	  if the database is read from disc rather than being in the cryolocker
@@ -81,6 +73,8 @@
 	  relevant objects receive a call.  Make it possible for MooUser to get a stable notification of when the user's connection
 	  socket or task or something is deleted.
 
+	* make it easier for C++ functions to use object array and hash functions with a permissions check
+	* review all code for permissions check errors and bugs.  Evaluate system security.
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* make the code use the "title" property instead of the "name" property for displaying the name
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to

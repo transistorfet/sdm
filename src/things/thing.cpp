@@ -254,18 +254,41 @@ int MooThing::to_string(char *buffer, int max)
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
-	// TODO do you need to do permissions checks here?
+	MooObject *cur;
+
 	if (!strcmp(name, "id"))
 		return(value ? NULL : new MooNumber((long int) this->m_id));
 	else if (!strcmp(name, "parent"))
 		return(value ? NULL : new MooNumber((long int) this->m_parent));
-	else if (value) {
-		if (this->set_property(name, value) < 0)
+
+	cur = m_properties->get(name);
+	if (value) {
+		if (!name || (*name == '\0'))
+			return(NULL);
+
+		if (value == &moo_nil) {
+			this->check_throw(MOO_PERM_W);
+			if (!cur)
+				m_properties->remove(name);
+			return(cur);
+		}
+
+		if (cur) {
+			cur->check_throw(MOO_PERM_W);
+			value->match_perms(cur);
+		}
+		else
+			this->check_throw(MOO_PERM_W);
+		if (m_properties->set(name, MOO_INCREF(value)))
 			return(NULL);
 		return(value);
 	}
-	else
-		return(this->get_property(name, NULL));
+	else {
+		if (cur)
+			cur->check_throw(MOO_PERM_R);
+		// TODO should you return nil if obj == NULL (??)
+		return(cur);
+	}
 }
 
 MooObject *MooThing::access_method(const char *name, MooObject *value)
@@ -280,81 +303,24 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 		return(this->get_method(name));
 }
 
-///// Property Methods /////
+///// Method Methods /////
 
-int MooThing::set_property(const char *name, MooObject *obj)
+int MooThing::set_method(const char *name, MooObject *value)
 {
 	MooObject *cur;
 
-	// TODO should there be a way to store the property in the local object
 	if (!name || (*name == '\0'))
 		return(-1);
-	/// If the object is NULL, remove the entry from the table
-	if ((cur = m_properties->get(name))) {
-		if (!obj) {
-			// TODO no perms checks for now
-			//this->check_throw(MOO_PERM_W);
-			m_properties->remove(name);
-			return(1);
-		}
-		else {
-			// TODO no perms checks for now
-			//cur->check_throw(MOO_PERM_W);
-			obj->owner(cur->owner());
-			obj->permissions(cur->permissions());
-			// TODO you could also do a check here for the type (only allow the same type to overwrite)
-			return(m_properties->set(name, MOO_INCREF(obj)));
-		}
-	}
-	else {
-		if (!obj)
-			return(1);
-		// TODO no perms checks for now
-		//this->check_throw(MOO_PERM_W);
-		return(m_properties->set(name, MOO_INCREF(obj)));
-	}
-}
 
-MooObject *MooThing::get_property(const char *name, MooObjectType *type)
-{
-	MooObject *obj;
+	if ((cur = m_methods->get(name)))
+		cur->check_throw(MOO_PERM_W);
+	else
+		this->check_throw(MOO_PERM_W);
 
-	if (!(obj = this->get_property_raw(name, NULL)))
-		return(NULL);
-	// TODO no perms checks for now
-	//obj->check_throw(MOO_PERM_R);
-	if (!type || obj->is_a(type))
-		return(obj);
-	return(NULL);
-}
-
-MooObject *MooThing::get_property_raw(const char *name, MooThing **thing)
-{
-	MooThing *cur;
-	MooObject *obj;
-
-	for (cur = this; cur; cur = cur->parent()) {
-		if ((obj = cur->m_properties->get(name))) {
-			if (thing)
-				*thing = cur;
-			return(obj);
-		}
-	}
-	return(NULL);
-}
-
-
-///// Method Methods /////
-
-int MooThing::set_method(const char *name, MooObject *action)
-{
-	if (!name || (*name == '\0'))
-		return(-1);
-	// TODO do permissions check??
-	/// If the action is NULL, remove the entry from the table
-	if (!action)
+	/// If the new value is nil, remove the entry from the table
+	if (value == &moo_nil)
 		return(m_methods->remove(name));
-	return(m_methods->set(name, MOO_INCREF(action)));
+	return(m_methods->set(name, MOO_INCREF(value)));
 }
 
 MooObject *MooThing::get_method(const char *name)
@@ -430,7 +396,7 @@ const char *MooThing::name()
 	const char *name = NULL;
 
 	try {
-		if (!(obj = this->get_property("name", NULL)))
+		if (!(obj = this->resolve_property("name", NULL)))
 			return(NULL);
 		name = obj->get_string();
 	}

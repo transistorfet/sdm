@@ -87,6 +87,12 @@ class MooCodeEventAppendReturn : public MooCodeEvent {
 	int do_event(MooCodeFrame *frame);
 };
 
+class MooCodeEventReturnPoint : public MooCodeEvent {
+    public:
+	MooCodeEventReturnPoint() : MooCodeEvent(NULL, NULL, NULL) { };
+	int do_event(MooCodeFrame *frame) { return(0); }
+};
+
 class MooCodeEventCatch : public MooCodeEvent {
     public:
 	MooCodeEventCatch(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };

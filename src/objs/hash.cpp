@@ -169,14 +169,18 @@ MooThing *MooObjectHash::get_thing(const char *key)
 
 MooObject *MooObjectHash::access_property(const char *name, MooObject *value)
 {
-	// TODO do you need to do permissions checks here?
+	MooObject *obj;
+
 	if (value) {
+		this->check_throw(MOO_PERM_W);
 		if (this->set(name, value) < 0)
 			return(NULL);
 		return(value);
 	}
-	else
+	else {
+		this->check_throw(MOO_PERM_R);
 		return(this->get(name));
+	}
 }
 
 MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
@@ -184,6 +188,7 @@ MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
 	if (value)
 		throw moo_permissions;
 	// TODO do you need to do a read permissions check here?
+	this->check_throw(MOO_PERM_R);
 	return(hash_methods->get(name));
 }
 
@@ -200,6 +205,7 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_R);
 	name = args->m_args->get_string(0);
 	args->m_result = m_this->get(name);
 	return(0);
@@ -216,6 +222,7 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 1)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_W);
 	name = args->m_args->get_string(0);
 	obj = args->m_args->get(1);
 	res = m_this->set(name, obj);
@@ -233,6 +240,7 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_W);
 	name = args->m_args->get_string(0);
 	res = m_this->remove(name);
 	args->m_result = new MooBoolean(res == 0);
@@ -249,6 +257,7 @@ static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_R);
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
@@ -267,6 +276,7 @@ static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_R);
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
@@ -292,8 +302,12 @@ class HashEventForeach : public MooCodeEvent {
 
 	int do_event(MooCodeFrame *frame) {
 		MooArgs *args;
+		MooObject *obj;
 		MooHashEntry<MooObject *> *entry;
 
+		/// Stop this loop if the previous cycle returned #f
+		if ((obj = frame->get_return()) && !obj->is_true())
+			return(0);
 		if (!(entry = m_next)) {
 			for (; m_index < m_this->m_size; m_index++) {
 				if ((entry = m_this->m_table[m_index]))
@@ -327,7 +341,9 @@ static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
+	m_this->check_throw(MOO_PERM_R);
 	func = args->m_args->get(0);
+	args->m_result = new MooBoolean(B_TRUE);
 	frame->push_event(new HashEventForeach(0, NULL, m_this, env, func));
 	return(0);
 }

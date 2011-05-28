@@ -30,8 +30,10 @@ class MooCodeFrame : public MooObject {
 	int push_call(MooObjectHash *env, MooObject *func, MooArgs *args);
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
+	int push_return_point();
 	int run();
 	int handle_exception();
+	int rewind_stack(int level = 1);
 
 	int eval(const char *code, MooArgs *args = NULL);
 

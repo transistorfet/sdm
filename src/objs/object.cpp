@@ -128,6 +128,12 @@ moo_perm_t MooObject::permissions(moo_perm_t perms)
 	return(m_permissions = perms);
 }
 
+void MooObject::match_perms(MooObject *obj)
+{
+	m_owner = obj->m_owner;
+	m_permissions = obj->m_permissions;
+}
+
 int MooObject::is_true()
 {
 	MooBoolean *b;
@@ -265,6 +271,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 	if (!method && !remain && value) {
 		if (!env)
 			env = global_env;
+		// TODO check perms
 		if (env->set(buffer, MOO_INCREF(value)))
 			return(NULL);
 		return(value);
@@ -283,7 +290,6 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		if (!(obj = obj->resolve_method(method, value)))
 			return(NULL);
 	}
-	obj->check_throw(MOO_PERM_R);
 	return(obj);
 }
 
@@ -298,8 +304,6 @@ MooObject *MooObject::resolve_property(const char *name, MooObject *value)
 
 	// TODO should you throw an error if we can't set the value, instead of just returing NULL?
 	for (str = buffer, obj = this; str && *str != '\0' && obj; str = remain) {
-		// TODO does permissions checks actually have to be in the access function, to properly check before setting the value?
-		//obj->check_throw(MOO_PERM_R);
 		if ((remain = strchr(buffer, '.'))) {
 			*remain = '\0';
 			remain++;

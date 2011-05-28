@@ -58,6 +58,7 @@ static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *thing;
 
+	// TODO permissions check
 	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
@@ -70,6 +71,7 @@ static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *thing;
 
+	// TODO permissions check
 	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
@@ -80,6 +82,7 @@ static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	// TODO permissions check
 	MooThing::save_all();
 	return(0);
 }
@@ -95,6 +98,7 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0 && args->m_args->last() != 1)
 		throw moo_args_mismatched;
 
+	// TODO permissions check!!!
 	thing = parent->clone();
 	if ((func = args->m_args->get(0)))
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
@@ -107,6 +111,7 @@ static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	MooObject *obj;
 	MooThing *thing, *where;
 
+	// TODO anything special for permissions?
 	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
 	if (args->m_args->last() != 0)

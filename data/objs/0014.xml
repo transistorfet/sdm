@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing>
- <id>4</id>
+ <id>14</id>
  <parent>1</parent>
  <owner>2</owner>
  <permissions>075</permissions>
@@ -15,31 +15,31 @@
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>ChanServ</value>
+   <value>NickServ</value>
   </entry>
   <entry key="list" type="hash">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <entry key="#help" type="thing">13</entry>
-   <entry key="#realm" type="thing">6</entry>
+   <entry key="ChanServ" type="thing">4</entry>
+   <entry key="NickServ" type="thing">14</entry>
+   <entry key="transistor" type="thing">100</entry>
+   <entry key="trans" type="thing">101</entry>
+   <entry key="trans2" type="thing">112</entry>
+   <entry key="trans3" type="thing">118</entry>
   </entry>
  </properties>
  <methods>
   <owner>-1</owner>
   <permissions>077</permissions>
-  <entry key="quit" type="moolambda">
+  <entry key="make_guest" type="moolambda">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <params><![CDATA[&all
+   <params><![CDATA[name
 ]]></params>
    <code><![CDATA[
-(this.list:foreach
- (lambda
-  (cur)
-  (define
-   channel
-   cur)
-  (cur:leave)))
+	(define guest (this:next_guest))
+	(define guest.name name)
+	guest
 ]]></code>
   </entry>
  </methods>

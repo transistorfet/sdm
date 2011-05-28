@@ -542,6 +542,18 @@ static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	throw MooException("%s", buffer);
 }
 
+static int basic_return(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+
+	if (args->m_args->last() > 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	args->m_result = obj;
+	frame->rewind_stack();
+	return(0);
+}
+
 int moo_load_basic_funcs(MooObjectHash *env)
 {
 	env->set("print", new MooFunc(basic_print));
@@ -581,6 +593,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));
+	env->set("return", new MooFunc(basic_return));
 
 /*
 	Possible Future Primatives:

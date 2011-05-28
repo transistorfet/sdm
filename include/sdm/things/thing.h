@@ -53,10 +53,6 @@ class MooThing : public MooObject {
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
     private:
-	// TODO integrate these directly into the access* methods?
-	int set_property(const char *name, MooObject *obj);
-	MooObject *get_property(const char *name, MooObjectType *type);
-	MooObject *get_property_raw(const char *name, MooThing **thing);
 	int set_method(const char *name, MooObject *action);
 	MooObject *get_method(const char *name);
 

@@ -105,6 +105,11 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 	return(m_stack->push(new MooCodeEventDebug(buffer)));
 }
 
+int MooCodeFrame::push_return_point()
+{
+	return(m_stack->push(new MooCodeEventReturnPoint()));
+}
+
 int MooCodeFrame::run()
 {
 	MooObjectHash *base;
@@ -170,6 +175,25 @@ int MooCodeFrame::handle_exception()
 			return(1);
 		}
 	}
+	return(0);
+}
+
+int MooCodeFrame::rewind_stack(int level)
+{
+	int ret = 0;
+	MooCodeEvent *event;
+
+	do {
+		event = m_stack->pop();
+		if (!event)
+			return(0);
+		if (dynamic_cast<MooCodeEventReturnPoint *>(event)) {
+			level--;
+			if (level <= 0)
+				ret = 1;
+		}
+		delete event;
+	} while (!ret);
 	return(0);
 }
 

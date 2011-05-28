@@ -23,7 +23,7 @@
   <permissions>077</permissions>
   <entry key="leave" type="moolambda">
    <owner>-1</owner>
-   <permissions>075</permissions>
+   <permissions>475</permissions>
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (if
@@ -83,7 +83,7 @@
   </entry>
   <entry key="join" type="moolambda">
    <owner>-1</owner>
-   <permissions>075</permissions>
+   <permissions>475</permissions>
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (if

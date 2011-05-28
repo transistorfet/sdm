@@ -5,26 +5,24 @@
  <owner>101</owner>
  <permissions>075</permissions>
  <properties>
-  <entry type="thing" key="location">
-   12
-  </entry>
-  <entry type="string" key="name">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <value>trans</value>
-  </entry>
-  <entry type="string" key="title">
+  <owner>-1</owner>
+  <permissions>077</permissions>
+  <entry key="location" type="thing">12</entry>
+  <entry key="title" type="string">
    <owner>101</owner>
    <permissions>075</permissions>
    <value>Trans2</value>
   </entry>
-  <entry type="string" key="description">
+  <entry key="name" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>trans</value>
+  </entry>
+  <entry key="description" type="string">
    <owner>101</owner>
    <permissions>075</permissions>
    <value>You see a funny little man.</value>
   </entry>
-  <entry type="thing" key="last_location">
-   50
-  </entry>
+  <entry key="last_location" type="thing">50</entry>
  </properties>
 </thing>

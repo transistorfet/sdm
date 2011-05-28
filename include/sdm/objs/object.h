@@ -101,6 +101,7 @@ class MooObject : public MooGC {
     public:
 	moo_id_t owner(moo_id_t id);
 	moo_perm_t permissions(moo_perm_t perms);
+	void match_perms(MooObject *obj);
 
     protected:
 	int is_deleting() { return(m_delete); }
