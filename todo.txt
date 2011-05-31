@@ -73,6 +73,8 @@
 	* make the code use the "title" property instead of the "name" property for displaying the name
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
+	* i think it will have to be possible to have an inherited property either retain permissions or use the cloner's permissions
+	  (make the cloner the owner) (sticky bit?).  Some properties need to be owned by the new object, and some need to be private.
 
 	* if possible/needed, you could have a method on NickServ which goes through all the users at startup and makes sure they are
 	  in the cryolocker or something

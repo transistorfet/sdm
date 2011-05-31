@@ -49,7 +49,7 @@ class MooCodeEvent {
 
 		this->linecol(line, col);
 		if (m_expr) {
-			MooCodeParser::generate(m_expr, buffer, LARGE_STRING_SIZE, ' ');
+			MooCodeParser::generate(m_expr, buffer, LARGE_STRING_SIZE, &moo_style_one_line);
 			moo_status("DEBUG: (%d, %d) %s: %s", line, col, typeid(*this).name(), buffer);
 		}
 		else

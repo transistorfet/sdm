@@ -18,6 +18,9 @@
 #include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 
+MooCodeStyle moo_style_normal = MooCodeStyle("  ", '\n', 60);
+MooCodeStyle moo_style_one_line = MooCodeStyle(NULL, ' ', 0);
+
 MooCodeParser::MooCodeParser()
 {
 
@@ -168,59 +171,57 @@ int MooCodeParser::read_token()
 	return(0);
 }
 
-int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, char linebr, int indent)
+int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, MooCodeStyle *style, int level)
+{
+	int i = 0;
+
+	if (!style)
+		style = &moo_style_normal;
+	for (; expr && i < max; expr = expr->next()) {
+		i += style->indent(&buffer[i], max - i, level);
+		i += MooCodeParser::generate_expr(expr, &buffer[i], max - i, style, level);
+		buffer[i++] = style->m_linebr;
+	}
+	buffer[--i] = '\0';
+	return(i);
+}
+
+int MooCodeParser::generate_expr(MooCodeExpr *expr, char *buffer, int max, MooCodeStyle *style, int level)
 {
 	int i = 0;
 	MooObject *obj;
+	MooString *str;
 	MooCodeExpr *call;
 
-	for (; expr && i < max; expr = expr->next()) {
-		if (indent < 0)
-			indent *= -1;
-		else {
-			for (int j = 0; i < max && j < indent; i++, j++)
-				buffer[i] = ' ';
+	if (!style)
+		style = &moo_style_normal;
+	if (expr->expr_type() == MCT_OBJECT) {
+		if (!(obj = expr->value()))
+			return(0);
+		if ((str = dynamic_cast<MooString *>(obj))) {
+			buffer[i++] = '\"';
+			i += MooCodeParser::encode_string(str->m_str, &buffer[i], max - i);
+			buffer[i++] = '\"';
 		}
-
-
-		if (expr->expr_type() == MCT_OBJECT) {
-			if (!(obj = expr->value()))
-				return(0);
-			if (dynamic_cast<MooString *>(obj)) {
-				// TODO this really isn't very good.  We don't check and convert control codes to escape characters
-				//	and we don't preserve the original quotes.  Do we even need 2 kinds of quoted strings??
-				//	Should there be a format/context arg passed to to_string??  We haven't been very consistent in
-				//	our use of to_string versus get_string
-				// TODO a possible solution is to not use an object here but to use a real string or number since those
-				//	should be the only object types we ever find here (unless of course we want to generate some
-				//	kind of bizzare intermediate code, but we should never have to do that... I can't think of why
-				//	we ever would...)  Oh, or it could be MooCodeExpr the way we have things, because when we
-				//	have an MCT_CALL type, it uses the object member to store the expression, but again, if it's a
-				//	call type, we should never have anything *except* MooCodeExpr there
-				buffer[i++] = '\'';
-				i += obj->to_string(&buffer[i], max - i);
-				buffer[i++] = '\'';
-			}
-			else
-				i += obj->to_string(&buffer[i], max - i);
-			buffer[i++] = linebr;
-		}
-		else if (expr->expr_type() == MCT_IDENTIFIER) {
-			if (!(obj = expr->value()))
-				return(0);
+		else
 			i += obj->to_string(&buffer[i], max - i);
-			buffer[i++] = linebr;
+	}
+	else if (expr->expr_type() == MCT_IDENTIFIER) {
+		if (!(obj = expr->value()))
+			return(0);
+		i += obj->to_string(&buffer[i], max - i);
+	}
+	else if (expr->expr_type() == MCT_CALL) {
+		call = dynamic_cast<MooCodeExpr *>(expr->value());
+		buffer[i++] = '(';
+		if (call) {
+			i += MooCodeParser::generate_expr(call, &buffer[i], max - i, style, level + 1);
+			if ((call = call->next())) {
+				buffer[i++] = style->m_linebr;
+				i += MooCodeParser::generate(call, &buffer[i], max - i, style, level + 1);
+			}
 		}
-		else if (expr->expr_type() == MCT_CALL) {
-			call = dynamic_cast<MooCodeExpr *>(expr->value());
-			buffer[i++] = '(';
-			if (call)
-				i += MooCodeParser::generate(call, &buffer[i], max - i, linebr, (indent + 1) * -1);
-			if (buffer[i - 1] == linebr)
-				i--;
-			buffer[i++] = ')';
-			buffer[i++] = linebr;
-		}
+		buffer[i++] = ')';
 	}
 	buffer[i] = '\0';
 	return(i);
@@ -234,5 +235,58 @@ void MooCodeParser::print(MooCodeExpr *expr)
 
 	MooCodeParser::generate(expr, buffer, MAX_CODE);
 	moo_status("CODE: \n%s", buffer);
+}
+
+int MooCodeParser::encode_string(const char *str, char *buffer, int max)
+{
+	int i = 0, j = 0;
+
+	for (; str[i] != '\0' && j < max; i++, j++) {
+		switch (str[i]) {
+		    case '\x09':
+			buffer[j++] = '\\';
+			buffer[j] = 't';
+			break;
+		    case '\x0d':
+			buffer[j++] = '\\';
+			buffer[j] = 'r';
+			break;
+		    case '\x0a':
+			buffer[j++] = '\\';
+			buffer[j] = 'n';
+			break;
+		    default:
+			buffer[j] = str[i];
+			break;
+		}
+	}
+	return(j);
+}
+
+MooCodeStyle::MooCodeStyle(const char *indent, char linebr, int wrap)
+{
+	m_indent = indent;
+	m_indent_len = indent ? strlen(indent) : 0;
+	m_linebr = linebr;
+	m_wrap = wrap;
+}
+
+int MooCodeStyle::linebr(char *buffer, int max)
+{
+	if (max <= 0)
+		return(0);
+	buffer[0] = m_linebr;
+	return(1);
+}
+
+int MooCodeStyle::indent(char *buffer, int max, int level)
+{
+	int i = 0;
+
+	if (m_indent) {
+		for (int j = 0; i < max && j < level; i += m_indent_len, j++)
+			strncpy(&buffer[i], m_indent, m_indent_len);
+	}
+	return(i);
 }
 

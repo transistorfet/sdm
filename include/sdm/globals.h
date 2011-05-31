@@ -34,6 +34,7 @@ typedef int moo_perm_t;
 #define MOO_PERM_OW		0020
 #define MOO_PERM_OR		0040
 #define MOO_PERM_SUID		0400
+#define MOO_PERM_STICKY		0100
 
 #define MOO_DEFAULT_PERMS	0077
 

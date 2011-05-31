@@ -2,6 +2,7 @@
 <thing>
  <id>101</id>
  <parent>3</parent>
+ <bits>0x1</bits>
  <owner>101</owner>
  <permissions>075</permissions>
  <properties>

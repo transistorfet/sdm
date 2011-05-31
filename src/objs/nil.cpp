@@ -37,11 +37,12 @@ MooNil::~MooNil()
 
 int MooNil::read_entry(const char *type, MooDataFile *data)
 {
-	return(MOO_HANDLED);
+	return(MooObject::read_entry(type, data));
 }
 
 int MooNil::write_data(MooDataFile *data)
 {
+	MooObject::write_data(data);
 	return(0);
 }
 

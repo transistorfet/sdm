@@ -18,6 +18,21 @@
 
 #define MAX_TOKEN_LEN		512
 
+class MooCodeStyle {
+    public:
+	const char *m_indent;
+	char m_indent_len;
+	char m_linebr;
+	char m_wrap;
+
+	MooCodeStyle(const char *indent, char linebr, int wrap);
+	int linebr(char *buffer, int max);
+	int indent(char *buffer, int max, int level);
+};
+
+extern MooCodeStyle moo_style_normal;
+extern MooCodeStyle moo_style_one_line;
+
 class MooCodeParser {
 	short m_line;
 	short m_col;
@@ -34,8 +49,11 @@ class MooCodeParser {
 
 	static MooCodeExpr *parse_code(const char *str);
 	MooCodeExpr *parse(const char *str);
-	static int generate(MooCodeExpr *expr, char *buffer, int max, char linebr = '\n', int indent = 0);
+	static int generate(MooCodeExpr *expr, char *buffer, int max, MooCodeStyle *style = NULL, int level = 0);
+	static int generate_expr(MooCodeExpr *expr, char *buffer, int max, MooCodeStyle *style = NULL, int level = 0);
 	static void print(MooCodeExpr *expr);
+
+	static int encode_string(const char *str, char *buffer, int max);
 
     private:
 	MooCodeExpr *parse_list();

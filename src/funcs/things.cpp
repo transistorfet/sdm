@@ -179,7 +179,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 			break;
 		    case MCT_CALL: {
 			char buffer[LARGE_STRING_SIZE];
-			MooCodeParser::generate(dynamic_cast<MooCodeExpr *>(cur->value()), buffer, LARGE_STRING_SIZE, ' ');
+			MooCodeParser::generate(dynamic_cast<MooCodeExpr *>(cur->value()), buffer, LARGE_STRING_SIZE, &moo_style_one_line);
 			newargs->m_args->push(new MooString("%s", buffer));
 			break;
 		    }
