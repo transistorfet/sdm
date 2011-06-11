@@ -100,9 +100,9 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	// TODO permissions check!!!
 	thing = parent->clone();
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
 	if ((func = args->m_args->get(0)))
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
-	args->m_result = thing;
 	return(0);
 }
 

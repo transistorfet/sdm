@@ -80,13 +80,8 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
 	/// If the id = MOO_NEW_ID then assign the next available id
 	m_bits = 0;
-	m_id = id;
-	if (m_id >= 0) {
-		if (!moo_thing_table->set(m_id, this))
-			m_id = -1;
-	}
-	else if (m_id == MOO_NEW_ID)
-		m_id = moo_thing_table->add(this);
+	m_id = -1;
+	this->assign_id(id);
 	m_parent = parent;
 }
 
@@ -379,7 +374,7 @@ int MooThing::assign_id(moo_id_t id)
 		moo_thing_table->set(m_id, NULL);
 	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
 	m_id = -1;
-	if (id < 0) {
+	if (id == MOO_NEW_ID) {
 		// TODO this will load every object in to the system, we need no change this if we want to only load the needed objs
 		id = moo_thing_table->next_space();
 		for (; id < MOO_THING_MAX_SIZE; id++) {
@@ -392,7 +387,7 @@ int MooThing::assign_id(moo_id_t id)
 		throw MooException("THING: Maximum number of things reached; assignment failed.");
 	if (moo_thing_table->set(id, this))
 		m_id = id;
-	if (m_id < 0)
+	if (m_id < 0 && id != MOO_NO_ID)
 		moo_status("Error: Attempted to reassign ID, %d", id);
 	return(m_id);
 }
