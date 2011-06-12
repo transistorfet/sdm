@@ -21,7 +21,6 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	int type;
 	MooObject *obj;
 	MooUser *thing;
-	const char *name;
 	MooThing *user, *channel;
 	char buffer[LARGE_STRING_SIZE];
 
@@ -29,26 +28,13 @@ static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 3)
 		throw moo_args_mismatched;
-	// TODO this is temporary until you get notify refactored
-	name = args->m_args->get_string(0);
+	type = args->m_args->get_integer(0);
 	user = args->m_args->get_thing(1);
 	channel = args->m_args->get_thing(2);
 	if (!(obj = args->m_args->get(3)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
-	if (!strcmp(name, "status"))
-		type = TNT_STATUS;
-	else if (!strcmp(name, "join"))
-		type = TNT_JOIN;
-	else if (!strcmp(name, "leave"))
-		type = TNT_LEAVE;
-	else if (!strcmp(name, "say"))
-		type = TNT_SAY;
-	else if (!strcmp(name, "emote"))
-		type = TNT_EMOTE;
-	else if (!strcmp(name, "quit"))
-		type = TNT_QUIT;
-	else
+	if (type < TNT_FIRST || type > TNT_LAST)
 		throw MooException("arg 0: Invalid notify() type");
 	thing->notify(type, user, channel, buffer);
 	return(0);
@@ -214,6 +200,13 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 int moo_load_thing_methods(MooObjectHash *env)
 {
+	env->set("N/STATUS", new MooNumber((long int) TNT_STATUS));
+	env->set("N/JOIN", new MooNumber((long int) TNT_JOIN));
+	env->set("N/LEAVE", new MooNumber((long int) TNT_LEAVE));
+	env->set("N/SAY", new MooNumber((long int) TNT_SAY));
+	env->set("N/EMOTE", new MooNumber((long int) TNT_EMOTE));
+	env->set("N/QUIT", new MooNumber((long int) TNT_QUIT));
+
 	env->set("%user_notify", new MooFunc(user_notify));
 	env->set("%thing_load", new MooFunc(thing_load));
 	env->set("%thing_save", new MooFunc(thing_save));

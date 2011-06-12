@@ -87,8 +87,8 @@ class MooObject : public MooGC {
 
     private:
 	/// Object Member Access Functions
-	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { return(NULL); }
-	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { return(NULL); }
+	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { throw moo_type_error; }
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { throw moo_type_error; }
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
 	friend class MooTask;
 

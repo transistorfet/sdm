@@ -36,7 +36,7 @@
    <permissions>075</permissions>
    <params><![CDATA[text]]></params>
    <code><![CDATA[
-	(this:notify 'status' channel text)
+	(this:notify N/STATUS channel text)
    ]]></code>
   </entry>
  </methods>

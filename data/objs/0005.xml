@@ -36,7 +36,7 @@
    (lambda
     (cur)
     (cur:notify
-     'leave'
+     N/LEAVE
      user
      channel
      '')))
@@ -75,7 +75,7 @@
  (lambda
   (cur)
   (cur:notify
-   'emote'
+   N/EMOTE
    user
    channel
    text)))
@@ -98,7 +98,7 @@
    (lambda
     (cur)
     (cur:notify
-     'join'
+     N/JOIN
      user
      channel
      '')))))
@@ -111,7 +111,7 @@
 ]]></params>
    <code><![CDATA[
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  'Commands are not supported in this channel.')
@@ -127,7 +127,7 @@
  (lambda
   (cur)
   (cur:notify
-   'say'
+   N/SAY
    user
    channel
    text)))

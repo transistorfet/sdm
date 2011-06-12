@@ -42,7 +42,7 @@
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  (format
@@ -55,13 +55,13 @@
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  (format
   '<yellow>$this.title'))
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  (format

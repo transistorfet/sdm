@@ -100,7 +100,7 @@
  (lambda
   (cur)
   (cur:notify
-   'emote'
+   N/EMOTE
    user
    channel
    text)))
@@ -116,7 +116,7 @@
  (lambda
   (cur)
   (cur:notify
-   'say'
+   N/SAY
    user
    channel
    text)))
@@ -128,13 +128,13 @@
    <params><![CDATA[]]></params>
    <code><![CDATA[
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  (format
   '<yellow>$this.title'))
 (user:notify
- 'status'
+ N/STATUS
  nil
  channel
  (format
@@ -143,7 +143,7 @@
  (lambda
   (cur)
   (user:notify
-   'status'
+   N/STATUS
    nil
    channel
    (format

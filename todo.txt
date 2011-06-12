@@ -67,6 +67,7 @@
 	* fix inconsistent uses of nil and NULL
 	* add infinite loop protection
 
+	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 	* make it easier for C++ functions to use object array and hash functions with a permissions check
 	* review all code for permissions check errors and bugs.  Evaluate system security.
 	* fix realm_evaluate (object/target do_actions are disabled atm)
