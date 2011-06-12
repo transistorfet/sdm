@@ -27,7 +27,7 @@
    <params><![CDATA[&all
 ]]></params>
    <code><![CDATA[
-(@eval
+(eval
  argstr)
 ]]></code>
   </entry>

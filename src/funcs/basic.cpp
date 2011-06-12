@@ -588,8 +588,8 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("array", new MooFunc(basic_array));
 	env->set("hash", new MooFunc(basic_hash));
 
-	env->set("@eval", new MooFunc(basic_eval));
-	env->set("@load", new MooFunc(basic_load));
+	env->set("eval", new MooFunc(basic_eval));
+	env->set("load", new MooFunc(basic_load));
 
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));

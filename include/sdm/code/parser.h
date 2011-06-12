@@ -126,5 +126,19 @@ static inline char parser_escape_char(char ch)
 	}
 }
 
+static inline const char *parser_next_word(const char *str)
+{
+	int i;
+
+	for (i = 0; str[i] != '\0'; i++) {
+		if (parser_is_whitespace(str[i])) {
+			while (parser_is_whitespace(str[i]))
+				i++;
+			break;
+		}
+	}
+	return(&str[i]);
+}
+
 #endif
 

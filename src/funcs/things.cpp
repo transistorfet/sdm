@@ -76,18 +76,28 @@ static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *func;
+	MooObject *id = NULL;
 	MooThing *thing, *parent;
+	moo_id_t idnum = MOO_NEW_ID;
 
 	// TODO is this good being a method? will we run into problems with initializing objects?
 	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
-	if (args->m_args->last() != 0 && args->m_args->last() != 1)
+	if (args->m_args->last() == 0)
+		func = args->m_args->get(0);
+	else if (args->m_args->last() == 1) {
+		id = args->m_args->get(0);
+		func = args->m_args->get(1);
+	}
+	else
 		throw moo_args_mismatched;
+	if (id)
+		idnum = id->get_integer();
 
 	// TODO permissions check!!!
-	thing = parent->clone();
+	thing = parent->clone(idnum);
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
-	if ((func = args->m_args->get(0)))
+	if (func)
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
 	return(0);
 }
@@ -112,8 +122,8 @@ static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int i = 0, j = 0;
-	const char *text;
 	MooObject *method, *user;
+	const char *text, *argstr;
 	char *words[MAX_WORDS];
 	MooArgs *newargs;
 	MooObjectHash *newenv;
@@ -121,6 +131,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (!(user = env->get("user")))
 		throw MooException("No user object set.");
 	text = args->m_args->get_string(0);
+	argstr = parser_next_word(text);
 
 /*
 	strncpy(buffer, text, LARGE_STRING_SIZE);
@@ -149,7 +160,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	newargs = new MooArgs();
 	newenv = new MooObjectHash(env);
-	newenv->set("argstr", new MooString("%s", text));
+	newenv->set("argstr", new MooString("%s", argstr));
 
 	MooCodeExpr *expr;
 

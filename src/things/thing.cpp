@@ -111,12 +111,12 @@ MooThing *MooThing::lookup(moo_id_t id)
 	return(thing);
 }
 
-MooThing *MooThing::clone()
+MooThing *MooThing::clone(moo_id_t id)
 {
 	MooThing *thing;
 	MooHashEntry<MooObject *> *entry;
 
-	if (!(thing = new MooThing(MOO_NEW_ID, this->m_id)))
+	if (!(thing = new MooThing(id, this->m_id)))
 		throw MooException("Error creating new thing from %d", this->m_id);
 
 	this->m_properties->reset();

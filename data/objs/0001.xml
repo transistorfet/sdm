@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>1</id>
+ <parent>0</parent>
  <owner>-1</owner>
  <permissions>075</permissions>
  <properties>
@@ -14,7 +15,12 @@
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>075</permissions>
-   <value>root</value>
+   <value>core</value>
+  </entry>
+  <entry key="title" type="string">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <value>Core Object</value>
   </entry>
  </properties>
  <methods>
@@ -24,21 +30,6 @@
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>%thing_move</func>
-  </entry>
-  <entry key="%load" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_load</func>
-  </entry>
-  <entry key="%save" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_save</func>
-  </entry>
-  <entry key="@clone" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_clone</func>
   </entry>
   <entry key="tell" type="moolambda">
    <owner>-1</owner>
