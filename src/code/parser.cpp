@@ -104,6 +104,7 @@ int MooCodeParser::read_token()
 		if (parser_is_whitespace(ch))
 			continue;
 		else if (ch == ';') {
+			// TODO comments aren't parsed properly; it always results in a close bracket being inserted where the comment is
 			while (1) {
 				ch = this->getchar();
 				if (ch == '\0' || ch == '\n')

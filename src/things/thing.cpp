@@ -343,7 +343,7 @@ MooThing *MooThing::reference(const char *name)
 
 	if (name[0] == '#') {
 		id = ::atoi(&name[1]);
-		if (id <= 0 || id > MOO_THING_MAX_SIZE)
+		if (id < 0 || id > MOO_THING_MAX_SIZE)
 			return(NULL);
 		return(MooThing::lookup(id));
 	}

@@ -206,6 +206,7 @@ int MooCodeFrame::eval(const char *code, MooArgs *args)
 	}
 	catch (MooException e) {
 		moo_status("EVAL: %s", e.get());
+		this->print_stack();
 		return(-1);
 	}
 }

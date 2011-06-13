@@ -496,18 +496,24 @@ static int basic_eval(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(frame->push_code(args->m_args->get_string(0)));
 }
 
+#define MAX_FILE_SIZE	65535
+
 static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int len;
 	MooObject *obj;
-	char buffer[LARGE_STRING_SIZE];
+	char buffer[MAX_FILE_SIZE];
 
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	if (!(obj = args->m_args->get(0)))
 		return(-1);
-	obj->to_string(buffer, LARGE_STRING_SIZE);
-	if (moo_data_read_file(buffer, buffer, LARGE_STRING_SIZE) <= 0)
+	obj->to_string(buffer, MAX_FILE_SIZE);
+	len = moo_data_read_file(buffer, buffer, MAX_FILE_SIZE);
+	if (len <= 0)
 		throw MooException("Unable to read file %s", buffer);
+	else if (len >= MAX_FILE_SIZE)
+		throw MooException("File exceeds maximum file size of %d bytes", MAX_FILE_SIZE);
 	return(frame->push_code(buffer));
 }
 
@@ -593,10 +599,12 @@ static int basic_chperms(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	else
 		throw moo_args_mismatched;
 
+	obj->check_throw(MOO_PERM_W);
 	if ((perms = args->m_args->get(0)))
 		obj->permissions(perms->get_integer());
 	if (owner)
 		obj->owner(owner->id());
+	args->m_result = obj;
 	return(0);
 }
 

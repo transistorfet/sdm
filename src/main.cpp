@@ -69,6 +69,13 @@ int init_moo(void)
 
 		load_global_config();
 
+		// TODO temporary
+		{
+			MooCodeFrame *frame;
+			frame = new MooCodeFrame();
+			frame->eval("(load \"code/core-seed.moo\")");
+		}
+
 		// TODO what should i use for these names:
 		//	*start*, %room%, +user+, T/CRYOLOCKER, $channels
 		global_env->set("@start", MooThing::reference(MOO_START_ROOM));
