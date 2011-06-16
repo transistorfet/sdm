@@ -392,9 +392,9 @@ static int form_ignore(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
-/*****************************
+/**************************************************
  * Form: (try <expr> ... (catch (...) <expr> ...) *
- *****************************/
+ **************************************************/
 
 static int form_try(MooCodeFrame *frame, MooCodeExpr *expr)
 {
@@ -404,6 +404,26 @@ static int form_try(MooCodeFrame *frame, MooCodeExpr *expr)
 	//return(0);
 	throw MooException("(try ...) form has not been implemented");
 }
+
+/***************************
+ * Form: (defined? <name>) *
+ ***************************/
+
+static int form_defined(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	const char *name;
+
+	if (!expr || expr->next())
+		throw moo_args_mismatched;
+
+	name = expr->get_identifier();
+	if (MooObject::resolve(name, frame->env()))
+		frame->set_return(new MooBoolean(B_TRUE));
+	else
+		frame->set_return(new MooBoolean(B_FALSE));
+	return(0);
+}
+
 int init_code_event(void)
 {
 	if (form_env)
@@ -420,6 +440,7 @@ int init_code_event(void)
 	form_env->set("super", new MooFormT(form_super));
 	form_env->set("ignore", new MooFormT(form_ignore));
 	form_env->set("try", new MooFormT(form_try));
+	form_env->set("defined?", new MooFormT(form_defined));
 	return(0);
 }
 

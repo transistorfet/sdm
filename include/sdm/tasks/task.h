@@ -47,7 +47,7 @@ class MooTask : public MooObject {
 	 * etc).  The str may be used or not depending on type. */
 	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *str) { return(-1); }
 
-	virtual int handle(MooInterface *inter, int ready) = 0;
+	virtual int handle(MooInterface *inter, int ready) { throw MooException("Unable to handle interface"); }
 	virtual int bestow(MooInterface *inter);
 	virtual int purge(MooInterface *inter) { return(-1); }
 

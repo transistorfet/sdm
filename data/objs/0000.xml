@@ -3,6 +3,7 @@
  <id>0</id>
  <owner>-1</owner>
  <permissions>055</permissions>
+ <bits>0x1</bits>
  <properties>
   <owner>-1</owner>
   <permissions>055</permissions>

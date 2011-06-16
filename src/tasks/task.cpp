@@ -13,6 +13,8 @@
 #include <sdm/interfaces/interface.h>
 #include <sdm/code/code.h>
 
+#include <sdm/tasks/init.h>
+
 #define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
 MooObjectType moo_task_obj_type = {
@@ -25,12 +27,17 @@ MooObjectType moo_task_obj_type = {
 static moo_id_t g_current_owner = -1;
 static MooTask *g_current_task = NULL;
 static MooArray<MooTask *> *g_task_list = NULL;
+static MooInit *g_init_task = NULL;
 
 int init_task(void)
 {
 	if (g_task_list)
 		return(1);
 	g_task_list = new MooArray<MooTask *>(MOO_ARRAY_DEFAULT_SIZE, -1, TASK_LIST_BITS);
+	g_init_task = new MooInit();
+	g_init_task->owner(0);
+	g_current_task = g_init_task;
+	g_current_owner = 0;
 	return(0);
 }
 

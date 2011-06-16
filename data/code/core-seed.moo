@@ -1,5 +1,5 @@
 
-; We are assuming we are a basic Wizard user
+(debug "Loading Core Seed...")
 
 (define core (#0:%clone 1 (lambda ()
 	(define this.name "core")
@@ -30,22 +30,6 @@
 	))
 )))
 
-(define wizard (architect:%clone 2 (lambda ()
-	(define this.name "wizard")
-	(define this.title "a powerful wizard")
-)))
-
-(define architect (user:%clone 3 (lambda ()
-	(define this.name "generic-architect")
-	(define this.title "an architect")
-
-	(define this:@eval (lambda ()
-		(eval argstr)
-	))
-
-	(define this:%save_all %thing_save_all)
-)))
-
 (define ChanServ (core:%clone 4 (lambda ()
 	(define this.name "ChanServ")
 	(define this.title "ChanServ")
@@ -66,7 +50,7 @@
 	(define this.name "generic-channel")
 	(define this.title "Generic Channel")
 
-	(define this:join (lambda ()
+	(define this:join (chperms 0475 (lambda ()
 		(if (= (this.users:search user) -1)
 			(begin
 				(this.users:push user)
@@ -75,9 +59,9 @@
 				))
 			)
 		)
-	))
+	)))
 
-	(define this:leave (lambda ()
+	(define this:leave (chperms 0475 (lambda ()
 		(if (!= (this.users:search user) -1)
 			(begin
 				(this.users:foreach (lambda (cur)
@@ -86,7 +70,7 @@
 				(this.users:remove user)
 			)
 		)
-	))
+	)))
 
 	(define this:quit (lambda ()
 		(if (!= (this.users:search user) -1)
@@ -196,6 +180,45 @@
 	))
 )))
 
+(define cryolocker (core:%clone 12 (lambda ()
+	(define this.name "cryolocker")
+	(define this.title "The Cryolocker")
+
+	(define this:store (chperms 0475 (lambda (name)
+		(if (!eqv? user.location this)
+			(begin
+				(define user.last_location user.location)
+				(user:move this)))
+	)))
+
+	(define this:fetch (chperms 0475 (lambda (name)
+		(if (not (defined? user.last_location))
+			(user:move start-room)
+			(if (eqv? user.location this)
+				(user:move user.last_location)))
+	)))
+)))
+
+
+(define architect (user:%clone 3 (lambda ()
+	(define this.name "generic-architect")
+	(define this.title "an architect")
+
+	(define this:@eval (lambda ()
+		(eval argstr)
+	))
+
+	(define this:%save_all %thing_save_all)
+)))
+
+(define wizard (architect:%clone 2 (lambda ()
+	(define this.name "wizard")
+	(define this.title "a powerful wizard")
+)))
+
+
+
+
 (define room (thing:%clone 10 (lambda ()
 	(define this.name "generic-room")
 	(define this.title "someplace")
@@ -280,26 +303,6 @@
 	))
 )))
 
-(define cryolocker (core:%clone 12 (lambda ()
-	(define this.name "cryolocker")
-	(define this.title "The Cryolocker")
-
-	(define this:store (lambda (name)
-		(if (!eqv? user.location this)
-			(begin
-				(define user.last_location user.location)
-				(user:move this)
-			)
-		)
-	))
-
-	(define this:fetch (lambda (name)
-		(if (eqv? user.location this)
-			(user:move user.last_location)
-		)
-	))
-)))
-
 ; TODO do you then have to add this to the list of channels???
 (define help (channel:%clone 13 (lambda ()
 	(define this.name "#help")
@@ -318,6 +321,11 @@
 		(define guest.name name)
 		guest
 	))
+
+	(define this:register (lambda (person)
+		(if (= (this.list:search person) -1)
+			(this.list:push person))
+	))
 )))
 
 
@@ -334,11 +342,14 @@
 	(define this.title "A Powerful Wizard")
 	(define this.description "You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.")
 )))
-
 (NickServ:register transistor)
-(transistor:move start-room)
-(cryolocker:store transistor)
 
+(define trans (user:%clone 101 (lambda ()
+	(define this.name "trans")
+	(define this.title "trans")
+	(define this.description "You see a strange man here, twitching slightly.")
+)))
+(NickServ:register trans)
 
 ; The editor can just be a special channel.  That way it will recieve input directly from the user via the channel interface functions
 ; We just need to interpret the 'say' text to be a command/input
@@ -425,5 +436,5 @@
 ;	))
 ;)))
 
-
+(debug "Done")
 
