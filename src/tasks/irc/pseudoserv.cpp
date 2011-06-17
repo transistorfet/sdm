@@ -627,7 +627,7 @@ int PseudoServ::send_list(const char *name)
 	MooObject *channels, *cur, *obj;
 
 	if ((channels = MooObject::resolve("@channels", global_env))) {
-		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("list")))) {
+		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
 			list->reset();
 			while ((cur = list->next())) {
 				if ((obj = cur->resolve_property("name")) && (str = obj->get_string()))

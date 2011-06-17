@@ -444,7 +444,7 @@ MooThing *MooThing::get_channel(const char *name)
 		moo_status("CHANNEL: channels object not found");
 		return(NULL);
 	}
-	if (!(list = dynamic_cast<MooObjectHash *>(channels->resolve_property("list")))) {
+	if (!(list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
 		moo_status("CHANNEL: channel list not found on channels object");
 		return(NULL);
 	}

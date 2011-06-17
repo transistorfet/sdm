@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>0</id>
+ <bits>0x81</bits>
  <owner>-1</owner>
  <permissions>055</permissions>
- <bits>0x1</bits>
  <properties>
   <owner>-1</owner>
   <permissions>055</permissions>
-  <entry key="location" type="nil"/>
+  <entry key="location" type="nil">
+   <owner>-1</owner>
+   <permissions>077</permissions>
+  </entry>
   <entry key="contents" type="array">
    <owner>-1</owner>
    <permissions>055</permissions>
@@ -21,11 +24,6 @@
  <methods>
   <owner>-1</owner>
   <permissions>055</permissions>
-  <entry key="%load" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_load</func>
-  </entry>
   <entry key="%save" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>
@@ -35,6 +33,11 @@
    <owner>-1</owner>
    <permissions>075</permissions>
    <func>%thing_clone</func>
+  </entry>
+  <entry key="%load" type="moofunc">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <func>%thing_load</func>
   </entry>
  </methods>
 </thing>

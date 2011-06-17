@@ -34,12 +34,18 @@
 	(define this.name "ChanServ")
 	(define this.title "ChanServ")
 
-	(define this.list (array))
+	(define this.db (hash))
 
-	; TODO you should add functions to add and remove channels to the list??
+	(define this:register (lambda (channel)
+		(define existing (this.db:get channel.name))
+		; should this be defined? or null? (null? does not work)
+		(if (defined? existing)
+			(this.db:set channel.name channel)
+			#f)
+	))
 
 	(define this:quit (lambda ()
-		(this.list:foreach (lambda (cur)
+		(this.db:foreach (lambda (cur)
 			(define channel cur)
 			(cur:leave)
 		))
@@ -108,6 +114,29 @@
 	))
 )))
 
+(define NickServ (core:%clone 14 (lambda ()
+	(define this.name "NickServ")
+	(define this.title "NickServ")
+
+	(define this.db (hash))
+	(define this.db.NickServ this)
+	(define this.db.ChanServ ChanServ)
+
+	(define this:make_guest (lambda ()
+		(define guest (this:next_guest))
+		(define guest.name name)
+		guest
+	))
+
+	(define this:register (lambda (person)
+		(define existing (this.db:get person.name))
+		; should this be defined? or null? (null? does not work)
+		(if (defined? existing)
+			(this.db:set person.name person)
+			#f)
+	))
+)))
+
 (define realm (channel:%clone 6 (lambda ()
 	(define this.name "#realm")
 	(define this.title "TheRealm")
@@ -137,6 +166,7 @@
 
 	(define this:command %parse_command)
 )))
+(ChanServ:register realm)
 
 (define thing (core:%clone 8 (lambda ()
 	(define this.name "generic-thing")
@@ -309,24 +339,9 @@
 	(define this.title "Help Channel")
 	(define this.topic "Welcome to the Help Channel")
 )))
+(ChanServ:register help)
 
-(define NickServ (core:%clone 14 (lambda ()
-	(define this.name "NickServ")
-	(define this.title "NickServ")
 
-	(define this.list (array this ChanServ wizard))
-
-	(define this:make_guest (lambda ()
-		(define guest (this:next_guest))
-		(define guest.name name)
-		guest
-	))
-
-	(define this:register (lambda (person)
-		(if (= (this.list:search person) -1)
-			(this.list:push person))
-	))
-)))
 
 
 
@@ -369,8 +384,9 @@
 	; TODO the biggest problem with this is keeping track of the editing in progress for each user
 
 )))
+(ChanServ:register ed)
 
-
+(architect:%save_all)
 
 
 

@@ -181,7 +181,9 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, MooCodeSty
 		i += MooCodeParser::generate_expr(expr, &buffer[i], max - i, style, level);
 		buffer[i++] = style->m_linebr;
 	}
-	buffer[--i] = '\0';
+	if (i > 0)
+		i--;
+	buffer[i] = '\0';
 	return(i);
 }
 
