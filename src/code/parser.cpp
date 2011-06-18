@@ -178,7 +178,11 @@ int MooCodeParser::generate(MooCodeExpr *expr, char *buffer, int max, MooCodeSty
 		style = &moo_style_normal;
 	for (; expr && i < max; expr = expr->next()) {
 		i += style->indent(&buffer[i], max - i, level);
+		if (i >= max)
+			break;
 		i += MooCodeParser::generate_expr(expr, &buffer[i], max - i, style, level);
+		if (i >= max)
+			break;
 		buffer[i++] = style->m_linebr;
 	}
 	if (i > 0)

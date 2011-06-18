@@ -1,7 +1,9 @@
 
 (debug "Loading Core Seed...")
 
-(define core (#0:%clone 1 (lambda ()
+(define *global*.root #0)
+
+(define *global*.core (root:%clone 1 (lambda ()
 	(define this.name "core")
 	(define this.title "Core Object")
 
@@ -30,7 +32,7 @@
 	))
 )))
 
-(define ChanServ (core:%clone 4 (lambda ()
+(define *global*.ChanServ (core:%clone 4 (lambda ()
 	(define this.name "ChanServ")
 	(define this.title "ChanServ")
 
@@ -40,8 +42,8 @@
 		(define existing (this.db:get channel.name))
 		; should this be defined? or null? (null? does not work)
 		(if (defined? existing)
-			(this.db:set channel.name channel)
-			#f)
+			#f
+			(this.db:set channel.name channel))
 	))
 
 	(define this:quit (lambda ()
@@ -52,9 +54,11 @@
 	))
 )))
 
-(define channel (core:%clone 5 (lambda ()
+(define *global*.channel (core:%clone 5 (lambda ()
 	(define this.name "generic-channel")
 	(define this.title "Generic Channel")
+
+	(define this.users (array))
 
 	(define this:join (chperms 0475 (lambda ()
 		(if (= (this.users:search user) -1)
@@ -114,7 +118,7 @@
 	))
 )))
 
-(define NickServ (core:%clone 14 (lambda ()
+(define *global*.NickServ (core:%clone 14 (lambda ()
 	(define this.name "NickServ")
 	(define this.title "NickServ")
 
@@ -132,12 +136,12 @@
 		(define existing (this.db:get person.name))
 		; should this be defined? or null? (null? does not work)
 		(if (defined? existing)
-			(this.db:set person.name person)
-			#f)
+			#f
+			(this.db:set person.name person))
 	))
 )))
 
-(define realm (channel:%clone 6 (lambda ()
+(define *global*.realm (channel:%clone 6 (lambda ()
 	(define this.name "#realm")
 	(define this.title "TheRealm")
 
@@ -168,7 +172,7 @@
 )))
 (ChanServ:register realm)
 
-(define thing (core:%clone 8 (lambda ()
+(define *global*.thing (core:%clone 8 (lambda ()
 	(define this.name "generic-thing")
 	(define this.title "something")
 	(define this.description "You're not sure what it is.")
@@ -185,7 +189,7 @@
 	))
 )))
 
-(define mobile (thing:%clone 9 (lambda ()
+(define *global*.mobile (thing:%clone 9 (lambda ()
 	(define this.name "generic-mobile")
 	(define this.title "a creature")
 
@@ -199,7 +203,7 @@
 	))
 )))
 
-(define user (mobile:%clone 7 (lambda ()
+(define *global*.user (mobile:%clone 7 (lambda ()
 	(define this.name "user")
 	(define this.title "someone")
 
@@ -210,7 +214,7 @@
 	))
 )))
 
-(define cryolocker (core:%clone 12 (lambda ()
+(define *global*.cryolocker (core:%clone 12 (lambda ()
 	(define this.name "cryolocker")
 	(define this.title "The Cryolocker")
 
@@ -230,7 +234,7 @@
 )))
 
 
-(define architect (user:%clone 3 (lambda ()
+(define *global*.architect (user:%clone 3 (lambda ()
 	(define this.name "generic-architect")
 	(define this.title "an architect")
 
@@ -241,7 +245,7 @@
 	(define this:%save_all %thing_save_all)
 )))
 
-(define wizard (architect:%clone 2 (lambda ()
+(define *global*.wizard (architect:%clone 2 (lambda ()
 	(define this.name "wizard")
 	(define this.title "a powerful wizard")
 )))
@@ -249,7 +253,7 @@
 
 
 
-(define room (thing:%clone 10 (lambda ()
+(define *global*.room (thing:%clone 10 (lambda ()
 	(define this.name "generic-room")
 	(define this.title "someplace")
 
@@ -310,7 +314,7 @@
 	(define this:d (lambda () (this:go "down")))
 )))
 
-(define exit (thing:%clone 11 (lambda ()
+(define *global*.exit (thing:%clone 11 (lambda ()
 	(define this.name "generic-exit")
 	(define this.title "some exit")
 
@@ -334,7 +338,7 @@
 )))
 
 ; TODO do you then have to add this to the list of channels???
-(define help (channel:%clone 13 (lambda ()
+(define *global*.help (channel:%clone 13 (lambda ()
 	(define this.name "#help")
 	(define this.title "Help Channel")
 	(define this.topic "Welcome to the Help Channel")
@@ -346,7 +350,7 @@
 
 
 
-(define start-room (room:%clone 50 (lambda ()
+(define *global*.start-room (room:%clone 50 (lambda ()
 	(define this.name "start")
 	(define this.title "The Test Room")
 	(define this.description "You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.")
@@ -377,7 +381,7 @@
 ;	i [<line>]		; Insert a new line above the current line.  If no <line> given, then each line said will be inserted
 ;				;   until a single '.' line is entered.
 ;	s/<pat1>/<pat2>/	; Replace all occurances of pat1 with pat2
-(define ed (channel:%clone 15 (lambda ()
+(define *global*.ed (channel:%clone 15 (lambda ()
 	(define this.name "#ed")
 	(define this.title "The Editor")
 

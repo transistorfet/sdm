@@ -327,13 +327,11 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooNumber *num;
+	MooObject *obj;
 
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	if (!(num = dynamic_cast<MooNumber *>(args->m_args->get(0))))
-		throw moo_type_error;
-	if (num->get_float())
+	if (!(obj = args->m_args->get(0)) || obj->is_true())
 		args->m_result = new MooBoolean(B_FALSE);
 	else
 		args->m_result = new MooBoolean(B_TRUE);
@@ -378,7 +376,9 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 0)
 		throw moo_args_mismatched;
 	for (int i = 0; i <= args->m_args->last() && j < LARGE_STRING_SIZE; i++) {
-		obj = args->m_args->get(i);
+		// TODO temporary? how the hell does/should nil/null work?
+		if (!(obj = args->m_args->get(i)))
+			obj = &moo_nil;
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
 	buffer[j] = '\0';
