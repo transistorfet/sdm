@@ -151,9 +151,9 @@ T MooArray<T>::set(int index, T value)
 {
 	if (index < 0)
 		return(NULL);
-	if (index > m_size) {
+	if (index >= m_size) {
 		if ((m_bits & MOO_ABF_RESIZE) && (m_max == -1 || index < m_max))
-			this->resize(index + 1);
+			this->resize((int) (index * 1.25));
 		else
 			return(NULL);
 	}

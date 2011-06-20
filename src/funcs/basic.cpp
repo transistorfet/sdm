@@ -340,7 +340,7 @@ static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
  * String Functions *
  ********************/
 
-static int basic_expand_string(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_expand(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	const char *str;
 	char buffer[LARGE_STRING_SIZE];
@@ -629,7 +629,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("not", new MooFunc(basic_not));
 
-	env->set("expand-string", new MooFunc(basic_expand_string));
+	env->set("expand", new MooFunc(basic_expand));
 	env->set("strlen", new MooFunc(basic_strlen));
 	env->set("concat", new MooFunc(basic_concat));
 	env->set("chop", new MooFunc(basic_chop));

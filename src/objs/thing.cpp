@@ -116,7 +116,7 @@ MooThing *MooThing::clone(moo_id_t id)
 	MooHashEntry<MooObject *> *entry;
 
 	if ((thing = moo_thing_table->get(id))) {
-		throw MooException("Reassign...");
+		moo_status("WARNING: Reassigning thing ID, #%d", id);
 		//thing->m_bits = 0;
 		thing->m_parent = this->m_id;
 		thing->m_properties->clear();

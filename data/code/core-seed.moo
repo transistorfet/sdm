@@ -162,19 +162,21 @@
 	(define this.title "something")
 	(define this.description "You're not sure what it is.")
 
-	(define this.looked_at "$user.name examines $this.name.")
-
 	(define this:look_self (lambda ()
-		(user:tell (format "<yellow>$this.title"))
-		(user:tell (format "<lightgreen>$this.description"))
+		(user:tell (expand "<yellow>$this.title"))
+		(user:tell (expand "<lightgreen>$this.description"))
 	))
 
-	(define this:tell (lambda ()
+	(define this:notify (lambda (&all)
+		"Do Nothing."
+	))
+
+	(define this:tell (lambda (&all)
 		"Do Nothing."
 	))
 
 	(define this:tell_view (lambda ()
-		(user:tell (format "<b><lightblue>You see $this.name here."))
+		(user:tell (expand "<b><lightblue>You see $this.title here."))
 	))
 
 	(define this:move %thing_move)
@@ -200,16 +202,13 @@
 
 (define *global*.mobile (thing:%clone 6 (lambda ()
 	(define this.name "generic-mobile")
-	(define this.title "a creature")
+	(define this.title "a generic-looking creature")
 
-	(define this.self_look_at "$this.name looks at himself, quizically.")
-	(define this.look_at "$user.name looks at you, menicingly.")
-	(define this.looked_at "$user.name looks at $this.name.")
+	(define this.msg_look_self "$this.name looks at himself, quizically.")
+	(define this.msg_look_victim "$user.name looks at you, menicingly.")
+	(define this.msg_look_everyone "$user.name looks at $this.title")
 
-	(define this:init (lambda ()
-		(define this.hp 30)
-		; TODO set all sorts of important values specific to a particular mobile
-	))
+	(define this.hp 30)
 )))
 
 (define *global*.user (mobile:%clone 7 (lambda ()
@@ -259,6 +258,8 @@
 	(define this.name "generic-room")
 	(define this.title "someplace")
 
+	(define this.display_contents #t)
+
 	(define this.looked_at "$user.name looks around the room.")
 
 	(define this:look (lambda (name)
@@ -275,11 +276,13 @@
 	))
 
 	(define this:look_self (lambda ()
-		(user:tell (format "<yellow>$this.title"))
-		(user:tell (format "<lightgreen>$this.description"))
-		(user.location.contents:foreach (lambda (cur)
-			(user:tell (format "<blue>$cur.title"))
-		))
+		(user:tell (expand "<yellow>$this.title"))
+		(user:tell (expand "<lightgreen>$this.description"))
+		(if this.display_contents
+			(user.location.contents:foreach (lambda (cur)
+				(user:tell (expand "<blue>$cur.title"))
+			))
+		)
 	))
 
 	(define this:say (lambda (text)
@@ -401,7 +404,19 @@
 )))
 (NickServ:register trans)
 
+(define trans2 (user:%clone 102 (lambda ()
+	(define this.name "trans2")
+	(define this.title "trans2")
+	(define this.description "You see a strange man here, twitching slightly.")
+)))
+(NickServ:register trans2)
 
+(define trans3 (user:%clone 103 (lambda ()
+	(define this.name "trans3")
+	(define this.title "trans3")
+	(define this.description "You see a strange man here, twitching slightly.")
+)))
+(NickServ:register trans3)
 
 ;(architect:%save_all)
 
