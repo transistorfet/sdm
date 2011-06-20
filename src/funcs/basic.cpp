@@ -11,8 +11,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
-
-#include <sdm/things/user.h>
+#include <sdm/tasks/task.h>
 #include <sdm/things/thing.h>
 
 
@@ -22,9 +21,8 @@
 
 static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooUser *user;
 	MooObject *obj;
-	MooThing *channel;
+	MooThing *user, *channel;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (args->m_args->last() != 0)
@@ -32,7 +30,7 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (!(obj = args->m_args->get(0)))
 		throw moo_type_error;
 	obj->to_string(buffer, LARGE_STRING_SIZE);
-	if (!(user = dynamic_cast<MooUser *>(env->get("user"))))
+	if (!(user = dynamic_cast<MooThing *>(env->get("user"))))
 		throw moo_type_error;
 	channel = dynamic_cast<MooThing *>(env->get("channel"));
 	user->notify(TNT_STATUS, NULL, channel, buffer);

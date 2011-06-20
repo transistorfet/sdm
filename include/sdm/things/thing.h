@@ -75,6 +75,9 @@ class MooThing : public MooObject {
 	MooThing *location();
 	inline MooObjectArray *contents() { return(dynamic_cast<MooObjectArray *>(this->resolve_property("contents"))); }
 	int move(MooThing *where);
+	int connect(MooTask *task);
+	void disconnect();
+	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 	static MooThing *get_channel(const char *name);
 	void quit();
 

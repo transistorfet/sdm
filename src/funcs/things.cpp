@@ -11,34 +11,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
-
-#include <sdm/things/user.h>
 #include <sdm/things/thing.h>
-
-
-static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	int type;
-	MooObject *obj;
-	MooUser *thing;
-	MooThing *user, *channel;
-	char buffer[LARGE_STRING_SIZE];
-
-	if (!(thing = dynamic_cast<MooUser *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() != 3)
-		throw moo_args_mismatched;
-	type = args->m_args->get_integer(0);
-	user = args->m_args->get_thing(1);
-	channel = args->m_args->get_thing(2);
-	if (!(obj = args->m_args->get(3)))
-		return(-1);
-	obj->to_string(buffer, LARGE_STRING_SIZE);
-	if (type < TNT_FIRST || type > TNT_LAST)
-		throw MooException("arg 0: Invalid notify() type");
-	thing->notify(type, user, channel, buffer);
-	return(0);
-}
 
 static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -211,14 +184,6 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 int moo_load_thing_methods(MooObjectHash *env)
 {
-	env->set("N/STATUS", new MooNumber((long int) TNT_STATUS));
-	env->set("N/JOIN", new MooNumber((long int) TNT_JOIN));
-	env->set("N/LEAVE", new MooNumber((long int) TNT_LEAVE));
-	env->set("N/SAY", new MooNumber((long int) TNT_SAY));
-	env->set("N/EMOTE", new MooNumber((long int) TNT_EMOTE));
-	env->set("N/QUIT", new MooNumber((long int) TNT_QUIT));
-
-	env->set("%user_notify", new MooFunc(user_notify));
 	env->set("%thing_load", new MooFunc(thing_load));
 	env->set("%thing_save", new MooFunc(thing_save));
 	env->set("%thing_save_all", new MooFunc(thing_save_all));

@@ -8,7 +8,6 @@
 #include <sdm/data.h>
 #include <sdm/globals.h>
 #include <sdm/tasks/task.h>
-#include <sdm/things/user.h>
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
@@ -116,7 +115,14 @@ MooThing *MooThing::clone(moo_id_t id)
 	MooThing *thing;
 	MooHashEntry<MooObject *> *entry;
 
-	if (!(thing = new MooThing(id, this->m_id)))
+	if ((thing = moo_thing_table->get(id))) {
+		throw MooException("Reassign...");
+		//thing->m_bits = 0;
+		thing->m_parent = this->m_id;
+		thing->m_properties->clear();
+		thing->m_methods->clear();
+	}
+	else if (!(thing = new MooThing(id, this->m_id)))
 		throw MooException("Error creating new thing from %d", this->m_id);
 
 	this->m_properties->reset();
@@ -239,7 +245,7 @@ int MooThing::save_all()
 
 	for (int i = 0; i <= moo_thing_table->last(); i++) {
 		thing = moo_thing_table->get(i);
-		if (!thing || dynamic_cast<MooUser *>(thing))
+		if (!thing)
 			continue;
 		thing->save();
 	}
@@ -435,17 +441,55 @@ int MooThing::move(MooThing *where)
 	return(0);
 }
 
+int MooThing::connect(MooTask *task)
+{
+	int res;
+	MooArgs *args;
+	MooObject *func;
+
+	if (!(func = this->resolve_method("connect")))
+		return(-1);
+	args = new MooArgs();
+	args->m_args->set(0, task);
+	res = this->call_method(NULL, func, args);
+	MOO_DECREF(args);
+	return(res);
+}
+
+void MooThing::disconnect()
+{
+	this->call_method(NULL, "disconnect", NULL);
+}
+
+int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
+{
+	int res;
+	MooArgs *args;
+	MooObject *func;
+
+	if (!(func = this->resolve_method("notify")))
+		return(-1);
+	args = new MooArgs();
+	args->m_args->set(0, new MooNumber((long int) type));
+	args->m_args->set(1, thing);
+	args->m_args->set(2, channel);
+	args->m_args->set(3, new MooString(text));
+	res = this->call_method(channel, func, args);
+	MOO_DECREF(args);
+	return(res);
+}
+
 MooThing *MooThing::get_channel(const char *name)
 {
-	MooThing *channels;
+	MooObject *channels;
 	MooObjectHash *list;
 
-	if (!(channels = MooThing::reference(MOO_CHANNELS))) {
-		moo_status("CHANNEL: channels object not found");
+	if (!(channels = MooObject::resolve("ChanServ", global_env))) {
+		moo_status("CHANNEL: ChanServ object not found");
 		return(NULL);
 	}
 	if (!(list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
-		moo_status("CHANNEL: channel list not found on channels object");
+		moo_status("CHANNEL: channel list not found in ChanServ");
 		return(NULL);
 	}
 	return(dynamic_cast<MooThing *>(list->get(name)));
@@ -455,7 +499,7 @@ void MooThing::quit()
 {
 	MooObject *channels;
 
-	if ((channels = MooObject::resolve("@channels", global_env)))
+	if ((channels = MooObject::resolve("ChanServ", global_env)))
 		channels->call_method(NULL, "quit", "");
 }
 

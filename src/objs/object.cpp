@@ -16,7 +16,6 @@
 #include <sdm/funcs/method.h>
 #include <sdm/tasks/task.h>
 #include <sdm/things/thing.h>
-#include <sdm/things/user.h>
 
 #include <sdm/code/code.h>
 
@@ -369,6 +368,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 {
 	int res;
 	MooCodeFrame *frame;
+	MooThing *thing, *channel;
 
 	frame = new MooCodeFrame(env);
 	// TODO is this no longer needed here (should be done in MooMethod do_evaluate)
@@ -382,12 +382,9 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 		moo_status("CODE: %s", e.get());
 		frame->print_stack();
 
-		// TODO this is totally horrible and ugly! what is a better way to print an error
-		MooUser *user;
-		MooThing *thing = MooThing::lookup(MooTask::current_user());
-		if ((user = dynamic_cast<MooUser *>(thing)))
-			// TODO send this to the current channel if possible
-			user->notify(TNT_STATUS, NULL, NULL, e.get());
+		channel = dynamic_cast<MooThing *>(env->get("channel"));
+		if (thing = MooThing::lookup(MooTask::current_user()))
+			thing->notify(TNT_STATUS, NULL, channel, e.get());
 		res = -1;
 	}
 	args->m_result = frame->get_return();

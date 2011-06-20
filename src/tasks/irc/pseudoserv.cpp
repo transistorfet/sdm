@@ -17,7 +17,7 @@
 #include <sdm/tasks/irc/msg.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
-#include <sdm/things/user.h>
+#include <sdm/funcs/users.h>
 #include <sdm/things/thing.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
@@ -217,7 +217,7 @@ int PseudoServ::purge(MooInterface *inter)
 	return(0);
 }
 
-int PseudoServ::purge(MooUser *user)
+int PseudoServ::purge(MooThing *user)
 {
 	if (user != m_user)
 		return(-1);
@@ -250,9 +250,9 @@ int PseudoServ::dispatch(Msg *msg)
 			m_pass = new std::string(msg->m_params[0]);
 			break;
 		    case IRC_MSG_NICK: {
-			if (!MooUser::valid_username(msg->m_params[0]))
+			if (!user_valid_username(msg->m_params[0]))
 				return(Msg::send(m_inter, ":%s %03d %s :Erroneus nickname\r\n", server_name, IRC_ERR_ERRONEUSNICKNAME, msg->m_params[0]));
-			if (MooUser::logged_in(msg->m_params[0]))
+			if (user_logged_in(msg->m_params[0]))
 				return(Msg::send(m_inter, ":%s %03d %s :Nickname is already in use\r\n", server_name, IRC_ERR_NICKNAMEINUSE, msg->m_params[0]));
 			if (m_nick)
 				delete m_nick;
@@ -505,8 +505,8 @@ int PseudoServ::login()
 	if (m_pass) {
 		/// We received a password so attempt to log in as the user with the network password
 		strcpy(buffer, m_pass->c_str());
-		MooUser::encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
-		m_user = MooUser::login(m_nick->c_str(), buffer);
+		user_encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
+		m_user = user_login(m_nick->c_str(), buffer);
 		/// Free the password whether it was correct or not so it's not lying around
 		delete m_pass;
 		m_pass = NULL;
@@ -519,7 +519,7 @@ int PseudoServ::login()
 	else {
 		/// We received no network password so sign in as a guest
 		try {
-			if (!(m_user = MooUser::make_guest(m_nick->c_str())))
+			if (!(m_user = user_make_guest(m_nick->c_str())))
 				throw MooException("Unable to connect as guest");
 		}
 		catch (MooException e) {
@@ -626,7 +626,7 @@ int PseudoServ::send_list(const char *name)
 	MooObjectHash *list;
 	MooObject *channels, *cur, *obj;
 
-	if ((channels = MooObject::resolve("@channels", global_env))) {
+	if ((channels = MooObject::resolve("ChanServ", global_env))) {
 		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
 			list->reset();
 			while ((cur = list->next())) {

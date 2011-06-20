@@ -1,26 +1,20 @@
 /*
- * Object Name:	user.cpp
- * Description:	User Object
+ * Name:	users.cpp
+ * Description:	User Methods
  */
 
-#include <time.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include <sdm/data.h>
 #include <sdm/globals.h>
-#include <sdm/tasks/task.h>
-#include <sdm/interfaces/interface.h>
-
-#include <sdm/objs/hash.h>
-#include <sdm/objs/object.h>
-#include <sdm/objs/string.h>
-#include <sdm/things/thing.h>
-#include <sdm/things/user.h>
 
 #include <sdm/code/code.h>
+#include <sdm/tasks/task.h>
+#include <sdm/things/thing.h>
+
+#include <sdm/funcs/users.h>
 
 
 MooThing *user_make_guest(const char *name)
@@ -33,7 +27,7 @@ MooThing *user_make_guest(const char *name)
 		throw moo_thing_not_found;
 	user = new MooThing(MOO_NEW_ID, parent->id());
 	user->resolve_property("name", new MooString(name));
-	user->owner(user->m_id);
+	user->owner(user->id());
 	user->resolve_property("description", new MooString("You see a new person who looks rather out-of-place."));
 	user->move(dynamic_cast<MooThing *>(MooObject::resolve("start-room", NULL)));
 	return(user);
@@ -145,4 +139,44 @@ void user_encrypt_password(const char *salt, char *passwd, int max)
 	strncpy(passwd, enc, max);
 }
 
+
+static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int type;
+	MooTask *task;
+	MooObject *obj;
+	MooThing *user, *channel;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!args->m_this)
+		throw moo_method_object;
+	if (!(task = dynamic_cast<MooTask *>(args->m_this->resolve_property("task"))))
+		throw MooException("User not connected; No \"task\" defined.");
+	if (args->m_args->last() != 3)
+		throw moo_args_mismatched;
+	type = args->m_args->get_integer(0);
+	user = args->m_args->get_thing(1);
+	channel = args->m_args->get_thing(2);
+	if (!(obj = args->m_args->get(3)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	if (type < TNT_FIRST || type > TNT_LAST)
+		throw MooException("arg 0: Invalid notify() type");
+	// TODO permissions check!? I guess on task
+	task->notify(type, user, channel, buffer);
+	return(0);
+}
+
+int moo_load_user_methods(MooObjectHash *env)
+{
+	env->set("N/STATUS", new MooNumber((long int) TNT_STATUS));
+	env->set("N/JOIN", new MooNumber((long int) TNT_JOIN));
+	env->set("N/LEAVE", new MooNumber((long int) TNT_LEAVE));
+	env->set("N/SAY", new MooNumber((long int) TNT_SAY));
+	env->set("N/EMOTE", new MooNumber((long int) TNT_EMOTE));
+	env->set("N/QUIT", new MooNumber((long int) TNT_QUIT));
+
+	env->set("%user_notify", new MooFunc(user_notify));
+	return(0);
+}
 

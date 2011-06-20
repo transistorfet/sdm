@@ -9,7 +9,7 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/things/user.h>
+#include <sdm/things/thing.h>
 #include <sdm/tasks/task.h>
 
 #include <sdm/tasks/irc/msg.h>
@@ -27,7 +27,7 @@ class PseudoServ : public MooTask {
 	std::string *m_nick;
 	std::string *m_pass;
 	MooTCP *m_inter;
-	MooUser *m_user;
+	MooThing *m_user;
 
     public:
 	PseudoServ();
@@ -46,7 +46,7 @@ class PseudoServ : public MooTask {
 	int bestow(MooInterface *inter);
 	int purge(MooInterface *inter);
 
-	int purge(MooUser *user);
+	int purge(MooThing *user);
 
 	int dispatch(Msg *msg);
 

@@ -12,7 +12,8 @@
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
-#include <sdm/things/user.h>
+
+#include <sdm/things/thing.h>
 
 MooObjectType moo_args_obj_type = {
 	NULL,

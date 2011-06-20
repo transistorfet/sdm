@@ -23,7 +23,8 @@
 #include <sdm/objs/hash.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
-#include <sdm/things/user.h>
+
+#include <sdm/things/thing.h>
 
 static int exit_flag = 1;
 
@@ -33,6 +34,7 @@ static void handle_sigint(int);
 
 extern int moo_load_basic_funcs(MooObjectHash *env);
 extern int moo_load_thing_methods(MooObjectHash *env);
+extern int moo_load_user_methods(MooObjectHash *env);
 
 int init_moo(void)
 {
@@ -63,9 +65,9 @@ int init_moo(void)
 
 		moo_load_basic_funcs(global_env);
 		moo_load_thing_methods(global_env);
+		moo_load_user_methods(global_env);
 
 		init_thing();
-		init_user();
 
 		load_global_config();
 
@@ -78,6 +80,7 @@ int init_moo(void)
 
 		// TODO what should i use for these names:
 		//	*start*, %room%, +user+, T/CRYOLOCKER, $channels
+		/*
 		global_env->set("@start", MooThing::reference(MOO_START_ROOM));
 		global_env->set("@user", MooThing::reference(MOO_GENERIC_USER));
 		global_env->set("@room", MooThing::reference(MOO_GENERIC_ROOM));
@@ -85,6 +88,7 @@ int init_moo(void)
 		global_env->set("@mobile", MooThing::reference(MOO_GENERIC_MOBILE));
 		global_env->set("@cryolocker", MooThing::reference(MOO_CRYOLOCKER));
 		global_env->set("@channels", MooThing::reference(MOO_CHANNELS));
+		*/
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());
@@ -97,7 +101,6 @@ int init_moo(void)
 
 void release_moo(void)
 {
-	release_user();
 	release_thing();
 
 	release_moo_code();

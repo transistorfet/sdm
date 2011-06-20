@@ -3,36 +3,7 @@
 
 (define *global*.root #0)
 
-(define *global*.core (root:%clone 1 (lambda ()
-	(define this.name "core")
-	(define this.title "Core Object")
-
-	(define this:tell (lambda ()
-		"Do Nothing."
-	))
-
-	(define this:move %thing_move)
-
-	(define find (lambda (name)
-		(if (equals? name "me")
-			this
-			(if (equals? name "here")
-				this.location
-				; TODO otherwise, search the current user for an object and then search the user's location for an object
-			)
-		)
-	))
-
-	(define this:acceptable (lambda (obj)
-		; TODO should this be a lambda on the location?
-		(this:notify-room obj
-			"You try to get into $obj.name but fail miserably."
-			"$user.name tries to get into $obj.name but fails miserably."
-			nil)
-	))
-)))
-
-(define *global*.ChanServ (core:%clone 4 (lambda ()
+(define *global*.ChanServ (root:%clone 1 (lambda ()
 	(define this.name "ChanServ")
 	(define this.title "ChanServ")
 
@@ -54,7 +25,30 @@
 	))
 )))
 
-(define *global*.channel (core:%clone 5 (lambda ()
+(define *global*.NickServ (root:%clone 2 (lambda ()
+	(define this.name "NickServ")
+	(define this.title "NickServ")
+
+	(define this.db (hash))
+	(define this.db.NickServ this)
+	(define this.db.ChanServ ChanServ)
+
+	(define this:make_guest (lambda ()
+		(define guest (this:next_guest))
+		(define guest.name name)
+		guest
+	))
+
+	(define this:register (lambda (person)
+		(define existing (this.db:get person.name))
+		; should this be defined? or null? (null? does not work)
+		(if (defined? existing)
+			#f
+			(this.db:set person.name person))
+	))
+)))
+
+(define *global*.channel (root:%clone 3 (lambda ()
 	(define this.name "generic-channel")
 	(define this.title "Generic Channel")
 
@@ -114,50 +108,27 @@
 	))
 
 	(define this:command (lambda (text)
-		(user:notify N/STATUS nil channel "Commands are not supported in this channel.")
+		(user:tell "Commands are not supported in this channel.")
 	))
 )))
 
-(define *global*.NickServ (core:%clone 14 (lambda ()
-	(define this.name "NickServ")
-	(define this.title "NickServ")
-
-	(define this.db (hash))
-	(define this.db.NickServ this)
-	(define this.db.ChanServ ChanServ)
-
-	(define this:make_guest (lambda ()
-		(define guest (this:next_guest))
-		(define guest.name name)
-		guest
-	))
-
-	(define this:register (lambda (person)
-		(define existing (this.db:get person.name))
-		; should this be defined? or null? (null? does not work)
-		(if (defined? existing)
-			#f
-			(this.db:set person.name person))
-	))
-)))
-
-(define *global*.realm (channel:%clone 6 (lambda ()
+(define *global*.realm (channel:%clone 4 (lambda ()
 	(define this.name "#realm")
 	(define this.title "TheRealm")
 
 	(define this:join (lambda ()
 		(super join)
-		(cryolocker:fetch user)
+		(this:fetch user)
 	))
 
 	(define this:leave (lambda ()
 		(super leave)
-		(cryolocker:store user)
+		(this:store user)
 	))
 
 	(define this:quit (lambda ()
 		(super quit)
-		(@cryolocker:store user)
+		(this:store user)
 	))
 
 	(define this:say (lambda (text)
@@ -169,10 +140,24 @@
 	))
 
 	(define this:command %parse_command)
+
+	(define this:store (chperms 0475 (lambda (name)
+		(if (!eqv? user.location this)
+			(begin
+				(define user.last_location user.location)
+				(user:move this)))
+	)))
+
+	(define this:fetch (chperms 0475 (lambda (name)
+		(if (not (defined? user.last_location))
+			(user:move start-room)
+			(if (eqv? user.location this)
+				(user:move user.last_location)))
+	)))
 )))
 (ChanServ:register realm)
 
-(define *global*.thing (core:%clone 8 (lambda ()
+(define *global*.thing (root:%clone 5 (lambda ()
 	(define this.name "generic-thing")
 	(define this.title "something")
 	(define this.description "You're not sure what it is.")
@@ -180,16 +165,40 @@
 	(define this.looked_at "$user.name examines $this.name.")
 
 	(define this:look_self (lambda ()
-		(user:notify N/STATUS nil channel (format "<yellow>$this.title"))
-		(user:notify N/STATUS nil channel (format "<lightgreen>$this.description"))
+		(user:tell (format "<yellow>$this.title"))
+		(user:tell (format "<lightgreen>$this.description"))
 	))
 
-	(define this:print_view (lambda ()
-		(user:notify N/STATUS nil channel (format "<b><lightblue>You see $this.name here."))
+	(define this:tell (lambda ()
+		"Do Nothing."
+	))
+
+	(define this:tell_view (lambda ()
+		(user:tell (format "<b><lightblue>You see $this.name here."))
+	))
+
+	(define this:move %thing_move)
+
+	(define find (lambda (name)
+		(if (equals? name "me")
+			this
+			(if (equals? name "here")
+				this.location
+				; TODO otherwise, search the current user for an object and then search the user's location for an object
+			)
+		)
+	))
+
+	(define this:acceptable (lambda (obj)
+		; TODO should this be a lambda on the location?
+		(this:tell-room obj
+			"You try to get into $obj.name but fail miserably."
+			"$user.name tries to get into $obj.name but fails miserably."
+			nil)
 	))
 )))
 
-(define *global*.mobile (thing:%clone 9 (lambda ()
+(define *global*.mobile (thing:%clone 6 (lambda ()
 	(define this.name "generic-mobile")
 	(define this.title "a creature")
 
@@ -207,6 +216,19 @@
 	(define this.name "user")
 	(define this.title "someone")
 
+	(define this:connect (lambda (task)
+		(if (defined? this.task)
+			(this:disconnect))
+		(define this.task task)
+	))
+
+	(define this:disconnect (lambda ()
+		;(if (defined? this.task)
+		;	(this.task:purge this))
+		(define this.task nil)
+		(this:%save)
+	))
+
 	(define this:notify %user_notify)
 
 	(define this:tell (lambda (text)
@@ -214,38 +236,18 @@
 	))
 )))
 
-(define *global*.cryolocker (core:%clone 12 (lambda ()
-	(define this.name "cryolocker")
-	(define this.title "The Cryolocker")
-
-	(define this:store (chperms 0475 (lambda (name)
-		(if (!eqv? user.location this)
-			(begin
-				(define user.last_location user.location)
-				(user:move this)))
-	)))
-
-	(define this:fetch (chperms 0475 (lambda (name)
-		(if (not (defined? user.last_location))
-			(user:move start-room)
-			(if (eqv? user.location this)
-				(user:move user.last_location)))
-	)))
-)))
-
-
-(define *global*.architect (user:%clone 3 (lambda ()
+(define *global*.architect (user:%clone 8 (lambda ()
 	(define this.name "generic-architect")
 	(define this.title "an architect")
 
-	(define this:@eval (lambda ()
+	(define this:@eval (lambda (&all)
 		(eval argstr)
 	))
 
 	(define this:%save_all %thing_save_all)
 )))
 
-(define *global*.wizard (architect:%clone 2 (lambda ()
+(define *global*.wizard (architect:%clone 9 (lambda ()
 	(define this.name "wizard")
 	(define this.title "a powerful wizard")
 )))
@@ -273,10 +275,10 @@
 	))
 
 	(define this:look_self (lambda ()
-		(user:notify N/STATUS nil channel (format "<yellow>$this.title"))
-		(user:notify N/STATUS nil channel (format "<lightgreen>$this.description"))
+		(user:tell (format "<yellow>$this.title"))
+		(user:tell (format "<lightgreen>$this.description"))
 		(user.location.contents:foreach (lambda (cur)
-			(user:notify N/STATUS nil channel (format "<blue>$cur.title"))
+			(user:tell (format "<blue>$cur.title"))
 		))
 	))
 
@@ -338,7 +340,7 @@
 )))
 
 ; TODO do you then have to add this to the list of channels???
-(define *global*.help (channel:%clone 13 (lambda ()
+(define *global*.help (channel:%clone 12 (lambda ()
 	(define this.name "#help")
 	(define this.title "Help Channel")
 	(define this.topic "Welcome to the Help Channel")
@@ -347,28 +349,6 @@
 
 
 
-
-
-
-(define *global*.start-room (room:%clone 50 (lambda ()
-	(define this.name "start")
-	(define this.title "The Test Room")
-	(define this.description "You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.")
-)))
-
-(define transistor (wizard:%clone 100 (lambda ()
-	(define this.name "transistor")
-	(define this.title "A Powerful Wizard")
-	(define this.description "You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.")
-)))
-(NickServ:register transistor)
-
-(define trans (user:%clone 101 (lambda ()
-	(define this.name "trans")
-	(define this.title "trans")
-	(define this.description "You see a strange man here, twitching slightly.")
-)))
-(NickServ:register trans)
 
 ; The editor can just be a special channel.  That way it will recieve input directly from the user via the channel interface functions
 ; We just need to interpret the 'say' text to be a command/input
@@ -381,7 +361,7 @@
 ;	i [<line>]		; Insert a new line above the current line.  If no <line> given, then each line said will be inserted
 ;				;   until a single '.' line is entered.
 ;	s/<pat1>/<pat2>/	; Replace all occurances of pat1 with pat2
-(define *global*.ed (channel:%clone 15 (lambda ()
+(define *global*.ed (channel:%clone 13 (lambda ()
 	(define this.name "#ed")
 	(define this.title "The Editor")
 
@@ -390,7 +370,40 @@
 )))
 (ChanServ:register ed)
 
-(architect:%save_all)
+
+
+
+;;;
+; Initial Rooms
+;;;
+
+(define *global*.start-room (room:%clone 50 (lambda ()
+	(define this.name "start")
+	(define this.title "The Test Room")
+	(define this.description "You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.")
+)))
+
+;;;
+; Initial Users
+;;;
+
+(define transistor (wizard:%clone 100 (lambda ()
+	(define this.name "transistor")
+	(define this.title "A Powerful Wizard")
+	(define this.description "You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.")
+)))
+(NickServ:register transistor)
+
+(define trans (wizard:%clone 101 (lambda ()
+	(define this.name "trans")
+	(define this.title "trans")
+	(define this.description "You see a strange man here, twitching slightly.")
+)))
+(NickServ:register trans)
+
+
+
+;(architect:%save_all)
 
 
 
