@@ -13,8 +13,6 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
 
-#include <sdm/things/thing.h>
-
 MooObjectType moo_args_obj_type = {
 	NULL,
 	"args",
@@ -72,11 +70,17 @@ int MooArgs::write_data(MooDataFile *data)
 MooObject *MooArgs::access_property(const char *name, MooObject *value)
 {
 	if (!strcmp(name, "args")) {
-		MOO_SET_MEMBER(m_args, MooObjectArray *, value)
+		if (value) {
+			MooObjectArray *obj;
+			if (!(obj = dynamic_cast<MooObjectArray *>(value)))
+				throw moo_type_error;
+			m_args = obj;
+		}
 		return(m_args);
 	}
 	else if (!strcmp(name, "this")) {
-		MOO_SET_MEMBER(m_this, MooThing *, value)
+		if (value)
+			m_this = value;
 		return(m_this);
 	}
 	else if (!strcmp(name, "result")) {

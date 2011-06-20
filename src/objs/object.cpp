@@ -15,7 +15,7 @@
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
 #include <sdm/tasks/task.h>
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 
 #include <sdm/code/code.h>
 
@@ -383,7 +383,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 		frame->print_stack();
 
 		channel = dynamic_cast<MooThing *>(env->get("channel"));
-		if (thing = MooThing::lookup(MooTask::current_user()))
+		if ((thing = MooThing::lookup(MooTask::current_user())))
 			thing->notify(TNT_STATUS, NULL, channel, e.get());
 		res = -1;
 	}

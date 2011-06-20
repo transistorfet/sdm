@@ -18,7 +18,7 @@
 #include <sdm/tasks/irc/pseudoserv.h>
 
 #include <sdm/funcs/users.h>
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
 	&moo_task_obj_type,

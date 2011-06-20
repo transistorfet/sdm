@@ -16,7 +16,6 @@
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
 
-#include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 
 MooObjectType moo_code_frame_obj_type = {

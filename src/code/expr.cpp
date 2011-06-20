@@ -12,7 +12,6 @@
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
-#include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 
 MooObjectType moo_code_expr_obj_type = {

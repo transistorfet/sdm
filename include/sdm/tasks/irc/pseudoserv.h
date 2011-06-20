@@ -8,8 +8,8 @@
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/thing.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/things/thing.h>
 #include <sdm/tasks/task.h>
 
 #include <sdm/tasks/irc/msg.h>

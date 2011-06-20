@@ -15,7 +15,7 @@
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 #include <sdm/funcs/method.h>
 
 MooObjectType moo_method_obj_type = {

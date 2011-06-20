@@ -17,7 +17,7 @@
 #include <sdm/objs/string.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE

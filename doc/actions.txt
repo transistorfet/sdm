@@ -3,13 +3,15 @@ This document describes the core actions on objects, what they do, and the actio
 call in order to get done what needs to get done.
 
 
-THING(3) --- CONTAINER(4) --- ROOM(10)
+THING(3)
+  |
+  +--- ROOM(10)
   |              |
-  |              +--- MOBILE(5) --- USER(6) --- WIZARD(7)
+  +--- MOBILE(5) --- USER(6) --- ARCHITECT(8) --- WIZARD(7)
   |
   +--- EXIT(11)
   |
-  +--- ITEM(8)
+  +--- WEAPON(15)
 
 
 

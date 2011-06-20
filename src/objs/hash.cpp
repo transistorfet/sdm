@@ -11,7 +11,6 @@
 
 #include <sdm/code/code.h>
 
-#include <sdm/things/thing.h>
 #include <sdm/objs/hash.h>
 
 struct MooObjectType moo_hash_obj_type = {
@@ -169,8 +168,6 @@ MooThing *MooObjectHash::get_thing(const char *key)
 
 MooObject *MooObjectHash::access_property(const char *name, MooObject *value)
 {
-	MooObject *obj;
-
 	if (value) {
 		this->check_throw(MOO_PERM_W);
 		if (this->set(name, value) < 0)

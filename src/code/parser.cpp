@@ -15,7 +15,6 @@
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 
-#include <sdm/things/thing.h>
 #include <sdm/code/code.h>
 
 MooCodeStyle moo_style_normal = MooCodeStyle("  ", '\n', 60);

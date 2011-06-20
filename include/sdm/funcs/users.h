@@ -10,8 +10,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <sdm/objs/object.h>
-#include <sdm/things/thing.h>
+class MooThing;
 
 MooThing *user_make_guest(const char *name);
 int user_logged_in(const char *name);

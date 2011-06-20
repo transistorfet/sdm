@@ -11,7 +11,6 @@
 
 #include <sdm/code/code.h>
 
-#include <sdm/things/thing.h>
 #include <sdm/objs/array.h>
 
 struct MooObjectType moo_array_obj_type = {

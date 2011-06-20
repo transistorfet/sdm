@@ -129,13 +129,5 @@ inline int MooObject::is_a(const MooObjectType *type) {
 	return(0);
 }
 
-#define MOO_SET_MEMBER(var, type, value) 				\
-	if ((value)) {							\
-		type obj;						\
-		if (!(obj = dynamic_cast<type>((value))))		\
-			throw moo_type_error;				\
-		(var) = obj;						\
-	}
-
 #endif
 

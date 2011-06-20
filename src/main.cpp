@@ -21,10 +21,10 @@
 #include <sdm/objs/config.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/hash.h>
+#include <sdm/objs/thing.h>
 #include <sdm/funcs/func.h>
 #include <sdm/funcs/method.h>
 
-#include <sdm/things/thing.h>
 
 static int exit_flag = 1;
 

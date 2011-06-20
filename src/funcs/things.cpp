@@ -11,7 +11,7 @@
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 
 static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {

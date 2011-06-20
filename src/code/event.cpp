@@ -14,7 +14,7 @@
 #include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 #include <sdm/code/code.h>
 
 typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);

@@ -12,7 +12,7 @@
 
 #include <sdm/code/code.h>
 #include <sdm/tasks/task.h>
-#include <sdm/things/thing.h>
+#include <sdm/objs/thing.h>
 
 #include <sdm/funcs/users.h>
 

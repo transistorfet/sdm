@@ -3,8 +3,8 @@
  * Description:	Base Game Object
  */
 
-#ifndef _SDM_THINGS_THING_H
-#define _SDM_THINGS_THING_H
+#ifndef _SDM_OBJS_THING_H
+#define _SDM_OBJS_THING_H
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -13,7 +13,6 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/things/references.h>
 
 #define MOO_ACTION_NOT_FOUND	1
 
