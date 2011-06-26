@@ -500,7 +500,7 @@ void MooThing::quit()
 	MooObject *channels;
 
 	if ((channels = MooObject::resolve("ChanServ", global_env)))
-		channels->call_method(NULL, "quit", "");
+		channels->call_method(NULL, "quit", NULL);
 }
 
 

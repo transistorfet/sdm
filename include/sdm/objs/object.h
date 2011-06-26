@@ -76,7 +76,7 @@ class MooObject : public MooGC {
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 	MooObject *resolve_method(const char *name, MooObject *value = NULL);
 
-	int call_method(MooObject *channel, const char *name, const char *text, MooObject **result = NULL);
+	int call_method(MooObject *channel, const char *name, MooObject **result = NULL, MooObject *obj1 = NULL, MooObject *obj2 = NULL, MooObject *obj3 = NULL, MooObject *obj4 = NULL, MooObject *obj5 = NULL);
 	int call_method(MooObject *channel, MooObject *func, MooArgs *args);
 	int call_method(MooObject *func, MooObjectHash *env, MooArgs *args);
 	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);

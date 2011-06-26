@@ -294,14 +294,14 @@ int PseudoServ::dispatch(Msg *msg)
 			if (!channel)
 				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 			if (msg->m_last[0] == '.') {
-				res = channel->call_method(channel, "command", &msg->m_last[1]);
+				res = channel->call_method(channel, "command", NULL, new MooString(&msg->m_last[1]));
 				if (res == MOO_ACTION_NOT_FOUND)
 					this->notify(TNT_STATUS, NULL, channel, "Pardon?");
 			}
 			else if (msg->m_last[0] == '\x01')
 				this->process_ctcp(msg, channel);
 			else
-				channel->call_method(channel, "say", msg->m_last);
+				channel->call_method(channel, "say", NULL, new MooString(msg->m_last));
 		}
 		return(0);
 	    }
@@ -584,7 +584,7 @@ int PseudoServ::send_names(const char *name)
 	channel = MooThing::get_channel(name);
 	if (!channel)
 		return(Msg::send(m_inter, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-	channel->call_method(channel, "names", NULL, &result);
+	channel->call_method(channel, "names", &result);
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
 	if (result && (names = dynamic_cast<MooString *>(result)))
@@ -648,9 +648,9 @@ int PseudoServ::process_ctcp(Msg *msg, MooThing *channel)
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
 		if (channel)
-			return(channel->call_method(channel, "emote", buffer));
+			return(channel->call_method(channel, "emote", NULL, new MooString(buffer)));
 		else
-			return(m_user->call_method(NULL, "emote", buffer));
+			return(m_user->call_method(NULL, "emote", NULL, new MooString(buffer)));
 	}
 	// TODO process others?? return error??
 	return(0);

@@ -54,6 +54,8 @@
 
 	(define this.users (array))
 
+	; TODO maybe this should take the user object that will join, and do a permissions check to make sure we can force a join on
+	;	that object.
 	(define this:join (chperms 0475 (lambda ()
 		(if (= (this.users:search user) -1)
 			(begin
@@ -342,13 +344,11 @@
 	))
 )))
 
-; TODO do you then have to add this to the list of channels???
-(define *global*.help (channel:%clone 12 (lambda ()
+(ChanServ:register (channel:%clone 12 (lambda ()
 	(define this.name "#help")
 	(define this.title "Help Channel")
 	(define this.topic "Welcome to the Help Channel")
 )))
-(ChanServ:register help)
 
 
 
@@ -364,14 +364,13 @@
 ;	i [<line>]		; Insert a new line above the current line.  If no <line> given, then each line said will be inserted
 ;				;   until a single '.' line is entered.
 ;	s/<pat1>/<pat2>/	; Replace all occurances of pat1 with pat2
-(define *global*.ed (channel:%clone 13 (lambda ()
+(ChanServ:register (channel:%clone 13 (lambda ()
 	(define this.name "#ed")
 	(define this.title "The Editor")
 
 	; TODO the biggest problem with this is keeping track of the editing in progress for each user
 
 )))
-(ChanServ:register ed)
 
 
 
@@ -390,46 +389,52 @@
 ; Initial Users
 ;;;
 
-(define transistor (wizard:%clone 100 (lambda ()
+(NickServ:register (wizard:%clone 100 (lambda ()
 	(define this.name "transistor")
 	(define this.title "A Powerful Wizard")
 	(define this.description "You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.")
 )))
-(NickServ:register transistor)
 
-(define trans (wizard:%clone 101 (lambda ()
+(NickServ:register (wizard:%clone 101 (lambda ()
 	(define this.name "trans")
 	(define this.title "trans")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
-(NickServ:register trans)
 
-(define trans2 (user:%clone 102 (lambda ()
+(NickServ:register (user:%clone 102 (lambda ()
 	(define this.name "trans2")
 	(define this.title "trans2")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
-(NickServ:register trans2)
 
-(define trans3 (user:%clone 103 (lambda ()
+(NickServ:register (user:%clone 103 (lambda ()
 	(define this.name "trans3")
 	(define this.title "trans3")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
-(NickServ:register trans3)
+
+
+(define botty (mobile:%clone (lambda ()
+	(define this.name "botty")
+	(define this.title "Botty the Bot")
+	(define this.description "You see an abstract program.")
+
+	(define this:notify (lambda (type user channel text)
+		(if (and (= type N/SAY) (!eqv? user this))
+			(if (equal? text "hello")
+				(channel:say (expand "Hello $user.name")))
+		)
+	))
+)))
+(NickServ:register botty)
+; TODO how would this work??
+;(help:join botty)
+((lambda ()
+	(define user botty)
+	(#12:join)
+))
 
 ;(architect:%save_all)
-
-
-
-
-;(define /core/mobile/bot (make-thing /core/mobile (lambda ()
-;	(define this:init (lambda ()
-;		(super:init)
-;		; this is a possible idea of how to set up a timer such that the lambda is called every 30 seconds
-;		(define this.tick_timer (make-timer 30 (lambda () (this:do_tick)))
-;	))
-;)))
 
 
 ;(define /core/mobile/bot/beast (make-thing /core/mobile/bot (lambda ()

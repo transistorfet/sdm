@@ -327,8 +327,7 @@ MooObject *MooObject::resolve_method(const char *name, MooObject *value)
 	return(new MooMethod(this, func));
 }
 
-// TODO should this be somewhere else where we can more generically put the parameter parsing? (ie. get it out of MooArgs)
-int MooObject::call_method(MooObject *channel, const char *name, const char *text, MooObject **result)
+int MooObject::call_method(MooObject *channel, const char *name, MooObject **result, MooObject *obj1, MooObject *obj2, MooObject *obj3, MooObject *obj4, MooObject *obj5)
 {
 	int res;
 	clock_t start;
@@ -338,11 +337,24 @@ int MooObject::call_method(MooObject *channel, const char *name, const char *tex
 	if (!(func = this->resolve_method(name)))
 		return(-1);
 	args = new MooArgs();
-	if (text)
-		args->m_args->set(0, new MooString("%s", text));
+	if (obj1) {
+		args->m_args->set(0, obj1);
+		if (obj2) {
+			args->m_args->set(1, obj2);
+			if (obj3) {
+				args->m_args->set(2, obj3);
+				if (obj4) {
+					args->m_args->set(3, obj4);
+					if (obj5)
+						args->m_args->set(4, obj5);
+				}
+			}
+		}
+	}
+
 	start = clock();
 	res = this->call_method(channel, func, args);
-	moo_status("Executed (%s \"%s\") in %f seconds", name, text, ((float) clock() - start) / CLOCKS_PER_SEC);
+	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
 	if (result) {
 		*result = args->m_result;
 		args->m_result = NULL;

@@ -54,13 +54,11 @@
 	  have permissions controls, although it might be possible to have permission controls in MooObjectHash as well.
 
 	* you could have NickServ and ChanServ as user-like objects which you can talk to for basic registration
-	* we could possibly make the MooUser connect/disconnect functions actually be methods call on an object (the user object) which
-	  would allow you to remove MooUser as a special subclass of MooThing.  You might want a user manager object similar to the
-	  channels list object 
 
     TODO:
 
 	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
+	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
 	* get timers working
 
 	* completely revamp the error reporting and debugging part of the interpreter
