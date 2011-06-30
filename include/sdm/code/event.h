@@ -87,34 +87,5 @@ class MooCodeEventAppendReturn : public MooCodeEvent {
 	int do_event(MooCodeFrame *frame);
 };
 
-class MooCodeEventReturnPoint : public MooCodeEvent {
-    public:
-	MooCodeEventReturnPoint() : MooCodeEvent(NULL, NULL, NULL) { };
-	int do_event(MooCodeFrame *frame) { return(0); }
-};
-
-class MooCodeEventCatch : public MooCodeEvent {
-    public:
-	MooCodeEventCatch(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
-
-	/// If we try to evaluate this during the normal run loop then just do nothing
-	int do_event(MooCodeFrame *frame) { return(0); }
-	int handle(MooCodeFrame *frame);
-};
-
-class MooCodeEventDebug : public MooCodeEvent {
-	std::string m_msg;
-    public:
-	MooCodeEventDebug(const char *msg) : MooCodeEvent(NULL, NULL, NULL) {
-		m_msg = std::string(msg);
-	}
-
-	int do_event(MooCodeFrame *frame) { return(0); }
-
-	void print_debug() {
-		moo_status("DEBUG: %s", m_msg.c_str());
-	}
-};
-
 #endif
 

@@ -57,6 +57,9 @@ class MooArray : public MooObject {
 	T splice(int index);
 	// TODO perhaps add a function which does splice() but also deletes the value appropriately without returning it
 
+	T get_first() { if (m_last < 0) return(NULL); return(m_data[0]); }
+	T get_last() { if (m_last < 0) return(NULL); return(m_data[m_last]); }
+
 	int resize(int size);
 
     public:

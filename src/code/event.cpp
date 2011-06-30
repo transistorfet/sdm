@@ -49,7 +49,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 {
 	if (!m_expr)
 		return(-1);
-	switch (m_expr->expr_type()) {
+	switch (m_expr->type()) {
 	    case MCT_OBJECT: {
 		frame->set_return(m_expr->value());
 		break;
@@ -71,7 +71,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		if (!(expr = dynamic_cast<MooCodeExpr *>(m_expr->value())))
 			throw MooException("(%d, %d) Invalid AST; expected MooCodeExpr.", m_expr->line(), m_expr->col());
 
-		if (expr->expr_type() == MCT_IDENTIFIER) {
+		if (expr->type() == MCT_IDENTIFIER) {
 			if ((form = form_env->get(expr->get_identifier())))
 				return((*form)(frame, expr->next()));
 		}
@@ -84,7 +84,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		break;
 	    }
 	    default:
-		throw MooException("(%d, %d) Invalid expression type, %d", m_expr->line(), m_expr->col(), m_expr->expr_type());
+		throw MooException("(%d, %d) Invalid expression type, %d", m_expr->line(), m_expr->col(), m_expr->type());
 	}
 	return(0);
 }
@@ -156,20 +156,6 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 	// TODO this line causes a segfault for unknown reasons (possibly a double free somewhere??)
 	// TODO should this not incref, but instead just steal the ref and set return to NULL? (or otherwise set return to NULL)
 	return(m_args->m_args->push(MOO_INCREF(frame->get_return())));
-}
-
-
-/*********************
- * MooCodeEventCatch *
- *********************/
-
-int MooCodeEventCatch::handle(MooCodeFrame *frame)
-{
-	// TODO this probably wont quite work since we'll put this on top of the faulted events
-	if (m_expr)
-		frame->push_event(new MooCodeEventEvalBlock(m_env, m_expr));
-	// TODO what else??
-	return(0);
 }
 
 
@@ -387,8 +373,8 @@ static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int form_ignore(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	frame->push_event(new MooCodeEventCatch(frame->env(), NULL));
-	frame->push_event(new MooCodeEventEvalBlock(frame->env(), expr));
+	frame->mark_exception(NULL);
+	frame->push_block(frame->env(), expr);
 	return(0);
 }
 
@@ -398,11 +384,34 @@ static int form_ignore(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int form_try(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	// TODO implement try
-	//frame->push_event(new MooCodeEventCatch(frame->env(), NULL));
-	//frame->push_event(new MooCodeEventEvalBlock(frame->env(), expr));
-	//return(0);
-	throw MooException("(try ...) form has not been implemented");
+	const char *str;
+	MooCodeExpr *id;
+	MooCodeExpr *handler;
+
+	for (handler = expr; handler; handler = handler->next()) {
+		if (handler->type() == MCT_CALL && (id = dynamic_cast<MooCodeExpr *>(handler->value()))) {
+			str = id->get_string();
+			if (str && !strcmp(str, "catch")) {
+				handler = id->next();
+				break;
+			}
+		}
+	}
+	if (!handler)
+		throw MooException("No catch expression in try block");
+	frame->mark_exception(handler);
+	frame->push_block(frame->env(), expr);
+	return(0);
+}
+
+/****************************
+ * Form: (catch <expr> ...) *
+ ****************************/
+
+static int form_catch(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	/// We are here because we reached the handler part of the try block under normal conditions, therefore we ignore it
+	return(0);
 }
 
 /***************************
@@ -440,6 +449,7 @@ int init_code_event(void)
 	form_env->set("super", new MooFormT(form_super));
 	form_env->set("ignore", new MooFormT(form_ignore));
 	form_env->set("try", new MooFormT(form_try));
+	form_env->set("catch", new MooFormT(form_catch));
 	form_env->set("defined?", new MooFormT(form_defined));
 	return(0);
 }

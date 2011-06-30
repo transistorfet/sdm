@@ -85,7 +85,7 @@ int MooObjectArray::write_data(MooDataFile *data)
 		if (m_data[i]) {
 			data->write_begin_entry("entry");
 			data->write_attrib_integer("index", i);
-			data->write_attrib_string("type", m_data[i]->type_name());
+			data->write_attrib_string("type", m_data[i]->objtype_name());
 			m_data[i]->write_data(data);
 			data->write_end_entry();
 		}
@@ -377,9 +377,10 @@ class ArrayEventForeach : public MooCodeEvent {
 		if (m_index > m_this->last())
 			return(0);
 
+		// TODO this is disabled for now because it causes trouble if you don't pay attention to the return type
 		/// Stop this loop if the previous cycle returned #f
-		if ((obj = frame->get_return()) && !obj->is_true())
-			return(0);
+		//if ((obj = frame->get_return()) && !obj->is_true())
+		//	return(0);
 
 		if (m_index < m_this->last())
 			frame->push_event(new ArrayEventForeach(m_index + 1, m_this, m_env, m_func));

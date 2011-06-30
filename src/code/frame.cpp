@@ -18,6 +18,36 @@
 
 #include <sdm/code/code.h>
 
+class FrameEventDebug : public MooCodeEvent {
+	std::string m_msg;
+    public:
+	FrameEventDebug(const char *msg) : MooCodeEvent(NULL, NULL, NULL) {
+		m_msg = std::string(msg);
+	}
+
+	int do_event(MooCodeFrame *frame) { return(0); }
+
+	void print_debug() {
+		moo_status("DEBUG: %s", m_msg.c_str());
+	}
+};
+
+class FrameEventReturnPoint : public MooCodeEvent {
+    public:
+	FrameEventReturnPoint() : MooCodeEvent(NULL, NULL, NULL) { };
+	int do_event(MooCodeFrame *frame) { return(0); }
+};
+
+class FrameEventCatch : public MooCodeEvent {
+    public:
+	FrameEventCatch(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+
+	/// If we evaluate this during the normal run loop then an exception hasn't occurred and we therefore do nothing
+	int do_event(MooCodeFrame *frame) { return(0); }
+	int handle(MooCodeFrame *frame);
+};
+
+
 MooObjectType moo_code_frame_obj_type = {
 	&moo_object_obj_type,
 	"frame",
@@ -65,6 +95,21 @@ int MooCodeFrame::write_data(MooDataFile *data)
 	return(0);
 }
 
+
+int MooCodeFrame::eval(const char *code, MooArgs *args)
+{
+	try {
+		this->push_code(code);
+		return(this->run());
+	}
+	catch (MooException e) {
+		moo_status("EVAL: %s", e.get());
+		this->print_stacktrace();
+		return(-1);
+	}
+}
+
+
 int MooCodeFrame::push_event(MooCodeEvent *event)
 {
 	return(m_stack->push(event));
@@ -101,12 +146,7 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 
 	va_start(va, msg);
 	vsnprintf(buffer, STRING_SIZE, msg, va);
-	return(m_stack->push(new MooCodeEventDebug(buffer)));
-}
-
-int MooCodeFrame::push_return_point()
-{
-	return(m_stack->push(new MooCodeEventReturnPoint()));
+	return(m_stack->push(new FrameEventDebug(buffer)));
 }
 
 int MooCodeFrame::run()
@@ -135,7 +175,7 @@ int MooCodeFrame::run()
 
 			if (e.is_fatal())
 				throw e;
-			this->linecol(line, col);
+			event->linecol(line, col);
 			m_exception = new MooException(e.type(), "(%d, %d): %s", line, col, e.get());
 		}
 		catch (...) {
@@ -156,13 +196,45 @@ int MooCodeFrame::run()
 	return(0);
 }
 
+int MooCodeFrame::mark_return_point()
+{
+	if (dynamic_cast<FrameEventReturnPoint *>(m_stack->get_last()))
+		return(0);
+	return(m_stack->push(new FrameEventReturnPoint()));
+}
+
+int MooCodeFrame::goto_return_point(int level)
+{
+	int ret = 0;
+	MooCodeEvent *event;
+
+	do {
+		event = m_stack->pop();
+		if (!event)
+			return(0);
+		if (dynamic_cast<FrameEventReturnPoint *>(event)) {
+			level--;
+			if (level <= 0)
+				ret = 1;
+		}
+		delete event;
+	} while (!ret);
+	return(0);
+}
+
+int MooCodeFrame::mark_exception(MooCodeExpr *handler)
+{
+	return(m_stack->push(new FrameEventCatch(m_env, handler)));
+}
+
 int MooCodeFrame::handle_exception()
 {
 	MooCodeEvent *event;
-	MooCodeEventCatch *handler;
+	FrameEventCatch *handler;
 
+	// TODO REDO THIS ALLL
 	for (int i = m_stack->last(); i >= 0; i--) {
-		if ((handler = dynamic_cast<MooCodeEventCatch *>(m_stack->get(i)))) {
+		if ((handler = dynamic_cast<FrameEventCatch *>(m_stack->get(i)))) {
 			// TODO I guess temporarily here we rewind the stack until we think out exception handling more
 			for (int j = m_stack->last(); j > i; j--) {
 				if ((event = m_stack->pop()))
@@ -177,38 +249,19 @@ int MooCodeFrame::handle_exception()
 	return(0);
 }
 
-int MooCodeFrame::rewind_stack(int level)
-{
-	int ret = 0;
-	MooCodeEvent *event;
+/*******************
+ * FrameEventCatch *
+ *******************/
 
-	do {
-		event = m_stack->pop();
-		if (!event)
-			return(0);
-		if (dynamic_cast<MooCodeEventReturnPoint *>(event)) {
-			level--;
-			if (level <= 0)
-				ret = 1;
-		}
-		delete event;
-	} while (!ret);
+int FrameEventCatch::handle(MooCodeFrame *frame)
+{
+	// TODO this probably wont quite work since we'll put this on top of the faulted events
+	if (m_expr)
+		frame->push_event(new MooCodeEventEvalBlock(m_env, m_expr));
+	// TODO what else??
 	return(0);
 }
 
-
-int MooCodeFrame::eval(const char *code, MooArgs *args)
-{
-	try {
-		this->push_code(code);
-		return(this->run());
-	}
-	catch (MooException e) {
-		moo_status("EVAL: %s", e.get());
-		this->print_stack();
-		return(-1);
-	}
-}
 
 void MooCodeFrame::set_return(MooObject *obj)
 {
@@ -222,21 +275,7 @@ void MooCodeFrame::env(MooObjectHash *env)
 	MOO_INCREF(m_env = env);
 }
 
-int MooCodeFrame::linecol(int &line, int &col)
-{
-	int i;
-	MooCodeEvent *cur;
-
-	for (i = m_stack->last(); i >= 0; i--) {
-		if (!(cur = m_stack->get(i)))
-			return(0);
-		if (cur->linecol(line, col))
-			return(1);
-	}
-	return(0);
-}
-
-void MooCodeFrame::print_stack()
+void MooCodeFrame::print_stacktrace()
 {
 	MooCodeEvent *event;
 

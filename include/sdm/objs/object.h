@@ -41,9 +41,8 @@ class MooObject : public MooGC {
 	MooObject();
 	virtual ~MooObject() { }
 
-	const MooObjectType *type();
-	const char *type_name() { return(this->type()->m_name); }
-	inline int is_a(const MooObjectType *type);
+	const MooObjectType *objtype();
+	const char *objtype_name() { return(this->objtype()->m_name); }
 	int is_true();
 
 	void check_throw(moo_perm_t perms);
@@ -118,16 +117,6 @@ int moo_object_deregister_type(const MooObjectType *type);
 const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base);
 
 MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data);
-
-inline int MooObject::is_a(const MooObjectType *type) {
-	const MooObjectType *cur;
-
-	for (cur = this->type(); cur; cur = cur->m_parent) {
-		if (cur == type)
-			return(1);
-	}
-	return(0);
-}
 
 #endif
 

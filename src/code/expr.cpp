@@ -103,6 +103,15 @@ MooCodeExpr *MooCodeExpr::get_call()
 	return(expr);
 }
 
+const char *MooCodeExpr::get_string()
+{
+	MooString *str;
+
+	if (!(str = dynamic_cast<MooString *>(m_value)))
+		return(NULL);
+	return(str->m_str);
+}
+
 int MooCodeExpr::check_args(MooCodeExpr *expr, int min, int max)
 {
 	int num = 0;

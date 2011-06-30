@@ -39,14 +39,19 @@ class MooCodeExpr : public MooObject {
 	int line() { return(m_line); }
 	int col() { return(m_col); }
 	MooCodeExpr *next() { return(m_next); }
-	int expr_type() { return(m_type); }
+	int type() { return(m_type); }
 	MooObject *value() { return(m_value); }
 
 	const char *get_identifier();
 	MooCodeExpr *get_call();
 
-	void next(MooCodeExpr *expr) { if (expr) m_next = expr; }
+	const char *get_string();
+
 	static int check_args(MooCodeExpr *expr, int min, int max);
+
+    protected:
+	friend class MooCodeParser;
+	void next(MooCodeExpr *expr) { if (expr) m_next = expr; }
 };
 
 extern MooObjectType moo_code_expr_obj_type;

@@ -140,7 +140,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (!(expr = MooCodeParser::parse_code(text)))
 		MooException("Unable to parse input.");
 	for (MooCodeExpr *cur = expr; cur; cur = cur->next()) {
-		switch (cur->expr_type()) {
+		switch (cur->type()) {
 		    case MCT_OBJECT:
 			newargs->m_args->push(cur->value());
 			break;

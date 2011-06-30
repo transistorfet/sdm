@@ -87,7 +87,7 @@ int MooObjectHash::write_data(MooDataFile *data)
 	while ((cur = this->next_entry())) {
 		data->write_begin_entry("entry");
 		data->write_attrib_string("key", cur->m_key);
-		data->write_attrib_string("type", cur->m_data->type_name());
+		data->write_attrib_string("type", cur->m_data->objtype_name());
 		cur->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -302,9 +302,10 @@ class HashEventForeach : public MooCodeEvent {
 		MooObject *obj;
 		MooHashEntry<MooObject *> *entry;
 
+		// TODO this is disabled for now because it causes trouble if you don't pay attention to the return type
 		/// Stop this loop if the previous cycle returned #f
-		if ((obj = frame->get_return()) && !obj->is_true())
-			return(0);
+		//if ((obj = frame->get_return()) && !obj->is_true())
+		//	return(0);
 		if (!(entry = m_next)) {
 			for (; m_index < m_this->m_size; m_index++) {
 				if ((entry = m_this->m_table[m_index]))

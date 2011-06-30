@@ -25,25 +25,26 @@ class MooCodeFrame : public MooObject {
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
+	int eval(const char *code, MooArgs *args = NULL);
+
 	int push_event(MooCodeEvent *event);
 	int push_block(MooObjectHash *env, MooCodeExpr *expr);
 	int push_call(MooObjectHash *env, MooObject *func, MooArgs *args);
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
-	int push_return_point();
-	int run();
-	int handle_exception();
-	int rewind_stack(int level = 1);
 
-	int eval(const char *code, MooArgs *args = NULL);
+	int run();
+	int mark_return_point();
+	int goto_return_point(int level = 1);
+	int mark_exception(MooCodeExpr *handler);
+	int handle_exception();
 
 	void set_return(MooObject *obj);
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
 
-	int linecol(int &line, int &col);
-	void print_stack();
+	void print_stacktrace();
 };
 
 extern MooObjectType moo_code_frame_obj_type;

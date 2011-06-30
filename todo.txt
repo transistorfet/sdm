@@ -57,19 +57,18 @@
 
     TODO:
 
-	* add proper (try ... (catch ...)) or what about alternative system, like an error handler stored in the current env
+	* finish exception handling in frame
+	* add debug field to event and fix debug message printing
+	* fix inconsistent uses of nil and NULL
+
 	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
 	* get timers working
 
-	* completely revamp the error reporting and debugging part of the interpreter
-	* fix inconsistent uses of nil and NULL
-	* add infinite loop protection
-
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
+	* add infinite loop protection
 	* make it easier for C++ functions to use object array and hash functions with a permissions check
 	* review all code for permissions check errors and bugs.  Evaluate system security.
 	* fix realm_evaluate (object/target do_actions are disabled atm)
-	* make the code use the "title" property instead of the "name" property for displaying the name
 	* make some notify functions that can be called from MooCode that take certain format lines as input and output them to
 	  the appropriate people in the room (like socials.dat in SMAUG)
 	* i think it will have to be possible to have an inherited property either retain permissions or use the cloner's permissions

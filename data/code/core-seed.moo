@@ -420,9 +420,11 @@
 	(define this.description "You see an abstract program.")
 
 	(define this:notify (lambda (type user channel text)
-		(if (and (= type N/SAY) (!eqv? user this))
-			(if (equal? text "hello")
-				(channel:say (expand "Hello $user.name")))
+		(ignore
+			(if (and (= type N/SAY) (!eqv? user this))
+				(if (equal? text "hello")
+					(channel:say (expand "Hello $user.name")))
+			)
 		)
 	))
 )))

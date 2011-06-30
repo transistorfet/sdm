@@ -101,7 +101,7 @@ MooObject::MooObject()
 	m_permissions = MOO_DEFAULT_PERMS;
 }
 
-const MooObjectType *MooObject::type()
+const MooObjectType *MooObject::objtype()
 {
 	const MooObjectType *type;
 	type = realname_type_list->get(typeid(*this).name());
@@ -392,7 +392,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 	catch (MooException e) {
 		// TODO temporary for debugging purposes??
 		moo_status("CODE: %s", e.get());
-		frame->print_stack();
+		frame->print_stacktrace();
 
 		channel = dynamic_cast<MooThing *>(env->get("channel"));
 		if ((thing = MooThing::lookup(MooTask::current_user())))

@@ -47,7 +47,7 @@ static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (!(obj = args->m_args->get(0)))
 		throw moo_type_error;
 	obj->to_string(buffer, LARGE_STRING_SIZE);
-	moo_status("%s", buffer);
+	moo_status("DEBUG: %s", buffer);
 	return(0);
 }
 
@@ -465,7 +465,7 @@ static int basic_type(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	args->m_result = new MooString("%s", obj->type_name());
+	args->m_result = new MooString("%s", obj->objtype_name());
 	return(0);
 }
 
@@ -554,7 +554,7 @@ static int basic_return(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
 	args->m_result = obj;
-	frame->rewind_stack();
+	frame->goto_return_point();
 	return(0);
 }
 

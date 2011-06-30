@@ -199,7 +199,7 @@ int MooCodeParser::generate_expr(MooCodeExpr *expr, char *buffer, int max, MooCo
 
 	if (!style)
 		style = &moo_style_normal;
-	if (expr->expr_type() == MCT_OBJECT) {
+	if (expr->type() == MCT_OBJECT) {
 		if (!(obj = expr->value()))
 			return(0);
 		if ((str = dynamic_cast<MooString *>(obj))) {
@@ -210,12 +210,12 @@ int MooCodeParser::generate_expr(MooCodeExpr *expr, char *buffer, int max, MooCo
 		else
 			i += obj->to_string(&buffer[i], max - i);
 	}
-	else if (expr->expr_type() == MCT_IDENTIFIER) {
+	else if (expr->type() == MCT_IDENTIFIER) {
 		if (!(obj = expr->value()))
 			return(0);
 		i += obj->to_string(&buffer[i], max - i);
 	}
-	else if (expr->expr_type() == MCT_CALL) {
+	else if (expr->type() == MCT_CALL) {
 		call = dynamic_cast<MooCodeExpr *>(expr->value());
 		buffer[i++] = '(';
 		if (call) {

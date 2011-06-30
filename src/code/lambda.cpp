@@ -130,7 +130,7 @@ int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooAr
 	env = frame->env();
 	env = new MooObjectHash(env);
 	this->map_args(env, args);
-	frame->push_return_point();
+	frame->mark_return_point();
 	return(frame->push_block(env, m_func));
 }
 
