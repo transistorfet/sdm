@@ -52,11 +52,14 @@
 	(define this.name "generic-channel")
 	(define this.title "Generic Channel")
 
-	(define this.users (array))
+	(define this:initialize (lambda ()
+		(define this.users (array))
+	))
 
 	; TODO maybe this should take the user object that will join, and do a permissions check to make sure we can force a join on
 	;	that object.
 	(define this:join (chperms 0475 (lambda ()
+		(debug this.users)
 		(if (= (this.users:search user) -1)
 			(begin
 				(this.users:push user)
@@ -104,7 +107,7 @@
 	(define this:names (lambda ()
 		(define names "")
 		(this.users:foreach (lambda (cur)
-			(set names (concat names cur.name " "))
+			(set! names (concat names cur.name " "))
 		))
 		(chop names)
 	))
@@ -431,10 +434,10 @@
 (NickServ:register botty)
 ; TODO how would this work??
 ;(help:join botty)
-((lambda ()
-	(define user botty)
-	(#12:join)
-))
+;((lambda ()
+;	(define user botty)
+;	(#12:join)
+;))
 
 ;(architect:%save_all)
 
@@ -448,7 +451,7 @@
 ;		(define n 0)
 ;		(foreach loc:contents cur
 ;			(if (equals (type cur) (type beast))		; beast could instead be a var that always points to *this*
-;				(set n (+ n 1))))
+;				(set! n (+ n 1))))
 ;		n
 ;	))
 ;
@@ -459,7 +462,7 @@
 ;				0
 ;				(if (equals (type cur) (type beast))
 ;					(delete cur)
-;					(set num (- num 1)))))
+;					(set! num (- num 1)))))
 ;				
 ;	))
 ;

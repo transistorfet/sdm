@@ -57,6 +57,9 @@
 
     TODO:
 
+	* the channels problem is because the users array in every channel is actually the same array, rather than a seperate one for
+	  each.  This is because we do a very shallow duplicate.
+
 	* finish exception handling in frame
 	* add debug field to event and fix debug message printing
 	* fix inconsistent uses of nil and NULL

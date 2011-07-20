@@ -21,11 +21,15 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
 MooHash<MooFormT *> *form_env = NULL;
 
-MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr)
+MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr, MooObject *debug)
 {
 	MOO_INCREF(m_env = env);
 	MOO_INCREF(m_args = args);
 	MOO_INCREF(m_expr = expr);
+	if (debug)
+		MOO_INCREF(m_debug = debug);
+	else
+		MOO_INCREF(m_debug = expr);
 }
 
 MooCodeEvent::~MooCodeEvent()
@@ -33,13 +37,40 @@ MooCodeEvent::~MooCodeEvent()
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_args);
 	MOO_DECREF(m_expr);
+	MOO_DECREF(m_debug);
 }
 
-int MooCodeEvent::do_event(MooCodeFrame *frame)
+int MooCodeEvent::linecol(int &line, int &col)
 {
-	return(-1);
+	MooCodeExpr *expr;
+
+	if (!(expr = dynamic_cast<MooCodeExpr *>(m_debug))) {
+		line = 0;
+		col = 0;
+		return(0);
+	}
+	line = expr->line();
+	col = expr->col();
+	return(1);
 }
 
+#define DEBUG_LIMIT	77
+
+void MooCodeEvent::print_debug()
+{
+	int line, col;
+	MooCodeExpr *expr;
+	char buffer[STRING_SIZE];
+
+	this->linecol(line, col);
+	if (m_debug && (expr = dynamic_cast<MooCodeExpr *>(m_debug))) {
+		if (MooCodeParser::generate(expr, buffer, DEBUG_LIMIT, &moo_style_one_line) >= DEBUG_LIMIT)
+			strcpy(&buffer[DEBUG_LIMIT], "...");
+		moo_status("DEBUG: (%d, %d) %s: %s", line, col, typeid(*this).name(), buffer);
+	}
+	else
+		moo_status("DEBUG: (%d, %d) %s", line, col, typeid(*this).name());
+}
 
 /************************
  * MooCodeEventEvalExpr *
@@ -78,7 +109,7 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 		MooArgs *args = new MooArgs();
 		// TODO add debug information
 		//frame->push_debug("> call to %s");
-		frame->push_event(new MooCodeEventCallFunc(m_env, args));
+		frame->push_event(new MooCodeEventCallFunc(m_env, args, m_expr));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
 		MOO_DECREF(args);
 		break;
@@ -190,7 +221,7 @@ static int form_define(MooCodeFrame *frame, MooCodeExpr *expr)
 
 
 /******************************
- * Form: (set <name> <value>) *
+ * Form: (set! <name> <value>) *
  ******************************/
 
 class FormSetEvent : public MooCodeEvent {
@@ -361,7 +392,7 @@ static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
 		method->m_obj = othis;
  	args = new MooArgs();
 	args->m_args->set(0, MOO_INCREF(obj));
-	frame->push_event(new MooCodeEventCallFunc(env, args));
+	frame->push_event(new MooCodeEventCallFunc(env, args, expr));
 	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));
 	MOO_DECREF(args);
 	return(0);
@@ -440,7 +471,7 @@ int init_code_event(void)
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
 	form_env->set("define", new MooFormT(form_define));
-	form_env->set("set", new MooFormT(form_set));
+	form_env->set("set!", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("and", new MooFormT(form_and));
 	form_env->set("or", new MooFormT(form_or));

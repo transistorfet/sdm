@@ -40,6 +40,7 @@ class MooObject : public MooGC {
     public:
 	MooObject();
 	virtual ~MooObject() { }
+	virtual void print_debug();
 
 	const MooObjectType *objtype();
 	const char *objtype_name() { return(this->objtype()->m_name); }

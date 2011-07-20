@@ -101,6 +101,18 @@ MooObject::MooObject()
 	m_permissions = MOO_DEFAULT_PERMS;
 }
 
+#define DEBUG_LIMIT	77
+
+void MooObject::print_debug()
+{
+	char buffer[STRING_SIZE];
+
+	//MooCodeParser::generate(m_expr, buffer, LARGE_STRING_SIZE, &moo_style_one_line);
+	if (this->to_string(buffer, DEBUG_LIMIT) >= DEBUG_LIMIT)
+		strcpy(&buffer[DEBUG_LIMIT], "...");
+	moo_status("DEBUG: (%s) %s", typeid(*this).name(), buffer);
+}
+
 const MooObjectType *MooObject::objtype()
 {
 	const MooObjectType *type;

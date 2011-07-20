@@ -123,7 +123,7 @@ int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr)
 int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
 {
 	args->m_args->unshift(func);
-	return(m_stack->push(new MooCodeEventCallFunc(env, args)));
+	return(m_stack->push(new MooCodeEventCallFunc(env, args, func)));
 }
 
 int MooCodeFrame::push_code(const char *code)
@@ -168,6 +168,8 @@ int MooCodeFrame::run()
 
 		try {
 			this->env(event->env());
+			// TODO temporary for debugging
+			//event->print_debug();
 			event->do_event(this);
 		}
 		catch (MooException e) {

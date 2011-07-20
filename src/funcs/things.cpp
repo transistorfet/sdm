@@ -48,8 +48,8 @@ static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 
 static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *func;
 	MooObject *id = NULL;
+	MooObject *func, *init;
 	MooThing *thing, *parent;
 	moo_id_t idnum = MOO_NEW_ID;
 
@@ -72,6 +72,8 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
 	if (func)
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
+	if ((init = thing->resolve_method("initialize")))
+		frame->push_call(env, init, new MooArgs());
 	return(0);
 }
 

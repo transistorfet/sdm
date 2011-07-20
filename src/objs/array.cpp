@@ -95,7 +95,20 @@ int MooObjectArray::write_data(MooDataFile *data)
 
 int MooObjectArray::to_string(char *buffer, int max)
 {
+	int j = 0;
+	MooObject *obj;
 
+	if (this->last() >= 0) {
+		obj = this->get(0);
+		j += obj->to_string(&buffer[j], max - j);
+		for (int i = 1; i <= this->last() && j < max; i++) {
+			buffer[j++] = ' ';
+			obj = this->get(i);
+			j += obj->to_string(&buffer[j], max - j);
+		}
+	}
+	buffer[j] = '\0';
+	return(j);
 }
 
 long int MooObjectArray::get_integer(int index)
