@@ -249,9 +249,9 @@ static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
-/*******************************************************
- * Form: (if <cond:number> <true-expr> [<false-expr>]) *
- *******************************************************/
+/*****************************************************
+ * Form: (if <cond-expr> <true-expr> [<false-expr>]) *
+ *****************************************************/
 
 class FormIfEvent : public MooCodeEvent {
     public:
@@ -273,6 +273,42 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 		throw moo_args_mismatched;
 	frame->push_event(new FormIfEvent(frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
+	return(0);
+}
+
+/********************************************************************
+ * Form: (cond (<cond-expr> <true-expr>) ... [(else <else-expr>)] ) *
+ ********************************************************************/
+
+class FormCondEvent : public MooCodeEvent {
+	MooCodeExpr *m_next;
+    public:
+	FormCondEvent(MooObjectHash *env, MooCodeExpr *expr, MooCodeExpr *next) : MooCodeEvent(env, NULL, expr) {
+		m_next = next;
+	}
+
+	int do_event(MooCodeFrame *frame) {
+		MooObject *obj;
+
+		if ((obj = frame->get_return()) && obj->is_true())
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
+		else if (m_next) {
+			MooCodeExpr *cond;
+
+			cond = m_next->get_call();
+			frame->push_event(new FormCondEvent(frame->env(), cond->next(), m_next->next()));
+			frame->push_event(new MooCodeEventEvalExpr(frame->env(), cond));
+		}
+		return(0);
+	}
+};
+
+static int form_cond(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!expr)
+		throw moo_args_mismatched;
+	frame->set_return(new MooBoolean(B_FALSE));
+	frame->push_event(new FormCondEvent(frame->env(), NULL, expr));
 	return(0);
 }
 
@@ -473,6 +509,7 @@ int init_code_event(void)
 	form_env->set("define", new MooFormT(form_define));
 	form_env->set("set!", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
+	form_env->set("cond", new MooFormT(form_cond));
 	form_env->set("and", new MooFormT(form_and));
 	form_env->set("or", new MooFormT(form_or));
 	form_env->set("begin", new MooFormT(form_begin));
@@ -482,6 +519,8 @@ int init_code_event(void)
 	form_env->set("try", new MooFormT(form_try));
 	form_env->set("catch", new MooFormT(form_catch));
 	form_env->set("defined?", new MooFormT(form_defined));
+
+	global_env->set("else", new MooBoolean(B_TRUE));
 	return(0);
 }
 

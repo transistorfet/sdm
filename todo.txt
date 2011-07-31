@@ -57,8 +57,9 @@
 
     TODO:
 
-	* the channels problem is because the users array in every channel is actually the same array, rather than a seperate one for
-	  each.  This is because we do a very shallow duplicate.
+	* we haven't fixed the problem with arrays and hashes and any complex data types where when a parent object is cloned, the
+	  properties in the new Thing point to the same objects rather than being new but duplicate objects
+	* MooMethod is still really ugly and should be changed
 
 	* finish exception handling in frame
 	* add debug field to event and fix debug message printing

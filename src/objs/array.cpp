@@ -186,6 +186,9 @@ static int array_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	m_this->check_throw(MOO_PERM_R);
 	index = args->m_args->get_integer(0);
 	args->m_result = m_this->get(index);
+	// TODO This is temporary until we figure out nil/NULL
+	if (!args->m_result)
+		args->m_result = &moo_nil;
 	return(0);
 }
 

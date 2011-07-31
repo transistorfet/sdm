@@ -124,6 +124,8 @@
 	(define this:join (lambda ()
 		(super join)
 		(this:fetch user)
+		(user:tell "Welcome te the Realm!")
+		(user:tell "To enter a command, put a period (.) before it (eg. .look)")
 	))
 
 	(define this:leave (lambda ()
@@ -186,10 +188,10 @@
 
 	(define this:move %thing_move)
 
-	(define find (lambda (name)
-		(if (equals? name "me")
+	(define this:find (lambda (name)
+		(if (equal? name "me")
 			this
-			(if (equals? name "here")
+			(if (equal? name "here")
 				this.location
 				; TODO otherwise, search the current user for an object and then search the user's location for an object
 			)
@@ -267,8 +269,10 @@
 
 	(define this.looked_at "$user.name looks around the room.")
 
-	(define this:look (lambda (name)
-		(if name
+	(define this:look (lambda (&all)
+		(define name (args:get 0))
+		(if (not (null? name))
+			(this:look_self)
 			(begin
 				(define obj (user:find name))
 				(if (null? obj)
@@ -276,7 +280,6 @@
 					(obj:look_self)
 				)
 			)
-			(this:look_self)
 		)
 	))
 
