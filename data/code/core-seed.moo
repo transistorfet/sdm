@@ -124,7 +124,7 @@
 	(define this:join (lambda ()
 		(super join)
 		(this:fetch user)
-		(user:tell "Welcome te the Realm!")
+		(user:tell "Welcome to the Realm!")
 		(user:tell "To enter a command, put a period (.) before it (eg. .look)")
 	))
 
