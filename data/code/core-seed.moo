@@ -170,7 +170,6 @@
 	(define this.description "You're not sure what it is.")
 
 	(define this:look_self (lambda ()
-		(user:tell (expand "<yellow>$this.title"))
 		(user:tell (expand "<lightgreen>$this.description"))
 	))
 
@@ -189,11 +188,16 @@
 	(define this:move %thing_move)
 
 	(define this:find (lambda (name)
-		(if (equal? name "me")
-			this
-			(if (equal? name "here")
+		(cond
+			((equal? name "me")
+				this
+			)
+			((equal? name "here")
 				this.location
+			)
+			(else
 				; TODO otherwise, search the current user for an object and then search the user's location for an object
+				nil
 			)
 		)
 	))
@@ -271,7 +275,7 @@
 
 	(define this:look (lambda (&all)
 		(define name (args:get 0))
-		(if (not (null? name))
+		(if (null? name)
 			(this:look_self)
 			(begin
 				(define obj (user:find name))
@@ -284,12 +288,17 @@
 	))
 
 	(define this:look_self (lambda ()
-		(user:tell (expand "<yellow>$this.title"))
-		(user:tell (expand "<lightgreen>$this.description"))
-		(if this.display_contents
-			(user.location.contents:foreach (lambda (cur)
-				(user:tell (expand "<blue>$cur.title"))
-			))
+		(if (not (this.contents:search user))
+			(user:tell "You don't have clairvoyance.")
+			(begin
+				(user:tell (expand "<yellow>$this.title"))
+				(user:tell (expand "<lightgreen>$this.description"))
+				(if this.display_contents
+					(user.location.contents:foreach (lambda (cur)
+						(user:tell (expand "<blue>$cur.title"))
+					))
+				)
+			)
 		)
 	))
 

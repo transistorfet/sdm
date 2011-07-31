@@ -133,13 +133,16 @@ static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	for (int i = 0; i <= args->m_args->last(); i++) {
-		if (args->m_args->get(i)) {
-			args->m_result = new MooBoolean(B_FALSE);
-			return(0);
-		}
+	MooObject *obj;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	if (!obj || (obj == &moo_nil)) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
 	}
-	args->m_result = new MooBoolean(B_TRUE);
+	args->m_result = new MooBoolean(B_FALSE);
 	return(0);
 }
 
@@ -469,6 +472,79 @@ static int basic_type(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int basic_boolean_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooBoolean *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_number_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooNumber *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_string_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooString *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_array_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooObjectArray *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_hash_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooObjectHash *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_thing_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooThing *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+
 static int basic_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	args->m_result = args->m_args;
@@ -637,6 +713,13 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("ltrim", new MooFunc(basic_ltrim));
 
 	env->set("type", new MooFunc(basic_type));
+	env->set("boolean?", new MooFunc(basic_boolean_q));
+	env->set("number?", new MooFunc(basic_number_q));
+	env->set("string?", new MooFunc(basic_string_q));
+	env->set("array?", new MooFunc(basic_array_q));
+	env->set("hash?", new MooFunc(basic_hash_q));
+	env->set("thing?", new MooFunc(basic_thing_q));
+
 	env->set("array", new MooFunc(basic_array));
 	env->set("hash", new MooFunc(basic_hash));
 
