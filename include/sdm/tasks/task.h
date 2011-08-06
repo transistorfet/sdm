@@ -36,6 +36,8 @@ class MooTask : public MooObject {
 	MooTask();
 	virtual ~MooTask();
 
+	int run_idle();
+
 	virtual int initialize() = 0;
 	virtual int idle() = 0;
 	virtual int release() = 0;

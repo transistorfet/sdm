@@ -77,6 +77,9 @@
 	  the appropriate people in the room (like socials.dat in SMAUG)
 	* i think it will have to be possible to have an inherited property either retain permissions or use the cloner's permissions
 	  (make the cloner the owner) (sticky bit?).  Some properties need to be owned by the new object, and some need to be private.
+	* you could have a locking mechanism in the frame itself similar to the task suid mechanism, where an unlock event is placed
+	  on the stack.  Then, when a frame is going to be suspended, it can check for a lock and continue execution until the unlock
+	  is reached.  It can also monitor for overrun and terminate the task or something.
 
 	* if possible/needed, you could have a method on NickServ which goes through all the users at startup and makes sure they are
 	  in the cryolocker or something
@@ -85,6 +88,7 @@
 	* add irc server-to-client pinging & connection timeouts
 	* add flood protection of some kind (???)  (could this somehow be an add-on or a coded thing)
 
+	* make an (undefine ...) command for completeness?
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
 	* how can you delete MooThings from the system?
 	* add return/return-from (how does lisp do it?) for breaking out of loops or returning early.  Perhaps we could use an exception

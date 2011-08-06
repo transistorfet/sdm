@@ -7,14 +7,6 @@
  <properties>
   <owner>-1</owner>
   <permissions>055</permissions>
-  <entry key="location" type="nil">
-   <owner>-1</owner>
-   <permissions>077</permissions>
-  </entry>
-  <entry key="contents" type="array">
-   <owner>-1</owner>
-   <permissions>055</permissions>
-  </entry>
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>055</permissions>
@@ -24,6 +16,14 @@
  <methods>
   <owner>-1</owner>
   <permissions>055</permissions>
+  <entry key="initialize" type="moolambda">
+   <owner>-1</owner>
+   <permissions>075</permissions>
+   <code>
+    (define this.location nil)
+    (define this.contents (array))
+   </code>
+  </entry>
   <entry key="%save" type="moofunc">
    <owner>-1</owner>
    <permissions>075</permissions>

@@ -169,7 +169,7 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 	if (!(method = user->resolve_method(cmd))) {
 		MooObject *location = user->resolve_property("location");
-		if (!(method = location->resolve_method(cmd))) {
+		if (location && !(method = location->resolve_method(cmd))) {
 			// TODO try to parse more and search the objects
 		}
 	}

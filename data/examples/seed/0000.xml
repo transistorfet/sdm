@@ -7,14 +7,6 @@
  <properties>
   <owner>-1</owner>
   <permissions>055</permissions>
-  <entry key="location" type="nil">
-   <owner>-1</owner>
-   <permissions>077</permissions>
-  </entry>
-  <entry key="contents" type="array">
-   <owner>-1</owner>
-   <permissions>055</permissions>
-  </entry>
   <entry key="name" type="string">
    <owner>-1</owner>
    <permissions>055</permissions>

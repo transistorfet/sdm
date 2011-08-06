@@ -125,10 +125,11 @@ MooThing *MooThing::clone(moo_id_t id)
 	else if (!(thing = new MooThing(id, this->m_id)))
 		throw MooException("Error creating new thing from %d", this->m_id);
 
+	/*
 	this->m_properties->reset();
 	while ((entry = this->m_properties->next_entry()))
 		thing->m_properties->set(entry->m_key, MOO_INCREF(entry->m_data));
-	// TODO call thing:init ??
+	*/
 	return(thing);
 }
 

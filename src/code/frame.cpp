@@ -234,7 +234,6 @@ int MooCodeFrame::handle_exception()
 	MooCodeEvent *event;
 	FrameEventCatch *handler;
 
-	// TODO REDO THIS ALLL
 	for (int i = m_stack->last(); i >= 0; i--) {
 		if ((handler = dynamic_cast<FrameEventCatch *>(m_stack->get(i)))) {
 			// TODO I guess temporarily here we rewind the stack until we think out exception handling more
@@ -243,6 +242,7 @@ int MooCodeFrame::handle_exception()
 					delete event;
 			}
 			m_stack->pop();		/// Pop the handler off the stack but don't delete it yet
+			this->set_return(NULL);
 			handler->handle(this);
 			delete handler;
 			return(1);
@@ -267,6 +267,8 @@ int FrameEventCatch::handle(MooCodeFrame *frame)
 
 void MooCodeFrame::set_return(MooObject *obj)
 {
+	if (!obj)
+		obj = &moo_nil;
 	MOO_DECREF(m_return);
 	m_return = MOO_INCREF(obj);
 }

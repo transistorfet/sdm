@@ -21,15 +21,18 @@
 
 static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int j = 0;
 	MooObject *obj;
 	MooThing *user, *channel;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (args->m_args->last() != 0)
+	if (args->m_args->last() == -1)
 		throw moo_args_mismatched;
-	if (!(obj = args->m_args->get(0)))
-		throw moo_type_error;
-	obj->to_string(buffer, LARGE_STRING_SIZE);
+	for (int i = 0; i <= args->m_args->last(); i++) {
+		if (!(obj = args->m_args->get(i)))
+			throw moo_type_error;
+		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
+	}
 	if (!(user = dynamic_cast<MooThing *>(env->get("user"))))
 		throw moo_type_error;
 	channel = dynamic_cast<MooThing *>(env->get("channel"));
@@ -39,18 +42,31 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int j = 0;
 	MooObject *obj;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (args->m_args->last() != 0)
+	if (args->m_args->last() == -1)
 		throw moo_args_mismatched;
-	if (!(obj = args->m_args->get(0)))
-		throw moo_type_error;
-	obj->to_string(buffer, LARGE_STRING_SIZE);
+	for (int i = 0; i <= args->m_args->last(); i++) {
+		if (!(obj = args->m_args->get(i)))
+			throw moo_type_error;
+		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
+	}
 	moo_status("DEBUG: %s", buffer);
 	return(0);
 }
 
+static int basic_printstack(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	frame->print_stacktrace();
+	return(0);
+}
 
 
 /******************
@@ -658,7 +674,7 @@ static int basic_owner(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
-static int basic_chperms(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int basic_chmod(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooThing *owner = NULL;
 	MooObject *obj, *perms;
@@ -686,6 +702,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 {
 	env->set("print", new MooFunc(basic_print));
 	env->set("debug", new MooFunc(basic_debug));
+	env->set("printstack", new MooFunc(basic_printstack));
 
 	env->set("+", new MooFunc(basic_add));
 	env->set("-", new MooFunc(basic_subtract));
@@ -732,7 +749,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 
 	env->set("perms", new MooFunc(basic_perms));
 	env->set("owner", new MooFunc(basic_owner));
-	env->set("chperms", new MooFunc(basic_chperms));
+	env->set("chmod", new MooFunc(basic_chmod));
 
 /*
 	Possible Future Primatives:

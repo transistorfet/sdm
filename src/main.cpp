@@ -77,18 +77,6 @@ int init_moo(void)
 			frame = new MooCodeFrame();
 			frame->eval("(load \"code/core-seed.moo\")");
 		}
-
-		// TODO what should i use for these names:
-		//	*start*, %room%, +user+, T/CRYOLOCKER, $channels
-		/*
-		global_env->set("@start", MooThing::reference(MOO_START_ROOM));
-		global_env->set("@user", MooThing::reference(MOO_GENERIC_USER));
-		global_env->set("@room", MooThing::reference(MOO_GENERIC_ROOM));
-		global_env->set("@exit", MooThing::reference(MOO_GENERIC_EXIT));
-		global_env->set("@mobile", MooThing::reference(MOO_GENERIC_MOBILE));
-		global_env->set("@cryolocker", MooThing::reference(MOO_CRYOLOCKER));
-		global_env->set("@channels", MooThing::reference(MOO_CHANNELS));
-		*/
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());

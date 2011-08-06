@@ -53,15 +53,32 @@ MooTask::MooTask()
 		m_parent_tid = g_current_task->m_tid;
 	else
 		m_parent_tid = -1;
+	//this->initialize();
 }
 
 MooTask::~MooTask()
 {
+	//this->release();
 	if (this == g_current_task) {
 		g_current_task = NULL;
 		g_current_owner = -1;
 	}
 	g_task_list->set(m_tid, NULL);
+}
+
+int MooTask::run_idle()
+{
+	int ret = 0;
+	MooTask *task;
+
+	// TODO i don't think this is right at all
+	for (int i = 0; i < g_task_list->last(); i++) {
+		task = g_task_list->get(i);
+		MooTask::switch_task(task);
+		if (task->idle())
+			ret = 1;
+	}
+	return(ret);
 }
 
 int MooTask::bestow(MooInterface *inter)
