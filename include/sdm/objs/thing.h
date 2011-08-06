@@ -71,9 +71,6 @@ class MooThing : public MooObject {
 	static int is_wizard(moo_id_t id);
 
 	const char *name();
-	MooThing *location();
-	inline MooObjectArray *contents() { return(dynamic_cast<MooObjectArray *>(this->resolve_property("contents"))); }
-	int move(MooThing *where);
 	int connect(MooTask *task);
 	void disconnect();
 	int notify(int type, MooThing *thing, MooThing *channel, const char *text);

@@ -59,9 +59,6 @@ static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 static int basic_printstack(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
-	MooObject *obj;
-	char buffer[LARGE_STRING_SIZE];
-
 	if (args->m_args->last() != -1)
 		throw moo_args_mismatched;
 	frame->print_stacktrace();
@@ -560,6 +557,30 @@ static int basic_thing_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int basic_lambda_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooCodeLambda *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
+static int basic_method_q(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	if (dynamic_cast<MooMethod *>(args->m_args->get(0))) {
+		args->m_result = new MooBoolean(B_TRUE);
+		return(0);
+	}
+	args->m_result = new MooBoolean(B_FALSE);
+	return(0);
+}
+
 
 static int basic_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -736,6 +757,8 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("array?", new MooFunc(basic_array_q));
 	env->set("hash?", new MooFunc(basic_hash_q));
 	env->set("thing?", new MooFunc(basic_thing_q));
+	env->set("lambda?", new MooFunc(basic_lambda_q));
+	env->set("method?", new MooFunc(basic_method_q));
 
 	env->set("array", new MooFunc(basic_array));
 	env->set("hash", new MooFunc(basic_hash));

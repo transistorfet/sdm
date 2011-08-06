@@ -48,12 +48,12 @@ static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args
 
 static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	MooMethod *init;
+	MooObject *func;
 	MooObject *id = NULL;
-	MooObject *func, *init;
 	MooThing *thing, *parent;
 	moo_id_t idnum = MOO_NEW_ID;
 
-	// TODO is this good being a method? will we run into problems with initializing objects?
 	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
 		throw moo_method_object;
 	if (args->m_args->last() == 0)
@@ -72,24 +72,16 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
 	if (func)
 		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
-	if ((init = thing->resolve_method("initialize")))
-		frame->push_call(env, init, new MooArgs());
+
+	/// Call the 'initialize' method of each parent object (Most distant parent will be called first)
+	while (parent) {
+		if ((init = dynamic_cast<MooMethod *>(parent->resolve_method("initialize")))) {
+			init->m_obj = thing;
+			frame->push_call(env, init, new MooArgs());
+		}
+		parent = parent->parent();
+	}
 	return(0);
-}
-
-static int thing_move(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooObject *obj;
-	MooThing *thing, *where;
-
-	// TODO anything special for permissions?
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() != 0)
-		throw moo_args_mismatched;
-	if (!(obj = args->m_args->get(0)) || !(where = obj->get_thing()))
-		throw moo_type_error;
-	return(thing->move(where));
 }
 
 #define MAX_WORDS	256
@@ -190,7 +182,6 @@ int moo_load_thing_methods(MooObjectHash *env)
 	env->set("%thing_save", new MooFunc(thing_save));
 	env->set("%thing_save_all", new MooFunc(thing_save_all));
 	env->set("%thing_clone", new MooFunc(thing_clone));
-	env->set("%thing_move", new MooFunc(thing_move));
 	env->set("%parse_command", new MooFunc(parse_command));
 	return(0);
 }

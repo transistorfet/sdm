@@ -416,32 +416,6 @@ const char *MooThing::name()
 	return(name);
 }
 
-MooThing *MooThing::location()
-{
-	MooObject *obj;
-	if (!(obj = this->resolve_property("location")))
-		return(NULL);
-	return(dynamic_cast<MooThing *>(obj));
-}
-
-int MooThing::move(MooThing *where)
-{
-	MooThing *was;
-	MooObjectArray *contents;
-
-	// TODO add permissions checks (this wasn't working)
-	//this->check_throw(MOO_PERM_W);
-	if ((was = this->location()) && (contents = was->contents()))
-		contents->remove(this);
-	if ((contents = where->contents())) {
-		// TODO do you need to check permissions on the contents array to be sure you can write to them?
-		if (contents->add(this) < 0)
-			return(-1);
-		this->resolve_property("location", where);
-	}
-	return(0);
-}
-
 int MooThing::connect(MooTask *task)
 {
 	int res;

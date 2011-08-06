@@ -236,7 +236,7 @@ int MooCodeFrame::handle_exception()
 
 	for (int i = m_stack->last(); i >= 0; i--) {
 		if ((handler = dynamic_cast<FrameEventCatch *>(m_stack->get(i)))) {
-			// TODO I guess temporarily here we rewind the stack until we think out exception handling more
+			/// Rewind the stack
 			for (int j = m_stack->last(); j > i; j--) {
 				if ((event = m_stack->pop()))
 					delete event;
@@ -257,10 +257,8 @@ int MooCodeFrame::handle_exception()
 
 int FrameEventCatch::handle(MooCodeFrame *frame)
 {
-	// TODO this probably wont quite work since we'll put this on top of the faulted events
 	if (m_expr)
 		frame->push_event(new MooCodeEventEvalBlock(m_env, m_expr));
-	// TODO what else??
 	return(0);
 }
 

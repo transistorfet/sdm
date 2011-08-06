@@ -29,7 +29,7 @@ MooThing *user_make_guest(const char *name)
 	user->resolve_property("name", new MooString(name));
 	user->owner(user->id());
 	user->resolve_property("description", new MooString("You see a new person who looks rather out-of-place."));
-	user->move(dynamic_cast<MooThing *>(MooObject::resolve("start-room", NULL)));
+	//user->move(dynamic_cast<MooThing *>(MooObject::resolve("start-room", NULL)));
 	return(user);
 }
 

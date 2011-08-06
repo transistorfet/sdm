@@ -294,7 +294,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		    && !(obj = global_env->get(buffer)))
 			return(NULL);
 	}
-	if (remain && !(obj = obj->resolve_property(remain, value)))
+	if (remain && !(obj = obj->resolve_property(remain, method ? NULL : value)))
 		return(NULL);
 
 	if (method) {
@@ -416,7 +416,6 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 	return(res);
 }
 
-// TODO should this function be private or something? I think it's only ever called by MooCodeEventCallExpr
 int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	int res;

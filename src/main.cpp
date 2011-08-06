@@ -111,7 +111,7 @@ void release_moo(void)
 int main(int argc, char **argv)
 {
 	if (init_moo()) {
-		printf("Failed to initialize mud\n");
+		printf("Failed to initialize moo\n");
 		release_moo();
 		return(0);
 	}

@@ -83,10 +83,10 @@ int MooCodeLambda::to_string(char *buffer, int max)
 
 	strcpy(buffer, "(lambda (");
 	i += 9;
-	i += MooCodeParser::generate(m_params, &buffer[i], STRING_SIZE - i);
+	i += MooCodeParser::generate(m_params, &buffer[i], STRING_SIZE - i, &moo_style_one_line);
 	strcpy(&buffer[i], ") ");
 	i += 2;
-	i += MooCodeParser::generate(m_func, &buffer[i], STRING_SIZE -i);
+	i += MooCodeParser::generate(m_func, &buffer[i], STRING_SIZE -i, &moo_style_one_line);
 	buffer[i] = ')';
 	return(0);
 }

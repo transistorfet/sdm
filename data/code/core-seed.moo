@@ -3,10 +3,10 @@
 
 (define *global*.root #0)
 
-;(define #0:initialize (lambda ()
-;	(define this.location nil)
-;	(define this.contents (array))
-;))
+(define *global*.root:initialize (lambda ()
+	(define this.location nil)
+	(define this.contents (array))
+))
 
 (define *global*.ChanServ (root:%clone (lambda ()
 	(define this.name "ChanServ")
@@ -173,11 +173,10 @@
 	(define this:move (lambda (where)
 		; TODO we need to add some (try ...) protection here
 		(define was (ignore this.location))
-		(print where " " was)
 		(if (and (not (null? was)) (not (was.contents:remove this)))
 			(return))
 		(define this.location where)
-		(where.contents:add this)
+		(where.contents:push this)
 	))
 
 	(define this:look_self (lambda ()
@@ -199,15 +198,12 @@
 	(define this:find (lambda (name)
 		(cond
 			((equal? name "me")
-				this
-			)
+				this)
 			((equal? name "here")
-				this.location
-			)
+				this.location)
 			(else
 				; TODO otherwise, search the current user for an object and then search the user's location for an object
-				nil
-			)
+				nil)
 		)
 	))
 
@@ -278,13 +274,12 @@
 	(define this.name "generic-room")
 	(define this.title "someplace")
 
-	(define this.locked #f)
-	(define this.display_contents #t)
-
 	(define this.looked_at "$user.name looks around the room.")
 
 	(define this:initialize (lambda ()
+		(define this.locked #f)
 		(define this.exits (hash))
+		(define this.display_contents #t)
 	))
 
 	(define this:look (lambda (&all)
