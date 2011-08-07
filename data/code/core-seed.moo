@@ -145,7 +145,7 @@
 		(user.location:emote text)
 	))
 
-	(define this:command %parse_command)
+	(define this:command %command)
 ;	(define this:command (lambda (text)
 ;		(define argstr text)
 ;		(define dobjstr "")
@@ -287,8 +287,6 @@
 	(define this:@eval (lambda (&all)
 		(eval argstr)
 	))
-
-	(define this:%save_all %thing_save_all)
 )))
 
 (define *global*.wizard (architect:%clone (lambda ()

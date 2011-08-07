@@ -16,20 +16,5 @@
  <methods>
   <owner>-1</owner>
   <permissions>055</permissions>
-  <entry key="%save" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_save</func>
-  </entry>
-  <entry key="%clone" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_clone</func>
-  </entry>
-  <entry key="%load" type="moofunc">
-   <owner>-1</owner>
-   <permissions>075</permissions>
-   <func>%thing_load</func>
-  </entry>
  </methods>
 </thing>

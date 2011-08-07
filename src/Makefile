@@ -22,7 +22,6 @@ OBJS =	colours.o	\
 	funcs/basic.o	\
 	funcs/func.o	\
 	funcs/method.o	\
-	funcs/things.o	\
 	funcs/users.o	\
 	interfaces/interface.o	\
 	interfaces/tcp.o	\
@@ -36,6 +35,7 @@ OBJS =	colours.o	\
 	objs/object.o	\
 	objs/string.o	\
 	objs/thing.o	\
+	tasks/code.o	\
 	tasks/init.o	\
 	tasks/listener.o	\
 	tasks/task.o	\
@@ -201,18 +201,6 @@ funcs/method.o: funcs/method.cpp ../include/sdm/data.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/objs/thing.h
 
-funcs/things.o: funcs/things.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
-  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
-  ../include/sdm/objs/args.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h ../include/sdm/objs/thing.h
-
 funcs/users.o: funcs/users.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/code/code.h ../include/sdm/objs/object.h \
@@ -320,6 +308,13 @@ objs/thing.o: objs/thing.cpp ../include/sdm/data.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/objs/thing.h
+
+tasks/code.o: tasks/code.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
+  ../include/sdm/tasks/code.h
 
 tasks/init.o: tasks/init.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

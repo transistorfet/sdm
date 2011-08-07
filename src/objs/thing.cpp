@@ -508,38 +508,10 @@ int MooChannel::valid_channelname(const char *name)
 }
 */
 
-static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooThing *thing;
 
-	// TODO permissions check
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() != -1)
-		throw moo_args_mismatched;
-	thing->load();
-	return(0);
-}
-
-static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	MooThing *thing;
-
-	// TODO permissions check
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
-		throw moo_method_object;
-	if (args->m_args->last() != -1)
-		throw moo_args_mismatched;
-	thing->save();
-	return(0);
-}
-
-static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
-{
-	// TODO permissions check
-	MooThing::save_all();
-	return(0);
-}
+/************************
+ * Thing Object Methods *
+ ************************/
 
 static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
@@ -576,6 +548,39 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		}
 		parent = parent->parent();
 	}
+	return(0);
+}
+
+static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	// TODO permissions check
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->load();
+	return(0);
+}
+
+static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	// TODO permissions check
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->save();
+	return(0);
+}
+
+static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	// TODO permissions check
+	MooThing::save_all();
 	return(0);
 }
 
@@ -672,10 +677,10 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 void moo_load_thing_methods(MooObjectHash *env)
 {
+	env->set("%clone", new MooFunc(thing_clone));
 	env->set("%load", new MooFunc(thing_load));
 	env->set("%save", new MooFunc(thing_save));
 	env->set("%save_all", new MooFunc(thing_save_all));
-	env->set("%clone", new MooFunc(thing_clone));
 	env->set("%command", new MooFunc(parse_command));
 }
 
