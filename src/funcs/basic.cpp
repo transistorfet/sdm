@@ -492,6 +492,13 @@ static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 	words[0] = &buffer[i];
 	for (; buffer[i] != '\0'; i++) {
 		if (buffer[i] == '\"') {
+			/// If the quote isn't the start of the next word, then close off the old word and start a new one
+			if (words[j][0] != '\"') {
+				buffer[i] = '\0';
+				j++;
+			}
+
+			/// Remove the quote from the word (or otherwise, start a new word)
 			words[j] = &buffer[++i];
 			for (; buffer[i] != '\0' && buffer[i] != '\"'; i++)
 				;
@@ -502,6 +509,7 @@ static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 			while (parser_is_whitespace(buffer[i]))
 				i++;
 			words[++j] = &buffer[i];
+			i--;
 		}
 	}
 	if (*words[j] == '\0')

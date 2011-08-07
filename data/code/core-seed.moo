@@ -147,9 +147,7 @@
 
 	(define this.prepositions (array "to" "in" "from" "is" "as"))
 
-	;(define this:command %command)
 	(define this:command (lambda (text)
-		; TODO we need to remove the command part from text
 		(define argstr (remove-word text))
 		(define dobjstr "")
 		(define prepstr "")
