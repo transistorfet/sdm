@@ -32,6 +32,8 @@
 	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
 
       MultiTasking:
+	* you could have a tasks/ directory the same as the current objs/ directory, such that each task ID coresponds to a numbered
+	  file in the tasks/ directory and stored in that is the task state such that it can be restarted using that information.
 	* perhaps you could add a lock/unlock method pair to MooObject or MooThing such that you pass it a pointer to the user (or
 	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
 	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine

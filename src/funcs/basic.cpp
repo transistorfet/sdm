@@ -504,12 +504,33 @@ static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 			words[++j] = &buffer[i];
 		}
 	}
+	if (*words[j] == '\0')
+		j--;
 
 	/// Build the array
 	array = new MooObjectArray();
-	for (int k = 0; k < j; k++)
+	for (int k = 0; k <= j; k++)
 		array->push(new MooString("%s", words[k]));
 	args->m_result = array;
+	return(0);
+}
+
+static int basic_remove_word(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int i = 0;
+	const char *text;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	text = args->m_args->get_string(0);
+
+	while (text[i] != '\0' && parser_is_whitespace(text[i]))
+		i++;
+	while (text[i] != '\0' && !parser_is_whitespace(text[i]))
+		i++;
+	while (text[i] != '\0' && parser_is_whitespace(text[i]))
+		i++;
+	args->m_result = new MooString("%s", &text[i]);
 	return(0);
 }
 
@@ -819,6 +840,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("substr", new MooFunc(basic_substr));
 	env->set("ltrim", new MooFunc(basic_ltrim));
 	env->set("parse-words", new MooFunc(basic_parse_words));
+	env->set("remove-word", new MooFunc(basic_remove_word));
 
 	env->set("type", new MooFunc(basic_type));
 	env->set("boolean?", new MooFunc(basic_boolean_q));
