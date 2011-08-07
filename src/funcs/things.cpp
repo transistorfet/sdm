@@ -85,79 +85,60 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 }
 
 #define MAX_WORDS	256
+#define PREPOSITIONS	5
+const char *prepositions[] = { "to", "in", "from", "is", "as" };
 
 static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
+	int k, m;
 	int i = 0, j = 0;
 	MooObject *method, *user;
-	const char *text, *argstr;
+	const char *text, *cmd, *argstr;
 	char *words[MAX_WORDS];
 	MooArgs *newargs;
 	MooObjectHash *newenv;
+	char buffer[LARGE_STRING_SIZE];
 
 	if (!(user = env->get("user")))
 		throw MooException("No user object set.");
 	text = args->m_args->get_string(0);
 	argstr = parser_next_word(text);
 
-/*
+	// Parse the text into words
 	strncpy(buffer, text, LARGE_STRING_SIZE);
 	buffer[LARGE_STRING_SIZE] = '\0';
 	while (parser_is_whitespace(buffer[i]))
 		i++;
-	// TODO alternatively, you can send this all to the lisp parser and traverse the expr you get back.
-	//	If you come across a CALL, convert it to a string or do something else with it so that you end up
-	//	with a list of numbers, strings (including code in string form), and identifiers.
-	//	Identifiers would also actually be strings, unless perhaps they were of a certain form, such as #<num>
-	//	You couldn't directly try to resolve all identifiers into values because some barewords for commands are
-	//	intended to be strings
 	words[0] = &buffer[i];
 	for (; buffer[i] != '\0'; i++) {
-		if (parser_is_whitespace(buffer[i])) {
+		if (buffer[i] == '\"') {
+			words[j] = &buffer[++i];
+			for (; buffer[i] != '\0' && buffer[i] != '\"'; i++)
+				;
+		}
+
+		if (buffer[i] == '\"' || parser_is_whitespace(buffer[i])) {
 			buffer[i++] = '\0';
 			while (parser_is_whitespace(buffer[i]))
 				i++;
 			words[++j] = &buffer[i];
 		}
-		else if (buffer[i] == '\"') {
-			// TODO implement quotes...
-		}
 	}
-*/
 
+	/// Build the arguments
 	newargs = new MooArgs();
 	newenv = new MooObjectHash(env);
+	cmd = words[0];
 	newenv->set("argstr", new MooString("%s", argstr));
+	for (k = 1; k < j; k++)
+		newargs->m_args->push(new MooString("%s", words[k]));
 
-	MooCodeExpr *expr;
-
-	if (!(expr = MooCodeParser::parse_code(text)))
-		MooException("Unable to parse input.");
-	for (MooCodeExpr *cur = expr; cur; cur = cur->next()) {
-		switch (cur->type()) {
-		    case MCT_OBJECT:
-			newargs->m_args->push(cur->value());
-			break;
-		    case MCT_IDENTIFIER:
-			newargs->m_args->push(new MooString("%s", cur->get_identifier()));
-			break;
-		    case MCT_CALL: {
-			char buffer[LARGE_STRING_SIZE];
-			MooCodeParser::generate(dynamic_cast<MooCodeExpr *>(cur->value()), buffer, LARGE_STRING_SIZE, &moo_style_one_line);
-			newargs->m_args->push(new MooString("%s", buffer));
-			break;
-		    }
-		    default:
-			break;
-		}
+	for (k = 1; k < j; k++) {
+		for (m = 0; m < PREPOSITIONS; m++)
+			if (!strcasecmp(words[k], prepositions[m]))
+				break;
 	}
-
-	MooObject *obj;
-	const char *cmd;
-
-	if (!(obj = newargs->m_args->shift()) || !(cmd = obj->get_string()))
-		throw MooException("No command given");
-	frame->push_debug("> in realm_command: %s", cmd);
+	newenv->set("prep", new MooString("%s", (k < j) ? words[k++] : ""));
 
 	if (!(method = user->resolve_method(cmd))) {
 		MooObject *location = user->resolve_property("location");
@@ -166,14 +147,32 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		}
 	}
 
-	// TODO you could push markers onto the stack like here so that if an exception occurs inside of the call we are pushing, then
-	//	it will print that it occurred inside of this evaluate function.
-
+	frame->push_debug("> in realm_command: %s", cmd);
 	frame->push_call(newenv, method, newargs);
 
 	// TODO you could have a call here to an optional method on the user after a command has been executed (like a prompt)
 
 	return(0);
+
+/*
+	(define this:command (lambda (text)
+		(define words (***parse-into-words***)
+		(define dobj "")
+		(define prep "")
+		(define iobj "")
+		(words:foreach (lambda (cur)
+			(cond
+				((!= (prepositions:search cur) -1)
+					(set! prep cur))
+				((equal? prep "")
+					(set! dobj (concat dobj " " cur)))
+				(else
+					(set! iobj (concat iobj " " cur)))
+		))
+	))
+*/
+
+
 }
 
 int moo_load_thing_methods(MooObjectHash *env)

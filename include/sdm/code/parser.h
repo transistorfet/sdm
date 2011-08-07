@@ -60,6 +60,10 @@ class MooCodeParser {
 	MooCodeExpr *parse_token();
 	int read_token();
 
+	int token_type() { return(m_type); }
+	int token_len() { return(m_len); }
+	const char *token() { return(m_token); }
+
 	inline char getchar() {
 		m_col++;
 		if (m_input[m_pos] == '\n') {

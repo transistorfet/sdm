@@ -139,7 +139,11 @@ int MooListener::listen(int port)
 		delete m_inter;
 	m_inter = new MooTCP();
 	m_inter->set_task(this);
-	m_inter->listen(port);
+	if (m_inter->listen(port)) {
+		delete m_inter;
+		m_inter = NULL;
+		return(-1);
+	}
 	return(0);
 }
 

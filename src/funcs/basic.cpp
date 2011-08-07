@@ -470,6 +470,49 @@ static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+#define MAX_WORDS	256
+
+static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int i = 0, j = 0;
+	MooObjectArray *array;
+	const char *text;
+	char *words[MAX_WORDS];
+	char buffer[LARGE_STRING_SIZE];
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	text = args->m_args->get_string(0);
+
+	/// Parse the text into words
+	strncpy(buffer, text, LARGE_STRING_SIZE);
+	buffer[LARGE_STRING_SIZE] = '\0';
+	while (parser_is_whitespace(buffer[i]))
+		i++;
+	words[0] = &buffer[i];
+	for (; buffer[i] != '\0'; i++) {
+		if (buffer[i] == '\"') {
+			words[j] = &buffer[++i];
+			for (; buffer[i] != '\0' && buffer[i] != '\"'; i++)
+				;
+		}
+
+		if (buffer[i] == '\"' || parser_is_whitespace(buffer[i])) {
+			buffer[i++] = '\0';
+			while (parser_is_whitespace(buffer[i]))
+				i++;
+			words[++j] = &buffer[i];
+		}
+	}
+
+	/// Build the array
+	array = new MooObjectArray();
+	for (int k = 0; k < j; k++)
+		array->push(new MooString("%s", words[k]));
+	args->m_result = array;
+	return(0);
+}
+
 /******************
  * Type Functions *
  ******************/
@@ -628,6 +671,32 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(frame->push_code(buffer));
 }
 
+static int basic_get_property(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	const char *name;
+
+	if (args->m_args->last() != 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	name = args->m_args->get_string(1);
+	args->m_result = obj->resolve_property(name);
+	return(0);
+}
+
+static int basic_get_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooObject *obj;
+	const char *name;
+
+	if (args->m_args->last() != 1)
+		throw moo_args_mismatched;
+	obj = args->m_args->get(0);
+	name = args->m_args->get_string(1);
+	args->m_result = obj->resolve_method(name);
+	return(0);
+}
+
 static int basic_call_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooArgs *newargs;
@@ -749,6 +818,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("chop", new MooFunc(basic_chop));
 	env->set("substr", new MooFunc(basic_substr));
 	env->set("ltrim", new MooFunc(basic_ltrim));
+	env->set("parse-words", new MooFunc(basic_parse_words));
 
 	env->set("type", new MooFunc(basic_type));
 	env->set("boolean?", new MooFunc(basic_boolean_q));
@@ -766,6 +836,8 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("eval", new MooFunc(basic_eval));
 	env->set("load", new MooFunc(basic_load));
 
+	env->set("get-property", new MooFunc(basic_get_property));
+	env->set("get-method", new MooFunc(basic_get_method));
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));
 	env->set("return", new MooFunc(basic_return));

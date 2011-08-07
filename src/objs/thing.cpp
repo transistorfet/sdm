@@ -37,12 +37,16 @@ MooObjectType moo_thing_obj_type = {
 
 MooArray<MooThing *> *moo_thing_table = NULL;
 
+static MooObjectHash *thing_methods = new MooObjectHash();
+void moo_load_thing_methods(MooObjectHash *env);
+
 int init_thing(void)
 {
 	if (moo_thing_table)
 		return(1);
 	moo_object_register_type(&moo_thing_obj_type);
 	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
+	moo_load_thing_methods(thing_methods);
 	return(0);
 }
 
@@ -299,14 +303,20 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 
 MooObject *MooThing::access_method(const char *name, MooObject *value)
 {
+	MooObject *obj;
+
 	// TODO do you need to do permissions checks here?
+	//this->check_throw(MOO_PERM_R);
 	if (value) {
 		if (this->set_method(name, value) < 0)
 			return(NULL);
 		return(value);
 	}
-	else
+	else {
+		if ((obj = thing_methods->get(name)))
+			return(obj);
 		return(this->get_method(name));
+	}
 }
 
 ///// Method Methods /////
@@ -497,5 +507,176 @@ int MooChannel::valid_channelname(const char *name)
 	return(1);
 }
 */
+
+static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	// TODO permissions check
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->load();
+	return(0);
+}
+
+static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooThing *thing;
+
+	// TODO permissions check
+	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() != -1)
+		throw moo_args_mismatched;
+	thing->save();
+	return(0);
+}
+
+static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	// TODO permissions check
+	MooThing::save_all();
+	return(0);
+}
+
+static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	MooMethod *init;
+	MooObject *func;
+	MooObject *id = NULL;
+	MooThing *thing, *parent;
+	moo_id_t idnum = MOO_NEW_ID;
+
+	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
+		throw moo_method_object;
+	if (args->m_args->last() == 0)
+		func = args->m_args->get(0);
+	else if (args->m_args->last() == 1) {
+		id = args->m_args->get(0);
+		func = args->m_args->get(1);
+	}
+	else
+		throw moo_args_mismatched;
+	if (id)
+		idnum = id->get_integer();
+
+	// TODO permissions check!!!
+	thing = parent->clone(idnum);
+	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
+	if (func)
+		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
+
+	/// Call the 'initialize' method of each parent object (Most distant parent will be called first)
+	while (parent) {
+		if ((init = dynamic_cast<MooMethod *>(parent->resolve_method("initialize")))) {
+			init->m_obj = thing;
+			frame->push_call(env, init, new MooArgs());
+		}
+		parent = parent->parent();
+	}
+	return(0);
+}
+
+#define MAX_WORDS	256
+#define PREPOSITIONS	5
+const char *prepositions[] = { "to", "in", "from", "is", "as" };
+
+static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	int k, m;
+	int i = 0, j = 0;
+	MooObject *method, *user;
+	const char *text, *cmd, *argstr;
+	char *words[MAX_WORDS];
+	MooArgs *newargs;
+	MooObjectHash *newenv;
+	char buffer[LARGE_STRING_SIZE];
+
+	if (!(user = env->get("user")))
+		throw MooException("No user object set.");
+	text = args->m_args->get_string(0);
+	argstr = parser_next_word(text);
+
+	// Parse the text into words
+	strncpy(buffer, text, LARGE_STRING_SIZE);
+	buffer[LARGE_STRING_SIZE] = '\0';
+	while (parser_is_whitespace(buffer[i]))
+		i++;
+	words[0] = &buffer[i];
+	for (; buffer[i] != '\0'; i++) {
+		if (buffer[i] == '\"') {
+			words[j] = &buffer[++i];
+			for (; buffer[i] != '\0' && buffer[i] != '\"'; i++)
+				;
+		}
+
+		if (buffer[i] == '\"' || parser_is_whitespace(buffer[i])) {
+			buffer[i++] = '\0';
+			while (parser_is_whitespace(buffer[i]))
+				i++;
+			words[++j] = &buffer[i];
+		}
+	}
+
+	/// Build the arguments
+	newargs = new MooArgs();
+	newenv = new MooObjectHash(env);
+	cmd = words[0];
+	newenv->set("argstr", new MooString("%s", argstr));
+	for (k = 1; k < j; k++)
+		newargs->m_args->push(new MooString("%s", words[k]));
+
+	for (k = 1; k < j; k++) {
+		for (m = 0; m < PREPOSITIONS; m++)
+			if (!strcasecmp(words[k], prepositions[m]))
+				break;
+	}
+	newenv->set("prep", new MooString("%s", (k < j) ? words[k++] : ""));
+
+	if (!(method = user->resolve_method(cmd))) {
+		MooObject *location = user->resolve_property("location");
+		if (location && !(method = location->resolve_method(cmd))) {
+			// TODO try to parse more and search the objects
+		}
+	}
+
+	frame->push_debug("> in realm_command: %s", cmd);
+	frame->push_call(newenv, method, newargs);
+
+	// TODO you could have a call here to an optional method on the user after a command has been executed (like a prompt)
+
+	return(0);
+
+/*
+	(define this:command (lambda (text)
+		(define words (***parse-into-words***)
+		(define dobj "")
+		(define prep "")
+		(define iobj "")
+		(words:foreach (lambda (cur)
+			(cond
+				((!= (prepositions:search cur) -1)
+					(set! prep cur))
+				((equal? prep "")
+					(set! dobj (concat dobj " " cur)))
+				(else
+					(set! iobj (concat iobj " " cur)))
+		))
+	))
+*/
+
+
+}
+
+void moo_load_thing_methods(MooObjectHash *env)
+{
+	env->set("%load", new MooFunc(thing_load));
+	env->set("%save", new MooFunc(thing_save));
+	env->set("%save_all", new MooFunc(thing_save_all));
+	env->set("%clone", new MooFunc(thing_clone));
+	env->set("%command", new MooFunc(parse_command));
+}
 
 

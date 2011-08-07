@@ -60,15 +60,12 @@
 	; TODO maybe this should take the user object that will join, and do a permissions check to make sure we can force a join on
 	;	that object.
 	(define this:join (chmod 0475 (lambda ()
-		(debug this.users)
-		(if (= (this.users:search user) -1)
-			(begin
-				(this.users:push user)
-				(this.users:foreach (lambda (cur)
-					(cur:notify N/JOIN user channel "")
-				))
-			)
-		)
+		(if (!= (this.users:search user) -1)
+			(return #f))
+		(this.users:push user)
+		(this.users:foreach (lambda (cur)
+			(cur:notify N/JOIN user channel "")))
+		#t
 	)))
 
 	(define this:leave (chmod 0475 (lambda ()
@@ -123,10 +120,11 @@
 	(define this.title "TheRealm")
 
 	(define this:join (lambda ()
-		(super join)
+		(if (not (super join))
+			(return))
+		(user:tell "<b>Welcome to the Realm!")
+		(user:tell "<b>To enter a command, put a period (.) before it (eg. .look)")
 		(this:fetch user)
-		(user:tell "Welcome to the Realm!")
-		(user:tell "To enter a command, put a period (.) before it (eg. .look)")
 	))
 
 	(define this:leave (lambda ()
@@ -148,6 +146,33 @@
 	))
 
 	(define this:command %parse_command)
+;	(define this:command (lambda (text)
+;		(define argstr text)
+;		(define dobjstr "")
+;		(define prepstr "")
+;		(define iobjstr "")
+;		(define words (parse-words text)
+;		(define cmd (words:unshift))
+;		(words:foreach (lambda (cur)
+;			(cond
+;				((!= (prepositions:search cur) -1)
+;					(set! prepstr cur))
+;				((equal? prep "")
+;					(set! dobjstr (concat dobjstr " " cur)))
+;				(else
+;					(set! iobjstr (concat iobjstr " " cur)))
+;		))
+;		(define method (get-method user cmd))
+;		(if (null? method)
+;			(begin
+;				(set! method (get-method user.location cmd))
+;				(if (null? method)
+;					; TODO search the objects
+;				)
+;			)
+;		)
+;		(call-method user method words)
+;	))
 
 	(define this:store (chmod 0475 (lambda (name)
 		(if (!eqv? user.location this)
@@ -160,7 +185,8 @@
 		(if (or (not (defined? user.last_location)) (null? user.last_location))
 			(user:move start-room)
 			(if (eqv? user.location this)
-				(user:move user.last_location)))
+				(user:move user.last_location)
+				(user.location:look_self)))
 	)))
 )))
 (ChanServ:register realm)
@@ -202,6 +228,9 @@
 			((equal? name "here")
 				this.location)
 			(else
+				(user.contents:foreach (lambda (cur)
+
+				))
 				; TODO otherwise, search the current user for an object and then search the user's location for an object
 				nil)
 		)
@@ -297,11 +326,12 @@
 	))
 
 	(define this:look_self (lambda ()
-		(if (not (this.contents:search user))
+		(if (= (this.contents:search user) -1)
 			(user:tell "You don't have clairvoyance.")
 			(begin
 				(user:tell (expand "<yellow>$this.title"))
 				(user:tell (expand "<lightgreen>$this.description"))
+				(user:tell (expand (concat "<b>Exits:" (this:obvious_exits) ".")))
 				(if this.display_contents
 					(user.location.contents:foreach (lambda (cur)
 						(user:tell (expand "<blue>$cur.title"))
@@ -309,6 +339,22 @@
 				)
 			)
 		)
+	))
+
+	(define this:obvious_exits (lambda ()
+		(define exits "")
+		(this.exits:foreach (lambda (cur)
+			(if cur.obvious
+				(define exits (concat exits " " cur.dir)))
+		))
+	))
+
+	(define this:exits (lambda ()
+		(user:tell "Obvious exits:")
+		(this.exits:foreach (lambda (cur)
+			(if cur.obvious
+				(user:tell (expand "$cur.dir - $cur.target.title")))
+		))
 	))
 
 	(define this:tell_all (lambda (text)
@@ -388,6 +434,10 @@
 		"You enter from... somewhere."
 		nil
 		"$what.title enters from... somewhere."))
+
+	(define this:initialize (lambda ()
+		(define this.obvious #t)
+	))
 
 	(define this:invoke (lambda (what)
 		(define dir this.dir)

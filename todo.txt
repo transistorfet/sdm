@@ -76,6 +76,8 @@
 	* add debug field to event and fix debug message printing
 	* fix inconsistent uses of nil and NULL
 
+	* add arguments to be passed to 'initialize' during cloning
+
 	* fix realm_evaluate (object/target do_actions are disabled atm)
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 
