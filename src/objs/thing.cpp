@@ -458,7 +458,7 @@ int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *t
 	args->m_args->set(0, new MooNumber((long int) type));
 	args->m_args->set(1, thing);
 	args->m_args->set(2, channel);
-	args->m_args->set(3, new MooString(text));
+	args->m_args->set(3, new MooString("%s", text));
 	res = this->call_method(channel, func, args);
 	MOO_DECREF(args);
 	return(res);

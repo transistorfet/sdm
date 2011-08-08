@@ -245,12 +245,18 @@
 			((equal? name "here")
 				this.location)
 			(else
+				(define obj nil)
 				(user.contents:foreach (lambda (cur)
-
+					(if (cur:match_name name)
+						(set! obj cur))
 				))
-				; TODO otherwise, search the current user for an object and then search the user's location for an object
-				nil)
+				obj
+			)
 		)
+	))
+
+	(define this:match_name (lambda (name)
+		(equal? name (substr 0 (strlen name) this.name))
 	))
 
 	(define this:acceptable (lambda (obj)
