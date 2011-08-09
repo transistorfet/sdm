@@ -390,7 +390,8 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() < 0)
 		throw moo_args_mismatched;
 	for (int i = 0; i <= args->m_args->last() && j < LARGE_STRING_SIZE; i++) {
-		// TODO temporary? how the hell does/should nil/null work?
+		// TODO this is a really weird use of nil/NULL; all undefined values will be stringified as 'nil'.
+		//	We could alternatively stringify undefined values as 'undef' or something
 		if (!(obj = args->m_args->get(i)))
 			obj = &moo_nil;
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);

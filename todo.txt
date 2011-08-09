@@ -69,6 +69,16 @@
 	  up a value on a thing, it checks the parent thing recursively (this still has the potential for that bug we've come across).
 	  If there is any property inheritence, should there be a sticky bit for perms such that some properties retain the original's
 	  owner instead of the default behaviour of making the new property owned by the owner of the cloned thing
+	* either we make all properties in the new object equal to nil (or maybe #f or maybe a type-approriate zero value) or we make
+	  properties recursive, and if we do, we could have a public/private flag for each property (permissions) such that some
+	  properties can be made accessable only when they are being accessed on the root thing.
+	* I'm getting worried about having too many permissions flags and stuff
+
+	* Really, we are using nil in places where we really mean #-1 (an invalid or undefined or nil MooThing).  Perhaps we should
+	  actually have a nil value that is of type MooThing, so that it can be accessed as such... although maybe that's dangerous.
+	  Maybe we should always be forced to check for a nil object (although it'd be nice if we got a "Accessing property on nil object"
+	  or something rather than "Invalid Type").
+	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
 	* MooMethod is still really ugly and should be changed
 

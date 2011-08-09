@@ -205,7 +205,6 @@ class FormDefineEvent : public MooCodeEvent {
 		MooObject *obj;
 
 		obj = frame->get_return();
-		// TODO if return is NULL, then we don't make an assignment here at all... (instead of assigning nil)
 		MooObject::resolve(m_expr->get_identifier(), m_env, obj);
 		return(0);
 	}

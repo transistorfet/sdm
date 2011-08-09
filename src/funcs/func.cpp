@@ -75,7 +75,7 @@ int MooFunc::to_string(char *buffer, int max)
 int MooFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	if (!m_func)
-		throw MooException("Null function");
+		throw MooException("Attempted to evaluate an undefined MooFunc (this means I really messed up).");
 	return(m_func(frame, env, args));
 }
 

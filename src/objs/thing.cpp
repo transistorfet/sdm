@@ -271,17 +271,17 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 	else if (!strcmp(name, "parent"))
 		return(value ? NULL : new MooNumber((long int) this->m_parent));
 
-	cur = m_properties->get(name);
 	if (value) {
 		if (!name || (*name == '\0'))
 			return(NULL);
+		cur = m_properties->get(name);
 
-		if (value == &moo_nil) {
-			this->check_throw(MOO_PERM_W);
-			if (!cur)
-				m_properties->remove(name);
-			return(cur);
-		}
+		//if (value == &moo_nil) {
+		//	this->check_throw(MOO_PERM_W);
+		//	if (cur)
+		//		m_properties->remove(name);
+		//	return(cur);
+		//}
 
 		if (cur) {
 			cur->check_throw(MOO_PERM_W);
@@ -294,6 +294,11 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 		return(value);
 	}
 	else {
+		for (MooThing *thing = this; thing; thing = thing->parent()) {
+			// TODO you could add some kind of pub/private/protected/whatever permissions checks here
+			if ((cur = thing->m_properties->get(name)))
+				break;
+		}
 		if (cur)
 			cur->check_throw(MOO_PERM_R);
 		// TODO should you return nil if obj == NULL (??)
@@ -334,6 +339,7 @@ int MooThing::set_method(const char *name, MooObject *value)
 		this->check_throw(MOO_PERM_W);
 
 	/// If the new value is nil, remove the entry from the table
+	/// 	(It doesn't even make sense for a method to be nil since it would case an exception, so it doesn't matter if we remove it)
 	if (value == &moo_nil)
 		return(m_methods->remove(name));
 	return(m_methods->set(name, MOO_INCREF(value)));
