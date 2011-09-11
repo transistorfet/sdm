@@ -183,7 +183,6 @@ static int array_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	index = args->m_args->get_integer(0);
 	args->m_result = m_this->get(index);
 	return(0);
@@ -328,7 +327,6 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	obj = args->m_args->get(0);
 	index = m_this->search(obj);
 	args->m_result = new MooNumber((long int) index);
@@ -348,7 +346,6 @@ static int array_join(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	obj = args->m_args->get(0);
 	len = obj->to_string(filler, STRING_SIZE);
 
@@ -414,7 +411,6 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	func = args->m_args->get(0);
 	args->m_result = new MooBoolean(B_TRUE);
 	frame->push_event(new ArrayEventForeach(0, m_this, env, func));

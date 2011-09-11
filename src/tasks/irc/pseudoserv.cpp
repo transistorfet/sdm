@@ -547,14 +547,38 @@ int PseudoServ::send_welcome()
 	Msg::send(m_inter, ":%s %03d %s :%s SuperDuperMoo v%s ? ?\r\n", server_name, IRC_RPL_MYINFO, m_nick->c_str(), server_name, server_version);
 	// TODO you can send the 005 ISUPPORT messages as well (which doesn't appear to be defined in the IRC standard)
 
-	Msg::send(m_inter, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, m_nick->c_str(), server_name);
-	// TODO send a motd (etc/motd.irc)
-	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
+	this->send_motd();
 	m_bits |= IRC_BF_WELCOMED;
 	if (m_user) {
+		// TODO remove this eventually??  It should be able to work with it in though, so make sure there are no bugs currently
 		this->handle_join("#realm");
-		Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, m_nick->c_str(), m_nick->c_str());
+		//Msg::send(m_inter, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, m_nick->c_str(), m_nick->c_str());
 	}
+	return(0);
+}
+
+int PseudoServ::send_motd()
+{
+	char ch;
+	int len, j = 0;
+	char buffer[LARGE_STRING_SIZE];
+
+	Msg::send(m_inter, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, m_nick->c_str(), server_name);
+	len = moo_data_read_file("etc/motd.txt", buffer, LARGE_STRING_SIZE);
+	for (int i = 0; i <= len; i++) {
+		if (buffer[i] == '\n' || buffer[i] == '\r' || buffer[i] == '\0') {
+			ch = buffer[i];
+			if (i - j > 80)
+				buffer[j + 80] = '\0';
+			else
+				buffer[i] = '\0';
+			Msg::send(m_inter, ":%s %03d %s :- %s\r\n", server_name, IRC_RPL_MOTD, m_nick->c_str(), &buffer[j]);
+			if (ch == '\r' && buffer[i + 1] == '\n')
+				i++;
+			j = i + 1;
+		}
+	}
+	Msg::send(m_inter, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
 	return(0);
 }
 
@@ -626,6 +650,8 @@ int PseudoServ::send_list(const char *name)
 	MooObjectHash *list;
 	MooObject *channels, *cur, *obj;
 
+	// TODO accessing the db directly isn't really correct here, we should either call a method, evaluate direct code (but which
+	//	would allow easy use of a method on chanserv), or something to put the actual db access into a method on ChanServ
 	if ((channels = MooObject::resolve("ChanServ", global_env))) {
 		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
 			list->reset();

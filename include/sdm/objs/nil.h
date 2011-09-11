@@ -10,6 +10,8 @@
 
 #include <sdm/objs/object.h>
 
+#define MOO_IS_NIL(x)		( !(x) || ((x) == &moo_nil) )
+
 class MooNil : public MooObject {
     public:
 	MooNil();

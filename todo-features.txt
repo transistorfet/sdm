@@ -10,6 +10,8 @@ GAME FEATURES TODO:
 	* have days/nights and time
 	* mobiles (players) who can fly (like pixies)
 	* migrating and reproducing mobiles (coinciding with seasons, etc)
+	* quests (obviously).  It could be a thing with methods that set props in the user as objectives are acheived, and so on
+	* fast travel, especially for quests
 
 	* make it possible for players to sell their own items from stores (they can make an object and sell it)
 	* have pegboards everywhere (like at area/world markers) so that people can leave comments (thus enriching the social

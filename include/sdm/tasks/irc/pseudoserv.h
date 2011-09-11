@@ -59,6 +59,7 @@ class PseudoServ : public MooTask {
 
 	int login();
 	int send_welcome();
+	int send_motd();
 	int send_join(const char *name);
 	int send_part(const char *name);
 	int send_names(const char *name);

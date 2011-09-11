@@ -219,10 +219,22 @@ static int form_define(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
+/***************************
+ * Form: (undefine <name>) *
+ ***************************/
 
-/******************************
+static int form_undefine(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!MooCodeExpr::check_args(expr, 1, 1))
+		throw moo_args_mismatched;
+	// TODO this is not right.  It will not undefine the value.
+	MooObject::resolve(expr->get_identifier(), frame->env(), &moo_nil);
+	return(0);
+}
+
+/*******************************
  * Form: (set! <name> <value>) *
- ******************************/
+ *******************************/
 
 class FormSetEvent : public MooCodeEvent {
     public:
@@ -507,6 +519,7 @@ int init_code_event(void)
 	form_env = new MooHash<MooFormT *>(MOO_HBF_REPLACE);
 
 	form_env->set("define", new MooFormT(form_define));
+	form_env->set("undefine", new MooFormT(form_undefine));
 	form_env->set("set!", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
 	form_env->set("cond", new MooFormT(form_cond));

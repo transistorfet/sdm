@@ -89,7 +89,7 @@ MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data)
 		return(NULL);
 	try {
 		return(type->m_make(data));
-	} catch(...) {
+	} catch(MooException e) {
 		return(NULL);
 	}
 }
@@ -189,10 +189,6 @@ int MooObject::read_file(const char *file, const char *type)
 	}
 	catch (MooException e) {
 		moo_status("DATA: %s", e.get());
-		return(-1);
-	}
-	catch (...) {
-		moo_status("Error opening file \"%s\".", file);
 		return(-1);
 	}
 }
@@ -390,7 +386,7 @@ int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
 
 int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 {
-	int res;
+	int res = 0;
 	MooCodeFrame *frame;
 	MooThing *thing, *channel;
 
@@ -399,7 +395,7 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 	args->m_this = this;
 	try {
 		frame->push_call(frame->env(), func, args);
-		res = frame->run();
+		frame->run();
 	}
 	catch (MooException e) {
 		// TODO temporary for debugging purposes??

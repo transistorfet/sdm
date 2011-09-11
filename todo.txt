@@ -1,4 +1,6 @@
 
+	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
+
     Discussion:
 
       Multiple Characters:
@@ -45,9 +47,6 @@
 	  or timer expire events or something) can be performed later.  It could be a fairly generic mechanism
 
       Miscellaneous:
-	* the editor task could be implemented via whatever protocol by just passing all the code to the client, allowing it to
-	  locally edit it, and then passing it back.  Even if an online (server-side) editor is used, it could store all the code in
-	  a buffer, edit it, and then pass it all back when done.  How will editing work through IRC?
 	* you could have NickServ and ChanServ as user-like objects which you can talk to for basic registration
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
@@ -55,48 +54,43 @@
 	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
-	* valid scheme characters: + - . * / < = > ! ? : $ _ & ~ ^
 
 	* you need to sort out permissions.  You can either have them on all objects or only on environment entries and things.  If you
 	  put them in the object themselves, then you can't have the same object added as a property to 2 different things or else the
 	  permission changes to one will affect the other.  This is the most significant with the way you are doing nil atm.  With
 	  a single value for nil, you can easily compare the pointer instead of doing a dynamic_cast, but you can't assign nil to a
 	  property since there is no way for the property itself to have unique permissions (the nil value would have the perms)
-	* we need to figure out property inheritence.  Will a cloned object have no properties defined, such that all properties must
-	  be set in initialize or after the object is created, or will all properties of the parent be set to nil so that they are still
-	  defined (possibly also could be set to an appropriate zero value for their type), or will the properties retain the value of
-	  the parent (a duplicate value) but only for strings, numbers, and booleans, or will no properties be set, but when you look
-	  up a value on a thing, it checks the parent thing recursively (this still has the potential for that bug we've come across).
-	  If there is any property inheritence, should there be a sticky bit for perms such that some properties retain the original's
-	  owner instead of the default behaviour of making the new property owned by the owner of the cloned thing
-	* either we make all properties in the new object equal to nil (or maybe #f or maybe a type-approriate zero value) or we make
-	  properties recursive, and if we do, we could have a public/private flag for each property (permissions) such that some
-	  properties can be made accessable only when they are being accessed on the root thing.
-	* I'm getting worried about having too many permissions flags and stuff
+	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
+	  being accessed on the direct thing.
+	* the biggest issue with permissions is the execute/suid flags.  It is best if these flags are on the value itself, unless
+	  some kind of value like MooMethod is *always* returned when calling get_method.  This would then persist at least until the
+	  value was evaluated.  It might be possible to remove this whole thing by alterning the execution core such that it stores
+	  the detailed information in MooArgs or in the CallFunction event or wherever, rather than evaluating the function lookup like
+	  all other values.  This would likely make function calls special and not first-class values.
+	* MooMethod is still really ugly and should be changed
 
-	* Really, we are using nil in places where we really mean #-1 (an invalid or undefined or nil MooThing).  Perhaps we should
-	  actually have a nil value that is of type MooThing, so that it can be accessed as such... although maybe that's dangerous.
-	  Maybe we should always be forced to check for a nil object (although it'd be nice if we got a "Accessing property on nil object"
-	  or something rather than "Invalid Type").
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
-	* MooMethod is still really ugly and should be changed
+	* how can you delete MooThings from the system?
+
+	* should call_method require a task (or be a method on a task)? This would allow you to easily get the 'user' or otherwise
+	  associate the task with the frame.
 
     TODO:
 
+	* add a 'register' and 'login' commands to basics
+
+	* make an (undefine ...) command for completeness!!!  (this should behave exactly like define except it removes entries).
+	  this would be the only way to remove a property from an object, since setting nil will not remove the entry.
 	* you could have a command prefix like '.' (but different because of compatibility stuff) such that it doesn't get parsed out
 	  of the name but only commands with that prefix are interpreted as commands, therefore all user-accessible commands must have
 	  a special name and don't get confused with none-command methods
 	* add debug field to event and fix debug message printing
-	* fix inconsistent uses of nil and NULL
 
 	* add arguments to be passed to 'initialize' during cloning
-
-	* fix realm_evaluate (object/target do_actions are disabled atm)
+	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 
-	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
-	* add a (map (lambda ...) ...) ??? (i guess it's not really needed actually, with arrays)
 	* add infinite loop protection
 	* review all code for permissions check errors and bugs.  Evaluate system security.
 	* check out SMAUG's social.dat stuff and incorporate it possibly
@@ -108,26 +102,22 @@
 	* add support for notices from clients to other clients
 	* add irc server-to-client pinging & connection timeouts
 	* add flood protection of some kind (???)  (could this somehow be an add-on or a coded thing)
-	* get timers working
-
-	* make an (undefine ...) command for completeness?
-	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
-	* how can you delete MooThings from the system?
-
-	* add caching to environments
-	* should you have private environments that are skipped when doing nested lookups?
 	* fix 'quit' function to send an actual quit message to each client rather than just having the user part all channels
+	* fill in all other IRC message processing
 
-	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
-	* add a 'register' and 'login' commands to basics
-	* implement an automatic testing system somehow (so you can verify the moocode core at least)
+	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
+	* get timers working (possibly implement them (or the functionality) via tasks)
+
 	* make it so that not all objects are loaded into the system (your ID assignment hack makes this impossible)
+	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found
+	* implement an automatic testing system somehow (so you can verify the moocode core at least)
+	* add caching to environments??
+	* should you have private environments that are skipped when doing nested lookups?
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
 	* make a bot which randomly pieces together lojban sentances (which may or may not make sense)
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
-	* fill in all other IRC message processing
 
 
     Old Stuff:

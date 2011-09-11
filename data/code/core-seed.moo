@@ -33,10 +33,8 @@
 	(define this.title "NickServ")
 
 	(define this.db (hash))
-	(define this.db.NickServ this)
-	(define this.db.ChanServ ChanServ)
 
-	(define this:make_guest (lambda ()
+	(define this:make_guest (lambda (name)
 		(define guest (this:next_guest))
 		(define guest.name name)
 		guest
@@ -48,6 +46,8 @@
 			#f)
 	))
 )))
+(NickServ:register NickServ)
+(NickServ:register ChanServ)
 
 (define *global*.channel (root:%clone (lambda ()
 	(define this.name "generic-channel")
@@ -203,7 +203,7 @@
 			(user:move start-room)
 			(if (eqv? user.location this)
 				(user:move user.last_location)
-				(user.location:look_self)))
+				(this:command "look")))
 	)))
 )))
 (ChanServ:register realm)
@@ -256,6 +256,7 @@
 	))
 
 	(define this:match_name (lambda (name)
+		(debug ">>>>>> " (substr 0 (strlen name) this.name))
 		(equal? name (substr 0 (strlen name) this.name))
 	))
 

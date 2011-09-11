@@ -151,7 +151,7 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(0);
-	if (!obj || (obj == &moo_nil)) {
+	if (MOO_IS_NIL(obj)) {
 		args->m_result = new MooBoolean(B_TRUE);
 		return(0);
 	}
@@ -736,7 +736,7 @@ static int basic_call_method(MooCodeFrame *frame, MooObjectHash *env, MooArgs *a
 	if (args->m_args->last() != 1 && args->m_args->last() != 2)
 		throw moo_args_mismatched;
 	obj = args->m_args->get(2);
-	if (!obj || obj == &moo_nil)
+	if (MOO_IS_NIL(obj))
 		newargs = new MooArgs();
 	else if (!(array = dynamic_cast<MooObjectArray *>(obj)))
 		throw moo_type_error;

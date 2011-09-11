@@ -276,13 +276,6 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 			return(NULL);
 		cur = m_properties->get(name);
 
-		//if (value == &moo_nil) {
-		//	this->check_throw(MOO_PERM_W);
-		//	if (cur)
-		//		m_properties->remove(name);
-		//	return(cur);
-		//}
-
 		if (cur) {
 			cur->check_throw(MOO_PERM_W);
 			value->match_perms(cur);
@@ -340,7 +333,7 @@ int MooThing::set_method(const char *name, MooObject *value)
 
 	/// If the new value is nil, remove the entry from the table
 	/// 	(It doesn't even make sense for a method to be nil since it would case an exception, so it doesn't matter if we remove it)
-	if (value == &moo_nil)
+	if (value && MOO_IS_NIL(value))
 		return(m_methods->remove(name));
 	return(m_methods->set(name, MOO_INCREF(value)));
 }
@@ -420,11 +413,13 @@ const char *MooThing::name()
 	MooObject *obj;
 	const char *name = NULL;
 
+	// TODO get rid of this whole function (or at least move it to funcs/ somewhere, it doesn't belong here)
 	try {
 		if (!(obj = this->resolve_property("name", NULL)))
 			return(NULL);
 		name = obj->get_string();
 	}
+	// TODO get rid of this especially
 	catch (...) { }
 
 	if (!name)

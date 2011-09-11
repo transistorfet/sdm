@@ -12,6 +12,8 @@
 #include <sdm/code/expr.h>
 #include <sdm/code/event.h>
 
+#define MOO_FRAME_CYCLE_LIMIT		50000
+
 class MooCodeFrame : public MooObject {
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
@@ -33,7 +35,7 @@ class MooCodeFrame : public MooObject {
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
 
-	int run();
+	int run(int limit = 0);
 	int mark_return_point();
 	int goto_return_point(int level = 1);
 	int mark_exception(MooCodeExpr *handler);

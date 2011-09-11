@@ -1,0 +1,21 @@
+
+
+CLASSES:
+	- warrior
+	- theif
+	- mage
+	- ranger
+	- ???
+
+
+RACES:
+	- human
+	- dwarf
+	- elf
+	- hafling
+	- gnome
+	- pixie??
+	- ??
+
+
+

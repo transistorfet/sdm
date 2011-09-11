@@ -202,7 +202,6 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	name = args->m_args->get_string(0);
 	args->m_result = m_this->get(name);
 	return(0);
@@ -254,7 +253,6 @@ static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
@@ -273,7 +271,6 @@ static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != -1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
@@ -339,7 +336,6 @@ static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 		throw moo_method_object;
 	if (args->m_args->last() != 0)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_R);
 	func = args->m_args->get(0);
 	args->m_result = new MooBoolean(B_TRUE);
 	frame->push_event(new HashEventForeach(0, NULL, m_this, env, func));

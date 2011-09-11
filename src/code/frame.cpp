@@ -149,15 +149,19 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 	return(m_stack->push(new FrameEventDebug(buffer)));
 }
 
-int MooCodeFrame::run()
+int MooCodeFrame::run(int limit)
 {
+	int cycles = 0;
 	MooObjectHash *base;
 	MooCodeEvent *event;
+
+	if (!limit)
+		limit = MOO_FRAME_CYCLE_LIMIT;
 
 	base = m_env;
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
-	while (m_stack->last() >= 0) {
+	while (cycles <= limit && m_stack->last() >= 0) {
 		if (!(event = m_stack->pop()))
 			continue;
 
@@ -180,9 +184,6 @@ int MooCodeFrame::run()
 			event->linecol(line, col);
 			m_exception = new MooException(e.type(), "(%d, %d): %s", line, col, e.get());
 		}
-		catch (...) {
-			m_exception = new MooException("Unknown error occurred");
-		}
 
 		if (m_exception) {
 			m_stack->push(event);
@@ -193,9 +194,10 @@ int MooCodeFrame::run()
 		}
 		else
 			delete event;
+		cycles++;
 	}
 	this->env(base);
-	return(0);
+	return(cycles);
 }
 
 int MooCodeFrame::mark_return_point()
