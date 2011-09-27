@@ -71,8 +71,6 @@ class MooThing : public MooObject {
 	static int is_wizard(moo_id_t id);
 
 	const char *name();
-	int connect(MooTask *task);
-	void disconnect();
 	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 	static MooThing *get_channel(const char *name);
 	void quit();

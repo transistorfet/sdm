@@ -36,7 +36,8 @@ class MooTask : public MooObject {
 	MooTask();
 	virtual ~MooTask();
 
-	int run_idle();
+	static int run_idle();
+	void schedule(double time);
 
 	virtual int initialize() = 0;
 	virtual int idle() = 0;

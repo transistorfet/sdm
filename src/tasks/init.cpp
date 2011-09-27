@@ -90,7 +90,6 @@ int MooInit::initialize()
 
 int MooInit::idle()
 {
-
 	return(0);
 }
 

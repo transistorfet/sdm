@@ -69,6 +69,10 @@ int init_moo(void)
 
 		init_thing();
 
+
+		// TODO create a new task and execute (#0:boot)
+		// TODO have #0:boot then call all this other shit.  It could be a compiled function and still call some other function
+		// TODO #0:boot must create the listener task)
 		load_global_config();
 
 		// TODO temporary
@@ -126,7 +130,7 @@ int serverloop(void)
 {
 	while (exit_flag) {
 		MooInterface::wait(1);
-		MooTimer::check();
+		MooTask::run_idle();
 	}
 	return(0);
 }

@@ -21,7 +21,7 @@ class MooCodeFrame : public MooObject {
 	MooObjectHash *m_env;
 
     public:
-	MooCodeFrame(MooObjectHash *parent = NULL);
+	MooCodeFrame(MooObjectHash *env = NULL);
 	virtual ~MooCodeFrame();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
@@ -47,6 +47,10 @@ class MooCodeFrame : public MooObject {
 	void env(MooObjectHash *env);
 
 	void print_stacktrace();
+};
+
+class MooCodeFrameSuspend {
+	
 };
 
 extern MooObjectType moo_code_frame_obj_type;

@@ -65,13 +65,13 @@ MooObject *make_moo_code_frame(MooDataFile *data)
 	return(obj);
 }
 
-MooCodeFrame::MooCodeFrame(MooObjectHash *parent)
+MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 {
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
 	m_return = NULL;
 	m_exception = NULL;
 	m_env = NULL;
-	this->env(new MooObjectHash(parent));
+	this->env(env ? env : new MooObjectHash());
 }
 
 MooCodeFrame::~MooCodeFrame()
@@ -183,6 +183,10 @@ int MooCodeFrame::run(int limit)
 				throw e;
 			event->linecol(line, col);
 			m_exception = new MooException(e.type(), "(%d, %d): %s", line, col, e.get());
+		}
+		catch (MooCodeFrameSuspend s) {
+			delete event;
+			break;
 		}
 
 		if (m_exception) {

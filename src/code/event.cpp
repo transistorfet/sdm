@@ -413,6 +413,19 @@ static int form_lambda(MooCodeFrame *frame, MooCodeExpr *expr)
 	return(0);
 }
 
+/**********************************
+ * Form: (synchronize <expr> ...) *
+ **********************************/
+
+static int form_synchronize(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	MooSync *sync;
+
+	sync = new MooSync(expr);
+	frame->set_return(sync);
+	return(0);
+}
+
 /*****************************************
  * Form: (super <identifier> <expr> ...) *
  *****************************************/
@@ -527,6 +540,7 @@ int init_code_event(void)
 	form_env->set("or", new MooFormT(form_or));
 	form_env->set("begin", new MooFormT(form_begin));
 	form_env->set("lambda", new MooFormT(form_lambda));
+	form_env->set("synchronize", new MooFormT(form_synchronize));
 	form_env->set("super", new MooFormT(form_super));
 	form_env->set("ignore", new MooFormT(form_ignore));
 	form_env->set("try", new MooFormT(form_try));

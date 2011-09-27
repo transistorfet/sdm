@@ -4,6 +4,7 @@
  */
 
 #include <stdarg.h>
+#include <sys/time.h>
 
 #include <sdm/globals.h>
 
@@ -24,25 +25,52 @@ MooObjectType moo_task_obj_type = {
 	(moo_type_make_t) NULL
 };
 
+class MooTaskQueueEntry {
+    public:
+	MooTaskQueueEntry(double time, MooTask *task) { m_time = time; m_task = task; m_next = NULL; m_prev = NULL; }
+	double m_time;
+	MooTask *m_task;
+	MooTaskQueueEntry *m_next;
+	MooTaskQueueEntry *m_prev;
+};
+
+class MooTaskQueue {
+	MooTaskQueueEntry *m_first;
+	MooTaskQueueEntry *m_last;
+
+    public:
+	MooTaskQueue();
+	~MooTaskQueue();
+
+	int schedule(double time, MooTask *task);
+	MooTask *consume();
+};
+
 static moo_id_t g_current_owner = -1;
 static MooTask *g_current_task = NULL;
 static MooArray<MooTask *> *g_task_list = NULL;
-static MooInit *g_init_task = NULL;
+static MooTaskQueue *g_task_queue = NULL;
 
 int init_task(void)
 {
+	MooInit *init_task = NULL;
+
 	if (g_task_list)
 		return(1);
 	g_task_list = new MooArray<MooTask *>(MOO_ARRAY_DEFAULT_SIZE, -1, TASK_LIST_BITS);
-	g_init_task = new MooInit();
-	g_init_task->owner(0);
-	g_current_task = g_init_task;
+	g_task_queue = new MooTaskQueue();
+
+	// TODO should this be moved somewhere else? like main()
+	init_task = new MooInit();
+	init_task->owner(0);
+	g_current_task = init_task;
 	g_current_owner = 0;
 	return(0);
 }
 
 void release_task(void)
 {
+	delete g_task_queue;
 	delete g_task_list;
 }
 
@@ -71,14 +99,17 @@ int MooTask::run_idle()
 	int ret = 0;
 	MooTask *task;
 
-	// TODO i don't think this is right at all
-	for (int i = 0; i < g_task_list->last(); i++) {
-		task = g_task_list->get(i);
+	while ((task = g_task_queue->consume())) {
 		MooTask::switch_task(task);
 		if (task->idle())
 			ret = 1;
 	}
 	return(ret);
+}
+
+void MooTask::schedule(double time)
+{
+	g_task_queue->schedule(time, this);
 }
 
 int MooTask::bestow(MooInterface *inter)
@@ -159,4 +190,87 @@ int MooTask::suid(MooObject *obj, MooCodeFrame *frame)
 	return(0);
 }
 
+
+void *moo_task_worker_thread(void *ptr)
+{
+
+	// TODO this thread will constantly try to consume a task from the queue and run it until completion, or until it is suspended
+
+
+}
+
+/**********************
+ * class MooTaskQueue *
+ **********************/
+
+MooTaskQueue::MooTaskQueue()
+{
+	m_first = NULL;
+	m_last = NULL;
+}
+
+MooTaskQueue::~MooTaskQueue()
+{
+	MooTaskQueueEntry *cur, *tmp;
+
+	for (cur = m_first; cur; cur = tmp) {
+		tmp = cur->m_next;
+		delete cur;
+	}
+}
+
+int MooTaskQueue::schedule(double time, MooTask *task)
+{
+	timeval tv;
+	MooTaskQueueEntry *cur, *prev, *entry;
+
+	gettimeofday(&tv, NULL);
+	time = time + tv.tv_sec + (tv.tv_usec / 1000000.0);
+
+	entry = new MooTaskQueueEntry(time, task);
+	cur = m_first;
+	prev = NULL;
+	while (cur && cur->m_time < entry->m_time) {
+		prev = cur;
+		cur = cur->m_next;
+	}
+
+	entry->m_next = cur;
+	if (cur)
+		cur->m_prev = entry;
+	else
+		m_last = entry;
+
+	entry->m_prev = prev;
+	if (prev)
+		prev->m_next = entry;
+	else
+		m_first = entry;
+	return(0);
+}
+
+MooTask *MooTaskQueue::consume()
+{
+	double time;
+	timeval tv;
+	MooTask *task;
+	MooTaskQueueEntry *entry;
+
+	gettimeofday(&tv, NULL);
+	time = tv.tv_sec + (tv.tv_usec / 1000000.0);
+
+	// TODO I guess in future this could block until a task is ready, but for now we will return NULL
+	if (m_first && m_first->m_time <= time) {
+		entry = m_first;
+		m_first = entry->m_next;
+		if (m_first)
+			m_first->m_prev = NULL;
+		if (m_last == entry)
+			m_last = NULL;
+		task = entry->m_task;
+		delete entry;
+		return(task);
+	}
+	return(NULL);
+}
 

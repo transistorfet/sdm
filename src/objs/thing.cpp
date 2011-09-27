@@ -311,6 +311,7 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 		return(value);
 	}
 	else {
+		// TODO this is totally wrong here because looking up a distant method would do this builtin methods lookup multiple times
 		if ((obj = thing_methods->get(name)))
 			return(obj);
 		return(this->get_method(name));
@@ -425,26 +426,6 @@ const char *MooThing::name()
 	if (!name)
 		return("???");
 	return(name);
-}
-
-int MooThing::connect(MooTask *task)
-{
-	int res;
-	MooArgs *args;
-	MooObject *func;
-
-	if (!(func = this->resolve_method("connect")))
-		return(-1);
-	args = new MooArgs();
-	args->m_args->set(0, task);
-	res = this->call_method(NULL, func, args);
-	MOO_DECREF(args);
-	return(res);
-}
-
-void MooThing::disconnect()
-{
-	this->call_method(NULL, "disconnect", NULL);
 }
 
 int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
@@ -678,6 +659,8 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 
 void moo_load_thing_methods(MooObjectHash *env)
 {
+	// TODO this is wrong because it will *effectively* add these methods to all things without setting permissions for them
+	// 	which i *think* will make them all (specifically %save_all) executable by anyone
 	env->set("%clone", new MooFunc(thing_clone));
 	env->set("%load", new MooFunc(thing_load));
 	env->set("%save", new MooFunc(thing_save));

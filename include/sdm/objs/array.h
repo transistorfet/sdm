@@ -6,6 +6,8 @@
 #ifndef _SDM_ARRAY_H
 #define _SDM_ARRAY_H
 
+#include <pthread.h>
+
 #include <sdm/data.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
@@ -25,6 +27,7 @@ class MooThing;
 template<typename T>
 class MooArray : public MooObject {
     protected:
+	pthread_mutex_t m_lock;
 	int m_bits;
 	int m_size;
 	int m_max;
@@ -96,6 +99,7 @@ void release_array(void);
 template<typename T>
 MooArray<T>::MooArray(int size, int max, int bits, void (*destroy)(T))
 {
+	pthread_mutex_init(&m_lock, NULL);
 	m_bits = bits;
 	m_size = 0;
 	m_max = max;
@@ -111,12 +115,14 @@ MooArray<T>::~MooArray()
 {
 	int i;
 
+	// TODO should we mutext lock here
 	if (m_bits & MOO_ABF_DELETEALL && m_destroy) {
 		for (i = 0; i < m_size; i++) {
 			if (m_data[i])
 				m_destroy(m_data[i]);
 		}
 	}
+	pthread_mutex_destroy(&m_lock);
 	free(m_data);
 }
 
@@ -125,6 +131,7 @@ void MooArray<T>::clear()
 {
 	int i;
 
+	pthread_mutex_lock(&m_lock);
 	if (m_bits & MOO_ABF_DELETE && m_destroy) {
 		for (i = 0; i < m_size; i++) {
 			if (m_data[i])
@@ -133,6 +140,7 @@ void MooArray<T>::clear()
 	}
 	m_last = -1;
 	m_next_space = 0;
+	pthread_mutex_unlock(&m_lock);
 }
 
 template<typename T>
@@ -155,6 +163,7 @@ T MooArray<T>::set(int index, T value)
 	if (index < 0)
 		return(NULL);
 	if (index >= m_size) {
+		// TODO you probably need to mutex lock but it would be better if you move this to resize or something
 		if ((m_bits & MOO_ABF_RESIZE) && (m_max == -1 || index < m_max))
 			this->resize((int) (index * 1.25));
 		else
@@ -167,8 +176,9 @@ T MooArray<T>::set(int index, T value)
 		if (m_bits & MOO_ABF_DELETE && m_destroy)
 			m_destroy(m_data[index]);
 	}
-	m_data[index] = value;
 
+	pthread_mutex_lock(&m_lock);
+	m_data[index] = value;
 	/// Update the next_space and last values accordingly
 	if (!value) {
 		if (index < m_next_space)
@@ -188,6 +198,7 @@ T MooArray<T>::set(int index, T value)
 				break;
 		}
 	}
+	pthread_mutex_unlock(&m_lock);
 	return(value);
 }
 

@@ -19,11 +19,8 @@
 
       Interface Methods:
 	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
-	* by making a subclass of both user and task, which can be used in place of both (task is already ok for this, but user would
-	  need some more virtual functions), it would be possible to easily implement an RCP break, such all code can be used to make
-	  combinations of either the server or client side of the connection, with minimal effort.  ie. function calls to task, to
-	  write to user, can be redirected over an RPC connection, and come out the other side, just as the other side of the function
-	  call.  Therefore, we need to work on the RPC system, the IRC system, and the telnet system =P
+	* you could implement a telnet per-user-connection-task (like pseudoserv) which uses ANSI codes to create a simple client
+	  interface.  It would interact with the objects in the same way as pseudoserv
 	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
 	  directly printed, exactly the same as it would appear on telnet (more or less), -OR- server based, either the same as the
 	  client (but with services-like permissions), or ... actually the method with #realm wont work with multiple IRC servers,
@@ -34,8 +31,10 @@
 	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
 
       MultiTasking:
+	* tasks should be small temporary things, like a new task for each fight.  They should not be directly equivallent to threads
 	* you could have a tasks/ directory the same as the current objs/ directory, such that each task ID coresponds to a numbered
 	  file in the tasks/ directory and stored in that is the task state such that it can be restarted using that information.
+	  A task that saves it's state would be persistent.  Not all tasks need (or should) be persistent.
 	* you could have a locking mechanism in the frame itself similar to the task suid mechanism, where an unlock event is placed
 	  on the stack.  Then, when a frame is going to be suspended, it can check for a lock and continue execution until the unlock
 	  is reached.  It can also monitor for overrun and terminate the task or something.
@@ -43,11 +42,14 @@
 	  object, or task, or something) that is trying to lock an object.  If you are using multithreading, it will use a semaphore
 	  or else just a bit and if successfully lock, will save the pointer passed to it.  That pointer can then be used to determine
 	  who is performing an operation on that object (for permission checking) while at the same time allowing multithreading
-	* we could have a message queue for each task such that certain functions (handling notify() calls or handling interface-ready
-	  or timer expire events or something) can be performed later.  It could be a fairly generic mechanism
+	* should we have a fixed number of worker threads, and have them access an mqueue of scheduled tasks and have them just
+	  constantly consume a task and run it (possibly until done, possibly for a limited time).  Is there a big benifit in not
+	  having a thread per task? (creating/destroying a thread for every task create/destroy)
 
-      Miscellaneous:
-	* you could have NickServ and ChanServ as user-like objects which you can talk to for basic registration
+	* how will any code (assuming we use pthreads) be able to get the current task (the only thing needed usually is the owner of
+	  the task, and the user)?  We can't use global variables like we are.  I guess this depends on the whole threading mechanism
+	* should all timing have to be done with tasks?  You could have scheduled tasks which execute after a specific amount of time,
+	  and you could also have a sleep function which suspends the task for a specific amount of time.
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
 	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
@@ -55,6 +57,56 @@
 	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
 	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
 
+	* how will 'notify' relate to tasks and all that?  Will it be a message system for passing messages to a task?
+	* we could have a message queue for each task such that certain functions (handling notify() calls or handling interface-ready
+	  or timer expire events or something) can be performed later.  It could be a fairly generic mechanism
+	* notify can either be like an interrupt, where in a code task, the notify execution code would be pushed directly onto the
+	  task's frame, so that it's executed immediately, no matter what is currently executing (or alternatively, somewhere in the
+	  frame that we know is safe).
+	* when data is available at the socket, you would normally "switch" to the handling task, and then call the handler.  In
+	  pseudoserv, we the use call_method to create a frame and run the command, inline, but if we want to eliminate the detached
+	  frames (1 frame always belongs to 1 task), then we would either evaluate this command on the pseudoserv frame, which would
+	  then need to be evaluated seperately (idle() would be called by an idle-processing worker thread), or we could make a new
+	  task (with a frame) and evaluate the command in there.  This would mean you could fork tasks by executing a command, and
+	  commands could run for a time without having to create their own tasks.  For example, fighting could be implemented directly
+	  in the command itself, so the fight command would just run and use 'sleep' or something to pause between rounds.  Not all
+	  instances of call_method could be replaced with this methods, since some are just doing something simple and don't need a
+	  whole task, so you'd probably still need both methods (pseudoserv has it's own code frame, and also creates new code frame tasks
+	  for executing commands).
+	* we could turn socket-data-ready callbacks into notify() calls and use the same mechanism for handling them
+	* notify could be a function or method defined in an environment, which all tasks would have (MooTask), and then in pseudoserv's
+	  case, it would be a MooFunc type definition to a builtin function.  We could eliminate the indirection (user:notify)
+	* you could have a queue type which is stored as just a normal property in the user object, instead of storing the task??
+	* you could have a queue of messages for each task (notify events, handling, etc) and still have a single task run function in
+	  each task, and have the run function call a function to process and dispatch notify messages automatically (for convenience).
+	  For pseudoserv and stuff, it's ok because they don't use their current idle() functions so that would become a run() function
+	  and would have a loop that blocks trying to read the queue, thus waiting until a message arrives.  Everything else in the
+	  server could be handled in this way (besides pinging clients and detecting timeouts, which could be incorporated into the
+	  read_and_dispatch() function).  For MooCodeTasks, you would have to incorporate the dispatch function inte the frame->run()
+	  system by periodically checking if a message is available (non-blocking).  The big problem here is if you use sleep() or
+	  somehow want a delay (without creating a new task to delay execution).  If you use the real sleep(), the thread will block,
+	  so you'd need 2 threads per task to run; one for the run() function and one for dispatching.  Another way is to somehow use
+	  another thread to time or something, or somehow get a special message sent when the time expires, and then the thread can
+	  block by waiting to read and dispatch a message, and when it recieves the timeout message, it unsuspends the run.  Another
+	  option is to not have a message queue per task, and instead, special tasks will be able to receive a message, like pseudoserv
+	  and everything else would be handled via thing methods (tell and functions like that would all just be methods and only the
+	  user object would have a tell function which calls task:notify or something like that, or else which pushes the message onto
+	  a queue, which pseudoserv can (with thread-safety built in to queue) consume messages from that queue and process them as it
+	  currently does.  We would still need a way to handle network events, but perhaps that could be integrated using a similar
+	  mechanism (register a queue object with interfaces, and have interfaces' select() function to write a message to that queue,
+	  and for pseudoserv, you'd give it the same queue as the user's queue (we'd create the queue first when the task starts and
+	  assign it to the user once we connect).  This would again, however, not work for MooCodeTask, because it is not already
+	  waiting on a queue.  Then again, MooCodeTasks cannot currently use interfaces anyways, and should not be able to do so easily
+
+	* how would you create a new listener task from MooCode: (new-task %listener 6667 "pseudoserv") ???
+	  This would assume that %listener is a global variable of the listener task type (well it's basically just a lambda), and it
+	  passes the arguments in the normal way.
+	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
+	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
+	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
+	  things and have them remain in the task's scope at all times (thread-global definitions).
+
+      Permissions:
 	* you need to sort out permissions.  You can either have them on all objects or only on environment entries and things.  If you
 	  put them in the object themselves, then you can't have the same object added as a property to 2 different things or else the
 	  permission changes to one will affect the other.  This is the most significant with the way you are doing nil atm.  With
@@ -62,19 +114,32 @@
 	  property since there is no way for the property itself to have unique permissions (the nil value would have the perms)
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
 	  being accessed on the direct thing.
+	* (define &rwxp name value) - you could do this or something like it in order to set permissions during the define.  Also
+	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
 	* the biggest issue with permissions is the execute/suid flags.  It is best if these flags are on the value itself, unless
 	  some kind of value like MooMethod is *always* returned when calling get_method.  This would then persist at least until the
 	  value was evaluated.  It might be possible to remove this whole thing by alterning the execution core such that it stores
 	  the detailed information in MooArgs or in the CallFunction event or wherever, rather than evaluating the function lookup like
 	  all other values.  This would likely make function calls special and not first-class values.
 	* MooMethod is still really ugly and should be changed
+	* can we pass 'this' as a lambda argument instead of it being implied?  Would this actually make it more complicated??
+
+      Miscellaneous:
+	* make properties do a recursive object lookup, like methods, so that it's easy to change object properties dynamically due to
+	  the inheritence (so you don't have to change all objects).  You can use a public/private flag or init() or something like tha
+	  to ensure you don't get those bugs where the same array or hash was used for multiple objects.  Contents and location are the
+	  worst for this
 
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
 	* how can you delete MooThings from the system?
 
-	* should call_method require a task (or be a method on a task)? This would allow you to easily get the 'user' or otherwise
-	  associate the task with the frame.
+	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
+	  that function would then check for a '.something' and send it to channel:command itself
+	* you could have a command prefix like '.' such that it doesn't get parsed out of the name but only commands with that prefix
+	  are interpreted as commands, therefore all user-accessible commands must have a special name and don't get confused with
+	  none-command methods.  It would have to be something else because '.' is used as an accessor in code (would be impossible to
+	  have channel:.say for example, but could have channel:@say)
 
     TODO:
 
@@ -82,9 +147,6 @@
 
 	* make an (undefine ...) command for completeness!!!  (this should behave exactly like define except it removes entries).
 	  this would be the only way to remove a property from an object, since setting nil will not remove the entry.
-	* you could have a command prefix like '.' (but different because of compatibility stuff) such that it doesn't get parsed out
-	  of the name but only commands with that prefix are interpreted as commands, therefore all user-accessible commands must have
-	  a special name and don't get confused with none-command methods
 	* add debug field to event and fix debug message printing
 
 	* add arguments to be passed to 'initialize' during cloning
@@ -106,7 +168,6 @@
 	* fill in all other IRC message processing
 
 	* make a regex type (like string) that precompiles the expression, and can be directly parsed in using // notation
-	* get timers working (possibly implement them (or the functionality) via tasks)
 
 	* make it so that not all objects are loaded into the system (your ID assignment hack makes this impossible)
 	* modify attribute/colour formatting to use a stack of attribs, and to revert when closed tag is found

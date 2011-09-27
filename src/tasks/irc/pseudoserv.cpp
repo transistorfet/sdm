@@ -14,6 +14,7 @@
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
 #include <sdm/tasks/task.h>
+#include <sdm/tasks/code.h>
 #include <sdm/tasks/irc/msg.h>
 #include <sdm/tasks/irc/pseudoserv.h>
 
@@ -31,6 +32,7 @@ time_t server_start = 0;
 const char *server_name = "moo.jabberwocky.ca";
 const char *server_version = "0.1";
 
+// TODO I'd like to get rid of this if possible, maybe move it to initialize()
 int init_irc_pseudoserv(void)
 {
 	extern int init_irc_msg();
@@ -75,7 +77,7 @@ PseudoServ::~PseudoServ()
 {
 	this->set_delete();
 	if (m_user)
-		m_user->disconnect();
+		m_user->call_method(NULL, "disconnect", NULL);
 	if (m_nick)
 		delete m_nick;
 	if (m_pass)
@@ -294,9 +296,17 @@ int PseudoServ::dispatch(Msg *msg)
 			if (!channel)
 				return(Msg::send(m_inter, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 			if (msg->m_last[0] == '.') {
-				res = channel->call_method(channel, "command", NULL, new MooString("%s", &msg->m_last[1]));
-				if (res == MOO_ACTION_NOT_FOUND)
-					this->notify(TNT_STATUS, NULL, channel, "Pardon?");
+				//res = channel->call_method(channel, "command", NULL, new MooString("%s", &msg->m_last[1]));
+				//if (res == MOO_ACTION_NOT_FOUND)
+				//	this->notify(TNT_STATUS, NULL, channel, "Pardon?");
+				MooObject *func;
+				MooCodeTask *task;
+
+				task = new MooCodeTask(m_user, channel);
+				if (!(func = channel->resolve_method("command")))
+					return(-1);
+				task->push_call(func, new MooString("%s", &msg->m_last[1]));
+				task->schedule(0);
 			}
 			else if (msg->m_last[0] == '\x01')
 				this->process_ctcp(msg, channel);
@@ -529,7 +539,7 @@ int PseudoServ::login()
 		}
 	}
 
-	if (m_user->connect(this) < 0) {
+	if (m_user->call_method(NULL, "connect", NULL, this) < 0) {
 		Msg::send(m_inter, "ERROR :Closing Link: Error when logging in to %s\r\n", m_nick->c_str());
 		delete this;
 		return(0);

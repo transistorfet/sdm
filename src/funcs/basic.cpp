@@ -770,6 +770,20 @@ static int basic_return(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	return(0);
 }
 
+static int basic_sleep(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+{
+	double time;
+	MooTask *task;
+
+	if (args->m_args->last() != 0)
+		throw moo_args_mismatched;
+	time = args->m_args->get_float(0);
+	if (!(task = MooTask::current_task()))
+		throw MooException("No current task (???)");
+	task->schedule(time);
+	throw MooCodeFrameSuspend();
+}
+
 static int basic_perms(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 {
 	MooObject *obj;
@@ -872,6 +886,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("call-method", new MooFunc(basic_call_method));
 	env->set("throw", new MooFunc(basic_throw));
 	env->set("return", new MooFunc(basic_return));
+	env->set("sleep", new MooFunc(basic_sleep));
 
 	env->set("perms", new MooFunc(basic_perms));
 	env->set("owner", new MooFunc(basic_owner));

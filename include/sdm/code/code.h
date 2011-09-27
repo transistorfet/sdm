@@ -22,6 +22,7 @@
 #include <sdm/funcs/method.h>
 
 #include <sdm/code/expr.h>
+#include <sdm/code/sync.h>
 #include <sdm/code/event.h>
 #include <sdm/code/frame.h>
 #include <sdm/code/parser.h>

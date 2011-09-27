@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <pthread.h>
 
 #include <sdm/globals.h>
 #include <sdm/exception.h>

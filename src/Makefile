@@ -19,6 +19,7 @@ OBJS =	colours.o	\
 	code/frame.o	\
 	code/lambda.o	\
 	code/parser.o	\
+	code/sync.o	\
 	funcs/basic.o	\
 	funcs/func.o	\
 	funcs/method.o	\
@@ -164,6 +165,18 @@ code/parser.o: code/parser.cpp ../include/sdm/data.h \
   ../include/sdm/code/expr.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
+
+code/sync.o: code/sync.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/args.h \
+  ../include/sdm/objs/array.h ../include/sdm/data.h \
+  ../include/sdm/objs/object.h ../include/sdm/gc.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h ../include/sdm/code/sync.h
 
 funcs/basic.o: funcs/basic.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
@@ -314,7 +327,14 @@ tasks/code.o: tasks/code.cpp ../include/sdm/data.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/tasks/code.h
+  ../include/sdm/tasks/code.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/args.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/funcs/func.h ../include/sdm/funcs/method.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h
 
 tasks/init.o: tasks/init.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
