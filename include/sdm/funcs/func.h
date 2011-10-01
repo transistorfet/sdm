@@ -10,7 +10,7 @@
 
 #include <sdm/objs/object.h>
 
-typedef int (*moo_func_t)(class MooCodeFrame *frame, class MooObjectHash *env, class MooArgs *args);
+typedef int (*moo_func_t)(class MooCodeFrame *frame, class MooObjectHash *env, class MooObjectArray *args);
 
 class MooFunc : public MooObject {
     protected:
@@ -26,7 +26,7 @@ class MooFunc : public MooObject {
 	virtual int to_string(char *buffer, int max);
 
     private:
-	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args);
 };
 
 extern MooObjectType moo_func_obj_type;

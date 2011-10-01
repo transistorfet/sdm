@@ -26,10 +26,10 @@ typedef struct MooObjectType {
 	moo_type_make_t m_make;
 } MooObjectType;
 
-class MooArgs;
 class MooThing;
 class MooCodeFrame;
 class MooObjectHash;
+class MooObjectArray;
 
 class MooObject : public MooGC {
     protected:
@@ -72,14 +72,14 @@ class MooObject : public MooGC {
 	virtual const char *get_string() { throw MooException("Unable to convert to string"); }
 	virtual MooThing *get_thing() { throw MooException("Unable to convert to thing"); }
 
-	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL);
+	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL, MooObject **parent = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 	MooObject *resolve_method(const char *name, MooObject *value = NULL);
 
 	int call_method(MooObject *channel, const char *name, MooObject **result = NULL, MooObject *obj1 = NULL, MooObject *obj2 = NULL, MooObject *obj3 = NULL, MooObject *obj4 = NULL, MooObject *obj5 = NULL);
-	int call_method(MooObject *channel, MooObject *func, MooArgs *args);
-	int call_method(MooObject *func, MooObjectHash *env, MooArgs *args);
-	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args);
+	int call_method(MooObject *channel, MooObject *func, MooObjectArray *args, MooObject **result = NULL);
+	int call_method(MooObject *func, MooObjectHash *env, MooObjectArray *args, MooObject **result = NULL);
+	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args);
 
 	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooObjectHash *env, const char *str, int *used);
@@ -89,7 +89,7 @@ class MooObject : public MooGC {
 	/// Object Member Access Functions
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { throw moo_type_error; }
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { throw moo_type_error; }
-	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args) { throw moo_evaluate_error; }
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args) { throw moo_evaluate_error; }
 	friend class MooTask;
 
     public:

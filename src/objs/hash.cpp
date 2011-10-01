@@ -193,89 +193,89 @@ MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
  * Hash Object Methods *
  ************************/
 
-static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	const char *name;
 	MooObjectHash *m_this;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != 0)
+	if (args->last() != 1)
 		throw moo_args_mismatched;
-	name = args->m_args->get_string(0);
-	args->m_result = m_this->get(name);
+	name = args->get_string(1);
+	frame->set_return(m_this->get(name));
 	return(0);
 }
 
-static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	int res;
 	MooObject *obj;
 	const char *name;
 	MooObjectHash *m_this;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != 1)
+	if (args->last() != 2)
 		throw moo_args_mismatched;
 	m_this->check_throw(MOO_PERM_W);
-	name = args->m_args->get_string(0);
-	obj = args->m_args->get(1);
+	name = args->get_string(1);
+	obj = args->get(2);
 	res = m_this->set(name, obj);
-	args->m_result = new MooBoolean(res == 0);
+	frame->set_return(new MooBoolean(res == 0));
 	return(0);
 }
 
-static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	int res;
 	const char *name;
 	MooObjectHash *m_this;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != 0)
+	if (args->last() != 1)
 		throw moo_args_mismatched;
 	m_this->check_throw(MOO_PERM_W);
-	name = args->m_args->get_string(0);
+	name = args->get_string(1);
 	res = m_this->remove(name);
-	args->m_result = new MooBoolean(res == 0);
+	frame->set_return(new MooBoolean(res == 0));
 	return(0);
 }
 
-static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	MooObjectHash *m_this;
 	MooObjectArray *array;
 	MooHashEntry<MooObject *> *entry;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != -1)
+	if (args->last() != 0)
 		throw moo_args_mismatched;
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
 		array->push(new MooString("%s", entry->m_key));
-	args->m_result = array;
+	frame->set_return(array);
 	return(0);
 }
 
-static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	MooObjectHash *m_this;
 	MooObjectArray *array;
 	MooHashEntry<MooObject *> *entry;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != -1)
+	if (args->last() != 0)
 		throw moo_args_mismatched;
 	array = new MooObjectArray();
 	m_this->reset();
 	while ((entry = m_this->next_entry()))
 		array->push(MOO_INCREF(entry->m_data));
-	args->m_result = array;
+	frame->set_return(array);
 	return(0);
 }
 
@@ -295,8 +295,8 @@ class HashEventForeach : public MooCodeEvent {
 	}
 
 	int do_event(MooCodeFrame *frame) {
-		MooArgs *args;
 		MooObject *obj;
+		MooObjectArray *args;
 		MooHashEntry<MooObject *> *entry;
 
 		// TODO this is disabled for now because it causes trouble if you don't pay attention to the return type
@@ -319,25 +319,25 @@ class HashEventForeach : public MooCodeEvent {
 				frame->push_event(new HashEventForeach(m_index + 1, NULL, m_this, m_env, m_func));
 		}
 
-		args = new MooArgs();
-		args->m_args->set(0, MOO_INCREF(m_func));
-		args->m_args->set(1, MOO_INCREF(entry->m_data));
+		args = new MooObjectArray();
+		args->set(0, MOO_INCREF(m_func));
+		args->set(1, MOO_INCREF(entry->m_data));
 		frame->push_event(new MooCodeEventCallFunc(m_env, args));
 		return(0);
 	}
 };
 
-static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	MooObject *func;
 	MooObjectHash *m_this;
 
-	if (!(m_this = dynamic_cast<MooObjectHash *>(args->m_this)))
+	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != 0)
+	if (args->last() != 1)
 		throw moo_args_mismatched;
-	func = args->m_args->get(0);
-	args->m_result = new MooBoolean(B_TRUE);
+	func = args->get(1);
+	frame->set_return(new MooBoolean(B_TRUE));
 	frame->push_event(new HashEventForeach(0, NULL, m_this, env, func));
 	return(0);
 }

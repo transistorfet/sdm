@@ -23,10 +23,10 @@ class MooCodeLambda : public MooObject {
 	virtual int write_data(MooDataFile *data);
 	virtual int to_string(char *buffer, int max);
 
-	int map_args(MooObjectHash *env, MooArgs *args);
+	int map_args(MooObjectHash *env, MooObjectArray *args);
 
     protected:
-	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args);
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooObjectArray *args);
 };
 
 extern MooObjectType moo_code_lambda_obj_type;

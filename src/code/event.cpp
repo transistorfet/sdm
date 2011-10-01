@@ -11,7 +11,6 @@
 #include <sdm/globals.h>
 
 #include <sdm/objs/hash.h>
-#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 
 #include <sdm/objs/thing.h>
@@ -21,7 +20,7 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
 MooHash<MooFormT *> *form_env = NULL;
 
-MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooArgs *args, MooCodeExpr *expr, MooObject *debug)
+MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooObjectArray *args, MooCodeExpr *expr, MooObject *debug)
 {
 	MOO_INCREF(m_env = env);
 	MOO_INCREF(m_args = args);
@@ -97,18 +96,29 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 	    case MCT_CALL: {
 		MooFormT *form;
 		MooCodeExpr *expr;
+		const char *name = NULL;
+		MooObject *method, *parent = NULL;
 
 		/// If the expr's value is not itself an expr, then the AST is invalid
 		if (!(expr = dynamic_cast<MooCodeExpr *>(m_expr->value())))
 			throw MooException("(%d, %d) Invalid AST; expected MooCodeExpr.", m_expr->line(), m_expr->col());
 
 		if (expr->type() == MCT_IDENTIFIER) {
-			if ((form = form_env->get(expr->get_identifier())))
+			name = expr->get_identifier();
+			if ((form = form_env->get(name)))
 				return((*form)(frame, expr->next()));
 		}
-		MooArgs *args = new MooArgs();
+		MooObjectArray *args = new MooObjectArray();
 		// TODO add debug information
 		//frame->push_debug("> call to %s");
+		if (name) {
+			if (!(method = MooObject::resolve(name, m_env, NULL, &parent)))
+				throw MooException("Undefined value: %s", name);
+			args->push(method);
+			if (parent)
+				args->push(parent);
+			expr = expr->next();
+		}
 		frame->push_event(new MooCodeEventCallFunc(m_env, args, m_expr));
 		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
 		MOO_DECREF(args);
@@ -148,10 +158,10 @@ int MooCodeEventCallFunc::do_event(MooCodeFrame *frame)
 {
 	MooObject *func;
 
-	if (!m_args || !(func = m_args->m_args->shift()))
+	// TODO m_expr is actually set to the expression of the call, so we can use it for debugging
+	if (!m_args || !(func = m_args->shift()))
 		throw MooException("Null function.");
 	func->evaluate(frame, m_env, m_args);
-	frame->set_return(m_args->m_result);
 	return(0);
 }
 
@@ -186,7 +196,7 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 		return(-1);
 	// TODO this line causes a segfault for unknown reasons (possibly a double free somewhere??)
 	// TODO should this not incref, but instead just steal the ref and set return to NULL? (or otherwise set return to NULL)
-	return(m_args->m_args->push(MOO_INCREF(frame->get_return())));
+	return(m_args->push(MOO_INCREF(frame->get_return())));
 }
 
 
@@ -432,27 +442,25 @@ static int form_synchronize(MooCodeFrame *frame, MooCodeExpr *expr)
 
 static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
 {
-	MooArgs *args;
-	MooObject *othis, *obj;
+	MooObjectArray *args;
+	MooObject *o_this, *obj;
 	MooThing *thing;
-	MooMethod *method;
 	MooObjectHash *env;
 
 	if (!expr)
 		throw moo_args_mismatched;
 	env = frame->env();
-	if (!(othis = env->get("this")))
+	if (!(o_this = env->get("this")))
 		throw MooException("in super: \'this\' not set");
 	// TODO  which way should we check for thing? (this is inconsistent with everything else)
-	if (!(thing = dynamic_cast<MooThing *>(othis)))
+	if (!(thing = dynamic_cast<MooThing *>(o_this)))
 		throw MooException("in super: \'this\' is not a thing");
 	if (!(obj = thing->parent()))
 		throw MooException("in super: object has no parent");
 	obj = obj->resolve_method(expr->get_identifier());
-	if ((method = dynamic_cast<MooMethod *>(obj)))
-		method->m_obj = othis;
- 	args = new MooArgs();
-	args->m_args->set(0, MOO_INCREF(obj));
+ 	args = new MooObjectArray();
+	args->set(0, MOO_INCREF(obj));
+	args->set(1, o_this);
 	frame->push_event(new MooCodeEventCallFunc(env, args, expr));
 	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));
 	MOO_DECREF(args);

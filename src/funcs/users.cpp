@@ -140,28 +140,29 @@ void user_encrypt_password(const char *salt, char *passwd, int max)
 }
 
 
-static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	int type;
 	MooTask *task;
 	MooObject *obj;
 	MooThing *user, *channel;
+	MooThing *m_this;
 	char buffer[LARGE_STRING_SIZE];
 
-	if (!args->m_this)
+	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
-	if (!(task = dynamic_cast<MooTask *>(args->m_this->resolve_property("task"))))
+	if (!(task = dynamic_cast<MooTask *>(m_this->resolve_property("task"))))
 		throw MooException("User not connected; No \"task\" defined.");
-	if (args->m_args->last() != 3)
+	if (args->last() != 4)
 		throw moo_args_mismatched;
-	type = args->m_args->get_integer(0);
-	user = args->m_args->get_thing(1);
-	channel = args->m_args->get_thing(2);
-	if (!(obj = args->m_args->get(3)))
+	type = args->get_integer(1);
+	user = args->get_thing(2);
+	channel = args->get_thing(3);
+	if (!(obj = args->get(4)))
 		return(-1);
 	obj->to_string(buffer, LARGE_STRING_SIZE);
 	if (type < TNT_FIRST || type > TNT_LAST)
-		throw MooException("arg 0: Invalid notify() type");
+		throw MooException("arg 1: Invalid notify() type");
 	// TODO permissions check!? I guess on task
 	task->notify(type, user, channel, buffer);
 	return(0);

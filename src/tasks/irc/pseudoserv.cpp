@@ -305,7 +305,7 @@ int PseudoServ::dispatch(Msg *msg)
 				task = new MooCodeTask(m_user, channel);
 				if (!(func = channel->resolve_method("command")))
 					return(-1);
-				task->push_call(func, new MooString("%s", &msg->m_last[1]));
+				task->push_call(func, channel, new MooString("%s", &msg->m_last[1]));
 				task->schedule(0);
 			}
 			else if (msg->m_last[0] == '\x01')

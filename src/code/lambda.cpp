@@ -7,7 +7,6 @@
 #include <stdarg.h>
 
 #include <sdm/globals.h>
-#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/code/code.h>
 
@@ -91,39 +90,38 @@ int MooCodeLambda::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooCodeLambda::map_args(MooObjectHash *env, MooArgs *args)
+int MooCodeLambda::map_args(MooObjectHash *env, MooObjectArray *args)
 {
 	int i;
 	const char *id;
 	MooCodeExpr *cur;
 
-	env->set("this", args->m_this);
 	for (i = 0, cur = m_params; cur; i++, cur = cur->next()) {
 		id = cur->get_identifier();
-		if (!strcmp(id, "&all")) {
-			env->set("args", args->m_args);
+		if (!strcmp(id, "&args")) {
+			env->set("args", args);
 			return(0);
 		}
 		else if (!strcmp(id, "&rest")) {
 			MooObjectArray *array = new MooObjectArray();
-			for (; i <= args->m_args->last(); i++)
-				array->push(MOO_INCREF(args->m_args->get(i)));
-			env->set("args", array);
+			for (; i <= args->last(); i++)
+				array->push(MOO_INCREF(args->get(i)));
+			env->set("rest", array);
 			return(0);
 		}
 		else {
-			if (i > args->m_args->last())
+			if (i > args->last())
 				break;
-			env->set(id, args->m_args->get(i));
+			env->set(id, args->get(i));
 		}
 	}
-	if (cur || i <= args->m_args->last())
+	if (cur || i <= args->last())
 		throw moo_args_mismatched;
 	return(0);
 }
 
 
-int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
+int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooObjectArray *args)
 {
 	MooObjectHash *env;
 

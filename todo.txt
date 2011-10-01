@@ -118,17 +118,18 @@
 	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
 	* the biggest issue with permissions is the execute/suid flags.  It is best if these flags are on the value itself, unless
 	  some kind of value like MooMethod is *always* returned when calling get_method.  This would then persist at least until the
-	  value was evaluated.  It might be possible to remove this whole thing by alterning the execution core such that it stores
+	  value was evaluated.  It might be possible to remove this whole thing by altering the execution core such that it stores
 	  the detailed information in MooArgs or in the CallFunction event or wherever, rather than evaluating the function lookup like
 	  all other values.  This would likely make function calls special and not first-class values.
-	* MooMethod is still really ugly and should be changed
 	* can we pass 'this' as a lambda argument instead of it being implied?  Would this actually make it more complicated??
 
       Miscellaneous:
-	* make properties do a recursive object lookup, like methods, so that it's easy to change object properties dynamically due to
-	  the inheritence (so you don't have to change all objects).  You can use a public/private flag or init() or something like tha
-	  to ensure you don't get those bugs where the same array or hash was used for multiple objects.  Contents and location are the
-	  worst for this
+	* You can use a public/private flag for thing properties so that some properties will be invisible to child things.  This would
+	  prevent those errors I had before where complex objcets like arrays and hashes would be the same (contents and stuff).  You
+	  could also just use init().
+
+	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
+	  because it allows a command to have the same name of a function but with different argument processing and stuff
 
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
@@ -140,6 +141,8 @@
 	  are interpreted as commands, therefore all user-accessible commands must have a special name and don't get confused with
 	  none-command methods.  It would have to be something else because '.' is used as an accessor in code (would be impossible to
 	  have channel:.say for example, but could have channel:@say)
+	* this could be entirely object dependant.  In nickserv, the 'say' method will be called when a pm is sent to nickserv.  That
+	  method then executes it as a command.
 
     TODO:
 

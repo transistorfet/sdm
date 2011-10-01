@@ -24,9 +24,9 @@
 typedef int moo_tid_t;
 
 class MooUser;
-class MooArgs;
 class MooThing;
 class MooInterface;
+class MooObjectArray;
 
 class MooTask : public MooObject {
 	moo_tid_t m_tid;

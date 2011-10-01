@@ -23,15 +23,16 @@ class MooCodeFrame : public MooObject {
     public:
 	MooCodeFrame(MooObjectHash *env = NULL);
 	virtual ~MooCodeFrame();
+	int clear();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
 
-	int eval(const char *code, MooArgs *args = NULL);
+	int eval(const char *code, MooObjectArray *args = NULL);
 
 	int push_event(MooCodeEvent *event);
 	int push_block(MooObjectHash *env, MooCodeExpr *expr);
-	int push_call(MooObjectHash *env, MooObject *func, MooArgs *args);
+	int push_call(MooObjectHash *env, MooObject *func, MooObjectArray *args);
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
 

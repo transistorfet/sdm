@@ -111,6 +111,7 @@ int MooCodeTask::idle()
 		moo_status("CODE: %s", e.get());
 		m_frame->print_stacktrace();
 		cycles = -1;
+		//m_frame->clear();
 	}
 	return(cycles);
 }
@@ -161,15 +162,15 @@ int MooCodeTask::purge(MooInterface *inter)
 
 int MooCodeTask::push_call(MooObject *func, MooObject *arg1, MooObject *arg2, MooObject *arg3)
 {
-	MooArgs *args;
+	MooObjectArray *args;
 
-	args = new MooArgs();
+	args = new MooObjectArray();
 	if (arg1) {
-		args->m_args->set(0, arg1);
+		args->set(0, arg1);
 		if (arg2) {
-			args->m_args->set(1, arg2);
+			args->set(1, arg2);
 			if (arg3)
-				args->m_args->set(2, arg3);
+				args->set(2, arg3);
 		}
 	}
 

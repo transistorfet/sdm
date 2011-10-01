@@ -12,7 +12,6 @@
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
-#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/tasks/task.h>
 
@@ -83,6 +82,15 @@ MooCodeFrame::~MooCodeFrame()
 		delete m_exception;
 }
 
+int MooCodeFrame::clear()
+{
+	MooCodeEvent *event;
+
+	while ((event = m_stack->pop()))
+		delete event;
+	return(0);
+}
+
 int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
 {
 	moo_status("DATA: Attempting to read unreadable type: MooCodeFrame (%x)", this);
@@ -96,7 +104,7 @@ int MooCodeFrame::write_data(MooDataFile *data)
 }
 
 
-int MooCodeFrame::eval(const char *code, MooArgs *args)
+int MooCodeFrame::eval(const char *code, MooObjectArray *args)
 {
 	try {
 		this->push_code(code);
@@ -120,9 +128,9 @@ int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr)
 	return(m_stack->push(new MooCodeEventEvalBlock(env, expr)));
 }
 
-int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooArgs *args)
+int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooObjectArray *args)
 {
-	args->m_args->unshift(func);
+	args->unshift(func);
 	return(m_stack->push(new MooCodeEventCallFunc(env, args, func)));
 }
 

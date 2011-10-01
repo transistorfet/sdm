@@ -9,15 +9,16 @@
 #include <sdm/globals.h>
 #include <sdm/tasks/task.h>
 
+#include <sdm/objs/nil.h>
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/args.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/funcs/func.h>
-#include <sdm/funcs/method.h>
 #include <sdm/objs/thing.h>
+
+#include <sdm/code/code.h>
 
 
 #define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
@@ -117,8 +118,6 @@ MooThing *MooThing::lookup(moo_id_t id)
 MooThing *MooThing::clone(moo_id_t id)
 {
 	MooThing *thing;
-	MooHashEntry<MooObject *> *entry;
-
 	if ((thing = moo_thing_table->get(id))) {
 		moo_status("WARNING: Reassigning thing ID, #%d", id);
 		//thing->m_bits = 0;
@@ -128,12 +127,6 @@ MooThing *MooThing::clone(moo_id_t id)
 	}
 	else if (!(thing = new MooThing(id, this->m_id)))
 		throw MooException("Error creating new thing from %d", this->m_id);
-
-	/*
-	this->m_properties->reset();
-	while ((entry = this->m_properties->next_entry()))
-		thing->m_properties->set(entry->m_key, MOO_INCREF(entry->m_data));
-	*/
 	return(thing);
 }
 
@@ -431,16 +424,17 @@ const char *MooThing::name()
 int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
 {
 	int res;
-	MooArgs *args;
 	MooObject *func;
+	MooObjectArray *args;
 
 	if (!(func = this->resolve_method("notify")))
 		return(-1);
-	args = new MooArgs();
-	args->m_args->set(0, new MooNumber((long int) type));
-	args->m_args->set(1, thing);
-	args->m_args->set(2, channel);
-	args->m_args->set(3, new MooString("%s", text));
+	args = new MooObjectArray();
+	args->set(0, this);
+	args->set(1, new MooNumber((long int) type));
+	args->set(2, thing);
+	args->set(3, channel);
+	args->set(4, new MooString("%s", text));
 	res = this->call_method(channel, func, args);
 	MOO_DECREF(args);
 	return(res);
@@ -495,21 +489,21 @@ int MooChannel::valid_channelname(const char *name)
  * Thing Object Methods *
  ************************/
 
-static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
-	MooMethod *init;
 	MooObject *func;
 	MooObject *id = NULL;
+	MooObjectArray *newargs;
 	MooThing *thing, *parent;
 	moo_id_t idnum = MOO_NEW_ID;
 
-	if (!(parent = dynamic_cast<MooThing *>(args->m_this)))
+	if (!(parent = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() == 0)
-		func = args->m_args->get(0);
-	else if (args->m_args->last() == 1) {
-		id = args->m_args->get(0);
-		func = args->m_args->get(1);
+	if (args->last() == 1)
+		func = args->get(1);
+	else if (args->last() == 2) {
+		id = args->get(1);
+		func = args->get(2);
 	}
 	else
 		throw moo_args_mismatched;
@@ -519,53 +513,58 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	// TODO permissions check!!!
 	thing = parent->clone(idnum);
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
-	if (func)
-		frame->push_call(env, new MooMethod(thing, func), new MooArgs());
+	if (func) {
+		newargs = new MooObjectArray();
+		newargs->set(0, thing);
+		frame->push_call(env, func, newargs);
+	}
 
 	/// Call the 'initialize' method of each parent object (Most distant parent will be called first)
 	while (parent) {
-		if ((init = dynamic_cast<MooMethod *>(parent->resolve_method("initialize")))) {
-			init->m_obj = thing;
-			frame->push_call(env, init, new MooArgs());
+		if ((func = parent->resolve_method("initialize"))) {
+			newargs = new MooObjectArray();
+			newargs->set(0, thing);
+			frame->push_call(env, func, newargs);
 		}
 		parent = parent->parent();
 	}
 	return(0);
 }
 
-static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	MooThing *thing;
 
 	// TODO permissions check
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+	if (!(thing = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != -1)
+	if (args->last() != 0)
 		throw moo_args_mismatched;
 	thing->load();
 	return(0);
 }
 
-static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	MooThing *thing;
 
 	// TODO permissions check
-	if (!(thing = dynamic_cast<MooThing *>(args->m_this)))
+	if (!(thing = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
-	if (args->m_args->last() != -1)
+	if (args->last() != 0)
 		throw moo_args_mismatched;
 	thing->save();
 	return(0);
 }
 
-static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	// TODO permissions check
 	MooThing::save_all();
 	return(0);
 }
 
+/*
 #define MAX_WORDS	256
 #define PREPOSITIONS	5
 const char *prepositions[] = { "to", "in", "from", "is", "as" };
@@ -635,27 +634,8 @@ static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
 	// TODO you could have a call here to an optional method on the user after a command has been executed (like a prompt)
 
 	return(0);
-
-/*
-	(define this:command (lambda (text)
-		(define words (***parse-into-words***)
-		(define dobj "")
-		(define prep "")
-		(define iobj "")
-		(words:foreach (lambda (cur)
-			(cond
-				((!= (prepositions:search cur) -1)
-					(set! prep cur))
-				((equal? prep "")
-					(set! dobj (concat dobj " " cur)))
-				(else
-					(set! iobj (concat iobj " " cur)))
-		))
-	))
-*/
-
-
 }
+*/
 
 void moo_load_thing_methods(MooObjectHash *env)
 {
@@ -665,7 +645,7 @@ void moo_load_thing_methods(MooObjectHash *env)
 	env->set("%load", new MooFunc(thing_load));
 	env->set("%save", new MooFunc(thing_save));
 	env->set("%save_all", new MooFunc(thing_save_all));
-	env->set("%command", new MooFunc(parse_command));
+	//env->set("%command", new MooFunc(parse_command));
 }
 
 

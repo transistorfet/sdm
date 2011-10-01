@@ -3,24 +3,24 @@
 
 (define *global*.root #0)
 
-(define *global*.root:initialize (lambda ()
+(define *global*.root:initialize (lambda (this)
 	(define this.location nil)
 	(define this.contents (array))
 ))
 
-(define *global*.ChanServ (root:%clone (lambda ()
+(define *global*.ChanServ (root:%clone (lambda (this)
 	(define this.name "ChanServ")
 	(define this.title "ChanServ")
 
 	(define this.db (hash))
 
-	(define this:register (lambda (channel)
+	(define this:register (lambda (this channel)
 		(if (null? (this.db:get channel.name))
 			(this.db:set channel.name channel)
 			#f)
 	))
 
-	(define this:quit (lambda ()
+	(define this:quit (lambda (this)
 		(this.db:foreach (lambda (cur)
 			(define channel cur)
 			(cur:leave)
@@ -28,38 +28,52 @@
 	))
 )))
 
-(define *global*.NickServ (root:%clone (lambda ()
+(define *global*.NickServ (root:%clone (lambda (this)
 	(define this.name "NickServ")
 	(define this.title "NickServ")
 
 	(define this.db (hash))
 
-	(define this:make_guest (lambda (name)
+	; The idea here is that when a user talks to nickserv in pm, it will execute it as a ! command
+	(define this:say (lambda (this &args)
+		((get-method this (expand "!$cmd")) this args)
+	))
+
+	(define this:make_guest (lambda (this name)
 		(define guest (this:next_guest))
 		(define guest.name name)
 		guest
 	))
 
-	(define this:register (lambda (person)
+	(define this:register (lambda (this person)
 		(if (null? (this.db:get person.name))
 			(this.db:set person.name person)
+			#f)
+	))
+
+	(define this:identify (lambda (this name password)
+		(define person (this.db:get name))
+		(if (null? person)
+			(return #f))
+		(if (equal? person.name password)
+			#t
 			#f)
 	))
 )))
 (NickServ:register NickServ)
 (NickServ:register ChanServ)
 
-(define *global*.channel (root:%clone (lambda ()
+(define *global*.channel (root:%clone (lambda (this)
 	(define this.name "generic-channel")
 	(define this.title "Generic Channel")
 
-	(define this:initialize (lambda ()
+	(define this:initialize (lambda (this)
 		(define this.users (array))
 	))
 
 	; TODO maybe this should take the user object that will join, and do a permissions check to make sure we can force a join on
 	;	that object.
-	(define this:join (chmod 0475 (lambda ()
+	(define this:join (chmod 0475 (lambda (this)
 		(if (!= (this.users:search user) -1)
 			(return #f))
 		(this.users:push user)
@@ -68,7 +82,7 @@
 		#t
 	)))
 
-	(define this:leave (chmod 0475 (lambda ()
+	(define this:leave (chmod 0475 (lambda (this)
 		(if (!= (this.users:search user) -1)
 			(begin
 				(this.users:foreach (lambda (cur)
@@ -79,7 +93,7 @@
 		)
 	)))
 
-	(define this:quit (lambda ()
+	(define this:quit (lambda (this)
 		(if (!= (this.users:search user) -1)
 			(begin
 				; TODO there should only be one quit message per user but we can only control the channels quit...
@@ -90,19 +104,19 @@
 		)
 	))
 
-	(define this:say (lambda (text)
+	(define this:say (lambda (this text)
 		(this.users:foreach (lambda (cur)
 			(cur:notify N/SAY user channel text)
 		))
 	))
 
-	(define this:emote (lambda (text)
+	(define this:emote (lambda (this text)
 		(this.users:foreach (lambda (cur)
 			(cur:notify N/EMOTE user channel text)
 		))
 	))
 
-	(define this:names (lambda ()
+	(define this:names (lambda (this)
 		(define names "")
 		(this.users:foreach (lambda (cur)
 			(set! names (concat names cur.name " "))
@@ -110,16 +124,16 @@
 		(chop names)
 	))
 
-	(define this:command (lambda (text)
+	(define this:command (lambda (this text)
 		(user:tell "Commands are not supported in this channel.")
 	))
 )))
 
-(define *global*.realm (channel:%clone (lambda ()
+(define *global*.realm (channel:%clone (lambda (this)
 	(define this.name "#realm")
 	(define this.title "TheRealm")
 
-	(define this:join (lambda ()
+	(define this:join (lambda (this)
 		(if (not (super join))
 			(return))
 		(user:tell "<b>Welcome to the Realm!")
@@ -127,27 +141,27 @@
 		(this:fetch user)
 	))
 
-	(define this:leave (lambda ()
+	(define this:leave (lambda (this)
 		(super leave)
 		(this:store user)
 	))
 
-	(define this:quit (lambda ()
+	(define this:quit (lambda (this)
 		(super quit)
 		(this:store user)
 	))
 
-	(define this:say (lambda (text)
+	(define this:say (lambda (this text)
 		(user.location:say text)
 	))
 
-	(define this:emote (lambda (text)
+	(define this:emote (lambda (this text)
 		(user.location:emote text)
 	))
 
 	(define this.prepositions (array "to" "in" "from" "is" "as"))
 
-	(define this:command (lambda (text)
+	(define this:command (lambda (this text)
 		(define argstr (remove-word text))
 		(define dobjstr "")
 		(define prepstr "")
@@ -168,19 +182,19 @@
 		(define iobj (user:find iobjstr))
 		(define method (get-method user cmd))
 		(if (not (null? method))
-			(call-method user method words)
+			(method user words)
 			(begin
 				(set! method (get-method user.location cmd))
 				(if (not (null? method))
-					(call-method user.location method words)
+					(method user.location words)
 					(begin			
 						(set! method (get-method dobj cmd))
 						(if (and (not (null? dobj)) (not (null? method)))
-							(call-method dobj method words)
+							(method dobj words)
 							(begin			
 								(set! method (get-method iobj cmd))
 								(if (and (not (null? iobj)) (not (null? method)))
-									(call-method iobj method words)
+									(method iobj words)
 									(user:tell "You don't know how to do that.")
 								)
 							)
@@ -191,14 +205,14 @@
 		)
 	))
 
-	(define this:store (chmod 0475 (lambda (name)
+	(define this:store (chmod 0475 (lambda (this name)
 		(if (!eqv? user.location this)
 			(begin
 				(define user.last_location user.location)
 				(user:move this)))
 	)))
 
-	(define this:fetch (chmod 0475 (lambda (name)
+	(define this:fetch (chmod 0475 (lambda (this name)
 		(if (or (not (defined? user.last_location)) (null? user.last_location))
 			(user:move start-room)
 			(if (eqv? user.location this)
@@ -208,12 +222,12 @@
 )))
 (ChanServ:register realm)
 
-(define *global*.thing (root:%clone (lambda ()
+(define *global*.thing (root:%clone (lambda (this)
 	(define this.name "generic-thing")
 	(define this.title "something")
 	(define this.description "You're not sure what it is.")
 
-	(define this:move (lambda (where)
+	(define this:move (lambda (this where)
 		; TODO we need to add some (try ...) protection here
 		(define was (ignore this.location))
 		(if (and (not (null? was)) (not (was.contents:remove this)))
@@ -222,23 +236,23 @@
 		(where.contents:push this)
 	))
 
-	(define this:look_self (lambda ()
+	(define this:look_self (lambda (this)
 		(user:tell (expand "<lightgreen>$this.description"))
 	))
 
-	(define this:notify (lambda (&all)
+	(define this:notify (lambda (this &args)
 		"Do Nothing."
 	))
 
-	(define this:tell (lambda (&all)
+	(define this:tell (lambda (this &args)
 		"Do Nothing."
 	))
 
-	(define this:tell_view (lambda ()
+	(define this:tell_view (lambda (this)
 		(user:tell (expand "<b><lightblue>You see $this.title here."))
 	))
 
-	(define this:find (lambda (name)
+	(define this:find (lambda (this name)
 		(cond
 			((equal? name "me")
 				this)
@@ -255,12 +269,12 @@
 		)
 	))
 
-	(define this:match_name (lambda (name)
+	(define this:match_name (lambda (this name)
 		(debug ">>>>>> " (substr 0 (strlen name) this.name))
 		(equal? name (substr 0 (strlen name) this.name))
 	))
 
-	(define this:acceptable (lambda (obj)
+	(define this:acceptable (lambda (this obj)
 		; TODO should this be a lambda on the location?
 		(this:tell-room obj
 			"You try to get into $obj.name but fail miserably."
@@ -269,7 +283,7 @@
 	))
 )))
 
-(define *global*.mobile (thing:%clone (lambda ()
+(define *global*.mobile (thing:%clone (lambda (this)
 	(define this.name "generic-mobile")
 	(define this.title "a generic-looking creature")
 
@@ -280,17 +294,17 @@
 	(define this.hp 30)
 )))
 
-(define *global*.user (mobile:%clone (lambda ()
+(define *global*.user (mobile:%clone (lambda (this)
 	(define this.name "user")
 	(define this.title "someone")
 
-	(define this:connect (lambda (task)
+	(define this:connect (lambda (this task)
 		(if (and (defined? this.task) (not (null? this.task)))
 			(this:disconnect))
 		(define this.task task)
 	))
 
-	(define this:disconnect (lambda ()
+	(define this:disconnect (lambda (this)
 		;(if (defined? this.task)
 		;	(this.task:purge this))
 		(define this.task nil)
@@ -299,21 +313,21 @@
 
 	(define this:notify %user_notify)
 
-	(define this:tell (lambda (text)
+	(define this:tell (lambda (this text)
 		(this:notify N/STATUS nil channel text)
 	))
 )))
 
-(define *global*.architect (user:%clone (lambda ()
+(define *global*.architect (user:%clone (lambda (this)
 	(define this.name "generic-architect")
 	(define this.title "an architect")
 
-	(define this:@eval (lambda (&all)
+	(define this:@eval (lambda (this &args)
 		(eval argstr)
 	))
 )))
 
-(define *global*.wizard (architect:%clone (lambda ()
+(define *global*.wizard (architect:%clone (lambda (this)
 	(define this.name "wizard")
 	(define this.title "a powerful wizard")
 )))
@@ -321,19 +335,19 @@
 
 
 
-(define *global*.room (thing:%clone (lambda ()
+(define *global*.room (thing:%clone (lambda (this)
 	(define this.name "generic-room")
 	(define this.title "someplace")
 
 	(define this.looked_at "$user.name looks around the room.")
 
-	(define this:initialize (lambda ()
+	(define this:initialize (lambda (this)
 		(define this.locked #f)
 		(define this.exits (hash))
 		(define this.display_contents #t)
 	))
 
-	(define this:look (lambda (&all)
+	(define this:look (lambda (this &args)
 		(define name (args:get 0))
 		(if (null? name)
 			(this:look_self)
@@ -347,7 +361,7 @@
 		)
 	))
 
-	(define this:look_self (lambda ()
+	(define this:look_self (lambda (this)
 		(if (= (this.contents:search user) -1)
 			(user:tell "You don't have clairvoyance.")
 			(begin
@@ -363,7 +377,7 @@
 		)
 	))
 
-	(define this:obvious_exits (lambda ()
+	(define this:obvious_exits (lambda (this)
 		(define exits "")
 		(this.exits:foreach (lambda (cur)
 			(if cur.obvious
@@ -371,7 +385,7 @@
 		))
 	))
 
-	(define this:exits (lambda ()
+	(define this:exits (lambda (this)
 		(user:tell "Obvious exits:")
 		(this.exits:foreach (lambda (cur)
 			(if cur.obvious
@@ -379,13 +393,13 @@
 		))
 	))
 
-	(define this:tell_all (lambda (text)
+	(define this:tell_all (lambda (this text)
 		(this.contents:foreach (lambda (cur)
 			(cur:tell text)
 		))
 	))
 
-	(define this:tell_action (lambda (you victim action)
+	(define this:tell_action (lambda (this you victim action)
 		(this.contents:foreach (lambda (cur)
 			(if (eqv? cur you)
 				(cur:tell (expand (action:get 0)))
@@ -397,33 +411,40 @@
 		))
 	))
 
-	(define this:say (lambda (text)
+	(define this:say (lambda (this text)
 		(this.contents:foreach (lambda (cur)
 			(cur:notify N/SAY user channel text)
 		))
 	))
 
-	(define this:emote (lambda (text)
+	(define this:emote (lambda (this text)
 		(this.contents:foreach (lambda (cur)
 			(cur:notify N/EMOTE user channel text)
 		))
 	))
 
 	;;; Returns 1 if the given object is allowed to enter or 0 otherwise
-	(define this:acceptable (lambda (obj)
+	(define this:acceptable (lambda (this obj)
 		(not this.locked)
 	))
 
 
-	(define this:add-exit (lambda (dir location)
-		(define new-exit (exit:%clone (lambda ()
+	(define this:describe (lambda (this &args)
+		;(if (defined? obj)
+			;(define obj.description ...)
+
+		;)
+	))
+
+	(define this:add-exit (lambda (this dir location)
+		(define new-exit (exit:%clone (lambda (this)
 			(define this.dest location)
 			(define this.dir dir)
 		)))
 		(this.exits:set dir new-exit)
 	))
 
-	(define this:go (lambda (dir)
+	(define this:go (lambda (this dir)
 		(try
 			(define exit (this.exits:get dir))
 		(catch (e)
@@ -432,15 +453,15 @@
 		(exit:invoke user)
 	))
 
-	(define this:n (lambda () (this:go "north")))
-	(define this:s (lambda () (this:go "south")))
-	(define this:e (lambda () (this:go "east")))
-	(define this:w (lambda () (this:go "west")))
-	(define this:u (lambda () (this:go "up")))
-	(define this:d (lambda () (this:go "down")))
+	(define this:n (lambda (this) (this:go "north")))
+	(define this:s (lambda (this) (this:go "south")))
+	(define this:e (lambda (this) (this:go "east")))
+	(define this:w (lambda (this) (this:go "west")))
+	(define this:u (lambda (this) (this:go "up")))
+	(define this:d (lambda (this) (this:go "down")))
 )))
 
-(define *global*.exit (thing:%clone (lambda ()
+(define *global*.exit (thing:%clone (lambda (this)
 	(define this.name "generic-exit")
 	(define this.title "some exit")
 
@@ -457,11 +478,11 @@
 		nil
 		"$what.title enters from... somewhere."))
 
-	(define this:initialize (lambda ()
+	(define this:initialize (lambda (this)
 		(define this.obvious #t)
 	))
 
-	(define this:invoke (lambda (what)
+	(define this:invoke (lambda (this what)
 		(define dir this.dir)
 		(define start what.location)
 		(if (this.dest:acceptable what)
@@ -481,7 +502,7 @@
 	))
 )))
 
-(ChanServ:register (channel:%clone (lambda ()
+(ChanServ:register (channel:%clone (lambda (this)
 	(define this.name "#help")
 	(define this.title "Help Channel")
 	(define this.topic "Welcome to the Help Channel")
@@ -501,7 +522,7 @@
 ;	i [<line>]		; Insert a new line above the current line.  If no <line> given, then each line said will be inserted
 ;				;   until a single '.' line is entered.
 ;	s/<pat1>/<pat2>/	; Replace all occurances of pat1 with pat2
-(ChanServ:register (channel:%clone (lambda ()
+(ChanServ:register (channel:%clone (lambda (this)
 	(define this.name "#ed")
 	(define this.title "The Editor")
 
@@ -516,14 +537,14 @@
 ; Initial Rooms
 ;;;
 
-(define *global*.start-room (room:%clone 50 (lambda ()
+(define *global*.start-room (room:%clone 50 (lambda (this)
 	(define this.name "start")
 	(define this.title "The Test Room")
 	(define this.description "You are in a room with loose wires and duct tape everywhere. You fear that if you touch anything, it might break.")
 
 )))
 
-(define lounge (room:%clone (lambda ()
+(define lounge (room:%clone (lambda (this)
 	(define this.name "lounge")
 	(define this.title "The Lounge")
 	(define this.description "You are in a sparse room with an old but comfy chesterfield in one corner and a coffeemaker not far away.")
@@ -537,37 +558,37 @@
 ; Initial Users
 ;;;
 
-(NickServ:register (wizard:%clone 100 (lambda ()
+(NickServ:register (wizard:%clone 100 (lambda (this)
 	(define this.name "transistor")
 	(define this.title "A Powerful Wizard")
 	(define this.description "You see an old man dressed in a flowing blue robe wearing a large pointy blue hat with white stars on it. His bushy white beard reaches half way down his chest.")
 )))
 
-(NickServ:register (wizard:%clone 101 (lambda ()
+(NickServ:register (wizard:%clone 101 (lambda (this)
 	(define this.name "trans")
 	(define this.title "trans")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
 
-(NickServ:register (user:%clone 102 (lambda ()
+(NickServ:register (user:%clone 102 (lambda (this)
 	(define this.name "trans2")
 	(define this.title "trans2")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
 
-(NickServ:register (user:%clone 103 (lambda ()
+(NickServ:register (user:%clone 103 (lambda (this)
 	(define this.name "trans3")
 	(define this.title "trans3")
 	(define this.description "You see a strange man here, twitching slightly.")
 )))
 
 
-(define botty (mobile:%clone (lambda ()
+(define botty (mobile:%clone (lambda (this)
 	(define this.name "botty")
 	(define this.title "Botty the Bot")
 	(define this.description "You see an abstract program.")
 
-	(define this:notify (lambda (type user channel text)
+	(define this:notify (lambda (this type user channel text)
 		(ignore
 			(if (and (= type N/SAY) (!eqv? user this))
 				(if (equal? text "hello")

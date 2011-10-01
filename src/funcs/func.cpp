@@ -10,7 +10,6 @@
 
 #include <sdm/code/code.h>
 #include <sdm/objs/object.h>
-#include <sdm/objs/args.h>
 #include <sdm/funcs/func.h>
 
 struct MooObjectType moo_func_obj_type = {
@@ -72,7 +71,7 @@ int MooFunc::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+int MooFunc::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	if (!m_func)
 		throw MooException("Attempted to evaluate an undefined MooFunc (this means I really messed up).");

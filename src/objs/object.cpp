@@ -8,12 +8,10 @@
 
 #include <sdm/globals.h>
 #include <sdm/objs/hash.h>
-#include <sdm/objs/args.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/string.h>
 #include <sdm/funcs/func.h>
-#include <sdm/funcs/method.h>
 #include <sdm/tasks/task.h>
 #include <sdm/objs/thing.h>
 
@@ -256,7 +254,7 @@ int MooObject::write_data(MooDataFile *data)
 	return(0);
 }
 
-MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value)
+MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value, MooObject **parent)
 {
 	MooObject *obj;
 	char *method, *remain;
@@ -294,6 +292,8 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 		return(NULL);
 
 	if (method) {
+		if (parent)
+			*parent = obj;
 		if (!(obj = obj->resolve_method(method, value)))
 			return(NULL);
 	}
@@ -329,49 +329,43 @@ MooObject *MooObject::resolve_method(const char *name, MooObject *value)
 
 	if (!(func = this->access_method(name, value)))
 		return(NULL);
-	if (dynamic_cast<MooMethod *>(func))
-		return(func);
-	// TODO this is a memory leak i think, because the return'd pointer is assumed to be borrowed
-	return(new MooMethod(this, func));
+	return(func);
 }
 
 int MooObject::call_method(MooObject *channel, const char *name, MooObject **result, MooObject *obj1, MooObject *obj2, MooObject *obj3, MooObject *obj4, MooObject *obj5)
 {
 	int res;
 	clock_t start;
-	MooArgs *args;
 	MooObject *func;
+	MooObjectArray *args;
 
 	if (!(func = this->resolve_method(name)))
 		return(-1);
-	args = new MooArgs();
+	args = new MooObjectArray();
+	args->set(0, this);
 	if (obj1) {
-		args->m_args->set(0, obj1);
+		args->set(1, obj1);
 		if (obj2) {
-			args->m_args->set(1, obj2);
+			args->set(2, obj2);
 			if (obj3) {
-				args->m_args->set(2, obj3);
+				args->set(3, obj3);
 				if (obj4) {
-					args->m_args->set(3, obj4);
+					args->set(4, obj4);
 					if (obj5)
-						args->m_args->set(4, obj5);
+						args->set(5, obj5);
 				}
 			}
 		}
 	}
 
 	start = clock();
-	res = this->call_method(channel, func, args);
+	res = this->call_method(channel, func, args, result);
 	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
-	if (result) {
-		*result = args->m_result;
-		args->m_result = NULL;
-	}
 	MOO_DECREF(args);
 	return(res);
 }
 
-int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
+int MooObject::call_method(MooObject *channel, MooObject *func, MooObjectArray *args, MooObject **result)
 {
 	int res;
 	MooObjectHash *env;
@@ -379,20 +373,18 @@ int MooObject::call_method(MooObject *channel, MooObject *func, MooArgs *args)
 	env = new MooObjectHash();
 	env->set("user", MooThing::lookup(MooTask::current_user()));
 	env->set("channel", channel);
-	res = this->call_method(func, env, args);
+	res = this->call_method(func, env, args, result);
 	MOO_DECREF(env);
 	return(res);
 }
 
-int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
+int MooObject::call_method(MooObject *func, MooObjectHash *env, MooObjectArray *args, MooObject **result)
 {
 	int res = 0;
 	MooCodeFrame *frame;
 	MooThing *thing, *channel;
 
 	frame = new MooCodeFrame(env);
-	// TODO is this no longer needed here (should be done in MooMethod do_evaluate)
-	args->m_this = this;
 	try {
 		frame->push_call(frame->env(), func, args);
 		frame->run();
@@ -407,12 +399,13 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooArgs *args)
 			thing->notify(TNT_STATUS, NULL, channel, e.get());
 		res = -1;
 	}
-	args->m_result = frame->get_return();
+	if (result)
+		 *result = frame->get_return();
 	MOO_DECREF(frame);
 	return(res);
 }
 
-int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	int res;
 

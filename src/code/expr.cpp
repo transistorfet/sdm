@@ -80,7 +80,7 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooArgs *args)
+int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooObjectArray *args)
 {
 	return(frame->push_block(parent, this));
 }

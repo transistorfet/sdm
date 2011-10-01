@@ -8,7 +8,6 @@
 #include <signal.h>
 
 #include <sdm/data.h>
-#include <sdm/timer.h>
 #include <sdm/exception.h>
 #include <sdm/code/code.h>
 #include <sdm/interfaces/interface.h>
@@ -23,7 +22,6 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/thing.h>
 #include <sdm/funcs/func.h>
-#include <sdm/funcs/method.h>
 
 
 static int exit_flag = 1;
@@ -52,9 +50,7 @@ int init_moo(void)
 		init_hash();
 
 		moo_object_register_type(&moo_func_obj_type);
-		moo_object_register_type(&moo_method_obj_type);
 
-		init_timer();
 		init_task();
 		init_interface();
 		moo_object_register_type(&moo_tcp_obj_type);
@@ -103,7 +99,6 @@ void release_moo(void)
 	release_irc_pseudoserv();
 	release_interface();
 	release_task();
-	release_timer();
 	release_object();
 
 	release_data();
