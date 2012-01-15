@@ -580,18 +580,25 @@ static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 
 static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
-	MooObject *obj;
+	MooThing *thing;
+	const char *str;
 
-/*
-	if (args->last() <= 0)
+	if (args->last() == 1)
+		str = args->get_string(1);
+	else if (args->last() != 0)
 		throw moo_args_mismatched;
-	if (!(obj = args->get(0)))
-		frame->set_return(new MooNumber((long int) m_owner));
+	if (!(thing = args->get_thing(0)))
+		throw moo_type_error;
+
+	if (!str)
+		frame->set_return(new MooNumber((long int) thing->owner()));
 	else {
-		// TODO you need to fix this but you have both properties and methods to deal with
-		//frame->set_return(new MooNumber((long int) obj->owner()));
+		if (str[0] == ':')
+			entry = thing->m_methods->get_entry(&str[1]);
+		else
+			entry = thing->m_properties->get_entry(str);
+		frame->set_return(new MooNumber((long int) entry->m_owner));
 	}
-*/
 	return(0);
 }
 

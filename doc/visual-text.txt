@@ -1,0 +1,27 @@
+
+2012/01/12:
+
+Visual text mud idea!
+
+Text has the ability to convey meaning without unnecessary detail unlike graphics which have to have a certain amount of detail and style
+to even resemble what some element is supposed to be.  Graphics on the other hand can be understood very quickly unlike text which must
+be read first.  So why not the best of both worlds by rendering text in a visual style that is easy and quick to read and understand what
+is going on but without being more than text.
+
+- you could have a room be a small paragraph of floating text which you can navigate perhaps like a first person 3D game where you can
+  turn and walk and run.  Around it would be text representing the exits by name and walking towards them (possibly clicking on them or
+  pressing a key (like enter) while standing in range of one would transport you to the next room.  People could be around represented
+  by moving text.
+- There could be various colours, fonts, and perhaps even advanced styles (like a forest having the description in 3D font that resembles
+  trees) each representing the mood or whatever.
+- when monsters attack, you would see the attack description in red italics appear and then move diagonally like a slashing motion or
+  something, and the counter attack text moving up towards the monster in like bright blue or some kind of power colour
+
+
+- with any text based mud, visual style should be a major part.  Effective use of capitals and lowercase, colour, bold/italics, font type
+  if available, use of spaces and justification, space between letters, space between lines, even unevenness of the characters, being on
+  an angle, spelt backwards, with contrasting backgrounds
+- could you use a CSS based system?  Could you even make this browser based somehow??
+
+- you could do this in a simpler system with just a text console and ncurses
+
