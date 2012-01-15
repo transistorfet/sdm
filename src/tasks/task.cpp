@@ -81,6 +81,7 @@ MooTask::MooTask()
 		m_parent_tid = g_current_task->m_tid;
 	else
 		m_parent_tid = -1;
+	m_owner = MooTask::current_owner();
 	//this->initialize();
 }
 
@@ -138,7 +139,7 @@ moo_id_t MooTask::current_user()
 {
 	if (!g_current_task)
 		return(-1);
-	return(g_current_task->owner());
+	return(g_current_task->m_owner);
 }
 
 moo_id_t MooTask::current_owner(moo_id_t id)
@@ -161,32 +162,8 @@ int MooTask::switch_task(MooTask *task)
 {
 	g_current_task = task;
 	if (task)
-		g_current_owner = task->owner();
+		g_current_owner = task->m_owner;
 	moo_status("Task Owner is now: %d", g_current_owner);
-	return(0);
-}
-
-
-class TaskEventSuid : public MooCodeEvent {
-	MooTask *m_task;
-	moo_id_t m_owner;
-
-    public:
-	TaskEventSuid(MooTask *task, moo_id_t owner) : MooCodeEvent(NULL, NULL, NULL) {
-		m_task = task;
-		m_owner = owner;
-	}
-
-	int do_event(MooCodeFrame *frame) {
-		MooTask::current_owner(m_task, m_owner);
-		return(0);
-	}
-};
-
-int MooTask::suid(MooObject *obj, MooCodeFrame *frame)
-{
-	frame->push_event(new TaskEventSuid(MooTask::current_task(), MooTask::current_owner()));
-	MooTask::current_owner(obj->owner());
 	return(0);
 }
 

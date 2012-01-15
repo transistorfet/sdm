@@ -70,7 +70,7 @@ MooObject *make_moo_thing(MooDataFile *data)
 	return(thing);
 }
 
-MooThing::MooThing(moo_id_t id, moo_id_t parent)
+MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode)
 {
 	// TODO temporary since we haven't properly dealt with refcounting/thingrefs
 	this->set_nofree();
@@ -87,6 +87,8 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent)
 	m_id = -1;
 	this->assign_id(id);
 	m_parent = parent;
+	m_owner = owner;
+	m_mode = mode;
 }
 
 MooThing::~MooThing()
@@ -158,6 +160,14 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		moo_id_t id = data->read_integer_entry();
 		m_parent = id;
 	}
+	else if (!strcmp(type, "owner")) {
+		moo_id_t owner = data->read_integer_entry();
+		m_owner = owner;
+	}
+	else if (!strcmp(type, "mode")) {
+		moo_mode_t mode = data->read_integer_entry();
+		m_mode = mode;
+	}
 	else
 		return(MooObject::read_entry(type, data));
 	return(MOO_HANDLED);
@@ -211,6 +221,10 @@ int MooThing::save()
 			data->write_integer_entry("parent", m_parent);
 		if (m_bits & ~MOO_TBF_WRITING)
 			data->write_hex_entry("bits", m_bits);
+		if (m_owner >= 0)
+			data->write_integer_entry("owner", m_owner);
+		if (m_mode != MOO_DEFAULT_MODE)
+			data->write_integer_entry("mode", m_mode);
 		MooObject::write_data(data);
 
 		/// Write the properties to the file
@@ -257,92 +271,91 @@ int MooThing::to_string(char *buffer, int max)
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
 {
-	MooObject *cur;
+	MooHashEntry<MooObject *> *entry;
 
 	if (!strcmp(name, "id"))
 		return(value ? NULL : new MooNumber((long int) this->m_id));
 	else if (!strcmp(name, "parent"))
 		return(value ? NULL : new MooNumber((long int) this->m_parent));
+	else if (!strcmp(name, "owner"))
+		return(value ? NULL : new MooNumber((long int) this->m_owner));
+	else if (!strcmp(name, "mode"))
+		return(value ? NULL : new MooNumber((long int) this->m_mode));
 
 	if (value) {
 		if (!name || (*name == '\0'))
 			return(NULL);
-		cur = m_properties->get(name);
+		entry = m_properties->get_entry(name);
 
-		if (cur) {
-			cur->check_throw(MOO_PERM_W);
-			value->match_perms(cur);
+		if (entry) {
+			this->check_throw(MOO_MODE_W, entry->m_owner, entry->m_mode);
+			entry->m_data = MOO_INCREF(value);
 		}
-		else
-			this->check_throw(MOO_PERM_W);
-		if (m_properties->set(name, MOO_INCREF(value)))
-			return(NULL);
+		else {
+			this->check_throw(MOO_MODE_W, m_owner, m_mode);
+			if (m_properties->set(name, MOO_INCREF(value), MooCodeFrame::current_owner(), MOO_DEFAULT_MODE))
+				return(NULL);
+		}
 		return(value);
 	}
 	else {
 		for (MooThing *thing = this; thing; thing = thing->parent()) {
 			// TODO you could add some kind of pub/private/protected/whatever permissions checks here
-			if ((cur = thing->m_properties->get(name)))
+			if ((entry = thing->m_properties->get_entry(name)))
 				break;
 		}
-		if (cur)
-			cur->check_throw(MOO_PERM_R);
 		// TODO should you return nil if obj == NULL (??)
-		return(cur);
+		if (!entry)
+			return(NULL);
+		this->check_throw(MOO_MODE_R, entry->m_owner, entry->m_mode);
+		return(entry->m_data);
 	}
 }
 
 MooObject *MooThing::access_method(const char *name, MooObject *value)
 {
 	MooObject *obj;
+	MooHashEntry<MooObject *> *entry;
 
-	// TODO do you need to do permissions checks here?
-	//this->check_throw(MOO_PERM_R);
 	if (value) {
-		if (this->set_method(name, value) < 0)
+		if (!name || (*name == '\0'))
 			return(NULL);
+		/// If the new value is nil, remove the entry from the table
+		/// 	(It doesn't even make sense for a method to be nil since it would case an exception, so it doesn't matter if we remove it)
+		if (MOO_IS_NIL(value)) {
+			if (m_methods->remove(name))
+				return(NULL);
+			return(value);
+		}
+
+		entry = m_methods->get_entry(name);
+		if (entry) {
+			this->check_throw(MOO_MODE_W, entry->m_owner, entry->m_mode);
+			entry->m_data = value;
+		}
+		else {
+			this->check_throw(MOO_MODE_W, m_owner, m_mode);
+			if (m_methods->set(name, MOO_INCREF(value), MooCodeFrame::current_owner(), MOO_DEFAULT_MODE))
+				return(NULL);
+		}
 		return(value);
 	}
 	else {
-		// TODO this is totally wrong here because looking up a distant method would do this builtin methods lookup multiple times
-		if ((obj = thing_methods->get(name)))
-			return(obj);
-		return(this->get_method(name));
+		MooThing *cur;
+
+		if ((entry = thing_methods->get_entry(name))) {
+			this->check_throw(MOO_MODE_R, entry->m_owner, entry->m_mode);
+			return(entry->m_data);
+		}
+
+		for (cur = this; cur; cur = cur->parent()) {
+			if ((entry = cur->m_methods->get_entry(name))) {
+				this->check_throw(MOO_MODE_R, entry->m_owner, entry->m_mode);
+				return(entry->m_data);
+			}
+		}
+		return(NULL);
 	}
-}
-
-///// Method Methods /////
-
-int MooThing::set_method(const char *name, MooObject *value)
-{
-	MooObject *cur;
-
-	if (!name || (*name == '\0'))
-		return(-1);
-
-	if ((cur = m_methods->get(name)))
-		cur->check_throw(MOO_PERM_W);
-	else
-		this->check_throw(MOO_PERM_W);
-
-	/// If the new value is nil, remove the entry from the table
-	/// 	(It doesn't even make sense for a method to be nil since it would case an exception, so it doesn't matter if we remove it)
-	if (value && MOO_IS_NIL(value))
-		return(m_methods->remove(name));
-	return(m_methods->set(name, MOO_INCREF(value)));
-}
-
-MooObject *MooThing::get_method(const char *name)
-{
-	MooThing *cur;
-	MooObject *func;
-
-	// TODO do permissions check??
-	for (cur = this; cur; cur = cur->parent()) {
-		if ((func = cur->m_methods->get(name)))
-			return(func);
-	}
-	return(NULL);
 }
 
 ///// Helper Methods /////
@@ -375,6 +388,26 @@ int MooThing::is_wizard(moo_id_t id)
 	if (!(thing = MooThing::lookup(id)))
 		return(0);
 	return(thing->is_wizard());
+}
+
+void MooThing::check_throw(moo_mode_t check, moo_id_t owner, moo_mode_t mode)
+{
+	if (!this->check(check, owner, mode))
+		throw moo_permissions;
+}
+
+int MooThing::check(moo_mode_t check, moo_id_t owner, moo_mode_t mode)
+{
+	moo_id_t current;
+
+	current = MooCodeFrame::current_owner();
+	if (MooThing::is_wizard(current))
+		return(1);
+	if (owner == current)
+		check <<= 3;
+	if ((mode & check) == check)
+		return(1);
+	return(0);
 }
 
 int MooThing::assign_id(moo_id_t id)
@@ -419,25 +452,6 @@ const char *MooThing::name()
 	if (!name)
 		return("???");
 	return(name);
-}
-
-int MooThing::notify(int type, MooThing *thing, MooThing *channel, const char *text)
-{
-	int res;
-	MooObject *func;
-	MooObjectArray *args;
-
-	if (!(func = this->resolve_method("notify")))
-		return(-1);
-	args = new MooObjectArray();
-	args->set(0, this);
-	args->set(1, new MooNumber((long int) type));
-	args->set(2, thing);
-	args->set(3, channel);
-	args->set(4, new MooString("%s", text));
-	res = this->call_method(channel, func, args);
-	MOO_DECREF(args);
-	return(res);
 }
 
 MooThing *MooThing::get_channel(const char *name)
@@ -564,6 +578,94 @@ static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	return(0);
 }
 
+static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+{
+	MooObject *obj;
+
+/*
+	if (args->last() <= 0)
+		throw moo_args_mismatched;
+	if (!(obj = args->get(0)))
+		frame->set_return(new MooNumber((long int) m_owner));
+	else {
+		// TODO you need to fix this but you have both properties and methods to deal with
+		//frame->set_return(new MooNumber((long int) obj->owner()));
+	}
+*/
+	return(0);
+}
+
+static int thing_mode(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+{
+	MooObject *obj;
+	// TODO FIX THIS
+/*
+	if (args->last() <= 0)
+		throw moo_args_mismatched;
+	if (!(obj = args->get(0)))
+		frame->set_return(new MooNumber((long int) m_owner));
+	else {
+		// TODO you need to fix this but you have both properties and methods to deal with
+		//frame->set_return(new MooNumber((long int) obj->owner()));
+	}
+*/
+	return(0);
+}
+
+static int thing_chmod(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+{
+	// TODO FIX THIS
+/*
+	MooThing *owner = NULL;
+	MooObject *obj, *perms;
+
+	if (args->last() == 1)
+		obj = args->get(1);
+	else if (args->last() == 2) {
+		if ((obj = args->get(1)) && !(owner = dynamic_cast<MooThing *>(obj)))
+			throw moo_type_error;
+		obj = args->get(2);
+	}
+	else
+		throw moo_args_mismatched;
+
+	obj->check_throw(MOO_MODE_W);
+	if ((perms = args->get(0)))
+		obj->permissions(perms->get_integer());
+	if (owner)
+		obj->owner(owner->id());
+	frame->set_return(obj);
+*/
+	return(0);
+}
+
+static int thing_chown(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+{
+	// TODO FIX THIS
+/*
+	MooThing *owner = NULL;
+	MooObject *obj, *perms;
+
+	if (args->last() == 1)
+		obj = args->get(1);
+	else if (args->last() == 2) {
+		if ((obj = args->get(1)) && !(owner = dynamic_cast<MooThing *>(obj)))
+			throw moo_type_error;
+		obj = args->get(2);
+	}
+	else
+		throw moo_args_mismatched;
+
+	obj->check_throw(MOO_MODE_W);
+	if ((perms = args->get(0)))
+		obj->permissions(perms->get_integer());
+	if (owner)
+		obj->owner(owner->id());
+	frame->set_return(obj);
+*/
+	return(0);
+}
+
 /*
 #define MAX_WORDS	256
 #define PREPOSITIONS	5
@@ -645,6 +747,10 @@ void moo_load_thing_methods(MooObjectHash *env)
 	env->set("%load", new MooFunc(thing_load));
 	env->set("%save", new MooFunc(thing_save));
 	env->set("%save_all", new MooFunc(thing_save_all));
+	env->set("owner", new MooFunc(thing_owner));
+	env->set("mode", new MooFunc(thing_mode));
+	env->set("chmod", new MooFunc(thing_chmod));
+	env->set("chown", new MooFunc(thing_chown));
 	//env->set("%command", new MooFunc(parse_command));
 }
 

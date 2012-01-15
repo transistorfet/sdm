@@ -29,12 +29,9 @@
 	  annoying since the notices might appear in other windows (dependant on client).  However, a system of #324 numeric channels
 	  or something like that would still be possible (channels could be +si or something, so that you can only join if you are
 	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
+	* you could somehow have a web browser based system and use CSS for text formatting or something, so you can do advanced stuff
 
       MultiTasking:
-	* tasks should be small temporary things, like a new task for each fight.  They should not be directly equivallent to threads
-	* you could have a tasks/ directory the same as the current objs/ directory, such that each task ID coresponds to a numbered
-	  file in the tasks/ directory and stored in that is the task state such that it can be restarted using that information.
-	  A task that saves it's state would be persistent.  Not all tasks need (or should) be persistent.
 	* you could have a locking mechanism in the frame itself similar to the task suid mechanism, where an unlock event is placed
 	  on the stack.  Then, when a frame is going to be suspended, it can check for a lock and continue execution until the unlock
 	  is reached.  It can also monitor for overrun and terminate the task or something.
@@ -48,8 +45,6 @@
 
 	* how will any code (assuming we use pthreads) be able to get the current task (the only thing needed usually is the owner of
 	  the task, and the user)?  We can't use global variables like we are.  I guess this depends on the whole threading mechanism
-	* should all timing have to be done with tasks?  You could have scheduled tasks which execute after a specific amount of time,
-	  and you could also have a sleep function which suspends the task for a specific amount of time.
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
 	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
 	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
@@ -107,27 +102,23 @@
 	  things and have them remain in the task's scope at all times (thread-global definitions).
 
       Permissions:
-	* you need to sort out permissions.  You can either have them on all objects or only on environment entries and things.  If you
-	  put them in the object themselves, then you can't have the same object added as a property to 2 different things or else the
-	  permission changes to one will affect the other.  This is the most significant with the way you are doing nil atm.  With
-	  a single value for nil, you can easily compare the pointer instead of doing a dynamic_cast, but you can't assign nil to a
-	  property since there is no way for the property itself to have unique permissions (the nil value would have the perms)
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
-	  being accessed on the direct thing.
-	* (define &rwxp name value) - you could do this or something like it in order to set permissions during the define.  Also
-	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
-	* the biggest issue with permissions is the execute/suid flags.  It is best if these flags are on the value itself, unless
-	  some kind of value like MooMethod is *always* returned when calling get_method.  This would then persist at least until the
-	  value was evaluated.  It might be possible to remove this whole thing by altering the execution core such that it stores
-	  the detailed information in MooArgs or in the CallFunction event or wherever, rather than evaluating the function lookup like
-	  all other values.  This would likely make function calls special and not first-class values.
-	* can we pass 'this' as a lambda argument instead of it being implied?  Would this actually make it more complicated??
-
-      Miscellaneous:
+	  being accessed on the direct thing. (call it 'local'??)
 	* You can use a public/private flag for thing properties so that some properties will be invisible to child things.  This would
 	  prevent those errors I had before where complex objcets like arrays and hashes would be the same (contents and stuff).  You
 	  could also just use init().
+	* (define &rwxp name value) - you could do this or something like it in order to set permissions during the define.  Also
+	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
+	* you still need to figure out how you can get the current owner while inside the access_property/access_methods functions in
+	  MooThing.  You could somehow get them from the frame, but you aren't currently passed the frame (possible but difficult?).
+	* you could have frame->run() set a global variable of the currently running frame, and sets it to NULL when the function exits.
+	  If the variable is not NULL when you run, you can throw a nested run exception or something (i'm not sure if there are any
+	  nested runs atm).  Then you use frame instead of task to eventually get the owner
 
+      Miscellaneous:
+	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
+	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
+	  data, or something.
 	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
 	  because it allows a command to have the same name of a function but with different argument processing and stuff
 
@@ -144,17 +135,30 @@
 	* this could be entirely object dependant.  In nickserv, the 'say' method will be called when a pm is sent to nickserv.  That
 	  method then executes it as a command.
 
+	* could you maybe have an aspect oriented debugging system??  That would make it easier to debug the running system without
+	  a fully interactive text editor or something. (add-pc[??] 'debug "*null?*" (lambda () (print name)))) this would
+	  print the value of name at the point after the null? statement.  You'd need a better way to specify joinpoints but it might
+	  work.  The 'debug would be a label so you can group pointcuts together and remove them simultaneously (or activate/deactivate)
+	  How would they be stored and implemented and so on??
+
+	* if you have an editor channel or something, how would it work?
+	* if you were to enter text sequentially on multiple lines ending in a period kinda-deal, how would the actual input work?? How
+	  would it be implemented.  How would input be redirected to that command versus being interpreted as a new command?  Would it
+	  involve a task running in the background and intercepting the data somehow? or would a directional pointer of some kind be
+	  stored in the user object??  Would this require any method that wants to have this entry method to have high level permissions?
+	  or perhaps even could you make this a generic format thing of some kind such that the actual control is handled by a higher
+	  level method, object, or task, and the output is returned to the calling function.
+
     TODO:
+	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
+	  IS THIS NEEDED ANYMORE??
 
-	* add a 'register' and 'login' commands to basics
+	* sort out the whole login/identify system so new people can connect and sign up
 
-	* make an (undefine ...) command for completeness!!!  (this should behave exactly like define except it removes entries).
-	  this would be the only way to remove a property from an object, since setting nil will not remove the entry.
 	* add debug field to event and fix debug message printing
 
 	* add arguments to be passed to 'initialize' during cloning
 	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
-	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 
 	* add infinite loop protection
 	* review all code for permissions check errors and bugs.  Evaluate system security.
@@ -177,6 +181,8 @@
 	* implement an automatic testing system somehow (so you can verify the moocode core at least)
 	* add caching to environments??
 	* should you have private environments that are skipped when doing nested lookups?
+	* make an (undefine ...) command for completeness!!!  (this should behave exactly like define except it removes entries).
+	  this would be the only way to remove a property from an object, since setting nil will not remove the entry.
 
 	* make a pet kitty cat object as a scripting test
 	* make a mobile-equivallent of logarithm
@@ -184,7 +190,7 @@
 	* make some room games for testing, like trivia, maybe munchkin if you are ambitious, or go fish??
 
 
-    Old Stuff:
+Old Stuff:
 	* parser format:   command[/modifier] [-flags] [object [preposition indirect-object]
 
 	* the biggest problem with any parsing format will be for the get <object> from <container> command

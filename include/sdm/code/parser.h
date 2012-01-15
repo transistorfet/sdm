@@ -125,6 +125,12 @@ static inline char parser_escape_char(char ch)
 			return('\x0d');
 		case 'n':
 			return('\x0a');
+		case '\'':
+			return('\'');
+		case '\"':
+			return('\"');
+		case '\\':
+			return('\\');
 		default:
 			return(ch);
 	}

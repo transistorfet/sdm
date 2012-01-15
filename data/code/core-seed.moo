@@ -35,8 +35,8 @@
 	(define this.db (hash))
 
 	; The idea here is that when a user talks to nickserv in pm, it will execute it as a ! command
-	(define this:say (lambda (this &args)
-		((get-method this (expand "!$cmd")) this args)
+	(define this:say (lambda (this &rest)
+		((get-method this (expand "!$cmd")) this rest)
 	))
 
 	(define this:make_guest (lambda (this name)
@@ -59,6 +59,30 @@
 			#t
 			#f)
 	))
+
+	(define this.guest_max 0)
+	(define this.guest_list (array))
+
+	(define this:set_max_guests (lambda (this num)
+		; TODO adjust the number of guests in the guest list to the new number (up or down as required)
+	))
+
+	(define this:get_next_guest (lambda (this name)
+		(define _find_next (lambda (num)
+			(if (> num this.guest_list.last)
+				nil
+				(begin
+					(define guest (this.guest_list:get num))
+					(if (= guest.in_use 0)
+						guest
+						(_find_next (+ num 1)))))
+		))
+
+		(define guest (_find_next 0))
+		(define guest.in_use 1)
+		guest
+	))
+
 )))
 (NickServ:register NickServ)
 (NickServ:register ChanServ)
@@ -318,6 +342,11 @@
 	))
 )))
 
+(define NickServ.guest (user:%clone (lambda (this)
+	(define this.name "Guest")
+)))
+
+
 (define *global*.architect (user:%clone (lambda (this)
 	(define this.name "generic-architect")
 	(define this.title "an architect")
@@ -347,8 +376,8 @@
 		(define this.display_contents #t)
 	))
 
-	(define this:look (lambda (this &args)
-		(define name (args:get 0))
+	(define this:look (lambda (this &rest)
+		(define name (rest:get 0))
 		(if (null? name)
 			(this:look_self)
 			(begin

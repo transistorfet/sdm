@@ -48,6 +48,8 @@ class MooDataFile {
 
 	int write_begin_entry(const char *name);
 	int write_attrib_integer(const char *name, long int value);
+	int write_attrib_octal(const char *name, long int value);
+	int write_attrib_hex(const char *name, long int value);
 	int write_attrib_float(const char *name, double value);
 	int write_attrib_string(const char *name, const char *value);
 	int write_integer(long int value);

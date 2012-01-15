@@ -21,22 +21,22 @@ typedef int (*callback_t)(void *, void *);
 #define DECLARE_UNUSED(arg)	((void) arg)
 
 typedef int moo_id_t;
-typedef int moo_perm_t;
+typedef int moo_mode_t;
 
-#define MOO_PERM_X		0001
-#define MOO_PERM_W		0002
-#define MOO_PERM_R		0004
+#define MOO_MODE_X		0001
+#define MOO_MODE_W		0002
+#define MOO_MODE_R		0004
 
-#define MOO_PERM_EX		0001
-#define MOO_PERM_EW		0002
-#define MOO_PERM_ER		0004
-#define MOO_PERM_OX		0010
-#define MOO_PERM_OW		0020
-#define MOO_PERM_OR		0040
-#define MOO_PERM_SUID		0400
-#define MOO_PERM_STICKY		0100
+#define MOO_MODE_EX		0001
+#define MOO_MODE_EW		0002
+#define MOO_MODE_ER		0004
+#define MOO_MODE_OX		0010
+#define MOO_MODE_OW		0020
+#define MOO_MODE_OR		0040
+#define MOO_MODE_SUID		0400
+#define MOO_MODE_STICKY		0100
 
-#define MOO_DEFAULT_PERMS	0077
+#define MOO_DEFAULT_MODE	0077
 
 #define SBIT(bits, flag)	( (bits) |= (flag) )
 #define RBIT(bits, flag)	( (bits) &= ~(flag) )

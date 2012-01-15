@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include <sdm/data.h>
 #include <sdm/globals.h>
@@ -22,7 +23,8 @@
 static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
 	int j = 0;
-	MooObject *obj;
+	MooObject *obj, *func;
+	MooObjectArray *newargs;
 	MooThing *user, *channel;
 	char buffer[LARGE_STRING_SIZE];
 
@@ -35,8 +37,13 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	}
 	if (!(user = dynamic_cast<MooThing *>(env->get("user"))))
 		throw moo_type_error;
-	channel = dynamic_cast<MooThing *>(env->get("channel"));
-	user->notify(TNT_STATUS, NULL, channel, buffer);
+
+	if (!(func = user->resolve_method("tell")))
+		throw MooException("User object does not have a \'tell\' method");
+	newargs = new MooObjectArray();
+	args->set(0, user);
+	args->set(1, new MooString("%s", buffer));
+	frame->push_call(frame->env(), func, args);
 	return(0);
 }
 
@@ -752,51 +759,16 @@ static int basic_sleep(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	throw MooCodeFrameSuspend();
 }
 
-static int basic_perms(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_time(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
-	MooObject *obj;
+	timeval tv;
+	double time;
 
-	if (args->last() != 0)
+	if (args->last() != -1)
 		throw moo_args_mismatched;
-	if (!(obj = args->get(0)))
-		throw moo_type_error;
-	frame->set_return(new MooNumber((long int) obj->permissions()));
-	return(0);
-}
-
-static int basic_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
-{
-	MooObject *obj;
-
-	if (args->last() != 0)
-		throw moo_args_mismatched;
-	if (!(obj = args->get(0)))
-		throw moo_type_error;
-	frame->set_return(new MooNumber((long int) obj->owner()));
-	return(0);
-}
-
-static int basic_chmod(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
-{
-	MooThing *owner = NULL;
-	MooObject *obj, *perms;
-
-	if (args->last() == 1)
-		obj = args->get(1);
-	else if (args->last() == 2) {
-		if ((obj = args->get(1)) && !(owner = dynamic_cast<MooThing *>(obj)))
-			throw moo_type_error;
-		obj = args->get(2);
-	}
-	else
-		throw moo_args_mismatched;
-
-	obj->check_throw(MOO_PERM_W);
-	if ((perms = args->get(0)))
-		obj->permissions(perms->get_integer());
-	if (owner)
-		obj->owner(owner->id());
-	frame->set_return(obj);
+	gettimeofday(&tv, NULL);
+	time = tv.tv_sec + (tv.tv_usec / 1000000.0);
+	frame->set_return(new MooNumber(time));
 	return(0);
 }
 
@@ -853,10 +825,7 @@ int moo_load_basic_funcs(MooObjectHash *env)
 	env->set("throw", new MooFunc(basic_throw));
 	env->set("return", new MooFunc(basic_return));
 	env->set("sleep", new MooFunc(basic_sleep));
-
-	env->set("perms", new MooFunc(basic_perms));
-	env->set("owner", new MooFunc(basic_owner));
-	env->set("chmod", new MooFunc(basic_chmod));
+	env->set("time", new MooFunc(basic_time));
 
 /*
 	Possible Future Primatives:

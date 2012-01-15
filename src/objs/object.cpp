@@ -95,8 +95,6 @@ MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data)
 MooObject::MooObject()
 {
 	m_delete = 0;
-	m_owner = MooTask::current_owner();
-	m_permissions = MOO_DEFAULT_PERMS;
 }
 
 #define DEBUG_LIMIT	77
@@ -120,29 +118,6 @@ const MooObjectType *MooObject::objtype()
 	return(type);
 }
 
-
-moo_id_t MooObject::owner(moo_id_t id)
-{
-	if (this == MooTask::current_task())
-		MooTask::current_owner(id);
-	return(m_owner = id);
-}
-
-moo_perm_t MooObject::permissions(moo_perm_t perms)
-{
-	// TODO this really sucks.  perms of 0 are invalid.  This is here because when you load perms from XML, if the
-	//	tag is not there, it will read as 0, but if perms are not specified, we should assume default_perms
-	if (!perms)
-		perms = MOO_DEFAULT_PERMS;
-	return(m_permissions = perms);
-}
-
-void MooObject::match_perms(MooObject *obj)
-{
-	m_owner = obj->m_owner;
-	m_permissions = obj->m_permissions;
-}
-
 int MooObject::is_true()
 {
 	MooBoolean *b;
@@ -151,27 +126,6 @@ int MooObject::is_true()
 		return(1);
 	return(b->m_bool != B_FALSE);
 }
-
-void MooObject::check_throw(moo_perm_t perms)
-{
-	if (!this->check(perms))
-		throw moo_permissions;
-}
-
-int MooObject::check(moo_perm_t perms)
-{
-	moo_id_t current;
-
-	current = MooTask::current_owner();
-	if (MooThing::is_wizard(current))
-		return(1);
-	if (m_owner == MooTask::current_owner())
-		perms <<= 3;
-	if ((m_permissions & perms) == perms)
-		return(1);
-	return(0);
-}
-
 
 int MooObject::read_file(const char *file, const char *type)
 {
@@ -230,28 +184,6 @@ int MooObject::read_data(MooDataFile *data)
 	} while (data->read_next());
 	/// We return if the file loaded incorrectly but we don't stop trying to load the file
 	return(error);
-}
-
-int MooObject::read_entry(const char *type, MooDataFile *data)
-{
-	if (!strcmp(type, "owner")) {
-		moo_id_t id = data->read_integer_entry();
-		this->owner(id);
-	}
-	else if (!strcmp(type, "permissions")) {
-		moo_perm_t perms = data->read_integer_entry();
-		this->permissions(perms);
-	}
-	else
-		return(MOO_NOT_HANDLED);
-	return(MOO_HANDLED);
-}
-
-int MooObject::write_data(MooDataFile *data)
-{
-	data->write_integer_entry("owner", this->owner());
-	data->write_octal_entry("permissions", this->permissions());
-	return(0);
 }
 
 MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value, MooObject **parent)
@@ -394,9 +326,12 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooObjectArray *
 		moo_status("CODE: %s", e.get());
 		frame->print_stacktrace();
 
+		// TODO you need some way of reporting the error back to the user
+		/*
 		channel = dynamic_cast<MooThing *>(env->get("channel"));
 		if ((thing = MooThing::lookup(MooTask::current_user())))
 			thing->notify(TNT_STATUS, NULL, channel, e.get());
+		*/
 		res = -1;
 	}
 	if (result)
@@ -407,13 +342,9 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooObjectArray *
 
 int MooObject::evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
 {
-	int res;
-
-	this->check_throw(MOO_PERM_X);
-	if (this->permissions() & MOO_PERM_SUID)
-		MooTask::suid(this, frame);
-	res = this->do_evaluate(frame, env, args);
-	return(res);
+	// TODO PERMS this no longer makse sense because we can't get owner from 'this'
+	frame->elevate(this);
+	return(this->do_evaluate(frame, env, args));
 }
 
 

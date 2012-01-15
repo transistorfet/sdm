@@ -52,6 +52,8 @@ MooObjectHash::MooObjectHash(MooObjectHash *parent, int size, int bits) : MooHas
 int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 {
 	int res;
+	moo_id_t owner;
+	moo_mode_t mode;
 	MooObject *obj = NULL;
 	char key[STRING_SIZE];
 	char type_name[STRING_SIZE];
@@ -64,6 +66,8 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 			return(-1);
 		}
 		data->read_attrib_string("key", key, STRING_SIZE);
+		owner = data->read_attrib_integer("owner");
+		mode = data->read_attrib_integer("mode");
 		res = data->read_children();
 		if (!(obj = moo_make_object(objtype, res ? data : NULL))) {
 			moo_status("HASH: Error loading entry, %s", key);
@@ -71,7 +75,7 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 		}
 		if (res)
 			data->read_parent();
-		this->set(key, obj);
+		this->set(key, obj, owner, mode);
 	}
 	else
 		return(MooObject::read_entry(type, data));
@@ -88,6 +92,8 @@ int MooObjectHash::write_data(MooDataFile *data)
 		data->write_begin_entry("entry");
 		data->write_attrib_string("key", cur->m_key);
 		data->write_attrib_string("type", cur->m_data->objtype_name());
+		data->write_attrib_integer("owner", cur->m_owner);
+		data->write_attrib_octal("mode", cur->m_mode);
 		cur->m_data->write_data(data);
 		data->write_end_entry();
 	}
@@ -169,23 +175,18 @@ MooThing *MooObjectHash::get_thing(const char *key)
 MooObject *MooObjectHash::access_property(const char *name, MooObject *value)
 {
 	if (value) {
-		this->check_throw(MOO_PERM_W);
 		if (this->set(name, value) < 0)
 			return(NULL);
 		return(value);
 	}
-	else {
-		this->check_throw(MOO_PERM_R);
+	else
 		return(this->get(name));
-	}
 }
 
 MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
 {
 	if (value)
 		throw moo_permissions;
-	// TODO do you need to do a read permissions check here?
-	this->check_throw(MOO_PERM_R);
 	return(hash_methods->get(name));
 }
 
@@ -198,6 +199,7 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	const char *name;
 	MooObjectHash *m_this;
 
+	// TODO all these functions will bypass permissions checks unless we put them in get/set
 	if (!(m_this = dynamic_cast<MooObjectHash *>(args->get(0))))
 		throw moo_method_object;
 	if (args->last() != 1)
@@ -218,7 +220,6 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 		throw moo_method_object;
 	if (args->last() != 2)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	name = args->get_string(1);
 	obj = args->get(2);
 	res = m_this->set(name, obj);
@@ -236,7 +237,6 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 		throw moo_method_object;
 	if (args->last() != 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	name = args->get_string(1);
 	res = m_this->remove(name);
 	frame->set_return(new MooBoolean(res == 0));

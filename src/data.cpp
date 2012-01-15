@@ -347,6 +347,20 @@ int MooDataFile::write_attrib_integer(const char *name, long int value)
 	return(0);
 }
 
+int MooDataFile::write_attrib_octal(const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatAttribute(this->writer, (xmlChar *) name, "%#lo", value) < 0)
+		return(-1);
+	return(0);
+}
+
+int MooDataFile::write_attrib_hex(const char *name, long int value)
+{
+	if (xmlTextWriterWriteFormatAttribute(this->writer, (xmlChar *) name, "%#lx", value) < 0)
+		return(-1);
+	return(0);
+}
+
 int MooDataFile::write_attrib_float(const char *name, double value)
 {
 	if (xmlTextWriterWriteFormatAttribute(this->writer, (xmlChar *) name, "%f", value) < 0)

@@ -17,6 +17,8 @@
 
 #include <sdm/code/code.h>
 
+MooCodeFrame *g_current_frame = NULL;
+
 class FrameEventDebug : public MooCodeEvent {
 	std::string m_msg;
     public:
@@ -66,6 +68,7 @@ MooObject *make_moo_code_frame(MooDataFile *data)
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 {
+	m_owner = MooTask::current_owner();
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
 	m_return = NULL;
 	m_exception = NULL;
@@ -166,6 +169,9 @@ int MooCodeFrame::run(int limit)
 	if (!limit)
 		limit = MOO_FRAME_CYCLE_LIMIT;
 
+	if (g_current_frame)
+		throw MooException("Nested run() detected");
+	g_current_frame = this;
 	base = m_env;
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
@@ -201,6 +207,7 @@ int MooCodeFrame::run(int limit)
 			m_stack->push(event);
 			if (!this->handle_exception()) {
 				this->env(base);
+				g_current_frame = NULL;
 				throw *m_exception;
 			}
 		}
@@ -209,6 +216,7 @@ int MooCodeFrame::run(int limit)
 		cycles++;
 	}
 	this->env(base);
+	g_current_frame = NULL;
 	return(cycles);
 }
 
@@ -273,6 +281,39 @@ int FrameEventCatch::handle(MooCodeFrame *frame)
 {
 	if (m_expr)
 		frame->push_event(new MooCodeEventEvalBlock(m_env, m_expr));
+	return(0);
+}
+
+/**********************
+ * FrameEventRelegate *
+ **********************/
+
+class FrameEventRelegate : public MooCodeEvent {
+	moo_id_t m_owner;
+
+    public:
+	FrameEventRelegate(moo_id_t owner) : MooCodeEvent(NULL, NULL, NULL) {
+		m_owner = owner;
+	}
+
+	int do_event(MooCodeFrame *frame) {
+		frame->owner(m_owner);
+		return(0);
+	}
+};
+
+
+int MooCodeFrame::elevate(MooObject *obj)
+{
+	/// If there is no difference in owner, then don't evelate in the first place.
+	//if (obj->owner() == this->owner())
+	//	return(0);
+	this->push_event(new FrameEventRelegate(m_owner));
+	// TODO FIX THIS!!!
+	// TODO this is the only time you need a different owner; in this case the owner of the function, which would otherwise be stored
+	//	in the hash entry where this object was originially found, but now we don't have it... We could possibly add a MooObject
+	//	virtual owner() and over ride in it the few things that have owners???  This still wont help...
+//>>	this->owner(obj->owner());
 	return(0);
 }
 

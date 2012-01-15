@@ -152,7 +152,6 @@ MooObject *MooObjectArray::access_property(const char *name, MooObject *value)
 {
 	if (value)
 		throw moo_permissions;
-	this->check_throw(MOO_PERM_R);
 
 	if (!strcmp(name, "size"))
 		return(new MooNumber((long int) m_size));
@@ -166,8 +165,6 @@ MooObject *MooObjectArray::access_method(const char *name, MooObject *value)
 {
 	if (value)
 		throw moo_permissions;
-	// TODO do you need to do a read permissions check here?
-	this->check_throw(MOO_PERM_R);
 	return(array_methods->get(name));
 }
 
@@ -199,7 +196,6 @@ static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 		throw moo_method_object;
 	if (args->last() != 2)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	index = args->get_integer(1);
 	obj = args->get(2);
 	frame->set_return(m_this->set(index, obj));
@@ -216,7 +212,6 @@ static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_method_object;
 	if (args->last() != 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	obj = args->get(1);
 	res = m_this->remove(obj);
 	frame->set_return(new MooBoolean(res != 0));
@@ -233,7 +228,6 @@ static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 		throw moo_method_object;
 	if (args->last() != 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	obj = args->get(1);
 	res = m_this->push(obj);
 	frame->set_return(new MooBoolean(res == 0));
@@ -248,7 +242,6 @@ static int array_pop(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 		throw moo_method_object;
 	if (args->last() >= 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	frame->set_return(m_this->pop());
 	return(0);
 }
@@ -261,7 +254,6 @@ static int array_shift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 		throw moo_method_object;
 	if (args->last() >= 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	frame->set_return(m_this->shift());
 	return(0);
 }
@@ -276,7 +268,6 @@ static int array_unshift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 		throw moo_method_object;
 	if (args->last() != 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	obj = args->get(1);
 	res = m_this->unshift(obj);
 	frame->set_return(new MooBoolean(res == 0));
@@ -294,7 +285,6 @@ static int array_insert(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_method_object;
 	if (args->last() != 2)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	index = args->get_integer(1);
 	obj = args->get(2);
 	res = m_this->insert(index, obj);
@@ -311,7 +301,6 @@ static int array_splice(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_method_object;
 	if (args->last() != 1)
 		throw moo_args_mismatched;
-	m_this->check_throw(MOO_PERM_W);
 	index = args->get_integer(1);
 	frame->set_return(m_this->splice(index));
 	return(0);

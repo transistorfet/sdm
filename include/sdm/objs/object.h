@@ -33,9 +33,8 @@ class MooObjectArray;
 
 class MooObject : public MooGC {
     protected:
+	// TODO should you move this to MooGC
 	int m_delete;
-	moo_id_t m_owner;
-	moo_perm_t m_permissions;
 
     public:
 	MooObject();
@@ -45,9 +44,6 @@ class MooObject : public MooGC {
 	const MooObjectType *objtype();
 	const char *objtype_name() { return(this->objtype()->m_name); }
 	int is_true();
-
-	void check_throw(moo_perm_t perms);
-	int check(moo_perm_t perms);
 
 	int read_file(const char *file, const char *type);
 	int write_file(const char *file, const char *type);
@@ -59,11 +55,11 @@ class MooObject : public MooGC {
 	    the entry type is not loadable/recognized by the object, 0 should be returned and the caller shall
 	    call the read function of the parent in order to read the entry.  This function should not recursively
 	    call the corresponding function of it's parent object */
-	virtual int read_entry(const char *type, MooDataFile *data);
+	virtual int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
 	/** Write all data for the object to the given open data handle.  Only data for the immediate object will
 	    be written and not data for the object's parent.  The caller shall call the write function for the
 	    object's parent before calling this function.  If an error occurs, a negative number is returned. */
-	virtual int write_data(MooDataFile *data);
+	virtual int write_data(MooDataFile *data) { return(0); }
 
 	virtual int to_string(char *buffer, int max) { buffer[0] = '\0'; return(0); }
 
@@ -91,17 +87,6 @@ class MooObject : public MooGC {
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { throw moo_type_error; }
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args) { throw moo_evaluate_error; }
 	friend class MooTask;
-
-    public:
-	/// Accessors
-	moo_id_t owner() { return(m_owner); }
-	moo_perm_t permissions() { return(m_permissions); }
-
-	// TODO shouldn't these be protected or something?  How will you change the values when loading actions and properties?
-    public:
-	moo_id_t owner(moo_id_t id);
-	moo_perm_t permissions(moo_perm_t perms);
-	void match_perms(MooObject *obj);
 
     protected:
 	int is_deleting() { return(m_delete); }

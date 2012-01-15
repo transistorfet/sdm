@@ -28,6 +28,8 @@ class MooThing;
 template<typename T>
 class MooHashEntry {
     public:
+	moo_id_t m_owner;
+	moo_mode_t m_mode;
 	char *m_key;
 	T m_data;
 	MooHashEntry<T> *m_next;
@@ -54,7 +56,7 @@ class MooHash : public MooObject {
 	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
 	void clear();
-	int set(const char *key, T data);
+	int set(const char *key, T data, moo_id_t owner = -2, moo_mode_t mode = -1);
 	int remove(const char *key);
 
 	MooHashEntry<T> *get_entry(const char *key);
@@ -148,7 +150,7 @@ void MooHash<T>::clear()
 }
 
 template<typename T>
-int MooHash<T>::set(const char *key, T data)
+int MooHash<T>::set(const char *key, T data, moo_id_t owner, moo_mode_t mode)
 {
 	unsigned int hash;
 	MooHashEntry<T> *entry;
@@ -163,6 +165,10 @@ int MooHash<T>::set(const char *key, T data)
 				return(-1);
 			if (m_bits & MOO_HBF_DELETE && m_destroy)
 				m_destroy(entry->m_data);
+			if (owner > -2)
+				entry->m_owner = owner;
+			if (mode > -1)
+				entry->m_mode = mode;
 			entry->m_data = data;
 			return(0);
 		}
@@ -173,6 +179,8 @@ int MooHash<T>::set(const char *key, T data)
 	entry->m_key = (char *) (entry + 1);
 	strcpy(entry->m_key, key);
 	entry->m_data = data;
+	entry->m_owner = (owner > -2) ? owner : -1;
+	entry->m_mode = (mode > -1) ? mode : MOO_DEFAULT_MODE;
 
 	entry->m_next = m_table[hash];
 	m_table[hash] = entry;
@@ -231,15 +239,11 @@ MooHashEntry<T> *MooHash<T>::get_entry(const char *key)
 template<typename T>
 T MooHash<T>::get(const char *key)
 {
-	unsigned int hash;
-	MooHashEntry<T> *cur;
+	MooHashEntry<T> *entry;
 
-	hash = moo_hash_func(key) % m_size;
-	for (cur = m_table[hash % m_size]; cur; cur = cur->m_next) {
-		if (!strcasecmp(key, cur->m_key))
-			return(cur->m_data);
-	}
-	return(NULL);
+	if (!(entry = this->get_entry(key)))
+		return(NULL);
+	return(entry->m_data);
 }
 
 template<typename T>

@@ -140,7 +140,18 @@ int MooCodeParser::read_token()
 			m_type = TT_STRING;
 			while (m_input[m_pos] != '\0') {
 				ch = this->getchar();
- 				if (ch == '\'')
+ 				if (parser_is_whitespace(ch))
+					break;
+				m_token[m_len++] = ch;
+			}
+			m_token[m_len] = '\0';
+			break;
+		}
+		else if (ch == '`') {
+			m_type = TT_STRING;
+			while (m_input[m_pos] != '\0') {
+				ch = this->getchar();
+ 				if (ch == '\'' || ch == '`')
 					break;
 				m_token[m_len++] = ch;
 			}

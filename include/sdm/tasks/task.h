@@ -31,6 +31,7 @@ class MooObjectArray;
 class MooTask : public MooObject {
 	moo_tid_t m_tid;
 	moo_tid_t m_parent_tid;
+	moo_id_t m_owner;
 
     public:
 	MooTask();
@@ -62,9 +63,12 @@ class MooTask : public MooObject {
 	static moo_id_t current_owner();
 	static moo_id_t current_user();
 
+	// TODO This is probably wrong permissions-wise, but we need this in init_task() at least
+	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
+
     private:
 	friend class MooObject;
-	friend class TaskEventSuid;
+	friend class FrameEventRelegate;
 	static moo_id_t current_owner(moo_id_t id);
 	static moo_id_t current_owner(MooTask *task, moo_id_t id);
 	static int switch_task(MooTask *task);

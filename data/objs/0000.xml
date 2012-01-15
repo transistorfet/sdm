@@ -2,19 +2,13 @@
 <thing>
  <id>0</id>
  <bits>0x81</bits>
- <owner>-1</owner>
- <permissions>055</permissions>
+ <owner>0</owner>
+ <mode>075</mode>
  <properties>
-  <owner>-1</owner>
-  <permissions>055</permissions>
-  <entry key="name" type="string">
-   <owner>-1</owner>
-   <permissions>055</permissions>
+  <entry key="name" type="string" owner="0" mode="055">
    <value>root</value>
   </entry>
  </properties>
  <methods>
-  <owner>-1</owner>
-  <permissions>055</permissions>
  </methods>
 </thing>

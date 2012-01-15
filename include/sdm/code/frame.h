@@ -14,7 +14,10 @@
 
 #define MOO_FRAME_CYCLE_LIMIT		50000
 
+extern class MooCodeFrame *g_current_frame;
+
 class MooCodeFrame : public MooObject {
+	moo_id_t m_owner;
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
 	MooException *m_exception;
@@ -42,12 +45,22 @@ class MooCodeFrame : public MooObject {
 	int mark_exception(MooCodeExpr *handler);
 	int handle_exception();
 
+	int elevate(MooObject *obj);
+
 	void set_return(MooObject *obj);
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
 
 	void print_stacktrace();
+
+    private:
+	friend class FrameEventRelegate;
+	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
+
+    public:
+	moo_id_t owner() { return(m_owner); }
+	static moo_id_t current_owner() { if (g_current_frame) return(g_current_frame->owner()); return(-1); } 
 };
 
 class MooCodeFrameSuspend {

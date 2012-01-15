@@ -29,11 +29,13 @@ class MooThing : public MooObject {
 	int m_bits;
 	moo_id_t m_id;
 	moo_id_t m_parent;
+	moo_id_t m_owner;
+	moo_mode_t m_mode;
 	MooObjectHash *m_properties;
 	MooObjectHash *m_methods;
 
     public:
-	MooThing(moo_id_t id = -1, moo_id_t parent = -1);
+	MooThing(moo_id_t id = -1, moo_id_t parent = -1, moo_id_t owner = -1, moo_mode_t mode = MOO_DEFAULT_MODE);
 	virtual ~MooThing();
 	static MooThing *lookup(moo_id_t id);
 	MooThing *clone(moo_id_t id = MOO_NEW_ID);
@@ -51,16 +53,12 @@ class MooThing : public MooObject {
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL);
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 
-    private:
-	int set_method(const char *name, MooObject *action);
-	MooObject *get_method(const char *name);
-
     public:
 	/// Accessors
 	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent_id() { return(m_parent); }
 	inline MooThing *parent() { return(MooThing::lookup(m_parent)); }
-	inline MooThing *owner_thing() { return(MooThing::lookup(this->owner())); }
+	inline MooThing *owner_thing() { return(MooThing::lookup(m_owner)); }
 	inline int is_a_thing(moo_id_t id);
 	inline int is_a_thing(const char *name);
 
@@ -69,9 +67,10 @@ class MooThing : public MooObject {
 	static MooThing *reference(const char *name);
 	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
 	static int is_wizard(moo_id_t id);
+	void check_throw(moo_mode_t check, moo_id_t owner, moo_mode_t mode);
+	int check(moo_mode_t mode, moo_id_t owner, moo_mode_t mode);
 
 	const char *name();
-	int notify(int type, MooThing *thing, MooThing *channel, const char *text);
 	static MooThing *get_channel(const char *name);
 	void quit();
 
