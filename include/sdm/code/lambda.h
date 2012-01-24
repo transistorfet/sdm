@@ -31,7 +31,7 @@ class MooCodeLambda : public MooObject {
 
 extern MooObjectType moo_code_lambda_obj_type;
 
-MooObject *make_moo_code_lambda(MooDataFile *data);
+MooObject *load_moo_code_lambda(MooDataFile *data);
 
 #endif
 

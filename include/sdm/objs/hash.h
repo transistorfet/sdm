@@ -10,6 +10,7 @@
 #include <sdm/data.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/mutable.h>
 
 #define MOO_HBF_NO_ADD			0x0001		/// No entries can be added
 #define MOO_HBF_REPLACE			0x0002		/// Allow new elements to replace existing elements at the same index
@@ -36,7 +37,7 @@ class MooHashEntry {
 };
 
 template<typename T>
-class MooHash : public MooObject {
+class MooHash : public MooMutable {
     protected:
 	int m_bits;
 	int m_traverse_index;
@@ -51,9 +52,6 @@ class MooHash : public MooObject {
 	MooHash(int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_HASH_DEFAULT_BITS, void (*destroy)(T) = MooHash::destroy);
 	~MooHash();
 	static void destroy(T value) { delete value; }
-
-	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
-	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
 	void clear();
 	int set(const char *key, T data, moo_id_t owner = -2, moo_mode_t mode = -1);
@@ -77,7 +75,7 @@ class MooObjectHash : public MooHash<MooObject *> {
 	MooObjectHash(MooObjectHash *parent = NULL, int size = MOO_HASH_DEFAULT_SIZE, int bits = MOO_OBJECT_HASH_DEFAULT_BITS);
 
 	int read_entry(const char *type, MooDataFile *data);
-	int write_data(MooDataFile *data);
+	int write_object(MooDataFile *data);
 	int to_string(char *buffer, int max);
 
 	int mutate(const char *key, MooObject *obj);
@@ -97,7 +95,7 @@ class MooObjectHash : public MooHash<MooObject *> {
 };
 
 extern MooObjectType moo_hash_obj_type;
-MooObject *make_moo_hash(MooDataFile *data);
+MooObject *load_moo_hash(MooDataFile *data);
 
 int init_hash(void);
 void release_hash(void);

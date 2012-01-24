@@ -63,13 +63,11 @@ class MooCodeFrame : public MooObject {
 	static moo_id_t current_owner() { if (g_current_frame) return(g_current_frame->owner()); return(-1); } 
 };
 
-class MooCodeFrameSuspend {
-	
-};
+class MooCodeFrameSuspend { };
 
 extern MooObjectType moo_code_frame_obj_type;
 
-MooObject *make_moo_code_frame(MooDataFile *data);
+MooObject *load_moo_code_frame(MooDataFile *data);
 
 #endif
 

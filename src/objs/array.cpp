@@ -15,10 +15,9 @@
 #include <sdm/objs/array.h>
 
 struct MooObjectType moo_array_obj_type = {
-	NULL,
 	"array",
 	typeid(MooObjectArray).name(),
-	(moo_type_make_t) make_moo_array
+	(moo_type_load_t) load_moo_array
 };
 
 static MooObjectHash *array_methods = new MooObjectHash();
@@ -37,11 +36,20 @@ void release_array(void)
 	moo_object_deregister_type(&moo_array_obj_type);
 }
 
-MooObject *make_moo_array(MooDataFile *data)
+MooObject *load_moo_array(MooDataFile *data)
 {
-	MooObjectArray *obj = new MooObjectArray();
-	if (data)
+	int id;
+	MooObject *obj;
+
+	if (data->child_of_root()) {
+		obj = new MooObjectArray();
 		obj->read_data(data);
+	}
+	else {
+		id = data->read_integer();
+		if (!(obj = MooMutable::lookup(id)))
+			return(&moo_nil);
+	}
 	return(obj);
 }
 
@@ -52,26 +60,18 @@ MooObjectArray::MooObjectArray(int size, int max, int bits) : MooArray<MooObject
 
 int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 {
-	int res, index;
+	int index;
 	MooObject *obj = NULL;
-	char buffer[STRING_SIZE];
-	const MooObjectType *objtype;
+	char type_name[STRING_SIZE];
 
 	// TODO read/write the other values?? like max?
 	if (!strcmp(type, "entry")) {
-		data->read_attrib_string("type", buffer, STRING_SIZE);
-		if (!(objtype = moo_object_find_type(buffer, NULL))) {
-			moo_status("ARRAY: Unable to find entry type, %s", buffer);
-			return(-1);
-		}
+		data->read_attrib_string("type", type_name, STRING_SIZE);
 		index = data->read_attrib_integer("index");
-		res = data->read_children();
-		if (!(obj = moo_make_object(objtype, res ? data : NULL))) {
+		if ((obj = MooObject::read_object(data, type_name))) {
 			moo_status("ARRAY: Error loading entry, %d", index);
 			return(-1);
 		}
-		if (res)
-			data->read_parent();
 		this->set(index, obj);
 	}
 	else
@@ -79,9 +79,9 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooObjectArray::write_data(MooDataFile *data)
+int MooObjectArray::write_object(MooDataFile *data)
 {
-	MooObject::write_data(data);
+	MooMutable::write_object(data);
 	for (int i = 0; i < m_size; i++) {
 		if (m_data[i]) {
 			data->write_begin_entry("entry");
@@ -214,7 +214,7 @@ static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_args_mismatched;
 	obj = args->get(1);
 	res = m_this->remove(obj);
-	frame->set_return(new MooBoolean(res != 0));
+	frame->set_return((res != 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -230,7 +230,7 @@ static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 		throw moo_args_mismatched;
 	obj = args->get(1);
 	res = m_this->push(obj);
-	frame->set_return(new MooBoolean(res == 0));
+	frame->set_return((res == 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -270,7 +270,7 @@ static int array_unshift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 		throw moo_args_mismatched;
 	obj = args->get(1);
 	res = m_this->unshift(obj);
-	frame->set_return(new MooBoolean(res == 0));
+	frame->set_return((res == 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -288,7 +288,7 @@ static int array_insert(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	index = args->get_integer(1);
 	obj = args->get(2);
 	res = m_this->insert(index, obj);
-	frame->set_return(new MooBoolean(res == 0));
+	frame->set_return((res == 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -402,7 +402,7 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	if (args->last() != 1)
 		throw moo_args_mismatched;
 	func = args->get(1);
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	frame->push_event(new ArrayEventForeach(0, m_this, env, func));
 	return(0);
 }

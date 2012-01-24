@@ -32,7 +32,7 @@ class MooInit : public MooTask {
 
 extern MooObjectType moo_init_obj_type;
 
-MooObject *make_moo_init(MooDataFile *data);
+MooObject *load_moo_init(MooDataFile *data);
 
 #endif
 

@@ -18,13 +18,6 @@
 
 #define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
-MooObjectType moo_task_obj_type = {
-	NULL,
-	"task",
-	typeid(MooTask).name(),
-	(moo_type_make_t) NULL
-};
-
 class MooTaskQueueEntry {
     public:
 	MooTaskQueueEntry(double time, MooTask *task) { m_time = time; m_task = task; m_next = NULL; m_prev = NULL; }

@@ -13,13 +13,12 @@
 #include <sdm/funcs/func.h>
 
 struct MooObjectType moo_func_obj_type = {
-	NULL,
 	"moofunc",
 	typeid(MooFunc).name(),
-	(moo_type_make_t) make_moo_func
+	(moo_type_load_t) load_moo_func
 };
 
-MooObject *make_moo_func(MooDataFile *data)
+MooObject *load_moo_func(MooDataFile *data)
 {
 	MooFunc *obj = new MooFunc((moo_func_t) NULL);
 	if (data)

@@ -18,13 +18,12 @@
 
 
 MooObjectType moo_listener_obj_type = {
-	&moo_task_obj_type,
 	"listener",
 	typeid(MooListener).name(),
-	(moo_type_make_t) make_moo_listener
+	(moo_type_load_t) load_moo_listener
 };
 
-MooObject *make_moo_listener(MooDataFile *data)
+MooObject *load_moo_listener(MooDataFile *data)
 {
 	MooListener *obj = new MooListener();
 	if (data)

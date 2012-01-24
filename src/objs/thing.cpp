@@ -13,6 +13,7 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/mutable.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
 #include <sdm/funcs/func.h>
@@ -21,53 +22,42 @@
 #include <sdm/code/code.h>
 
 
-#define THING_TABLE_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
-#define THING_PROPERTIES_SIZE		5
-#define THING_METHODS_SIZE		5
-
-#define MOO_THING_INIT_SIZE			100
-/// This is to prevent us from making giant table accidentally
-#define MOO_THING_MAX_SIZE			65536
-
 MooObjectType moo_thing_obj_type = {
-	NULL,
 	"thing",
 	typeid(MooThing).name(),
-	(moo_type_make_t) make_moo_thing
+	(moo_type_load_t) load_moo_thing
 };
-
-MooArray<MooThing *> *moo_thing_table = NULL;
 
 static MooObjectHash *thing_methods = new MooObjectHash();
 void moo_load_thing_methods(MooObjectHash *env);
 
 int init_thing(void)
 {
-	if (moo_thing_table)
-		return(1);
 	moo_object_register_type(&moo_thing_obj_type);
-	moo_thing_table = new MooArray<MooThing *>(MOO_THING_INIT_SIZE, MOO_THING_MAX_SIZE, THING_TABLE_BITS);
 	moo_load_thing_methods(thing_methods);
 	return(0);
 }
 
 void release_thing(void)
 {
-	if (moo_thing_table)
-		delete moo_thing_table;
 	moo_object_deregister_type(&moo_thing_obj_type);
 }
 
-MooObject *make_moo_thing(MooDataFile *data)
+MooObject *load_moo_thing(MooDataFile *data)
 {
 	int id;
-	MooThing *thing;
+	MooObject *obj;
 
-	id = data->read_integer();
-	// TODO is this right to return the nil value, or should you create a new nil value
-	if (!(thing = MooThing::lookup(id)))
-		return(make_moo_nil(NULL));
-	return(thing);
+	if (data->child_of_root()) {
+		obj = new MooThing();
+		obj->read_data(data);
+	}
+	else {
+		id = data->read_integer();
+		if (!(obj = MooMutable::lookup(id)))
+			return(&moo_nil);
+	}
+	return(obj);
 }
 
 MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode)
@@ -75,16 +65,12 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode
 	// TODO temporary since we haven't properly dealt with refcounting/thingrefs
 	this->set_nofree();
 
+	// TODO you should set these to be unassignable or something
 	m_properties = new MooObjectHash();
-	// TODO we could choose to only create an actions list when we want to place a new
-	//	action in it unique to this object and otherwise, an action on this object will
-	//	only send the request to it's parent object
 	m_methods = new MooObjectHash();
 
 	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
 	/// If the id = MOO_NEW_ID then assign the next available id
-	m_bits = 0;
-	m_id = -1;
 	this->assign_id(id);
 	m_parent = parent;
 	m_owner = owner;
@@ -93,42 +79,22 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode
 
 MooThing::~MooThing()
 {
-	MOO_DECREF(m_properties);
-	MOO_DECREF(m_methods);
-	if (m_id >= 0)
-		moo_thing_table->set(m_id, NULL);
-}
-
-MooThing *MooThing::lookup(moo_id_t id)
-{
-	MooThing *thing;
-	char buffer[STRING_SIZE];
-
-	if (id < 0)
-		return(NULL);
-	if (!(thing = moo_thing_table->get(id))) {
-		snprintf(buffer, STRING_SIZE, "objs/%04d.xml", id);
-		if (!moo_data_file_exists(buffer))
-			return(NULL);
-		thing = new MooThing(id);
-		if (thing->load() < 0)
-			MOO_DECREF(thing);
-	}
-	return(thing);
+	/// When we set these to NULL, the garbage collector will free them
+	m_properties = NULL;
+	m_methods = NULL;
 }
 
 MooThing *MooThing::clone(moo_id_t id)
 {
 	MooThing *thing;
-	if ((thing = moo_thing_table->get(id))) {
-		moo_status("WARNING: Reassigning thing ID, #%d", id);
-		//thing->m_bits = 0;
-		thing->m_parent = this->m_id;
-		thing->m_properties->clear();
-		thing->m_methods->clear();
+
+	if (MooMutable::is_assigned(id)) {
+		moo_status("THING: ID %d is already assigned", id);
+		return(NULL);
 	}
-	else if (!(thing = new MooThing(id, this->m_id)))
-		throw MooException("Error creating new thing from %d", this->m_id);
+
+	if (!(thing = new MooThing(id, this->id())))
+		throw MooException("Error creating new thing from %d", this->id());
 	return(thing);
 }
 
@@ -148,14 +114,6 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 			data->read_parent();
 		}
 	}
-	else if (!strcmp(type, "bits")) {
-		int bits = data->read_integer_entry();
-		m_bits = (bits & ~MOO_TBF_WRITING);
-	}
-	else if (!strcmp(type, "id")) {
-		moo_id_t id = data->read_integer_entry();
-		this->assign_id(id);
-	}
 	else if (!strcmp(type, "parent")) {
 		moo_id_t id = data->read_integer_entry();
 		m_parent = id;
@@ -173,100 +131,35 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooThing::write_data(MooDataFile *data)
+int MooThing::write_object(MooDataFile *data)
 {
-	// TODO you should either save this object (if not currently being saved) or queue it up or something, or
-	//	perhaps you can have some kind of 'modified/dirty' bit (which would prevent repeated or unnecessary saving (but this
-	//	wouldn't necessarily work because a subvalue could be modified and we woludn't save it)
-	data->write_integer(m_id);
-	return(0);
-}
+	MooMutable::write_object(data);
+	if (m_parent >= 0)
+		data->write_integer_entry("parent", m_parent);
+	if (m_owner >= 0)
+		data->write_integer_entry("owner", m_owner);
+	if (m_mode != MOO_DEFAULT_MODE)
+		data->write_integer_entry("mode", m_mode);
 
-int MooThing::load()
-{
-	char buffer[STRING_SIZE];
-
-	if (m_id < 0) {
-		moo_status("THING: attempting to read thing with an invalid ID");
-		return(-1);
+	/// Write the properties to the file
+	if (m_properties->entries()) {
+		data->write_begin_entry("properties");
+		m_properties->write_object(data);
+		data->write_end_entry();
 	}
-	snprintf(buffer, STRING_SIZE, "objs/%04d.xml", m_id);
-	m_properties->clear();
-	m_methods->clear();
-	return(this->read_file(buffer, "thing"));
-}
 
-int MooThing::save()
-{
-	MooDataFile *data;
-	char file[STRING_SIZE];
-
-	/// If we are currently writing the file to disc then don't write it again
-	if (m_bits & MOO_TBF_WRITING)
-		return(0);
-
-	if (m_id < 0) {
-		moo_status("THING: attempting to write thing with an invalid ID");
-		return(-1);
-	}
-	//snprintf(file, STRING_SIZE, "objs/%04d/%04d.xml", m_id / 10000, m_id % 10000);
-	snprintf(file, STRING_SIZE, "objs/%04d.xml", m_id);
-	moo_status("Writing thing data to file \"%s\".", file);
-	data = new MooDataFile(file, MOO_DATA_WRITE, "thing");
-
-	m_bits |= MOO_TBF_WRITING;
-	try {
-		data->write_integer_entry("id", m_id);
-		if (m_parent >= 0)
-			data->write_integer_entry("parent", m_parent);
-		if (m_bits & ~MOO_TBF_WRITING)
-			data->write_hex_entry("bits", m_bits);
-		if (m_owner >= 0)
-			data->write_integer_entry("owner", m_owner);
-		if (m_mode != MOO_DEFAULT_MODE)
-			data->write_integer_entry("mode", m_mode);
-		MooObject::write_data(data);
-
-		/// Write the properties to the file
-		if (m_properties->entries()) {
-			data->write_begin_entry("properties");
-			m_properties->write_data(data);
-			data->write_end_entry();
-		}
-
-		/// Write the actions to the file
-		if (m_methods->entries()) {
-			data->write_begin_entry("methods");
-			m_methods->write_data(data);
-			data->write_end_entry();
-		}
-	}
-	catch (MooException e) {
-		m_bits &= ~MOO_TBF_WRITING;
-		throw e;
-	}
-	m_bits &= ~MOO_TBF_WRITING;
-
-	delete data;
-	return(0);
-}
-
-int MooThing::save_all()
-{
-	MooThing *thing;
-
-	for (int i = 0; i <= moo_thing_table->last(); i++) {
-		thing = moo_thing_table->get(i);
-		if (!thing)
-			continue;
-		thing->save();
+	/// Write the actions to the file
+	if (m_methods->entries()) {
+		data->write_begin_entry("methods");
+		m_methods->write_object(data);
+		data->write_end_entry();
 	}
 	return(0);
 }
 
 int MooThing::to_string(char *buffer, int max)
 {
-	return(snprintf(buffer, max, "#%d", m_id));
+	return(snprintf(buffer, max, "#%d", this->id()));
 }
 
 MooObject *MooThing::access_property(const char *name, MooObject *value)
@@ -274,7 +167,7 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 	MooHashEntry<MooObject *> *entry;
 
 	if (!strcmp(name, "id"))
-		return(value ? NULL : new MooNumber((long int) this->m_id));
+		return(value ? NULL : new MooNumber((long int) this->id()));
 	else if (!strcmp(name, "parent"))
 		return(value ? NULL : new MooNumber((long int) this->m_parent));
 	else if (!strcmp(name, "owner"))
@@ -314,7 +207,6 @@ MooObject *MooThing::access_property(const char *name, MooObject *value)
 
 MooObject *MooThing::access_method(const char *name, MooObject *value)
 {
-	MooObject *obj;
 	MooHashEntry<MooObject *> *entry;
 
 	if (value) {
@@ -358,37 +250,6 @@ MooObject *MooThing::access_method(const char *name, MooObject *value)
 	}
 }
 
-///// Helper Methods /////
-
-MooThing *MooThing::reference(const char *name)
-{
-	moo_id_t id;
-
-	if (name[0] == '#') {
-		id = ::atoi(&name[1]);
-		if (id < 0 || id > MOO_THING_MAX_SIZE)
-			return(NULL);
-		return(MooThing::lookup(id));
-	}
-	// TODO should we just get rid of this entirely?
-	else if (name[0] == '$') {
-		// TODO should we break up the reference??
-		MooObject *ref = global_env->get(&name[1]);
-		if (!ref)
-			return(NULL);
-		return(ref->get_thing());
-	}
-	return(NULL);
-}
-
-int MooThing::is_wizard(moo_id_t id)
-{
-	MooThing *thing;
-
-	if (!(thing = MooThing::lookup(id)))
-		return(0);
-	return(thing->is_wizard());
-}
 
 void MooThing::check_throw(moo_mode_t check, moo_id_t owner, moo_mode_t mode)
 {
@@ -408,31 +269,6 @@ int MooThing::check(moo_mode_t check, moo_id_t owner, moo_mode_t mode)
 	if ((mode & check) == check)
 		return(1);
 	return(0);
-}
-
-int MooThing::assign_id(moo_id_t id)
-{
-	/// If the thing already has an ID, then remove it from the table
-	if (this->m_id >= 0)
-		moo_thing_table->set(m_id, NULL);
-	/// Assign the thing to the appropriate index in the table and set the ID if it succeeded
-	m_id = -1;
-	if (id == MOO_NEW_ID) {
-		// TODO this will load every object in to the system, we need no change this if we want to only load the needed objs
-		id = moo_thing_table->next_space();
-		for (; id < MOO_THING_MAX_SIZE; id++) {
-			if (!MooThing::lookup(id))
-				break;
-		}
-	}
-
-	if (id >= MOO_THING_MAX_SIZE)
-		throw MooException("THING: Maximum number of things reached; assignment failed.");
-	if (moo_thing_table->set(id, this))
-		m_id = id;
-	if (m_id < 0 && id != MOO_NO_ID)
-		moo_status("Error: Attempted to reassign ID, %d", id);
-	return(m_id);
 }
 
 const char *MooThing::name()
@@ -554,7 +390,8 @@ static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 		throw moo_method_object;
 	if (args->last() != 0)
 		throw moo_args_mismatched;
-	thing->load();
+	//  TODO FIX THIS
+	//thing->load();
 	return(0);
 }
 
@@ -567,7 +404,8 @@ static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 		throw moo_method_object;
 	if (args->last() != 0)
 		throw moo_args_mismatched;
-	thing->save();
+	// TODO FIX THIS
+	//thing->save();
 	return(0);
 }
 
@@ -583,6 +421,7 @@ static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	MooThing *thing;
 	const char *str;
 
+/*
 	if (args->last() == 1)
 		str = args->get_string(1);
 	else if (args->last() != 0)
@@ -599,6 +438,7 @@ static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 			entry = thing->m_properties->get_entry(str);
 		frame->set_return(new MooNumber((long int) entry->m_owner));
 	}
+*/
 	return(0);
 }
 

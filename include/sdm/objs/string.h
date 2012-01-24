@@ -11,10 +11,10 @@
 #include <sdm/objs/object.h>
 
 class MooString : public MooObject {
-    public:
 	char *m_str;
 	int m_len;
 
+    public:
 	MooString(const char *fmt, ...);
 	virtual ~MooString();
 
@@ -23,17 +23,19 @@ class MooString : public MooObject {
 	virtual int to_string(char *buffer, int max);
 
 	virtual const char *get_string() { return(m_str); }
-
-	// TODO should all fault conditions throw an exception instead of returning an int?
-	int set(const char *str);
+	int length() { return(m_len); }
 
 	int compare(const char *str);
 	int compare(const char *str, int len);
+
+    private:
+	// TODO should all fault conditions throw an exception instead of returning an int?
+	int set(const char *str);
 };
 
 extern MooObjectType moo_string_obj_type;
 
-MooObject *make_moo_string(MooDataFile *data);
+MooObject *load_moo_string(MooDataFile *data);
 
 #endif
 

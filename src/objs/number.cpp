@@ -11,13 +11,12 @@
 #include <sdm/objs/number.h>
 
 struct MooObjectType moo_number_obj_type = {
-	NULL,
 	"number",
 	typeid(MooNumber).name(),
-	(moo_type_make_t) make_moo_number
+	(moo_type_load_t) load_moo_number
 };
 
-MooObject *make_moo_number(MooDataFile *data)
+MooObject *load_moo_number(MooDataFile *data)
 {
 	MooNumber *obj = new MooNumber((long int) 0);
 	if (data)

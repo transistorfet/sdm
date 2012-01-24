@@ -24,8 +24,12 @@ class MooDataFile {
 	xmlBufferPtr buffer;
 
     public:
-	MooDataFile(const char *file, int mode, const char *rootname);
+	MooDataFile(const char *file, int mode, const char *rootname = NULL);
 	~MooDataFile();
+
+	int root_name(char *buffer, int max);
+	int compare_root(const char *rootname);
+	int child_of_root();
 
 	int read_rewind();
 	int read_next();

@@ -101,7 +101,7 @@ MooThing *user_login(const char *name, const char *passwd)
 				if (passwd)
 					break;
 				memset(buffer, '\0', STRING_SIZE);
-				return(MooThing::lookup(id));
+				return(dynamic_cast<MooThing *>(MooMutable::lookup(id)));
 			}
 			break;
 		}

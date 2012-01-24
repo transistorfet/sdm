@@ -159,10 +159,10 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 		throw moo_args_mismatched;
 	obj = args->get(0);
 	if (MOO_IS_NIL(obj)) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -175,11 +175,11 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	obj = args->get(0);
 	for (int i = 1; i <= args->last(); i++) {
 		if (args->get(i) != obj) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -192,11 +192,11 @@ static int basic_not_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	obj = args->get(0);
 	for (int i = 1; i <= args->last(); i++) {
 		if (args->get(i) != obj) {
-			frame->set_return(new MooBoolean(B_TRUE));
+			frame->set_return(&moo_true);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -218,11 +218,11 @@ static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 			throw moo_type_error;
 		obj->to_string(buffer2, LARGE_STRING_SIZE);
 		if (strcmp(buffer1, buffer2)) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -238,11 +238,11 @@ static int basic_num_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArr
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (num1->compare(num2)) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -258,11 +258,11 @@ static int basic_num_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjec
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (!num1->compare(num2)) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -278,11 +278,11 @@ static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (num1->compare(num2) != 1) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -298,11 +298,11 @@ static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (num1->compare(num2) == -1) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -318,11 +318,11 @@ static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (num1->compare(num2) != -1) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -338,11 +338,11 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 		if (!(num2 = dynamic_cast<MooNumber *>(args->get(i))))
 			throw MooException("arg %d: Invalid type. Expected number", i + 1);
 		if (num1->compare(num2) == 1) {
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 			return(0);
 		}
 	}
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -353,9 +353,9 @@ static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (!(obj = args->get(0)) || obj->is_true())
-		frame->set_return(new MooBoolean(B_FALSE));
+		frame->set_return(&moo_false);
 	else
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 	return(0);
 }
 
@@ -384,7 +384,7 @@ static int basic_strlen(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_args_mismatched;
 	if (!(str = dynamic_cast<MooString *>(args->get(0))))
 		throw moo_type_error;
-	frame->set_return(new MooNumber((long int) str->m_len));
+	frame->set_return(new MooNumber((long int) str->length()));
 	return(0);
 }
 
@@ -570,10 +570,10 @@ static int basic_boolean_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArr
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooBoolean *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -582,10 +582,10 @@ static int basic_number_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooNumber *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -594,10 +594,10 @@ static int basic_string_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooString *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -606,10 +606,10 @@ static int basic_array_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooObjectArray *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -618,10 +618,10 @@ static int basic_hash_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooObjectHash *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -630,10 +630,10 @@ static int basic_thing_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooThing *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -642,10 +642,10 @@ static int basic_lambda_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	if (dynamic_cast<MooCodeLambda *>(args->get(0))) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	return(0);
 }
 

@@ -11,13 +11,12 @@
 #include <sdm/code/code.h>
 
 struct MooObjectType moo_code_lambda_obj_type = {
-	NULL,
 	"moolambda",
 	typeid(MooCodeLambda).name(),
-	(moo_type_make_t) make_moo_code_lambda
+	(moo_type_load_t) load_moo_code_lambda
 };
 
-MooObject *make_moo_code_lambda(MooDataFile *data)
+MooObject *load_moo_code_lambda(MooDataFile *data)
 {
 	MooCodeLambda *obj = new MooCodeLambda(NULL, NULL);
 	if (data)

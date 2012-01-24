@@ -18,13 +18,12 @@
 
 
 MooObjectType moo_init_obj_type = {
-	&moo_task_obj_type,
 	"init",
 	typeid(MooInit).name(),
-	(moo_type_make_t) make_moo_init
+	(moo_type_load_t) load_moo_init
 };
 
-MooObject *make_moo_init(MooDataFile *data)
+MooObject *load_moo_init(MooDataFile *data)
 {
 	MooInit *obj = new MooInit();
 	if (data)

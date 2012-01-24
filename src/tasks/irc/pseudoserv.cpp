@@ -22,10 +22,9 @@
 #include <sdm/objs/thing.h>
 
 MooObjectType moo_irc_pseudoserv_obj_type = {
-	&moo_task_obj_type,
 	"irc-pseudoserv",
 	typeid(MooIRC::PseudoServ).name(),
-	(moo_type_make_t) make_moo_irc_pseudoserv
+	(moo_type_load_t) load_moo_irc_pseudoserv
 };
 
 time_t server_start = 0;
@@ -47,7 +46,7 @@ void release_irc_pseudoserv(void)
 
 }
 
-MooObject *make_moo_irc_pseudoserv(MooDataFile *data)
+MooObject *load_moo_irc_pseudoserv(MooDataFile *data)
 {
 	MooIRC::PseudoServ *obj = new MooIRC::PseudoServ();
 	if (data)
@@ -622,7 +621,7 @@ int PseudoServ::send_names(const char *name)
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
 	if (result && (names = dynamic_cast<MooString *>(result)))
-		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, names->m_str);
+		Msg::send(m_inter, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, names->get_string());
 	Msg::send(m_inter, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
 	MOO_DECREF(result);
 	return(0);

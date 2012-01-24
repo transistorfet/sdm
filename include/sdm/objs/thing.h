@@ -13,21 +13,10 @@
 #include <sdm/objs/hash.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/mutable.h>
 
-#define MOO_ACTION_NOT_FOUND	1
-
-#define MOO_NO_ID		-1
-#define MOO_NEW_ID		-2
-
-#define MOO_TBF_WIZARD		0x01
-#define MOO_TBF_WRITING		0x80
-
-extern MooArray<MooThing *> *moo_thing_table;
-
-class MooThing : public MooObject {
+class MooThing : public MooMutable {
     protected:
-	int m_bits;
-	moo_id_t m_id;
 	moo_id_t m_parent;
 	moo_id_t m_owner;
 	moo_mode_t m_mode;
@@ -37,14 +26,10 @@ class MooThing : public MooObject {
     public:
 	MooThing(moo_id_t id = -1, moo_id_t parent = -1, moo_id_t owner = -1, moo_mode_t mode = MOO_DEFAULT_MODE);
 	virtual ~MooThing();
-	static MooThing *lookup(moo_id_t id);
 	MooThing *clone(moo_id_t id = MOO_NEW_ID);
 
 	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
-	virtual int load();
-	virtual int save();
-	static int save_all();
+	virtual int write_object(MooDataFile *data);
 
 	virtual int to_string(char *buffer, int max);
 	MooThing *get_thing() { return(this); }
@@ -55,43 +40,25 @@ class MooThing : public MooObject {
 
     public:
 	/// Accessors
-	inline moo_id_t id() { return(m_id); }
 	inline moo_id_t parent_id() { return(m_parent); }
-	inline MooThing *parent() { return(MooThing::lookup(m_parent)); }
-	inline MooThing *owner_thing() { return(MooThing::lookup(m_owner)); }
-	inline int is_a_thing(moo_id_t id);
-	inline int is_a_thing(const char *name);
+	inline MooThing *parent() { return(dynamic_cast<MooThing *>(MooMutable::lookup(m_parent))); }
+	moo_id_t owner() { return(m_owner); }
+	moo_mode_t mode() { return(m_mode); }
 
     public:
-	/// Helper Methods
-	static MooThing *reference(const char *name);
-	int is_wizard() { return(m_bits & MOO_TBF_WIZARD); }
-	static int is_wizard(moo_id_t id);
 	void check_throw(moo_mode_t check, moo_id_t owner, moo_mode_t mode);
 	int check(moo_mode_t mode, moo_id_t owner, moo_mode_t mode);
 
 	const char *name();
 	static MooThing *get_channel(const char *name);
 	void quit();
-
-    protected:
-	int assign_id(moo_id_t id);
 };
 
 extern MooObjectType moo_thing_obj_type;
 
 int init_thing(void);
 void release_thing(void);
-MooObject *make_moo_thing(MooDataFile *data);
-
-inline int MooThing::is_a_thing(moo_id_t id)
-{
-	for (MooThing *cur = this; cur; cur = MooThing::lookup(cur->m_parent)) {
-		if (cur->m_id == id)
-			return(1);
-	}
-	return(0);
-}
+MooObject *load_moo_thing(MooDataFile *data);
 
 #endif
 

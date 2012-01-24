@@ -82,7 +82,6 @@
 		(define guest.in_use 1)
 		guest
 	))
-
 )))
 (NickServ:register NickServ)
 (NickServ:register ChanServ)
@@ -378,6 +377,7 @@
 
 	(define this:look (lambda (this &rest)
 		(define name (rest:get 0))
+		(debug "Name>> " name)
 		(if (null? name)
 			(this:look_self)
 			(begin

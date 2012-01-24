@@ -73,9 +73,9 @@ MooCodeExpr *MooCodeParser::parse_token()
 		return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooString("%s", m_token)));
 	    case TT_WORD: {
 		if (!strcasecmp(m_token, "#t"))
-			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooBoolean(B_TRUE)));
+			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, &moo_true));
 		else if (!strcasecmp(m_token, "#f"))
-			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooBoolean(B_FALSE)));
+			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, &moo_false));
 		else if (parser_is_digit(m_token[0]) || (m_token[0] == '-' && parser_is_digit(m_token[1])))
 			return(new MooCodeExpr(m_line, m_col, MCT_OBJECT, new MooNumber(m_token)));
 		else
@@ -215,7 +215,7 @@ int MooCodeParser::generate_expr(MooCodeExpr *expr, char *buffer, int max, MooCo
 			return(0);
 		if ((str = dynamic_cast<MooString *>(obj))) {
 			buffer[i++] = '\"';
-			i += MooCodeParser::encode_string(str->m_str, &buffer[i], max - i);
+			i += MooCodeParser::encode_string(str->get_string(), &buffer[i], max - i);
 			buffer[i++] = '\"';
 		}
 		else

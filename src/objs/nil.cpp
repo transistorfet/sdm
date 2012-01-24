@@ -12,15 +12,14 @@
 #include <sdm/objs/nil.h>
 
 MooObjectType moo_nil_obj_type = {
-	NULL,
 	"nil",
 	typeid(MooNil).name(),
-	(moo_type_make_t) make_moo_nil
+	(moo_type_load_t) load_moo_nil
 };
 
 MooNil moo_nil;
 
-MooObject *make_moo_nil(MooDataFile *data)
+MooObject *load_moo_nil(MooDataFile *data)
 {
 	return(&moo_nil);
 }

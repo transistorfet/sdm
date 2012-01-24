@@ -75,8 +75,6 @@ class MooTask : public MooObject {
 	static int suid(MooObject *obj, MooCodeFrame *frame);
 };
 
-extern MooObjectType moo_task_obj_type;
-
 int init_task(void);
 void release_task(void);
 

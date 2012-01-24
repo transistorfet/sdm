@@ -329,7 +329,7 @@ static int form_cond(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!expr)
 		throw moo_args_mismatched;
-	frame->set_return(new MooBoolean(B_FALSE));
+	frame->set_return(&moo_false);
 	frame->push_event(new FormCondEvent(frame->env(), NULL, expr));
 	return(0);
 }
@@ -345,7 +345,7 @@ class FormAndEvent : public MooCodeEvent {
 		MooObject *obj;
 
 		if (!(obj = frame->get_return()) || !obj->is_true())
-			frame->set_return(new MooBoolean(B_FALSE));
+			frame->set_return(&moo_false);
 		else if (!m_expr)
 			frame->set_return(obj);
 		else {
@@ -359,7 +359,7 @@ class FormAndEvent : public MooCodeEvent {
 static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!expr) {
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 		return(0);
 	}
 	frame->push_event(new FormAndEvent(frame->env(), expr->next()));
@@ -392,7 +392,7 @@ class FormOrEvent : public MooCodeEvent {
 static int form_or(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!expr) {
-		frame->set_return(new MooBoolean(B_FALSE));
+		frame->set_return(&moo_false);
 		return(0);
 	}
 
@@ -527,9 +527,9 @@ static int form_defined(MooCodeFrame *frame, MooCodeExpr *expr)
 
 	name = expr->get_identifier();
 	if (MooObject::resolve(name, frame->env()))
-		frame->set_return(new MooBoolean(B_TRUE));
+		frame->set_return(&moo_true);
 	else
-		frame->set_return(new MooBoolean(B_FALSE));
+		frame->set_return(&moo_false);
 	return(0);
 }
 
@@ -555,7 +555,7 @@ int init_code_event(void)
 	form_env->set("catch", new MooFormT(form_catch));
 	form_env->set("defined?", new MooFormT(form_defined));
 
-	global_env->set("else", new MooBoolean(B_TRUE));
+	global_env->set("else", &moo_true);
 	return(0);
 }
 

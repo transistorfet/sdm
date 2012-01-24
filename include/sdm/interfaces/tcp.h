@@ -59,7 +59,7 @@ class MooTCP : public MooInterface {
 
 extern MooObjectType moo_tcp_obj_type;
 
-MooObject *make_moo_tcp(MooDataFile *data);
+MooObject *load_moo_tcp(MooDataFile *data);
 
 #endif
 

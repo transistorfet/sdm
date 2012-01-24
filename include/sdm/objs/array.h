@@ -11,6 +11,7 @@
 #include <sdm/data.h>
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
+#include <sdm/objs/mutable.h>
 
 #define MOO_ABF_DELETE			0x01	/// Delete elements when removed from list
 #define MOO_ABF_DELETEALL		0x02	/// Delete all elements when list is destroyed
@@ -25,9 +26,9 @@
 class MooThing;
 
 template<typename T>
-class MooArray : public MooObject {
+class MooArray : public MooMutable {
     protected:
-	pthread_mutex_t m_lock;
+	//pthread_mutex_t m_lock;
 	int m_bits;
 	int m_size;
 	int m_max;
@@ -40,9 +41,6 @@ class MooArray : public MooObject {
 	MooArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_ARRAY_DEFAULT_BITS, void (*destroy)(T) = MooArray<T>::destroy);
 	virtual ~MooArray();
 	static void destroy(T value) { delete value; }
-
-	int read_entry(const char *type, MooDataFile *data) { return(MOO_NOT_HANDLED); }
-	int write_data(MooDataFile *data) { return(MOO_NOT_HANDLED); }
 
 	void clear();
 	T operator[] (int index);
@@ -77,7 +75,7 @@ class MooObjectArray : public MooArray<MooObject *> {
 	MooObjectArray(int size = MOO_ARRAY_DEFAULT_SIZE, int max = -1, int bits = MOO_OBJECT_ARRAY_DEFAULT_BITS);
 
 	int read_entry(const char *type, MooDataFile *data);
-	int write_data(MooDataFile *data);
+	int write_object(MooDataFile *data);
 	int to_string(char *buffer, int max);
 
 	long int get_integer(int index);
@@ -91,7 +89,7 @@ class MooObjectArray : public MooArray<MooObject *> {
 };
 
 extern MooObjectType moo_array_obj_type;
-MooObject *make_moo_array(MooDataFile *data);
+MooObject *load_moo_array(MooDataFile *data);
 
 int init_array(void);
 void release_array(void);
@@ -99,7 +97,7 @@ void release_array(void);
 template<typename T>
 MooArray<T>::MooArray(int size, int max, int bits, void (*destroy)(T))
 {
-	pthread_mutex_init(&m_lock, NULL);
+	//pthread_mutex_init(&m_lock, NULL);
 	m_bits = bits;
 	m_size = 0;
 	m_max = max;
@@ -122,7 +120,7 @@ MooArray<T>::~MooArray()
 				m_destroy(m_data[i]);
 		}
 	}
-	pthread_mutex_destroy(&m_lock);
+	//pthread_mutex_destroy(&m_lock);
 	free(m_data);
 }
 
@@ -131,7 +129,7 @@ void MooArray<T>::clear()
 {
 	int i;
 
-	pthread_mutex_lock(&m_lock);
+	//pthread_mutex_lock(&m_lock);
 	if (m_bits & MOO_ABF_DELETE && m_destroy) {
 		for (i = 0; i < m_size; i++) {
 			if (m_data[i])
@@ -140,7 +138,7 @@ void MooArray<T>::clear()
 	}
 	m_last = -1;
 	m_next_space = 0;
-	pthread_mutex_unlock(&m_lock);
+	//pthread_mutex_unlock(&m_lock);
 }
 
 template<typename T>
@@ -177,7 +175,7 @@ T MooArray<T>::set(int index, T value)
 			m_destroy(m_data[index]);
 	}
 
-	pthread_mutex_lock(&m_lock);
+	//pthread_mutex_lock(&m_lock);
 	m_data[index] = value;
 	/// Update the next_space and last values accordingly
 	if (!value) {
@@ -198,7 +196,7 @@ T MooArray<T>::set(int index, T value)
 				break;
 		}
 	}
-	pthread_mutex_unlock(&m_lock);
+	//pthread_mutex_unlock(&m_lock);
 	return(value);
 }
 

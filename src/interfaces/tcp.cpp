@@ -33,13 +33,12 @@
 #endif
 
 MooObjectType moo_tcp_obj_type = {
-	NULL,
 	"tcp",
 	typeid(MooTCP).name(),
-	(moo_type_make_t) make_moo_tcp
+	(moo_type_load_t) load_moo_tcp
 };
 
-MooObject *make_moo_tcp(MooDataFile *data)
+MooObject *load_moo_tcp(MooDataFile *data)
 {
 	MooTCP *obj = new MooTCP();
 	if (data)

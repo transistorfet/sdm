@@ -101,6 +101,50 @@
 	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
 	  things and have them remain in the task's scope at all times (thread-global definitions).
 
+	* you could have various functionality such as the irc pseudoserv stuff be implemented as a special builtin object (you'd call
+	  a C function like the load_methods() functions, which creates a new MooThing with a specific ID, and adds various properties
+	  and methods, most of which would be direct references to built-in functions (rather than indirectly setting a global variable
+	  with the builtin method that you can then assign to a custom object).  Then you could make tasks like pseudoserv be all
+	  generic and all coded (it can always run a thing's method as the task body, thus an thing can describe a whole function
+	  including tasks and launching task)
+
+      Dealing with References when Saving:
+	* this is the problem of saving everything to disk and reloading it, but loosing all duplicate references because they are not
+	  saved uniquely
+	* you could divide all MooObjects into MooPersistent and MooConstant.  Constants would be numbers, strings, boolean, nil, etc
+	  where the value is a constant (thus a reference doesn't matter), and the value can be directly saved and reloaded from disk
+	  without an issue.  Then, all MooPersistent objects would have an ID and be saved seperately or on equal terms.  Whenever a
+	  Persistent object is used as a value in something being written to an object file, the ID would be saved instead, and the
+	  that Persistent object would be written seperately.  Then, when the system is loaded, all the values would be read in and
+	  you'd have to use a temporary value of the ID and when everything is loaded, go back and convert all the IDs to pointers.
+	  You could also store all references as only numeric IDs and require a lookup of some kind whenever accessing one.  That would
+	  be much slower, but it would also prevent segfaults in the server since no pointers are used.  It would also save on loading
+	  times but that is really irrelevant because that almost never happens.
+	* you could defer assigning IDs until the system is written rather than doing it when any value is assigned.  A lot of values
+	  might come into existance and disappear before the system is written again.  Actually, you'd still need a place to store them
+	  in the array of that type...
+	* you might want to think about changing array into a constant type, come to think of it, which doesn't make sense at all.  You
+	  create an array every time you eval an expr, and this would add waaaay too much overhead.  There is already too much as it is.
+	  Then again... what if you only cleared the items in an array and marked it as unused, and then when you go to make a new array
+	  it just uses the allocated one, thus saving allocation time!
+	* wait wait, this will actually work because you don't have to assign an ID unless you save that object.  When you write
+	  everything to disk, if you come across a value with a -1 ID, then you assign it an ID and save it (or optionally traverse
+	  everything, assign the IDs, and then save everything, or else you might have already saved that type and then it wont be saved,
+	  or else you are able to individually save objects, and you do that when you assign a new ID (??)
+	* actually not all objects have to be persistent.  They could be individually selected, such that if the aren't persistent, they
+	  are never assigned IDs and always written as nil to disk (like perhaps some interfaces)
+	* all of this would actually make it easier to have a distributed system or something, because every value of uniqueness would
+	  have a global ID of some kind allowing objects to be distributed and cached or accessed remotely.
+	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
+	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
+	  namespaces would be merged.  The : syntax would just be a syntactic thing for calls (a shorthand).  Lambda environments would
+	  be non-persistent, or at least never ID assigned, and as long as you don't save the frame, you are fine.  But come to think of
+	  it, you could always save a frame to suspend a task to disk!
+	* you could store all values in a global array of some kind and use that for garbage collecting, and IDs, and saving, and so on
+	  You need to change the data storage system anyways
+
+
+
       Permissions:
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
 	  being accessed on the direct thing. (call it 'local'??)
@@ -109,13 +153,27 @@
 	  could also just use init().
 	* (define &rwxp name value) - you could do this or something like it in order to set permissions during the define.  Also
 	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
-	* you still need to figure out how you can get the current owner while inside the access_property/access_methods functions in
-	  MooThing.  You could somehow get them from the frame, but you aren't currently passed the frame (possible but difficult?).
-	* you could have frame->run() set a global variable of the currently running frame, and sets it to NULL when the function exits.
-	  If the variable is not NULL when you run, you can throw a nested run exception or something (i'm not sure if there are any
-	  nested runs atm).  Then you use frame instead of task to eventually get the owner
+	* you could possible pass the frame to resolve(), which can then use it to get the current owner for permissions checking, so
+	  that you no longer need the global variables in frame and task.
+	* you still need to get the owner when you evaluate a method, so that you can elevate the privs.  You can't elevate the frame
+	  when you access the method, because you can't know that it will execute it (it only read it), and you can't set a member of the
+	  object to be the owner through a MooObject virtual function, because anything stored in the object itself will make it
+	  impossible to store that object twice.  A workable solution would be to make a new object when you store a method, and
+	  return that object when you read it (like MooMethod was like) which stores the owner and elevates the perms transparently when
+	  you try to evaluate it, but it would be added memory and complexity, and when you set a method and then get a method, it will
+	  not (eqv? ...) to true
 
       Miscellaneous:
+	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
+	  parent).  If you assign anything to the root environment, it will be saved as part of the root thing (#0).  You can also
+	  access the root (global) env at any time by directly accessing #0.
+	* you can eliminate all call_methods by making all task be frames and have a frame passed to the pseudoserv functions which all
+	  use call_method currently (they would just push the call onto the stack to complete it, or possibly even push a whole chunk
+	  of code to handle the return value as well)
+	* when data is available on an interface, you don't need to know the specific task to call ever, since all tasks would essentially
+	  just be a frame.  You just need to know the code to push onto the frame in order to handle the data request.  This could be
+	  set via an interface method which is passed a lambda pointer, or an object and method name pair or something.
+
 	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
 	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
 	  data, or something.
@@ -125,6 +183,9 @@
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
 	* how can you delete MooThings from the system?
+
+	* should you make all boolean values refer to single constants rather than creating one every time? (like nil now).  We kinda
+	  need a better system for constants (in the C implementation)
 
 	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
 	  that function would then check for a '.something' and send it to channel:command itself
@@ -149,7 +210,12 @@
 	  or perhaps even could you make this a generic format thing of some kind such that the actual control is handled by a higher
 	  level method, object, or task, and the output is returned to the calling function.
 
+	* task.cpp could move to code/
+	* interfaces can become drivers (??)
+
     TODO:
+	* change all dynamic casts to typeid compares + static cast
+
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 	  IS THIS NEEDED ANYMORE??
 

@@ -99,10 +99,10 @@ MooDataFile::MooDataFile(const char *file, int mode, const char *rootname)
 
 	if (mode & MOO_DATA_READ) {
 		if (!(this->doc = xmlReadFile(this->filename, NULL, 0))
-		    || !(this->root = xmlDocGetRootElement(this->doc)) || xmlStrcmp(this->root->name, (xmlChar *) rootname)) {
+		    || !(this->root = xmlDocGetRootElement(this->doc)) || (rootname && this->compare_root(rootname))) {
 			throw MooException("Error opening XML file for reading");
 		}
-		this->current = this->root->children;
+		this->current = this->root;
 	}
 
 	if (mode & MOO_DATA_WRITE) {
@@ -136,6 +136,25 @@ MooDataFile::~MooDataFile()
 		free(this->filename);
 	if (this->doc)
 		xmlFreeDoc(this->doc);
+}
+
+int MooDataFile::root_name(char *buffer, int max)
+{
+	if (strncpy(buffer, (const char *) this->root->name, max))
+		return(0);
+	return(-1);
+}
+
+int MooDataFile::compare_root(const char *rootname)
+{
+	return(xmlStrcmp(this->root->name, (xmlChar *) rootname));
+}
+
+int MooDataFile::child_of_root()
+{
+	if (this->current && this->current->parent && (this->current->parent == this->root))
+		return(1);
+	return(0);
 }
 
 int MooDataFile::read_rewind()

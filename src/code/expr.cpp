@@ -15,14 +15,13 @@
 #include <sdm/code/code.h>
 
 MooObjectType moo_code_expr_obj_type = {
-	&moo_object_obj_type,
 	"expr",
 	typeid(MooCodeExpr).name(),
-	(moo_type_make_t) make_moo_code_expr
+	(moo_type_load_t) load_moo_code_expr
 };
 
 
-MooObject *make_moo_code_expr(MooDataFile *data)
+MooObject *load_moo_code_expr(MooDataFile *data)
 {
 	MooCodeExpr *obj = new MooCodeExpr(-1, -1, 0);
 	if (data)
@@ -91,7 +90,7 @@ const char *MooCodeExpr::get_identifier()
 
 	if (m_type != MCT_IDENTIFIER || !(str = dynamic_cast<MooString *>(m_value)))
 		throw MooException("(%d, %d) Expected identifier", m_line, m_col);
-	return(str->m_str);
+	return(str->get_string());
 }
 
 MooCodeExpr *MooCodeExpr::get_call()
@@ -109,7 +108,7 @@ const char *MooCodeExpr::get_string()
 
 	if (!(str = dynamic_cast<MooString *>(m_value)))
 		return(NULL);
-	return(str->m_str);
+	return(str->get_string());
 }
 
 int MooCodeExpr::check_args(MooCodeExpr *expr, int min, int max)

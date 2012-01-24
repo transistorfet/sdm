@@ -14,10 +14,9 @@
 #include <sdm/objs/hash.h>
 
 struct MooObjectType moo_hash_obj_type = {
-	NULL,
 	"hash",
 	typeid(MooObjectHash).name(),
-	(moo_type_make_t) make_moo_hash
+	(moo_type_load_t) load_moo_hash
 };
 
 static MooObjectHash *hash_methods = new MooObjectHash();
@@ -36,11 +35,20 @@ void release_hash(void)
 	moo_object_deregister_type(&moo_hash_obj_type);
 }
 
-MooObject *make_moo_hash(MooDataFile *data)
+MooObject *load_moo_hash(MooDataFile *data)
 {
-	MooObjectHash *obj = new MooObjectHash();
-	if (data)
+	int id;
+	MooObject *obj;
+
+	if (data->child_of_root()) {
+		obj = new MooObjectHash();
 		obj->read_data(data);
+	}
+	else {
+		id = data->read_integer();
+		if (!(obj = MooMutable::lookup(id)))
+			return(&moo_nil);
+	}
 	return(obj);
 }
 
@@ -51,30 +59,21 @@ MooObjectHash::MooObjectHash(MooObjectHash *parent, int size, int bits) : MooHas
 
 int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 {
-	int res;
 	moo_id_t owner;
 	moo_mode_t mode;
 	MooObject *obj = NULL;
 	char key[STRING_SIZE];
 	char type_name[STRING_SIZE];
-	const MooObjectType *objtype;
 
 	if (!strcmp(type, "entry")) {
 		data->read_attrib_string("type", type_name, STRING_SIZE);
-		if (!(objtype = moo_object_find_type(type_name, NULL))) {
-			moo_status("HASH: Unable to find entry type, %s", type_name);
-			return(-1);
-		}
 		data->read_attrib_string("key", key, STRING_SIZE);
 		owner = data->read_attrib_integer("owner");
 		mode = data->read_attrib_integer("mode");
-		res = data->read_children();
-		if (!(obj = moo_make_object(objtype, res ? data : NULL))) {
+		if ((obj = MooObject::read_object(data, type_name))) {
 			moo_status("HASH: Error loading entry, %s", key);
 			return(-1);
 		}
-		if (res)
-			data->read_parent();
 		this->set(key, obj, owner, mode);
 	}
 	else
@@ -82,11 +81,11 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 	return(MOO_HANDLED);
 }
 
-int MooObjectHash::write_data(MooDataFile *data)
+int MooObjectHash::write_object(MooDataFile *data)
 {
 	MooHashEntry<MooObject *> *cur;
 
-	MooObject::write_data(data);
+	MooMutable::write_object(data);
 	this->reset();
 	while ((cur = this->next_entry())) {
 		data->write_begin_entry("entry");
@@ -223,7 +222,7 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	name = args->get_string(1);
 	obj = args->get(2);
 	res = m_this->set(name, obj);
-	frame->set_return(new MooBoolean(res == 0));
+	frame->set_return((res == 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -239,7 +238,7 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 		throw moo_args_mismatched;
 	name = args->get_string(1);
 	res = m_this->remove(name);
-	frame->set_return(new MooBoolean(res == 0));
+	frame->set_return((res == 0) ? &moo_true : &moo_false);
 	return(0);
 }
 
@@ -337,7 +336,7 @@ static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	if (args->last() != 1)
 		throw moo_args_mismatched;
 	func = args->get(1);
-	frame->set_return(new MooBoolean(B_TRUE));
+	frame->set_return(&moo_true);
 	frame->push_event(new HashEventForeach(0, NULL, m_this, env, func));
 	return(0);
 }

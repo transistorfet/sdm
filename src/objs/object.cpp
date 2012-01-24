@@ -19,13 +19,6 @@
 
 #define TYPE_INIT_SIZE		32
 
-const MooObjectType moo_object_obj_type = {
-	NULL,
-	"object",
-	typeid(MooObject).name(),
-	NULL
-};
-
 extern MooObjectHash *global_env;
 
 static MooHash<const MooObjectType *> *name_type_list = NULL;
@@ -37,7 +30,6 @@ int init_object(void)
 		return(1);
 	name_type_list = new MooHash<const MooObjectType *>(TYPE_INIT_SIZE, MOO_HBF_REPLACE | MOO_HBF_REMOVE);
 	realname_type_list = new MooHash<const MooObjectType *>(TYPE_INIT_SIZE, MOO_HBF_REPLACE | MOO_HBF_REMOVE);
-	moo_object_register_type(&moo_object_obj_type);
 	return(0);
 }
 
@@ -48,6 +40,7 @@ void release_object(void)
 	delete realname_type_list;
 	delete name_type_list;
 	name_type_list = NULL;
+	realname_type_list = NULL;
 }
 
 int moo_object_register_type(const MooObjectType *type)
@@ -64,37 +57,14 @@ int moo_object_deregister_type(const MooObjectType *type)
 	return(0);
 }
 
-const MooObjectType *moo_object_find_type(const char *name, const MooObjectType *base)
+const MooObjectType *moo_object_find_type(const char *name)
 {
-	const MooObjectType *type, *cur;
-
-	if (!(type = name_type_list->get(name)))
-		return(NULL);
-	/// If base is given, then only return this type if it is a subclass of base
-	if (!base)
-		return(type);
-	for (cur = type; cur; cur = cur->m_parent) {
-		if (cur == base)
-			return(type);
-	}
-	return(NULL);
-}
-
-
-MooObject *moo_make_object(const MooObjectType *type, MooDataFile *data)
-{
-	if (!type || !type->m_make)
-		return(NULL);
-	try {
-		return(type->m_make(data));
-	} catch(MooException e) {
-		return(NULL);
-	}
+	return(name_type_list->get(name));
 }
 
 MooObject::MooObject()
 {
-	m_delete = 0;
+	m_bitflags = 0;
 }
 
 #define DEBUG_LIMIT	77
@@ -122,38 +92,10 @@ int MooObject::is_true()
 {
 	MooBoolean *b;
 
+	// TODO change this to a static call??
 	if (!(b = dynamic_cast<MooBoolean *>(this)))
 		return(1);
-	return(b->m_bool != B_FALSE);
-}
-
-int MooObject::read_file(const char *file, const char *type)
-{
-	int res = -1;
-	MooDataFile *data;
-
-	try {
-		data = new MooDataFile(file, MOO_DATA_READ, type);
-		moo_status("Reading %s data from file \"%s\".", type, file);
-		res = this->read_data(data);
-		delete data;
-		return(res);
-	}
-	catch (MooException e) {
-		moo_status("DATA: %s", e.get());
-		return(-1);
-	}
-}
-
-int MooObject::write_file(const char *file, const char *type)
-{
-	MooDataFile *data;
-
-	moo_status("Writing %s data to file \"%s\".", type, file);
-	data = new MooDataFile(file, MOO_DATA_WRITE, type);
-	this->write_data(data);
-	delete data;
-	return(0);
+	return(b->value() != B_FALSE);
 }
 
 int MooObject::read_data(MooDataFile *data)
@@ -186,6 +128,27 @@ int MooObject::read_data(MooDataFile *data)
 	return(error);
 }
 
+MooObject *MooObject::read_object(MooDataFile *data, const char *type)
+{
+	int res;
+	MooObject *obj = NULL;
+	const MooObjectType *objtype;
+
+	if (!(objtype = moo_object_find_type(type)) || !objtype->m_load) {
+		moo_status("OBJ: No such type, %s", type);
+		return(NULL);
+	}
+	res = data->read_children();
+	try {
+		obj = objtype->m_load(data);
+	} catch(MooException e) {
+		moo_status("OBJ: Error loading object of type %s", type);
+	}
+	if (res)
+		data->read_parent();
+	return(obj);
+}
+
 MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *value, MooObject **parent)
 {
 	MooObject *obj;
@@ -215,7 +178,7 @@ MooObject *MooObject::resolve(const char *name, MooObjectHash *env, MooObject *v
 	}
 	else {
 		// TODO should we modify this so that we never do a global_env lookup and instead rely on the env being linked to global_env
-		if (!(obj = MooThing::reference(buffer))
+		if (!(obj = MooMutable::reference(buffer))
 		    && !(obj = env->get(buffer))
 		    && !(obj = global_env->get(buffer)))
 			return(NULL);

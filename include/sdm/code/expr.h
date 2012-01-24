@@ -56,7 +56,7 @@ class MooCodeExpr : public MooObject {
 
 extern MooObjectType moo_code_expr_obj_type;
 
-MooObject *make_moo_code_expr(MooDataFile *data);
+MooObject *load_moo_code_expr(MooDataFile *data);
 
 #endif
 

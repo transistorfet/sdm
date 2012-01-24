@@ -41,7 +41,7 @@ class MooListener : public MooTask {
 
 extern MooObjectType moo_listener_obj_type;
 
-MooObject *make_moo_listener(MooDataFile *data);
+MooObject *load_moo_listener(MooDataFile *data);
 
 #endif
 

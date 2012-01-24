@@ -10,15 +10,18 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/boolean.h>
 
+MooBoolean moo_true = MooBoolean(B_TRUE);
+MooBoolean moo_false = MooBoolean(B_FALSE);
+
 struct MooObjectType moo_boolean_obj_type = {
-	NULL,
 	"boolean",
 	typeid(MooBoolean).name(),
-	(moo_type_make_t) make_moo_boolean
+	(moo_type_load_t) load_moo_boolean
 };
 
-MooObject *make_moo_boolean(MooDataFile *data)
+MooObject *load_moo_boolean(MooDataFile *data)
 {
+	// TODO this needs to be changed
 	MooBoolean *obj = new MooBoolean(B_FALSE);
 	if (data)
 		obj->read_data(data);

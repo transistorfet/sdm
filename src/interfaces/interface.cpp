@@ -24,10 +24,9 @@
 static MooArray<MooInterface *> *interface_list = NULL;
 
 MooObjectType moo_interface_obj_type = {
-	NULL,
 	"interface",
 	typeid(MooInterface).name(),
-	(moo_type_make_t) NULL
+	(moo_type_load_t) NULL
 };
 
 int init_interface(void)

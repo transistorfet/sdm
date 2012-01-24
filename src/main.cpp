@@ -17,7 +17,6 @@
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/objs/config.h>
 #include <sdm/objs/array.h>
 #include <sdm/objs/hash.h>
 #include <sdm/objs/thing.h>
@@ -69,7 +68,7 @@ int init_moo(void)
 		// TODO create a new task and execute (#0:boot)
 		// TODO have #0:boot then call all this other shit.  It could be a compiled function and still call some other function
 		// TODO #0:boot must create the listener task)
-		load_global_config();
+		//load_global_config();
 
 		// TODO temporary
 		{

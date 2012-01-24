@@ -12,13 +12,12 @@
 #include <sdm/objs/string.h>
 
 MooObjectType moo_string_obj_type = {
-	NULL,
 	"string",
 	typeid(MooString).name(),
-	(moo_type_make_t) make_moo_string
+	(moo_type_load_t) load_moo_string
 };
 
-MooObject *make_moo_string(MooDataFile *data)
+MooObject *load_moo_string(MooDataFile *data)
 {
 	MooString *obj = new MooString("");
 	if (data)

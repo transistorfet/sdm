@@ -20,13 +20,13 @@ typedef enum {
 //	have to create a new number and return it (we wouldn't allow any it, even if the type doesn't have to change, in order to keep
 //	behaviour consistent)
 class MooNumber : public MooObject {
-    public:
 	MooNumberFormatT m_format;
 	union {
 		long int m_int;
 		double m_float;
 	};
 
+    public:
 	MooNumber(long int num = 0) { m_format = INT; m_int = num; }
 	MooNumber(double num) { m_format = FLOAT; m_float = num; }
 	MooNumber(const char *str);
@@ -103,7 +103,7 @@ class MooNumber : public MooObject {
 
 extern MooObjectType moo_number_obj_type;
 
-MooObject *make_moo_number(MooDataFile *data);
+MooObject *load_moo_number(MooDataFile *data);
 
 #endif
 

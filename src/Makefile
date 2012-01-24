@@ -26,14 +26,13 @@ OBJS =	colours.o	\
 	interfaces/tcp.o	\
 	objs/array.o	\
 	objs/boolean.o	\
-	objs/config.o	\
 	objs/hash.o	\
+	objs/mutable.o	\
 	objs/nil.o	\
 	objs/number.o	\
 	objs/object.o	\
 	objs/string.o	\
 	objs/thing.o	\
-	tasks/code.o	\
 	tasks/init.o	\
 	tasks/listener.o	\
 	tasks/task.o	\
@@ -77,137 +76,140 @@ exception.o: exception.cpp ../include/sdm/exception.h
 main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/objs/thing.h \
-  ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/commands.h \
-  ../include/sdm/objs/config.h
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/pseudoserv.h \
+  ../include/sdm/objs/thing.h ../include/sdm/tasks/irc/msg.h \
+  ../include/sdm/tasks/irc/commands.h
 
 code/code.o: code/code.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/mutable.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/event.o: code/event.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/thing.h \
-  ../include/sdm/objs/array.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/gc.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/thing.h ../include/sdm/objs/array.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/expr.o: code/expr.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/mutable.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/frame.o: code/frame.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/array.h \
-  ../include/sdm/tasks/task.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/gc.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/tasks/task.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/lambda.o: code/lambda.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 code/parser.o: code/parser.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h \
   ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
-  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
-
-code/sync.o: code/sync.cpp ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
   ../include/sdm/code/sync.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
+
+code/sync.o: code/sync.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 funcs/basic.o: funcs/basic.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/code/code.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/objs/hash.h \
-  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
-  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
-  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
-  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
-  ../include/sdm/tasks/task.h ../include/sdm/objs/thing.h
-
-funcs/func.o: funcs/func.cpp ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/array.h \
   ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
   ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
   ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
   ../include/sdm/code/sync.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/code/lambda.h ../include/sdm/tasks/task.h \
+  ../include/sdm/objs/thing.h
 
-funcs/users.o: funcs/users.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
+funcs/func.o: funcs/func.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
   ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
   ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
-  ../include/sdm/tasks/task.h ../include/sdm/objs/thing.h \
-  ../include/sdm/funcs/users.h
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
+
+funcs/users.o: funcs/users.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h ../include/sdm/tasks/task.h \
+  ../include/sdm/objs/thing.h ../include/sdm/funcs/users.h
 
 interfaces/interface.o: interfaces/interface.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/tasks/task.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
-  ../include/sdm/objs/array.h ../include/sdm/interfaces/interface.h
+  ../include/sdm/objs/array.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/interfaces/interface.h
 
 interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
@@ -218,34 +220,34 @@ interfaces/tcp.o: interfaces/tcp.cpp ../include/sdm/globals.h \
 objs/array.o: objs/array.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 objs/boolean.o: objs/boolean.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/boolean.h
 
-objs/config.o: objs/config.cpp ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/config.h \
-  ../include/sdm/tasks/listener.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/interfaces/tcp.h
-
 objs/hash.o: objs/hash.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h ../include/sdm/data.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
+
+objs/mutable.o: objs/mutable.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/mutable.h
 
 objs/nil.o: objs/nil.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
@@ -258,14 +260,14 @@ objs/number.o: objs/number.cpp ../include/sdm/globals.h \
 objs/object.o: objs/object.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/objs/boolean.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/tasks/task.h \
-  ../include/sdm/objs/thing.h ../include/sdm/objs/array.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/nil.h \
-  ../include/sdm/objs/number.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/tasks/task.h ../include/sdm/objs/thing.h \
+  ../include/sdm/objs/array.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/number.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 objs/string.o: objs/string.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
@@ -275,24 +277,11 @@ objs/thing.o: objs/thing.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/tasks/task.h ../include/sdm/objs/object.h \
   ../include/sdm/gc.h ../include/sdm/objs/nil.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/array.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/objs/thing.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
-  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
-
-tasks/code.o: tasks/code.cpp ../include/sdm/data.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/objs/thing.h \
-  ../include/sdm/objs/array.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/tasks/code.h ../include/sdm/code/code.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
+  ../include/sdm/objs/thing.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/code/expr.h \
   ../include/sdm/code/sync.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h
@@ -300,49 +289,49 @@ tasks/code.o: tasks/code.cpp ../include/sdm/data.h \
 tasks/init.o: tasks/init.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/tasks/init.h
+  ../include/sdm/gc.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/tasks/init.h
 
 tasks/listener.o: tasks/listener.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/interfaces/tcp.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/tasks/listener.h
+  ../include/sdm/gc.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/interfaces/tcp.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/tasks/listener.h
 
 tasks/task.o: tasks/task.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/tasks/task.h ../include/sdm/interfaces/interface.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/hash.h \
-  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
-  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
-  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
-  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
-  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
-  ../include/sdm/code/lambda.h ../include/sdm/tasks/init.h \
-  ../include/sdm/interfaces/tcp.h
-
-tasks/irc/msg.o: tasks/irc/msg.cpp ../include/sdm/globals.h \
-  ../include/sdm/exception.h ../include/sdm/objs/hash.h \
-  ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/irc/commands.h \
-  ../include/sdm/tasks/irc/msg.h
-
-tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp ../include/sdm/colours.h \
-  ../include/sdm/globals.h ../include/sdm/exception.h \
-  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/hash.h \
-  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/tasks/task.h \
+  ../include/sdm/interfaces/interface.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/funcs/func.h \
   ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
-  ../include/sdm/interfaces/interface.h ../include/sdm/tasks/task.h \
-  ../include/sdm/interfaces/tcp.h ../include/sdm/tasks/code.h \
+  ../include/sdm/tasks/init.h ../include/sdm/interfaces/tcp.h
+
+tasks/irc/msg.o: tasks/irc/msg.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/hash.h \
+  ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/tcp.h \
+  ../include/sdm/tasks/irc/commands.h ../include/sdm/tasks/irc/msg.h
+
+tasks/irc/pseudoserv.o: tasks/irc/pseudoserv.cpp ../include/sdm/colours.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/funcs/func.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h ../include/sdm/interfaces/interface.h \
+  ../include/sdm/tasks/task.h ../include/sdm/interfaces/tcp.h \
   ../include/sdm/tasks/irc/msg.h ../include/sdm/tasks/irc/commands.h \
   ../include/sdm/tasks/irc/pseudoserv.h ../include/sdm/objs/thing.h \
   ../include/sdm/funcs/users.h
