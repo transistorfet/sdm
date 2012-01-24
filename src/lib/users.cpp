@@ -11,10 +11,9 @@
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
-#include <sdm/tasks/task.h>
 #include <sdm/objs/thing.h>
 
-#include <sdm/funcs/users.h>
+#include <sdm/lib/users.h>
 
 
 MooThing *user_make_guest(const char *name)
@@ -177,7 +176,7 @@ int moo_load_user_methods(MooObjectHash *env)
 	env->set("N/EMOTE", new MooNumber((long int) TNT_EMOTE));
 	env->set("N/QUIT", new MooNumber((long int) TNT_QUIT));
 
-	env->set("%user_notify", new MooFunc(user_notify));
+	env->set("%user_notify", new MooFuncPtr(user_notify));
 	return(0);
 }
 

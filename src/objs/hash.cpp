@@ -343,12 +343,12 @@ static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 
 void moo_load_hash_methods(MooObjectHash *env)
 {
-	env->set("get", new MooFunc(hash_get));
-	env->set("set", new MooFunc(hash_set));
-	env->set("remove", new MooFunc(hash_remove));
-	env->set("keys", new MooFunc(hash_keys));
-	env->set("->array", new MooFunc(hash_to_array));
-	env->set("foreach", new MooFunc(hash_foreach));
+	env->set("get", new MooFuncPtr(hash_get));
+	env->set("set", new MooFuncPtr(hash_set));
+	env->set("remove", new MooFuncPtr(hash_remove));
+	env->set("keys", new MooFuncPtr(hash_keys));
+	env->set("->array", new MooFuncPtr(hash_to_array));
+	env->set("foreach", new MooFuncPtr(hash_foreach));
 }
 
 

@@ -9,7 +9,7 @@
 #include <stdarg.h>
 
 #include <sdm/globals.h>
-#include <sdm/tasks/task.h>
+#include <sdm/code/task.h>
 #include <sdm/objs/object.h>
 
 #define IO_READY_READ			0x0001

@@ -16,8 +16,7 @@
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-
-#include <sdm/funcs/func.h>
+#include <sdm/objs/funcptr.h>
 
 #include <sdm/code/expr.h>
 #include <sdm/code/sync.h>
@@ -25,6 +24,7 @@
 #include <sdm/code/frame.h>
 #include <sdm/code/parser.h>
 #include <sdm/code/lambda.h>
+#include <sdm/code/task.h>
 
 extern MooObjectHash *global_env;
 

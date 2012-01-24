@@ -3,12 +3,10 @@
  * Description:		Message Command Numbers
  */
 
-#ifndef SDM_TASKS_IRC_COMMANDS_H
-#define SDM_TASKS_IRC_COMMANDS_H
+#ifndef SDM_LIB_IRC_COMMANDS_H
+#define SDM_LIB_IRC_COMMANDS_H
 
-namespace MooIRC {
-
-class MsgCommand {
+class IRCMsgCommand {
     public:
 	const char *m_name;
 	int m_cmd;
@@ -16,7 +14,7 @@ class MsgCommand {
 	int m_min;
 	int m_max;
 
-	MsgCommand(const char *name, int cmd, int usetext, int min, int max)
+	IRCMsgCommand(const char *name, int cmd, int usetext, int min, int max)
 	{
 		m_name = name;
 		m_cmd = cmd;
@@ -216,8 +214,6 @@ class IRCException : public MooException {
 
 extern IRCException irc_erroneusnickname;
 extern IRCException irc_nicknameinuse;
-
-}
 
 #endif
 

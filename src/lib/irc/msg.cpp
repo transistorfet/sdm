@@ -14,25 +14,24 @@
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/interface.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/tasks/irc/commands.h>
-#include <sdm/tasks/irc/msg.h>
-
-using namespace MooIRC;
+#include <sdm/lib/irc/commands.h>
+#include <sdm/lib/irc/msg.h>
 
 MooException irc_unmarshal_error("Malformed message received");
-static MooHash<MsgCommand *> *cmd_list = NULL;
 
-Msg::Msg()
+static MooHash<IRCMsgCommand *> *cmd_list = NULL;
+
+IRCMsg::IRCMsg()
 {
 	this->clear();
 }
 
-Msg::~Msg()
+IRCMsg::~IRCMsg()
 {
 
 }
 
-void Msg::clear()
+void IRCMsg::clear()
 {
 	m_nick = NULL;
 	m_host = NULL;
@@ -46,14 +45,14 @@ void Msg::clear()
 	memset(m_params, '\0', sizeof(char *) * IRC_MAX_ARGS);
 }
 
-int Msg::need_more_params()
+int IRCMsg::need_more_params()
 {
 	if (m_cmd && m_numparams < m_cmd->m_min)
 		return(1);
 	return(0);
 }
 
-int Msg::send(MooTCP *inter, const char *fmt, ...)
+int IRCMsg::send(MooTCP *inter, const char *fmt, ...)
 {
 	va_list va;
 	char buffer[STRING_SIZE];
@@ -66,7 +65,7 @@ int Msg::send(MooTCP *inter, const char *fmt, ...)
 	return(inter->send(buffer));
 }
 
-int Msg::receive(MooTCP *inter)
+int IRCMsg::receive(MooTCP *inter)
 {
 	int size;
 
@@ -78,11 +77,11 @@ int Msg::receive(MooTCP *inter)
 	return(0);
 }
 
-Msg *Msg::read(MooTCP *inter)
+IRCMsg *IRCMsg::read(MooTCP *inter)
 {
-	Msg *msg;
+	IRCMsg *msg;
 
-	msg = new Msg();
+	msg = new IRCMsg();
 	if (msg->receive(inter)) {
 		delete msg;
 		return(NULL);
@@ -91,7 +90,7 @@ Msg *Msg::read(MooTCP *inter)
 }
 
 
-int Msg::unmarshal(char *str, int size)
+int IRCMsg::unmarshal(char *str, int size)
 {
 	int i = 0;
 
@@ -153,8 +152,8 @@ int Msg::unmarshal(char *str, int size)
 
 inline void irc_add_command(const char *name, int cmd, int usetext, int min, int max)
 {
-	MsgCommand *ptr;
-	ptr = new MsgCommand(name, cmd, usetext, min, max);
+	IRCMsgCommand *ptr;
+	ptr = new IRCMsgCommand(name, cmd, usetext, min, max);
 	cmd_list->set(name, ptr);
 }
 
@@ -162,7 +161,7 @@ int init_irc_msg()
 {
 	if (cmd_list)
 		return(1);
-	cmd_list = new MooHash<MsgCommand *>(64, MOO_HBF_DELETEALL);
+	cmd_list = new MooHash<IRCMsgCommand *>(64, MOO_HBF_DELETEALL);
 	irc_add_command("PASS", IRC_MSG_PASS, 0, 1, 1);
 	irc_add_command("NICK", IRC_MSG_NICK, 0, 0, 1);
 	irc_add_command("USER", IRC_MSG_USER, 1, 4, 4);

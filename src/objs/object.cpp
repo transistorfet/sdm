@@ -11,8 +11,7 @@
 #include <sdm/objs/object.h>
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/string.h>
-#include <sdm/funcs/func.h>
-#include <sdm/tasks/task.h>
+#include <sdm/objs/funcptr.h>
 #include <sdm/objs/thing.h>
 
 #include <sdm/code/code.h>

@@ -12,7 +12,6 @@
 #include <sdm/globals.h>
 
 #include <sdm/code/code.h>
-#include <sdm/tasks/task.h>
 #include <sdm/objs/thing.h>
 
 
@@ -774,58 +773,58 @@ static int basic_time(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 
 int moo_load_basic_funcs(MooObjectHash *env)
 {
-	env->set("print", new MooFunc(basic_print));
-	env->set("debug", new MooFunc(basic_debug));
-	env->set("printstack", new MooFunc(basic_printstack));
+	env->set("print", new MooFuncPtr(basic_print));
+	env->set("debug", new MooFuncPtr(basic_debug));
+	env->set("printstack", new MooFuncPtr(basic_printstack));
 
-	env->set("+", new MooFunc(basic_add));
-	env->set("-", new MooFunc(basic_subtract));
-	env->set("*", new MooFunc(basic_multiply));
-	env->set("/", new MooFunc(basic_divide));
+	env->set("+", new MooFuncPtr(basic_add));
+	env->set("-", new MooFuncPtr(basic_subtract));
+	env->set("*", new MooFuncPtr(basic_multiply));
+	env->set("/", new MooFuncPtr(basic_divide));
 
-	env->set("null?", new MooFunc(basic_null));
-	env->set("eqv?", new MooFunc(basic_eqv));
-	env->set("!eqv?", new MooFunc(basic_not_eqv));
-	env->set("equal?", new MooFunc(basic_equal));
-	env->set("=", new MooFunc(basic_num_equal));
-	env->set("!=", new MooFunc(basic_num_not_equal));
-	env->set(">", new MooFunc(basic_gt));
-	env->set(">=", new MooFunc(basic_ge));
-	env->set("<", new MooFunc(basic_lt));
-	env->set("<=", new MooFunc(basic_le));
+	env->set("null?", new MooFuncPtr(basic_null));
+	env->set("eqv?", new MooFuncPtr(basic_eqv));
+	env->set("!eqv?", new MooFuncPtr(basic_not_eqv));
+	env->set("equal?", new MooFuncPtr(basic_equal));
+	env->set("=", new MooFuncPtr(basic_num_equal));
+	env->set("!=", new MooFuncPtr(basic_num_not_equal));
+	env->set(">", new MooFuncPtr(basic_gt));
+	env->set(">=", new MooFuncPtr(basic_ge));
+	env->set("<", new MooFuncPtr(basic_lt));
+	env->set("<=", new MooFuncPtr(basic_le));
 
-	env->set("not", new MooFunc(basic_not));
+	env->set("not", new MooFuncPtr(basic_not));
 
-	env->set("expand", new MooFunc(basic_expand));
-	env->set("strlen", new MooFunc(basic_strlen));
-	env->set("concat", new MooFunc(basic_concat));
-	env->set("chop", new MooFunc(basic_chop));
-	env->set("substr", new MooFunc(basic_substr));
-	env->set("ltrim", new MooFunc(basic_ltrim));
-	env->set("parse-words", new MooFunc(basic_parse_words));
-	env->set("remove-word", new MooFunc(basic_remove_word));
+	env->set("expand", new MooFuncPtr(basic_expand));
+	env->set("strlen", new MooFuncPtr(basic_strlen));
+	env->set("concat", new MooFuncPtr(basic_concat));
+	env->set("chop", new MooFuncPtr(basic_chop));
+	env->set("substr", new MooFuncPtr(basic_substr));
+	env->set("ltrim", new MooFuncPtr(basic_ltrim));
+	env->set("parse-words", new MooFuncPtr(basic_parse_words));
+	env->set("remove-word", new MooFuncPtr(basic_remove_word));
 
-	env->set("type", new MooFunc(basic_type));
-	env->set("boolean?", new MooFunc(basic_boolean_q));
-	env->set("number?", new MooFunc(basic_number_q));
-	env->set("string?", new MooFunc(basic_string_q));
-	env->set("array?", new MooFunc(basic_array_q));
-	env->set("hash?", new MooFunc(basic_hash_q));
-	env->set("thing?", new MooFunc(basic_thing_q));
-	env->set("lambda?", new MooFunc(basic_lambda_q));
+	env->set("type", new MooFuncPtr(basic_type));
+	env->set("boolean?", new MooFuncPtr(basic_boolean_q));
+	env->set("number?", new MooFuncPtr(basic_number_q));
+	env->set("string?", new MooFuncPtr(basic_string_q));
+	env->set("array?", new MooFuncPtr(basic_array_q));
+	env->set("hash?", new MooFuncPtr(basic_hash_q));
+	env->set("thing?", new MooFuncPtr(basic_thing_q));
+	env->set("lambda?", new MooFuncPtr(basic_lambda_q));
 
-	env->set("array", new MooFunc(basic_array));
-	env->set("hash", new MooFunc(basic_hash));
+	env->set("array", new MooFuncPtr(basic_array));
+	env->set("hash", new MooFuncPtr(basic_hash));
 
-	env->set("eval", new MooFunc(basic_eval));
-	env->set("load", new MooFunc(basic_load));
+	env->set("eval", new MooFuncPtr(basic_eval));
+	env->set("load", new MooFuncPtr(basic_load));
 
-	env->set("get-property", new MooFunc(basic_get_property));
-	env->set("get-method", new MooFunc(basic_get_method));
-	env->set("throw", new MooFunc(basic_throw));
-	env->set("return", new MooFunc(basic_return));
-	env->set("sleep", new MooFunc(basic_sleep));
-	env->set("time", new MooFunc(basic_time));
+	env->set("get-property", new MooFuncPtr(basic_get_property));
+	env->set("get-method", new MooFuncPtr(basic_get_method));
+	env->set("throw", new MooFuncPtr(basic_throw));
+	env->set("return", new MooFuncPtr(basic_return));
+	env->set("sleep", new MooFuncPtr(basic_sleep));
+	env->set("time", new MooFuncPtr(basic_time));
 
 /*
 	Possible Future Primatives:

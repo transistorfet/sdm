@@ -1,10 +1,10 @@
 /*
- * Object Name:	func.h
- * Description:	Moo Function
+ * Object Name:	funcptr.h
+ * Description:	Moo Function Pointer
  */
 
-#ifndef _SDM_FUNCS_FUNC_H
-#define _SDM_FUNCS_FUNC_H
+#ifndef _SDM_OBJS_FUNCPTR_H
+#define _SDM_OBJS_FUNCPTR_H
 
 #include <stdarg.h>
 
@@ -12,14 +12,14 @@
 
 typedef int (*moo_func_t)(class MooCodeFrame *frame, class MooObjectHash *env, class MooObjectArray *args);
 
-class MooFunc : public MooObject {
+class MooFuncPtr : public MooObject {
     protected:
 	std::string *m_name;
 	moo_func_t m_func;
 
     public:
-	MooFunc(moo_func_t func);
-	virtual ~MooFunc();
+	MooFuncPtr(moo_func_t func);
+	virtual ~MooFuncPtr();
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
@@ -29,9 +29,9 @@ class MooFunc : public MooObject {
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args);
 };
 
-extern MooObjectType moo_func_obj_type;
+extern MooObjectType moo_func_ptr_obj_type;
 
-MooObject *load_moo_func(MooDataFile *data);
+MooObject *load_moo_func_ptr(MooDataFile *data);
 
 #endif
 

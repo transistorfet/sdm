@@ -211,7 +211,6 @@
 	  level method, object, or task, and the output is returned to the calling function.
 
 	* task.cpp could move to code/
-	* interfaces can become drivers (??)
 
     TODO:
 	* change all dynamic casts to typeid compares + static cast

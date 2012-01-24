@@ -409,19 +409,19 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 
 void moo_load_array_methods(MooObjectHash *env)
 {
-	env->set("get", new MooFunc(array_get));
-	env->set("set", new MooFunc(array_set));
-	env->set("remove", new MooFunc(array_remove));
-	env->set("push", new MooFunc(array_push));
-	env->set("pop", new MooFunc(array_pop));
-	env->set("shift", new MooFunc(array_shift));
-	env->set("unshift", new MooFunc(array_unshift));
-	env->set("insert", new MooFunc(array_insert));
-	env->set("splice", new MooFunc(array_splice));
+	env->set("get", new MooFuncPtr(array_get));
+	env->set("set", new MooFuncPtr(array_set));
+	env->set("remove", new MooFuncPtr(array_remove));
+	env->set("push", new MooFuncPtr(array_push));
+	env->set("pop", new MooFuncPtr(array_pop));
+	env->set("shift", new MooFuncPtr(array_shift));
+	env->set("unshift", new MooFuncPtr(array_unshift));
+	env->set("insert", new MooFuncPtr(array_insert));
+	env->set("splice", new MooFuncPtr(array_splice));
 
-	env->set("search", new MooFunc(array_search));
-	env->set("join", new MooFunc(array_join));
+	env->set("search", new MooFuncPtr(array_search));
+	env->set("join", new MooFuncPtr(array_join));
 
-	env->set("foreach", new MooFunc(array_foreach));
+	env->set("foreach", new MooFuncPtr(array_foreach));
 }
 

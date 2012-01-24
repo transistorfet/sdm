@@ -7,7 +7,6 @@
 
 #include <sdm/data.h>
 #include <sdm/globals.h>
-#include <sdm/tasks/task.h>
 
 #include <sdm/objs/nil.h>
 #include <sdm/objs/hash.h>
@@ -16,7 +15,7 @@
 #include <sdm/objs/mutable.h>
 #include <sdm/objs/number.h>
 #include <sdm/objs/string.h>
-#include <sdm/funcs/func.h>
+#include <sdm/objs/funcptr.h>
 #include <sdm/objs/thing.h>
 
 #include <sdm/code/code.h>
@@ -590,15 +589,15 @@ void moo_load_thing_methods(MooObjectHash *env)
 {
 	// TODO this is wrong because it will *effectively* add these methods to all things without setting permissions for them
 	// 	which i *think* will make them all (specifically %save_all) executable by anyone
-	env->set("%clone", new MooFunc(thing_clone));
-	env->set("%load", new MooFunc(thing_load));
-	env->set("%save", new MooFunc(thing_save));
-	env->set("%save_all", new MooFunc(thing_save_all));
-	env->set("owner", new MooFunc(thing_owner));
-	env->set("mode", new MooFunc(thing_mode));
-	env->set("chmod", new MooFunc(thing_chmod));
-	env->set("chown", new MooFunc(thing_chown));
-	//env->set("%command", new MooFunc(parse_command));
+	env->set("%clone", new MooFuncPtr(thing_clone));
+	env->set("%load", new MooFuncPtr(thing_load));
+	env->set("%save", new MooFuncPtr(thing_save));
+	env->set("%save_all", new MooFuncPtr(thing_save_all));
+	env->set("owner", new MooFuncPtr(thing_owner));
+	env->set("mode", new MooFuncPtr(thing_mode));
+	env->set("chmod", new MooFuncPtr(thing_chmod));
+	env->set("chown", new MooFuncPtr(thing_chown));
+	//env->set("%command", new MooFuncPtr(parse_command));
 }
 
 

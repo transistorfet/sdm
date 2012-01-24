@@ -1,27 +1,25 @@
 /*
- * Name:	pseudo.h
+ * Name:	pseudoserv.h
  * Description:	IRC PseudoServer Handling
  */
 
-#ifndef _SDM_INTERFACE_IRC_PSEUDO_H
-#define _SDM_INTERFACE_IRC_PSEUDO_H
+#ifndef _SDM_LIB_IRC_PSEUDO_H
+#define _SDM_LIB_IRC_PSEUDO_H
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/tasks/task.h>
+#include <sdm/code/task.h>
 
-#include <sdm/tasks/irc/msg.h>
+#include <sdm/lib/irc/msg.h>
 
 class MooChannel;
-
-namespace MooIRC {
 
 #define IRC_BF_WELCOMED		0x0001
 #define IRC_BF_RECEIVED_USER	0x0002
 
-class PseudoServ : public MooTask {
+class PseudoServ {
     protected:
 	int m_bits;
 	std::string *m_nick;
@@ -33,13 +31,6 @@ class PseudoServ : public MooTask {
 	PseudoServ();
 	~PseudoServ();
 
-	int read_entry(const char *type, MooDataFile *data);
-	int write_data(MooDataFile *data);
-
-	int initialize();
-	int idle();
-	int release();
-
 	int notify(int type, MooThing *thing, MooThing *channel, const char *str);
 
 	int handle(MooInterface *inter, int ready);
@@ -48,7 +39,7 @@ class PseudoServ : public MooTask {
 
 	int purge(MooThing *user);
 
-	int dispatch(Msg *msg);
+	int dispatch(IRCMsg *msg);
 
     protected:
 	int welcomed() { return(m_bits & IRC_BF_WELCOMED); }
@@ -65,18 +56,11 @@ class PseudoServ : public MooTask {
 	int send_names(const char *name);
 	int send_who(const char *mask);
 	int send_list(const char *name);
-	int process_ctcp(Msg *msg, MooThing *channel);
+	int process_ctcp(IRCMsg *msg, MooThing *channel);
 };
-
-}
-
-extern MooObjectType moo_irc_pseudoserv_obj_type;
 
 int init_irc_pseudoserv(void);
 void release_irc_pseudoserv(void);
-MooObject *load_moo_irc_pseudoserv(MooDataFile *data);
-
-int irc_write_attrib(int type, char *buffer, int max);
 
 #endif
 

@@ -9,19 +9,17 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/interfaces/tcp.h>
-#include <sdm/tasks/irc/commands.h>
-
-namespace MooIRC {
+#include <sdm/lib/irc/commands.h>
 
 #define IRC_MAX_ARGS		14
 #define IRC_MAX_MSG		512
 
-class Msg {
+class IRCMsg {
     public:
 	char *m_nick;
 	char *m_host;
 	char *m_cmdtext;
-	MsgCommand *m_cmd;
+	IRCMsgCommand *m_cmd;
 	char *m_params[IRC_MAX_ARGS];
 	int m_numparams;
 	char *m_last;
@@ -29,8 +27,8 @@ class Msg {
 	char m_buffer[IRC_MAX_MSG];
 
     public:
-	Msg();
-	virtual ~Msg();
+	IRCMsg();
+	virtual ~IRCMsg();
 	void clear();
 
 	int cmd() { if (m_cmd) return(m_cmd->m_cmd); return(IRC_ERR_UNKNOWNCOMMAND); }
@@ -40,17 +38,13 @@ class Msg {
 	int send(MooTCP *inter);
 	int receive(MooTCP *inter);
 
-	static Msg *read(MooTCP *inter);
+	static IRCMsg *read(MooTCP *inter);
 	static int send(MooTCP *inter, const char *fmt, ...);
 
     protected:
 	int marshal();
 	int unmarshal(char *str, int size);
 };
-
-int init_irc_msg();
-
-}
 
 #endif
 

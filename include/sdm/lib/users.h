@@ -3,8 +3,8 @@
  * Description:	User Methods
  */
 
-#ifndef _SDM_FUNCS_USERS_H
-#define _SDM_FUNCS_USERS_H
+#ifndef _SDM_LIB_USERS_H
+#define _SDM_LIB_USERS_H
 
 #include <string>
 #include <stdio.h>
