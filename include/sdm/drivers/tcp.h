@@ -1,10 +1,10 @@
 /*
  * Header Name:	tcp.h
- * Description:	TCP Network Interface Manager Header
+ * Description:	TCP Driver Header
  */
 
-#ifndef _SDM_INTERFACES_TCP_H
-#define _SDM_INTERFACES_TCP_H
+#ifndef _SDM_DRIVERS_TCP_H
+#define _SDM_DRIVERS_TCP_H
 
 #include <string>
 #include <stdarg.h>
@@ -13,17 +13,13 @@
 
 #include <sdm/data.h>
 #include <sdm/objs/object.h>
-#include <sdm/interfaces/interface.h>
-
-#define SDM_TCP_CONNECT		1
-#define SDM_TCP_LISTEN		2
-#define SDM_TCP_ACCEPT		3
+#include <sdm/drivers/driver.h>
 
 #ifndef TCP_READ_BUFFER
 #define TCP_READ_BUFFER		512
 #endif
 
-class MooTCP : public MooInterface {
+class MooTCP : public MooDriver {
     protected:
 	int m_read_pos;
 	int m_read_length;
@@ -38,8 +34,6 @@ class MooTCP : public MooInterface {
 	virtual int write_data(MooDataFile *data);
 
 	int connect(const char *addr, int port);
-	int listen(int port);
-	int accept(MooTCP *inter);
 	void disconnect();
 	const char *host() { if (!m_host) return(NULL); return(m_host->c_str()); }
 

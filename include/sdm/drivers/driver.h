@@ -1,10 +1,10 @@
 /*
- * Header Name:	interface.h
- * Description:	Interface Header
+ * Header Name:	driver.h
+ * Description:	Driver Header
  */
 
-#ifndef _SDM_INTERFACES_INTERFACE_H
-#define _SDM_INTERFACES_INTERFACE_H
+#ifndef _SDM_DRIVERS_DRIVER_H
+#define _SDM_DRIVERS_DRIVER_H
 
 #include <stdarg.h>
 
@@ -19,7 +19,7 @@
 
 #define SDM_IBF_RELEASING		0x1000
 
-class MooInterface : public MooObject {
+class MooDriver : public MooObject {
     protected:
 	int m_bits;
 	int m_rfd;
@@ -40,21 +40,19 @@ class MooInterface : public MooObject {
 	void clear_state() { m_bits &= ~IO_STATE; }
 
     public:
-	MooInterface();
-	~MooInterface();
+	MooDriver();
+	~MooDriver();
 	void set_task(MooTask *task) { m_task = task; }
 	int ready() { return(m_bits & IO_STATE); }
 
-	virtual int read(char *data, int len) = 0;
-	virtual int write(const char *data) = 0;
+	virtual int read(char *data, int len) { return(0); }
+	virtual int write(const char *data) { return(0); }
 
 	static int wait(float t);
 };
 
-extern MooObjectType moo_interface_obj_type;
-
-int init_interface(void);
-void release_interface(void);
+int init_driver(void);
+void release_driver(void);
 
 #endif
 

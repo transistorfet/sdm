@@ -20,7 +20,7 @@ OBJS =	colours.o	\
 	code/parser.o	\
 	code/sync.o	\
 	code/task.o	\
-	drivers/interface.o	\
+	drivers/driver.o	\
 	drivers/tcp.o	\
 	lib/basic.o	\
 	lib/users.o	\
@@ -81,7 +81,8 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
-  ../include/sdm/code/task.h ../include/sdm/objs/thing.h \
+  ../include/sdm/code/task.h ../include/sdm/drivers/driver.h \
+  ../include/sdm/drivers/tcp.h ../include/sdm/objs/thing.h \
   ../include/sdm/lib/irc/pseudoserv.h ../include/sdm/lib/irc/msg.h \
   ../include/sdm/lib/irc/commands.h
 
@@ -173,23 +174,25 @@ code/sync.o: code/sync.cpp ../include/sdm/globals.h \
 code/task.o: code/task.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/objs/mutable.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/drivers/driver.h \
+  ../include/sdm/code/task.h ../include/sdm/code/code.h \
   ../include/sdm/objs/hash.h ../include/sdm/objs/nil.h \
   ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
   ../include/sdm/objs/string.h ../include/sdm/objs/funcptr.h \
   ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
-  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
-  ../include/sdm/code/task.h
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
-drivers/interface.o: drivers/interface.cpp ../include/sdm/globals.h \
+drivers/driver.o: drivers/driver.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/objs/mutable.h
+  ../include/sdm/objs/mutable.h ../include/sdm/drivers/driver.h \
+  ../include/sdm/code/task.h
 
 drivers/tcp.o: drivers/tcp.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h
+  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/drivers/tcp.h \
+  ../include/sdm/drivers/driver.h ../include/sdm/code/task.h
 
 lib/basic.o: lib/basic.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
@@ -233,6 +236,7 @@ lib/irc/pseudoserv.o: lib/irc/pseudoserv.cpp ../include/sdm/colours.h \
   ../include/sdm/code/sync.h ../include/sdm/code/event.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/code/task.h \
+  ../include/sdm/drivers/driver.h ../include/sdm/drivers/tcp.h \
   ../include/sdm/objs/thing.h ../include/sdm/lib/users.h \
   ../include/sdm/lib/irc/msg.h ../include/sdm/lib/irc/commands.h \
   ../include/sdm/lib/irc/pseudoserv.h

@@ -9,7 +9,7 @@
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
 #include <sdm/objs/thing.h>
-#include <sdm/interfaces/tcp.h>
+#include <sdm/drivers/tcp.h>
 #include <sdm/code/task.h>
 
 #include <sdm/lib/irc/msg.h>
@@ -24,7 +24,7 @@ class PseudoServ {
 	int m_bits;
 	std::string *m_nick;
 	std::string *m_pass;
-	MooTCP *m_inter;
+	MooTCP *m_driver;
 	MooThing *m_user;
 
     public:
@@ -33,9 +33,9 @@ class PseudoServ {
 
 	int notify(int type, MooThing *thing, MooThing *channel, const char *str);
 
-	int handle(MooInterface *inter, int ready);
-	int bestow(MooInterface *inter);
-	int purge(MooInterface *inter);
+	int handle(MooDriver *driver, int ready);
+	int bestow(MooDriver *driver);
+	int purge(MooDriver *driver);
 
 	int purge(MooThing *user);
 

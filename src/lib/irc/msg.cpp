@@ -12,8 +12,7 @@
 
 #include <sdm/objs/hash.h>
 #include <sdm/objs/object.h>
-#include <sdm/interfaces/interface.h>
-#include <sdm/interfaces/tcp.h>
+#include <sdm/drivers/tcp.h>
 #include <sdm/lib/irc/commands.h>
 #include <sdm/lib/irc/msg.h>
 

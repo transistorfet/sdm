@@ -330,6 +330,12 @@ void MooCodeFrame::env(MooObjectHash *env)
 	MOO_INCREF(m_env = env);
 }
 
+void MooCodeFrame::set_user_channel(MooObject *user, MooObject *channel)
+{
+	m_env->set("user", user);
+	m_env->set("channel", channel);
+}
+
 void MooCodeFrame::print_stacktrace()
 {
 	MooCodeEvent *event;

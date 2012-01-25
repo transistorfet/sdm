@@ -3,13 +3,13 @@
  * Description:	IRC Message Handling
  */
 
-#ifndef _SDM_INTERFACE_IRC_MSG_H
-#define _SDM_INTERFACE_IRC_MSG_H
+#ifndef _SDM_LIB_IRC_MSG_H
+#define _SDM_LIB_IRC_MSG_H
 
 #include <sdm/globals.h>
 #include <sdm/objs/object.h>
-#include <sdm/interfaces/tcp.h>
 #include <sdm/lib/irc/commands.h>
+#include <sdm/drivers/tcp.h>
 
 #define IRC_MAX_ARGS		14
 #define IRC_MAX_MSG		512

@@ -231,7 +231,9 @@ int MooObject::call_method(MooObject *channel, const char *name, MooObject **res
 	int res;
 	clock_t start;
 	MooObject *func;
+	MooObjectHash *env;
 	MooObjectArray *args;
+	MooCodeFrame *frame;
 
 	if (!(func = this->resolve_method(name)))
 		return(-1);
@@ -252,33 +254,10 @@ int MooObject::call_method(MooObject *channel, const char *name, MooObject **res
 		}
 	}
 
+	frame = new MooCodeFrame();
+	frame->set_user_channel(MooThing::lookup(MooTask::current_user()), channel);
+
 	start = clock();
-	res = this->call_method(channel, func, args, result);
-	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
-	MOO_DECREF(args);
-	return(res);
-}
-
-int MooObject::call_method(MooObject *channel, MooObject *func, MooObjectArray *args, MooObject **result)
-{
-	int res;
-	MooObjectHash *env;
-
-	env = new MooObjectHash();
-	env->set("user", MooThing::lookup(MooTask::current_user()));
-	env->set("channel", channel);
-	res = this->call_method(func, env, args, result);
-	MOO_DECREF(env);
-	return(res);
-}
-
-int MooObject::call_method(MooObject *func, MooObjectHash *env, MooObjectArray *args, MooObject **result)
-{
-	int res = 0;
-	MooCodeFrame *frame;
-	MooThing *thing, *channel;
-
-	frame = new MooCodeFrame(env);
 	try {
 		frame->push_call(frame->env(), func, args);
 		frame->run();
@@ -298,7 +277,12 @@ int MooObject::call_method(MooObject *func, MooObjectHash *env, MooObjectArray *
 	}
 	if (result)
 		 *result = frame->get_return();
-	MOO_DECREF(frame);
+	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
+
+	// TODO this seems kinda... bad
+	frame = NULL;	/// Release frame
+	env = NULL;	/// Release environment
+	args = NULL;	/// Release args
 	return(res);
 }
 

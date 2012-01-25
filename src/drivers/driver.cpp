@@ -1,6 +1,6 @@
 /*
- * Module Name:	interface.c
- * Description:	Interface Manager
+ * Module Name:	driver.c
+ * Description:	Driver Manager
  */
 
 #include <string.h>
@@ -16,32 +16,26 @@
 
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/interfaces/interface.h>
+#include <sdm/drivers/driver.h>
 
-#define INTERFACE_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
+#define DRIVER_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
-static MooArray<MooInterface *> *interface_list = NULL;
+static MooArray<MooDriver *> *driver_list = NULL;
 
-MooObjectType moo_interface_obj_type = {
-	"interface",
-	typeid(MooInterface).name(),
-	(moo_type_load_t) NULL
-};
-
-int init_interface(void)
+int init_driver(void)
 {
-	if (!interface_list)
-		interface_list = new MooArray<MooInterface *>(MOO_ARRAY_DEFAULT_SIZE, -1, INTERFACE_LIST_BITS);
+	if (!driver_list)
+		driver_list = new MooArray<MooDriver *>(MOO_ARRAY_DEFAULT_SIZE, -1, DRIVER_LIST_BITS);
 	return(0);
 }
 
-void release_interface(void)
+void release_driver(void)
 {
-	delete interface_list;
-	interface_list = NULL;
+	delete driver_list;
+	driver_list = NULL;
 }
 
-MooInterface::MooInterface()
+MooDriver::MooDriver()
 {
 	m_bits = 0;
 	m_rfd = -1;
@@ -49,14 +43,14 @@ MooInterface::MooInterface()
 	m_efd = -1;
 	m_task = NULL;
 
-	interface_list->add(this);
+	driver_list->add(this);
 }
 
-MooInterface::~MooInterface()
+MooDriver::~MooDriver()
 {
 	if (m_task)
 		m_task->purge(this);
-	interface_list->remove(this);
+	driver_list->remove(this);
 	if (m_rfd > 0)
 		close(m_rfd);
 	if ((m_wfd > 0) && (m_wfd != m_rfd))
@@ -67,25 +61,25 @@ MooInterface::~MooInterface()
 
 
 /**
- * Check for activity on all interfaces for up to a maximum of t seconds.
+ * Check for activity on all drivers for up to a maximum of t seconds.
  * If new activity is available, the appropriate callback is called using the
- * interface as the parameter.  The number of interfaces that were serviced is
+ * driver as the parameter.  The number of drivers that were serviced is
  * returned or -1 if an error occurred.
  */
-int MooInterface::wait(float t)
+int MooDriver::wait(float t)
 {
 	int i;
 	int state;
 	int max, ret = 0;
-	MooInterface *cur;
+	MooDriver *cur;
 	fd_set rd, wr, err;
 	struct timeval timeout;
 
 	/// Check the buffer of each connection to see if any data is waiting
 	/// and return when each connection gets a chance to read data so that
 	/// we can check other events and remain responsive
-	for (i = 0; i < interface_list->size(); i++) {
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
+	for (i = 0; i < driver_list->size(); i++) {
+		if (!(cur = driver_list->get(i)) || !cur->m_task)
 			continue;
 		if ((state = (cur->m_bits & IO_STATE))) {
 			cur->m_bits &= ~IO_STATE;
@@ -104,8 +98,8 @@ int MooInterface::wait(float t)
 	FD_ZERO(&wr);
 	FD_ZERO(&err);
 	max = 0;
-	for (i = 0;i < interface_list->size();i++) {
-		if (!(cur = interface_list->get(i)))
+	for (i = 0;i < driver_list->size();i++) {
+		if (!(cur = driver_list->get(i)))
 			continue;
 		if (cur->m_rfd != -1) {
 			FD_SET(cur->m_rfd, &rd);
@@ -129,10 +123,10 @@ int MooInterface::wait(float t)
 		return(-1);
 	}
 
-	for (i = 0;i < interface_list->size();i++) {
-		/// We check that the interface is not NULL before each condition in case the previous
-		/// callback destroyed the interface
-		if (!(cur = interface_list->get(i)) || !cur->m_task)
+	for (i = 0;i < driver_list->size();i++) {
+		/// We check that the driver is not NULL before each condition in case the previous
+		/// callback destroyed the driver
+		if (!(cur = driver_list->get(i)) || !cur->m_task)
 			continue;
 		if ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd))
 			cur->m_bits |= IO_READY_READ;

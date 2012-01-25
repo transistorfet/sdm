@@ -10,8 +10,8 @@
 #include <sdm/data.h>
 #include <sdm/exception.h>
 #include <sdm/code/code.h>
-#include <sdm/interfaces/interface.h>
-#include <sdm/interfaces/tcp.h>
+#include <sdm/drivers/driver.h>
+#include <sdm/drivers/tcp.h>
 
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
@@ -50,7 +50,7 @@ int init_moo(void)
 		init_hash();
 
 		init_task();
-		init_interface();
+		init_driver();
 		moo_object_register_type(&moo_tcp_obj_type);
 
 		init_moo_code();
@@ -96,7 +96,7 @@ void release_moo(void)
 	release_array();
 	release_hash();
 
-	release_interface();
+	release_driver();
 	release_task();
 	release_object();
 
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 int serverloop(void)
 {
 	while (exit_flag) {
-		MooInterface::wait(1);
+		MooDriver::wait(1);
 		MooTask::run_idle();
 	}
 	return(0);

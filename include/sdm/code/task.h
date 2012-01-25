@@ -25,24 +25,29 @@ typedef int moo_tid_t;
 
 class MooUser;
 class MooThing;
-class MooInterface;
+class MooDriver;
+class MooCodeFrame;
 class MooObjectArray;
 
 class MooTask : public MooObject {
 	moo_tid_t m_tid;
 	moo_tid_t m_parent_tid;
-	moo_id_t m_owner;
+	MooCodeFrame *m_frame;
 
     public:
 	MooTask();
+	MooTask(MooObject *user, MooObject *channel);
 	virtual ~MooTask();
 
 	static int run_idle();
 	void schedule(double time);
 
-	virtual int initialize() = 0;
-	virtual int idle() = 0;
-	virtual int release() = 0;
+	int initialize();
+	int idle();
+	int release();
+
+	int MooTask::push_call(MooObject *func, MooObject *arg1, MooObject *arg2, MooObject *arg3);
+	int MooTask::push_code(const char *code);
 
 	/**
 	 * Notify the task of an event from the user object.  If channel is NULL, then it's a message from
@@ -51,20 +56,17 @@ class MooTask : public MooObject {
 	 * etc).  The str may be used or not depending on type. */
 	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *str) { return(-1); }
 
-	virtual int handle(MooInterface *inter, int ready) { throw MooException("Unable to handle interface"); }
-	virtual int bestow(MooInterface *inter);
-	virtual int purge(MooInterface *inter) { return(-1); }
+	virtual int handle(MooDriver *inter, int ready) { throw MooException("Unable to handle interface"); }
+	virtual int bestow(MooDriver *inter);
+	virtual int purge(MooDriver *inter) { return(-1); }
 
 	virtual int purge(MooUser *user) { return(-1); }
 
 	/// Accessors
-	int switch_handle(MooInterface *inter, int ready);
+	int switch_handle(MooDriver *inter, int ready);
 	static MooTask *current_task();
 	static moo_id_t current_owner();
 	static moo_id_t current_user();
-
-	// TODO This is probably wrong permissions-wise, but we need this in init_task() at least
-	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
 
     private:
 	friend class MooObject;
@@ -79,44 +81,5 @@ int init_task(void);
 void release_task(void);
 
 #endif
-
-/*
- * Task Name:	init.h
- * Description:	Init Task
- */
-
-#ifndef _SDM_TASKS_INIT_H
-#define _SDM_TASKS_INIT_H
-
-#include <string>
-#include <stdarg.h>
-
-#include <sdm/data.h>
-#include <sdm/tasks/task.h>
-#include <sdm/interfaces/interface.h>
-#include <sdm/interfaces/tcp.h>
-
-#include <sdm/objs/object.h>
-
-class MooInit : public MooTask {
-
-    public:
-	MooInit();
-	~MooInit();
-
-	int read_entry(const char *type, MooDataFile *data);
-	int write_data(MooDataFile *data);
-
-	int initialize();
-	int idle();
-	int release();
-};
-
-extern MooObjectType moo_init_obj_type;
-
-MooObject *load_moo_init(MooDataFile *data);
-
-#endif
-
 
 

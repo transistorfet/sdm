@@ -10,7 +10,7 @@
 
 #include <sdm/objs/array.h>
 #include <sdm/objs/object.h>
-#include <sdm/interfaces/interface.h>
+#include <sdm/drivers/driver.h>
 #include <sdm/code/code.h>
 
 #include <sdm/code/task.h>
@@ -45,7 +45,7 @@ static MooTaskQueue *g_task_queue = NULL;
 
 int init_task(void)
 {
-	MooInit *init_task = NULL;
+	MooTask *init_task = NULL;
 
 	if (g_task_list)
 		return(1);
@@ -53,8 +53,8 @@ int init_task(void)
 	g_task_queue = new MooTaskQueue();
 
 	// TODO should this be moved somewhere else? like main()
-	init_task = new MooInit();
-	init_task->owner(0);
+	init_task = new MooTask();
+	init_task->m_frame->owner(0);
 	g_current_task = init_task;
 	g_current_owner = 0;
 	return(0);
@@ -73,12 +73,19 @@ MooTask::MooTask()
 		m_parent_tid = g_current_task->m_tid;
 	else
 		m_parent_tid = -1;
-	m_owner = MooTask::current_owner();
+	m_frame = new MooCodeFrame();
 	//this->initialize();
+}
+
+MooTask::MooTask(MooObject *user, MooObject *channel) : MooTask()
+{
+	m_frame->set_user_channel(user, channel);
 }
 
 MooTask::~MooTask()
 {
+	delete m_frame;
+	m_frame = NULL;
 	//this->release();
 	if (this == g_current_task) {
 		g_current_task = NULL;
@@ -105,13 +112,62 @@ void MooTask::schedule(double time)
 	g_task_queue->schedule(time, this);
 }
 
-int MooTask::bestow(MooInterface *inter)
+int MooTask::initialize()
+{
+
+}
+
+int MooTask::idle()
+{
+	int cycles;
+
+	try {
+		cycles = m_frame->run();
+	}
+	catch (MooException e) {
+		// TODO temporary for debugging purposes??
+		moo_status("CODE: %s", e.get());
+		m_frame->print_stacktrace();
+		cycles = -1;
+		//m_frame->clear();
+	}
+	return(cycles);
+}
+
+int MooTask::release()
+{
+
+}
+
+int MooTask::push_call(MooObject *func, MooObject *arg1, MooObject *arg2, MooObject *arg3)
+{
+	MooObjectArray *args;
+
+	args = new MooObjectArray();
+	if (arg1) {
+		args->set(0, arg1);
+		if (arg2) {
+			args->set(1, arg2);
+			if (arg3)
+				args->set(2, arg3);
+		}
+	}
+
+	return(m_frame->push_call(m_frame->env(), func, args));
+}
+
+int MooTask::push_code(const char *code)
+{
+	return(m_frame->push_code(code));
+}
+
+int MooTask::bestow(MooDriver *inter)
 {
 	delete inter;
 	return(-1);
 }
 
-int MooTask::switch_handle(MooInterface *inter, int ready)
+int MooTask::switch_handle(MooDriver *inter, int ready)
 {
 	MooTask::switch_task(this);
 	return(this->handle(inter, ready));
@@ -131,7 +187,7 @@ moo_id_t MooTask::current_user()
 {
 	if (!g_current_task)
 		return(-1);
-	return(g_current_task->m_owner);
+	return(g_current_task->m_frame->owner());
 }
 
 moo_id_t MooTask::current_owner(moo_id_t id)
@@ -154,7 +210,7 @@ int MooTask::switch_task(MooTask *task)
 {
 	g_current_task = task;
 	if (task)
-		g_current_owner = task->m_owner;
+		g_current_owner = task->m_frame->owner();
 	moo_status("Task Owner is now: %d", g_current_owner);
 	return(0);
 }
@@ -241,106 +297,6 @@ MooTask *MooTaskQueue::consume()
 		return(task);
 	}
 	return(NULL);
-}
-
-/*
- * Task Name:	init.cpp
- * Description:	Init Task
- */
-
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-
-#include <sdm/data.h>
-#include <sdm/globals.h>
-
-#include <sdm/objs/hash.h>
-#include <sdm/objs/object.h>
-#include <sdm/interfaces/tcp.h>
-#include <sdm/tasks/task.h>
-#include <sdm/tasks/init.h>
-
-
-MooObjectType moo_init_obj_type = {
-	"init",
-	typeid(MooInit).name(),
-	(moo_type_load_t) load_moo_init
-};
-
-MooObject *load_moo_init(MooDataFile *data)
-{
-	MooInit *obj = new MooInit();
-	if (data)
-		obj->read_data(data);
-	return(obj);
-}
-
-MooInit::MooInit()
-{
-
-}
-
-MooInit::~MooInit()
-{
-	this->set_delete();
-	//if (m_inter)
-	//	delete m_inter;
-}
-
-int MooInit::read_entry(const char *type, MooDataFile *data)
-{
-	char buffer[STRING_SIZE];
-
-/*
-	if (!strcmp(type, "port")) {
-		m_port = data->read_integer_entry();
-		this->listen(m_port);
-	}
-	else if (!strcmp(type, "type")) {
-		data->read_string_entry(buffer, STRING_SIZE);
-		if (!(m_itype = moo_object_find_type((*buffer != '\0') ? buffer : "tcp", &moo_tcp_obj_type)))
-			throw MooException("No tcp type, %s", buffer);
-	}
-	else if (!strcmp(type, "task")) {
-		data->read_string_entry(buffer, STRING_SIZE);
-		if (!(m_ttype = moo_object_find_type(buffer, &moo_task_obj_type)))
-			throw MooException("No task type, %s", buffer);
-	}
-	else
-		return(MOO_NOT_HANDLED);
-*/
-	return(MOO_HANDLED);
-}
-
-
-int MooInit::write_data(MooDataFile *data)
-{
-/*
-	data->write_integer_entry("port", m_port);
-	if (m_itype)
-		data->write_string_entry("type", m_itype->m_name);
-	if (m_ttype)
-		data->write_string_entry("task", m_ttype->m_name);
-*/
-	return(0);
-}
-
-int MooInit::initialize()
-{
-
-	return(0);
-}
-
-int MooInit::idle()
-{
-	return(0);
-}
-
-int MooInit::release()
-{
-
-	return(0);
 }
 
 

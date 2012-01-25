@@ -51,10 +51,12 @@ class MooCodeFrame : public MooObject {
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
+	void set_user_channel(MooObject *user, MooObject *channel);
 
 	void print_stacktrace();
 
     private:
+	friend class MooTask;
 	friend class FrameEventRelegate;
 	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
 
