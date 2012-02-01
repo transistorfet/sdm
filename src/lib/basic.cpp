@@ -19,9 +19,10 @@
  * Input/Output Functions *
  **************************/
 
-static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_print(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int j = 0;
+	MooObjectHash *env;
 	MooObject *obj, *func;
 	MooObjectArray *newargs;
 	MooThing *user, *channel;
@@ -34,6 +35,7 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 			throw moo_type_error;
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
+	env = frame->env();
 	if (!(user = dynamic_cast<MooThing *>(env->get("user"))))
 		throw moo_type_error;
 
@@ -42,11 +44,11 @@ static int basic_print(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	newargs = new MooObjectArray();
 	args->set(0, user);
 	args->set(1, new MooString("%s", buffer));
-	frame->push_call(frame->env(), func, args);
+	frame->push_call(env, func, args);
 	return(0);
 }
 
-static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_debug(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int j = 0;
 	MooObject *obj;
@@ -63,7 +65,7 @@ static int basic_debug(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int basic_printstack(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_printstack(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != -1)
 		throw moo_args_mismatched;
@@ -76,7 +78,7 @@ static int basic_printstack(MooCodeFrame *frame, MooObjectHash *env, MooObjectAr
  * Math Functions *
  ******************/
 
-static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_add(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *result, *num;
 
@@ -92,7 +94,7 @@ static int basic_add(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int basic_subtract(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_subtract(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *result, *num;
 
@@ -110,7 +112,7 @@ static int basic_subtract(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	return(0);
 }
 
-static int basic_multiply(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_multiply(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *result, *num;
 
@@ -128,7 +130,7 @@ static int basic_multiply(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	return(0);
 }
 
-static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_divide(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *result, *num;
 
@@ -150,7 +152,7 @@ static int basic_divide(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
  * Comparison Functions *
  ************************/
 
-static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_null(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -165,7 +167,7 @@ static int basic_null(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_eqv(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -182,7 +184,7 @@ static int basic_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int basic_not_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_not_eqv(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -199,7 +201,7 @@ static int basic_not_eqv(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	return(0);
 }
 
-static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_equal(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 	char buffer1[LARGE_STRING_SIZE];
@@ -225,7 +227,7 @@ static int basic_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int basic_num_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_num_equal(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -245,7 +247,7 @@ static int basic_num_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArr
 	return(0);
 }
 
-static int basic_num_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_num_not_equal(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -265,7 +267,7 @@ static int basic_num_not_equal(MooCodeFrame *frame, MooObjectHash *env, MooObjec
 	return(0);
 }
 
-static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_gt(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -285,7 +287,7 @@ static int basic_gt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_ge(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -305,7 +307,7 @@ static int basic_ge(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_lt(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -325,7 +327,7 @@ static int basic_lt(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_le(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooNumber *num1, *num2;
 
@@ -345,7 +347,7 @@ static int basic_le(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_not(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -362,7 +364,7 @@ static int basic_not(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
  * String Functions *
  ********************/
 
-static int basic_expand(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_expand(MooCodeFrame *frame, MooObjectArray *args)
 {
 	const char *str;
 	char buffer[LARGE_STRING_SIZE];
@@ -370,12 +372,12 @@ static int basic_expand(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	str = args->get_string(0);
-	MooObject::format(buffer, LARGE_STRING_SIZE, env, str);
+	MooObject::format(buffer, LARGE_STRING_SIZE, frame->env(), str);
 	frame->set_return(new MooString("%s", buffer));
 	return(0);
 }
 
-static int basic_strlen(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_strlen(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooString *str;
 
@@ -387,7 +389,7 @@ static int basic_strlen(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_concat(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int j = 0;
 	MooObject *obj;
@@ -407,7 +409,7 @@ static int basic_concat(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int basic_chop(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_chop(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int i;
 	MooObject *obj;
@@ -424,7 +426,7 @@ static int basic_chop(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_substr(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int j, k;
 	MooObject *obj;
@@ -460,7 +462,7 @@ static int basic_substr(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_ltrim(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int i;
 	MooObject *obj;
@@ -479,7 +481,7 @@ static int basic_ltrim(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 
 #define MAX_WORDS	256
 
-static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_parse_words(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int i = 0, j = 0;
 	MooObjectArray *array;
@@ -530,7 +532,7 @@ static int basic_parse_words(MooCodeFrame *frame, MooObjectHash *env, MooObjectA
 	return(0);
 }
 
-static int basic_remove_word(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_remove_word(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int i = 0;
 	const char *text;
@@ -553,7 +555,7 @@ static int basic_remove_word(MooCodeFrame *frame, MooObjectHash *env, MooObjectA
  * Type Functions *
  ******************/
 
-static int basic_type(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_type(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -564,7 +566,7 @@ static int basic_type(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int basic_boolean_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_boolean_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -576,7 +578,7 @@ static int basic_boolean_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArr
 	return(0);
 }
 
-static int basic_number_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_number_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -588,7 +590,7 @@ static int basic_number_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	return(0);
 }
 
-static int basic_string_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_string_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -600,7 +602,7 @@ static int basic_string_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 	return(0);
 }
 
-static int basic_array_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_array_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -612,7 +614,7 @@ static int basic_array_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	return(0);
 }
 
-static int basic_hash_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_hash_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -624,7 +626,7 @@ static int basic_hash_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int basic_thing_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_thing_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -636,7 +638,7 @@ static int basic_thing_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	return(0);
 }
 
-static int basic_lambda_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_lambda_q(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (args->last() != 0)
 		throw moo_args_mismatched;
@@ -649,13 +651,13 @@ static int basic_lambda_q(MooCodeFrame *frame, MooObjectHash *env, MooObjectArra
 }
 
 
-static int basic_array(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_array(MooCodeFrame *frame, MooObjectArray *args)
 {
 	frame->set_return(args);
 	return(0);
 }
 
-static int basic_hash(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_hash(MooCodeFrame *frame, MooObjectArray *args)
 {
 	// TODO for now, we wont initialize the hash
 	if (args->last() >= 0)
@@ -668,14 +670,14 @@ static int basic_hash(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
  * System Functions *
  ********************/
 
-static int basic_eval(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_eval(MooCodeFrame *frame, MooObjectArray *args)
 {
 	return(frame->push_code(args->get_string(0)));
 }
 
 #define MAX_FILE_SIZE	65535
 
-static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_load(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int len;
 	MooObject *obj;
@@ -694,7 +696,7 @@ static int basic_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(frame->push_code(buffer));
 }
 
-static int basic_get_property(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_get_property(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 	const char *name;
@@ -707,7 +709,7 @@ static int basic_get_property(MooCodeFrame *frame, MooObjectHash *env, MooObject
 	return(0);
 }
 
-static int basic_get_method(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_get_method(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 	const char *name;
@@ -720,7 +722,7 @@ static int basic_get_method(MooCodeFrame *frame, MooObjectHash *env, MooObjectAr
 	return(0);
 }
 
-static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_throw(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 	char buffer[STRING_SIZE];
@@ -732,7 +734,7 @@ static int basic_throw(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	throw MooException("%s", buffer);
 }
 
-static int basic_return(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_return(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 
@@ -744,7 +746,7 @@ static int basic_return(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int basic_sleep(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_sleep(MooCodeFrame *frame, MooObjectArray *args)
 {
 	double time;
 	MooTask *task;
@@ -758,7 +760,7 @@ static int basic_sleep(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	throw MooCodeFrameSuspend();
 }
 
-static int basic_time(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int basic_time(MooCodeFrame *frame, MooObjectArray *args)
 {
 	timeval tv;
 	double time;

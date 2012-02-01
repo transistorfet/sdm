@@ -135,6 +135,27 @@ int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooObjectArray 
 	return(m_stack->push(new MooCodeEventCallFunc(env, args, func)));
 }
 
+int MooCodeFrame::push_method_call(const char *name, MooObject *obj, MooObject *arg1, MooObject *arg2, MooObject *arg3)
+{
+	MooObject *func;
+	MooObjectArray *args;
+
+	if (!(func = obj->resolve_method(name)))
+		return(-1);
+	args = new MooObjectArray();
+	args->set(0, obj);
+	if (arg1) {
+		args->set(1, arg1);
+		if (arg2) {
+			args->set(2, arg2);
+			if (arg3)
+				args->set(3, arg3);
+		}
+	}
+
+	return(this->push_call(this->env(), func, args));
+}
+
 int MooCodeFrame::push_code(const char *code)
 {
 	MooCodeExpr *expr;
@@ -330,10 +351,10 @@ void MooCodeFrame::env(MooObjectHash *env)
 	MOO_INCREF(m_env = env);
 }
 
-void MooCodeFrame::set_user_channel(MooObject *user, MooObject *channel)
+MooObjectHash *MooCodeFrame::extend_env()
 {
-	m_env->set("user", user);
-	m_env->set("channel", channel);
+	m_env = new MooObjectHash(m_env);
+	return(m_env);
 }
 
 void MooCodeFrame::print_stacktrace()

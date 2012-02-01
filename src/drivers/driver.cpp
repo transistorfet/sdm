@@ -41,15 +41,14 @@ MooDriver::MooDriver()
 	m_rfd = -1;
 	m_wfd = -1;
 	m_efd = -1;
-	m_task = NULL;
 
+	// TODO should this instead be set by the function that creates the driver?
+	m_owner = MooTask::current_owner();
 	driver_list->add(this);
 }
 
 MooDriver::~MooDriver()
 {
-	if (m_task)
-		m_task->purge(this);
 	driver_list->remove(this);
 	if (m_rfd > 0)
 		close(m_rfd);
@@ -79,11 +78,11 @@ int MooDriver::wait(float t)
 	/// and return when each connection gets a chance to read data so that
 	/// we can check other events and remain responsive
 	for (i = 0; i < driver_list->size(); i++) {
-		if (!(cur = driver_list->get(i)) || !cur->m_task)
+		if (!(cur = driver_list->get(i)))
 			continue;
 		if ((state = (cur->m_bits & IO_STATE))) {
 			cur->m_bits &= ~IO_STATE;
-			cur->m_task->switch_handle(cur, state);
+			cur->handle(state);
 			ret++;
 		}
 	}
@@ -126,7 +125,7 @@ int MooDriver::wait(float t)
 	for (i = 0;i < driver_list->size();i++) {
 		/// We check that the driver is not NULL before each condition in case the previous
 		/// callback destroyed the driver
-		if (!(cur = driver_list->get(i)) || !cur->m_task)
+		if (!(cur = driver_list->get(i)))
 			continue;
 		if ((cur->m_rfd != -1) && FD_ISSET(cur->m_rfd, &rd))
 			cur->m_bits |= IO_READY_READ;
@@ -137,7 +136,7 @@ int MooDriver::wait(float t)
 
 		if ((state = (cur->m_bits & IO_STATE))) {
 			cur->m_bits &= ~IO_STATE;
-			cur->m_task->switch_handle(cur, state);
+			cur->handle(state);
 		}
 	}
 	return(ret);

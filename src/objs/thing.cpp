@@ -68,9 +68,6 @@ MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode
 	m_properties = new MooObjectHash();
 	m_methods = new MooObjectHash();
 
-	/// Set the thing id and add the thing to the table.  If id = MOO_NO_ID, don't add it to a table.
-	/// If the id = MOO_NEW_ID then assign the next available id
-	this->assign_id(id);
 	m_parent = parent;
 	m_owner = owner;
 	m_mode = mode;
@@ -126,7 +123,7 @@ int MooThing::read_entry(const char *type, MooDataFile *data)
 		m_mode = mode;
 	}
 	else
-		return(MooObject::read_entry(type, data));
+		return(MooMutable::read_entry(type, data));
 	return(MOO_HANDLED);
 }
 
@@ -305,15 +302,6 @@ MooThing *MooThing::get_channel(const char *name)
 	return(dynamic_cast<MooThing *>(list->get(name)));
 }
 
-void MooThing::quit()
-{
-	MooObject *channels;
-
-	if ((channels = MooObject::resolve("ChanServ", global_env)))
-		channels->call_method(NULL, "quit", NULL);
-}
-
-
 
 /*
 int MooChannel::valid_channelname(const char *name)
@@ -338,7 +326,7 @@ int MooChannel::valid_channelname(const char *name)
  * Thing Object Methods *
  ************************/
 
-static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_clone(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *func;
 	MooObject *id = NULL;
@@ -365,7 +353,7 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	if (func) {
 		newargs = new MooObjectArray();
 		newargs->set(0, thing);
-		frame->push_call(env, func, newargs);
+		frame->push_call(frame->env(), func, newargs);
 	}
 
 	/// Call the 'initialize' method of each parent object (Most distant parent will be called first)
@@ -373,14 +361,14 @@ static int thing_clone(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 		if ((func = parent->resolve_method("initialize"))) {
 			newargs = new MooObjectArray();
 			newargs->set(0, thing);
-			frame->push_call(env, func, newargs);
+			frame->push_call(frame->env(), func, newargs);
 		}
 		parent = parent->parent();
 	}
 	return(0);
 }
 
-static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_load(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooThing *thing;
 
@@ -394,7 +382,7 @@ static int thing_load(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_save(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooThing *thing;
 
@@ -408,14 +396,14 @@ static int thing_save(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int thing_save_all(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_save_all(MooCodeFrame *frame, MooObjectArray *args)
 {
 	// TODO permissions check
 	MooThing::save_all();
 	return(0);
 }
 
-static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_owner(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooThing *thing;
 	const char *str;
@@ -441,7 +429,7 @@ static int thing_owner(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int thing_mode(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_mode(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *obj;
 	// TODO FIX THIS
@@ -458,7 +446,7 @@ static int thing_mode(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int thing_chmod(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_chmod(MooCodeFrame *frame, MooObjectArray *args)
 {
 	// TODO FIX THIS
 /*
@@ -485,7 +473,7 @@ static int thing_chmod(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int thing_chown(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int thing_chown(MooCodeFrame *frame, MooObjectArray *args)
 {
 	// TODO FIX THIS
 /*
@@ -517,7 +505,7 @@ static int thing_chown(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 #define PREPOSITIONS	5
 const char *prepositions[] = { "to", "in", "from", "is", "as" };
 
-static int parse_command(MooCodeFrame *frame, MooObjectHash *env, MooArgs *args)
+static int parse_command(MooCodeFrame *frame, MooArgs *args)
 {
 	int k, m;
 	int i = 0, j = 0;

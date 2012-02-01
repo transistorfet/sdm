@@ -40,6 +40,7 @@ int init_moo(void)
 		moo_set_data_path("data");
 
 		init_object();
+		init_mutable();
 
 		moo_object_register_type(&moo_nil_obj_type);
 		moo_object_register_type(&moo_boolean_obj_type);
@@ -51,7 +52,7 @@ int init_moo(void)
 
 		init_task();
 		init_driver();
-		moo_object_register_type(&moo_tcp_obj_type);
+		init_tcp();
 
 		init_moo_code();
 
@@ -69,12 +70,11 @@ int init_moo(void)
 		// TODO #0:boot must create the listener task)
 		//load_global_config();
 
-		// TODO temporary
-		{
-			MooCodeFrame *frame;
-			frame = new MooCodeFrame();
-			frame->eval("(load \"code/core-seed.moo\")");
-		}
+		MooTask *task;
+		task = new MooTask();
+		task->push_code("(load \"code/core-seed.moo\")");
+		//task->push_code("(loop (debug \"Looping...\"))");
+		task->schedule(0);
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());
@@ -96,8 +96,11 @@ void release_moo(void)
 	release_array();
 	release_hash();
 
+	release_tcp();
 	release_driver();
 	release_task();
+
+	release_mutable();
 	release_object();
 
 	release_data();

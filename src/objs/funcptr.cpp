@@ -73,10 +73,10 @@ int MooFuncPtr::to_string(char *buffer, int max)
 	return(0);
 }
 
-int MooFuncPtr::do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+int MooFuncPtr::do_evaluate(MooCodeFrame *frame, MooObjectArray *args)
 {
 	if (!m_func)
 		throw MooException("FUNC: Attempted to evaluate an undefined MooFuncPtr (this means I really messed up).");
-	return(m_func(frame, env, args));
+	return(m_func(frame, args));
 }
 

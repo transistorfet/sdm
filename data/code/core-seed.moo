@@ -334,7 +334,11 @@
 		(this:%save)
 	))
 
-	(define this:notify %user_notify)
+	(define this:notify (lambda (this type thing channel str)
+		(if (null? this.server)
+			(throw "USER: User is not connected."))
+		(this.server:notify this type thing channel str)
+	))
 
 	(define this:tell (lambda (this text)
 		(this:notify N/STATUS nil channel text)

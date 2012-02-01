@@ -120,14 +120,13 @@ int MooCodeLambda::map_args(MooObjectHash *env, MooObjectArray *args)
 }
 
 
-int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooObjectArray *args)
+int MooCodeLambda::do_evaluate(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObjectHash *env;
 
-	env = frame->env();
-	env = new MooObjectHash(env);
-	this->map_args(env, args);
 	frame->mark_return_point();
+	env = frame->extend_env();
+	this->map_args(env, args);
 	return(frame->push_block(env, m_func));
 }
 

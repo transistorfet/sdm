@@ -161,7 +161,12 @@ int MooCodeEventCallFunc::do_event(MooCodeFrame *frame)
 	// TODO m_expr is actually set to the expression of the call, so we can use it for debugging
 	if (!m_args || !(func = m_args->shift()))
 		throw MooException("Null function.");
-	func->evaluate(frame, m_env, m_args);
+
+	// TODO PERMS this no longer makse sense because we can't get owner from 'this'
+	frame->elevate(func);
+	if (frame->env() != m_env)
+		throw MooException("DEBUG: Yeah, the env isn't always the same so you should set it here");
+	func->do_evaluate(frame, m_args);
 	return(0);
 }
 
@@ -297,6 +302,31 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
 }
+
+/***********************
+ * Form: (loop <expr>) *
+ ***********************/
+
+class FormLoopEvent : public MooCodeEvent {
+    public:
+	FormLoopEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+
+	int do_event(MooCodeFrame *frame) {
+		frame->push_event(new FormLoopEvent(frame->env(), m_expr));
+		frame->push_block(frame->env(), m_expr);
+		return(0);
+	}
+};
+
+static int form_loop(MooCodeFrame *frame, MooCodeExpr *expr)
+{
+	if (!expr)
+		throw moo_args_mismatched;
+	frame->mark_return_point();
+	frame->push_event(new FormLoopEvent(frame->env(), expr));
+	return(0);
+}
+
 
 /********************************************************************
  * Form: (cond (<cond-expr> <true-expr>) ... [(else <else-expr>)] ) *
@@ -543,6 +573,7 @@ int init_code_event(void)
 	form_env->set("undefine", new MooFormT(form_undefine));
 	form_env->set("set!", new MooFormT(form_set));
 	form_env->set("if", new MooFormT(form_if));
+	form_env->set("loop", new MooFormT(form_loop));
 	form_env->set("cond", new MooFormT(form_cond));
 	form_env->set("and", new MooFormT(form_and));
 	form_env->set("or", new MooFormT(form_or));

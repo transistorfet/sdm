@@ -79,9 +79,9 @@ int MooCodeExpr::write_data(MooDataFile *data)
 	return(0);
 }
 
-int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectHash *parent, MooObjectArray *args)
+int MooCodeExpr::do_evaluate(MooCodeFrame *frame, MooObjectArray *args)
 {
-	return(frame->push_block(parent, this));
+	return(frame->push_block(frame->env(), this));
 }
 
 const char *MooCodeExpr::get_identifier()

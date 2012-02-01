@@ -18,7 +18,6 @@
 	  could be maintained by the clone function or something).
 
       Interface Methods:
-	* should MooInterface use a MooTask as the handler, or should it make a custom handler class like MooTimer does?
 	* you could implement a telnet per-user-connection-task (like pseudoserv) which uses ANSI codes to create a simple client
 	  interface.  It would interact with the objects in the same way as pseudoserv
 	* the 2 other IRC interface methods (client connected as TheRealm, privmsgs are directly interpreted as commands, output is
@@ -58,19 +57,12 @@
 	* notify can either be like an interrupt, where in a code task, the notify execution code would be pushed directly onto the
 	  task's frame, so that it's executed immediately, no matter what is currently executing (or alternatively, somewhere in the
 	  frame that we know is safe).
-	* when data is available at the socket, you would normally "switch" to the handling task, and then call the handler.  In
-	  pseudoserv, we the use call_method to create a frame and run the command, inline, but if we want to eliminate the detached
-	  frames (1 frame always belongs to 1 task), then we would either evaluate this command on the pseudoserv frame, which would
-	  then need to be evaluated seperately (idle() would be called by an idle-processing worker thread), or we could make a new
-	  task (with a frame) and evaluate the command in there.  This would mean you could fork tasks by executing a command, and
-	  commands could run for a time without having to create their own tasks.  For example, fighting could be implemented directly
-	  in the command itself, so the fight command would just run and use 'sleep' or something to pause between rounds.  Not all
-	  instances of call_method could be replaced with this methods, since some are just doing something simple and don't need a
-	  whole task, so you'd probably still need both methods (pseudoserv has it's own code frame, and also creates new code frame tasks
-	  for executing commands).
+	* commands could run for a time without having to create their own tasks.  For example, fighting could be implemented directly
+	  in the command itself, so the fight command would just run and use 'sleep' or something to pause between rounds.
 	* we could turn socket-data-ready callbacks into notify() calls and use the same mechanism for handling them
 	* notify could be a function or method defined in an environment, which all tasks would have (MooTask), and then in pseudoserv's
 	  case, it would be a MooFunc type definition to a builtin function.  We could eliminate the indirection (user:notify)
+
 	* you could have a queue type which is stored as just a normal property in the user object, instead of storing the task??
 	* you could have a queue of messages for each task (notify events, handling, etc) and still have a single task run function in
 	  each task, and have the run function call a function to process and dispatch notify messages automatically (for convenience).
@@ -93,40 +85,21 @@
 	  assign it to the user once we connect).  This would again, however, not work for MooCodeTask, because it is not already
 	  waiting on a queue.  Then again, MooCodeTasks cannot currently use interfaces anyways, and should not be able to do so easily
 
-	* how would you create a new listener task from MooCode: (new-task %listener 6667 "pseudoserv") ???
-	  This would assume that %listener is a global variable of the listener task type (well it's basically just a lambda), and it
-	  passes the arguments in the normal way.
 	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
 	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
 	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
 	  things and have them remain in the task's scope at all times (thread-global definitions).
 
-	* you could have various functionality such as the irc pseudoserv stuff be implemented as a special builtin object (you'd call
-	  a C function like the load_methods() functions, which creates a new MooThing with a specific ID, and adds various properties
-	  and methods, most of which would be direct references to built-in functions (rather than indirectly setting a global variable
-	  with the builtin method that you can then assign to a custom object).  Then you could make tasks like pseudoserv be all
-	  generic and all coded (it can always run a thing's method as the task body, thus an thing can describe a whole function
-	  including tasks and launching task)
+	* you could add a virtual handle function to driver so that drivers can custom handle the connection rather than calling a
+	  method or creating a new task for all drivers.
+	* you could have server create a new task and pass it the new connection, and then the task can call a blocking read function
+	  on the driver which suspends the task, and stores the task pointer in the tcp driver (which also acts as a lock of sorts on
+	  who can read from the connection) and when data is ready, the task is unsuspended and a check to make sure the task was really
+	  waiting for data, then it schedules itself for execution and acknowledges the condition.  The continuation would cause the
+	  actual read operation to take place and the value would be returned.  It doesn't matter that the task would be lost in a
+	  crash since the connection should go down as well.
 
       Dealing with References when Saving:
-	* this is the problem of saving everything to disk and reloading it, but loosing all duplicate references because they are not
-	  saved uniquely
-	* you could divide all MooObjects into MooPersistent and MooConstant.  Constants would be numbers, strings, boolean, nil, etc
-	  where the value is a constant (thus a reference doesn't matter), and the value can be directly saved and reloaded from disk
-	  without an issue.  Then, all MooPersistent objects would have an ID and be saved seperately or on equal terms.  Whenever a
-	  Persistent object is used as a value in something being written to an object file, the ID would be saved instead, and the
-	  that Persistent object would be written seperately.  Then, when the system is loaded, all the values would be read in and
-	  you'd have to use a temporary value of the ID and when everything is loaded, go back and convert all the IDs to pointers.
-	  You could also store all references as only numeric IDs and require a lookup of some kind whenever accessing one.  That would
-	  be much slower, but it would also prevent segfaults in the server since no pointers are used.  It would also save on loading
-	  times but that is really irrelevant because that almost never happens.
-	* you could defer assigning IDs until the system is written rather than doing it when any value is assigned.  A lot of values
-	  might come into existance and disappear before the system is written again.  Actually, you'd still need a place to store them
-	  in the array of that type...
-	* you might want to think about changing array into a constant type, come to think of it, which doesn't make sense at all.  You
-	  create an array every time you eval an expr, and this would add waaaay too much overhead.  There is already too much as it is.
-	  Then again... what if you only cleared the items in an array and marked it as unused, and then when you go to make a new array
-	  it just uses the allocated one, thus saving allocation time!
 	* wait wait, this will actually work because you don't have to assign an ID unless you save that object.  When you write
 	  everything to disk, if you come across a value with a -1 ID, then you assign it an ID and save it (or optionally traverse
 	  everything, assign the IDs, and then save everything, or else you might have already saved that type and then it wont be saved,
@@ -142,8 +115,6 @@
 	  it, you could always save a frame to suspend a task to disk!
 	* you could store all values in a global array of some kind and use that for garbage collecting, and IDs, and saving, and so on
 	  You need to change the data storage system anyways
-
-
 
       Permissions:
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
@@ -167,20 +138,16 @@
 	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
 	  parent).  If you assign anything to the root environment, it will be saved as part of the root thing (#0).  You can also
 	  access the root (global) env at any time by directly accessing #0.
-	* you can eliminate all call_methods by making all task be frames and have a frame passed to the pseudoserv functions which all
-	  use call_method currently (they would just push the call onto the stack to complete it, or possibly even push a whole chunk
-	  of code to handle the return value as well)
 	* when data is available on an interface, you don't need to know the specific task to call ever, since all tasks would essentially
 	  just be a frame.  You just need to know the code to push onto the frame in order to handle the data request.  This could be
 	  set via an interface method which is passed a lambda pointer, or an object and method name pair or something.
+	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
 	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
 	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
 	  data, or something.
 	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
 	  because it allows a command to have the same name of a function but with different argument processing and stuff
-
-	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 
 	* how can you delete MooThings from the system?
 
@@ -210,8 +177,6 @@
 	  or perhaps even could you make this a generic format thing of some kind such that the actual control is handled by a higher
 	  level method, object, or task, and the output is returned to the calling function.
 
-	* task.cpp could move to code/
-
     TODO:
 	* change all dynamic casts to typeid compares + static cast
 	* go through all destructors and have them set all values to NULL instead of just freeing them, to help the garbage collector
@@ -221,11 +186,14 @@
 
 	* sort out the whole login/identify system so new people can connect and sign up
 
+	* you could have a breakpoint events that causes execution to stop whenever you reach a certain in the execution process
 	* add debug field to event and fix debug message printing
+	* add commands to list properties and methods
 
 	* add arguments to be passed to 'initialize' during cloning
 	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
 
+	* you could add code that creates initial objects so that you can bootstrap the system with just the source code (??)
 	* add infinite loop protection
 	* review all code for permissions check errors and bugs.  Evaluate system security.
 	* check out SMAUG's social.dat stuff and incorporate it possibly

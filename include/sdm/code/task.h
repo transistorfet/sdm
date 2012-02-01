@@ -27,6 +27,7 @@ class MooUser;
 class MooThing;
 class MooDriver;
 class MooCodeFrame;
+class MooObjectHash;
 class MooObjectArray;
 
 class MooTask : public MooObject {
@@ -36,8 +37,9 @@ class MooTask : public MooObject {
 
     public:
 	MooTask();
-	MooTask(MooObject *user, MooObject *channel);
+	MooTask(MooObjectHash *env);
 	virtual ~MooTask();
+	void init(MooObjectHash *env);
 
 	static int run_idle();
 	void schedule(double time);
@@ -46,8 +48,8 @@ class MooTask : public MooObject {
 	int idle();
 	int release();
 
-	int MooTask::push_call(MooObject *func, MooObject *arg1, MooObject *arg2, MooObject *arg3);
-	int MooTask::push_code(const char *code);
+	int push_method_call(const char *name, MooObject *obj, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL);
+	int push_code(const char *code);
 
 	/**
 	 * Notify the task of an event from the user object.  If channel is NULL, then it's a message from
@@ -56,14 +58,8 @@ class MooTask : public MooObject {
 	 * etc).  The str may be used or not depending on type. */
 	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *str) { return(-1); }
 
-	virtual int handle(MooDriver *inter, int ready) { throw MooException("Unable to handle interface"); }
-	virtual int bestow(MooDriver *inter);
-	virtual int purge(MooDriver *inter) { return(-1); }
-
-	virtual int purge(MooUser *user) { return(-1); }
-
 	/// Accessors
-	int switch_handle(MooDriver *inter, int ready);
+	int switch_handle(MooDriver *driver, int ready);
 	static MooTask *current_task();
 	static moo_id_t current_owner();
 	static moo_id_t current_user();

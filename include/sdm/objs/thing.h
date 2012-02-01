@@ -51,7 +51,6 @@ class MooThing : public MooMutable {
 
 	const char *name();
 	static MooThing *get_channel(const char *name);
-	void quit();
 };
 
 extern MooObjectType moo_thing_obj_type;

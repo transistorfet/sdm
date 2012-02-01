@@ -139,7 +139,7 @@ void user_encrypt_password(const char *salt, char *passwd, int max)
 }
 
 
-static int user_notify(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int user_notify(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int type;
 	MooTask *task;

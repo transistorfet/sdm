@@ -25,6 +25,7 @@ class MooServer : public MooDriver {
 
 	virtual int read_entry(const char *type, MooDataFile *data);
 	virtual int write_data(MooDataFile *data);
+	virtual int handle(int ready);
 
 	int listen(int port);
 	MooTCP *MooServer::receive_connection();

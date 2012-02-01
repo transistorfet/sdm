@@ -68,14 +68,14 @@ int MooObjectArray::read_entry(const char *type, MooDataFile *data)
 	if (!strcmp(type, "entry")) {
 		data->read_attrib_string("type", type_name, STRING_SIZE);
 		index = data->read_attrib_integer("index");
-		if ((obj = MooObject::read_object(data, type_name))) {
+		if (!(obj = MooObject::read_object(data, type_name))) {
 			moo_status("ARRAY: Error loading entry, %d", index);
 			return(-1);
 		}
 		this->set(index, obj);
 	}
 	else
-		return(MooObject::read_entry(type, data));
+		return(MooMutable::read_entry(type, data));
 	return(MOO_HANDLED);
 }
 
@@ -172,7 +172,7 @@ MooObject *MooObjectArray::access_method(const char *name, MooObject *value)
  * Array Object Methods *
  ************************/
 
-static int array_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_get(MooCodeFrame *frame, MooObjectArray *args)
 {
 	long int index;
 	MooObjectArray *m_this;
@@ -186,7 +186,7 @@ static int array_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_set(MooCodeFrame *frame, MooObjectArray *args)
 {
 	long int index;
 	MooObject *obj;
@@ -202,7 +202,7 @@ static int array_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_remove(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	MooObject *obj;
@@ -218,7 +218,7 @@ static int array_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_push(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	MooObject *obj;
@@ -234,7 +234,7 @@ static int array_push(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *a
 	return(0);
 }
 
-static int array_pop(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_pop(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObjectArray *m_this;
 
@@ -246,7 +246,7 @@ static int array_pop(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int array_shift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_shift(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObjectArray *m_this;
 
@@ -258,7 +258,7 @@ static int array_shift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int array_unshift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_unshift(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	MooObject *obj;
@@ -274,7 +274,7 @@ static int array_unshift(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 	return(0);
 }
 
-static int array_insert(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_insert(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	int index;
@@ -292,7 +292,7 @@ static int array_insert(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int array_splice(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_splice(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int index;
 	MooObjectArray *m_this;
@@ -307,7 +307,7 @@ static int array_splice(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 }
 
 
-static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_search(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int index;
 	MooObject *obj;
@@ -323,7 +323,7 @@ static int array_search(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 	return(0);
 }
 
-static int array_join(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_join(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int len;
 	int j = 0;
@@ -392,7 +392,7 @@ class ArrayEventForeach : public MooCodeEvent {
 	}
 };
 
-static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int array_foreach(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *func;
 	MooObjectArray *m_this;
@@ -403,7 +403,7 @@ static int array_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray
 		throw moo_args_mismatched;
 	func = args->get(1);
 	frame->set_return(&moo_true);
-	frame->push_event(new ArrayEventForeach(0, m_this, env, func));
+	frame->push_event(new ArrayEventForeach(0, m_this, frame->env(), func));
 	return(0);
 }
 

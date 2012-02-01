@@ -73,9 +73,6 @@ class MooObject : public MooGC {
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 	MooObject *resolve_method(const char *name, MooObject *value = NULL);
 
-	int call_method(MooObject *channel, const char *name, MooObject **result = NULL, MooObject *obj1 = NULL, MooObject *obj2 = NULL, MooObject *obj3 = NULL, MooObject *obj4 = NULL, MooObject *obj5 = NULL);
-	int evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args);
-
 	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);
 	static int expand_reference(char *buffer, int max, MooObjectHash *env, const char *str, int *used);
 	static int escape_char(const char *str, char *buffer);
@@ -84,8 +81,9 @@ class MooObject : public MooGC {
 	/// Object Member Access Functions
 	virtual MooObject *access_property(const char *name, MooObject *value = NULL) { throw moo_type_error; }
 	virtual MooObject *access_method(const char *name, MooObject *value = NULL) { throw moo_type_error; }
-	virtual int do_evaluate(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args) { throw moo_evaluate_error; }
-	friend class MooTask;
+
+	friend class MooCodeEventCallFunc;
+	virtual int do_evaluate(MooCodeFrame *frame, MooObjectArray *args) { throw moo_evaluate_error; }
 
     protected:
 	int is_deleting() { return((m_bitflags & MOO_BF_DELETING) ? 1 : 0); }

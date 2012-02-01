@@ -45,17 +45,11 @@ static MooTaskQueue *g_task_queue = NULL;
 
 int init_task(void)
 {
-	MooTask *init_task = NULL;
-
 	if (g_task_list)
 		return(1);
 	g_task_list = new MooArray<MooTask *>(MOO_ARRAY_DEFAULT_SIZE, -1, TASK_LIST_BITS);
 	g_task_queue = new MooTaskQueue();
-
-	// TODO should this be moved somewhere else? like main()
-	init_task = new MooTask();
-	init_task->m_frame->owner(0);
-	g_current_task = init_task;
+	g_current_task = NULL;
 	g_current_owner = 0;
 	return(0);
 }
@@ -68,18 +62,23 @@ void release_task(void)
 
 MooTask::MooTask()
 {
+	this->init(NULL);
+}
+
+MooTask::MooTask(MooObjectHash *env)
+{
+	this->init(env);
+}
+
+void MooTask::init(MooObjectHash *env)
+{
 	m_tid = g_task_list->add(this);
 	if (g_current_task)
 		m_parent_tid = g_current_task->m_tid;
 	else
 		m_parent_tid = -1;
-	m_frame = new MooCodeFrame();
+	m_frame = new MooCodeFrame(env);
 	//this->initialize();
-}
-
-MooTask::MooTask(MooObject *user, MooObject *channel) : MooTask()
-{
-	m_frame->set_user_channel(user, channel);
 }
 
 MooTask::~MooTask()
@@ -120,7 +119,9 @@ int MooTask::initialize()
 int MooTask::idle()
 {
 	int cycles;
+	clock_t start;
 
+	start = clock();
 	try {
 		cycles = m_frame->run();
 	}
@@ -129,8 +130,22 @@ int MooTask::idle()
 		moo_status("CODE: %s", e.get());
 		m_frame->print_stacktrace();
 		cycles = -1;
+
 		//m_frame->clear();
+
+		// TODO you need some way of reporting the error back to the user
+		// TODO the problem is you need to call basic_print, but it requires a frame and it calls a method, so you need to
+		//	either run the frame back to it's starting point (I suppose you could even push a breakpoint or something on
+		//	to the event stack rather than make custom provisions in frame->run().)  You need to detect double errors though
+		//	where an error occurs in the new code being called so you don't loop infinitely.  You could also somehow package
+		//	the event stack into an exception, clear everything, and then push the error reporting code.
+		/*
+		channel = dynamic_cast<MooThing *>(env->get("channel"));
+		if ((thing = MooThing::lookup(MooTask::current_user())))
+			thing->notify(TNT_STATUS, NULL, channel, e.get());
+		*/
 	}
+	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
 	return(cycles);
 }
 
@@ -139,21 +154,9 @@ int MooTask::release()
 
 }
 
-int MooTask::push_call(MooObject *func, MooObject *arg1, MooObject *arg2, MooObject *arg3)
+int MooTask::push_method_call(const char *name, MooObject *obj, MooObject *arg1, MooObject *arg2, MooObject *arg3)
 {
-	MooObjectArray *args;
-
-	args = new MooObjectArray();
-	if (arg1) {
-		args->set(0, arg1);
-		if (arg2) {
-			args->set(1, arg2);
-			if (arg3)
-				args->set(2, arg3);
-		}
-	}
-
-	return(m_frame->push_call(m_frame->env(), func, args));
+	return(m_frame->push_method_call(name, obj, arg1, arg2, arg3));
 }
 
 int MooTask::push_code(const char *code)
@@ -161,16 +164,12 @@ int MooTask::push_code(const char *code)
 	return(m_frame->push_code(code));
 }
 
-int MooTask::bestow(MooDriver *inter)
-{
-	delete inter;
-	return(-1);
-}
-
-int MooTask::switch_handle(MooDriver *inter, int ready)
+int MooTask::switch_handle(MooDriver *driver, int ready)
 {
 	MooTask::switch_task(this);
-	return(this->handle(inter, ready));
+	// TODO we don't have a handler anymore
+	//return(this->handle(driver, ready));
+	return(0);
 }
 
 MooTask *MooTask::current_task()

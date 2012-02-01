@@ -43,86 +43,60 @@ static inline int moo_is_channel_name(const char *name)
 	return(0);
 }
 
-PseudoServ::PseudoServ()
-{
-	m_bits = 0;
-	m_nick = NULL;
-	m_driver = NULL;
-	m_user = NULL;
-	m_pass = NULL;
-}
 
-PseudoServ::~PseudoServ()
-{
-	this->set_delete();
-	if (m_user)
-		m_user->call_method(NULL, "disconnect", NULL);
-	if (m_nick)
-		delete m_nick;
-	if (m_pass)
-		delete m_pass;
-	if (m_driver)
-		delete m_driver;
-}
+// TODO where would this go? it was in the destructor for pseudoserv
+//	if (m_user)
+//		m_user->call_method(NULL, "disconnect", NULL);
 
-int PseudoServ::handle(MooDriver *driver, int ready)
-{
-	IRCMsg msg;
 
-	if (!(ready & IO_READY_READ))
-		return(-1);
-	try {
-		if (msg.receive(dynamic_cast<MooTCP *>(driver)))
-			return(1);
-		this->dispatch(&msg);
-	}
-	catch (MooException e) {
-		moo_status("IRC: %s", e.get());
-		delete this;
-	}
-	return(0);
-}
-
-int PseudoServ::bestow(MooDriver *driver)
+int irc_pseudoserv_notify(MooCodeFrame *frame, MooObjectArray *args)
+//int irc_notify(MooCodeFrame *frame, MooTCP *driver, int type, MooThing *thing, MooThing *channel, const char *str)
 {
-	if (m_driver)
-		delete m_driver;
-	m_driver = dynamic_cast<MooTCP *>(driver);
-	m_driver->set_task(this);
-	return(0);
-}
-
-int PseudoServ::purge(MooDriver *driver)
-{
-	if (driver != m_driver)
-		return(-1);
-	/// We assume that we were called because the interface is already being deleted, in which case we don't want to delete it too
-	m_driver = NULL;
-	if (!this->is_deleting())
-		delete this;
-	return(0);
-}
-
-int PseudoServ::purge(MooThing *user)
-{
-	if (user != m_user)
-		return(-1);
-	/// We assume that since we were called because the user is already being deleted, in which case we don't want to delete too
-	m_user = NULL;
-	if (!this->is_deleting())
-		delete this;
-	return(0);
-}
-
-int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char *str)
-{
+	MooTCP *driver;
+	MooObject *obj;
 	const char *cmd;
+	const char *nick;
 	const char *thing_name = NULL;
 	const char *channel_name = NULL;
+	MooThing *m_this, *user, *channel;
 
-	if (!m_driver)
-		return(0);
+	if (args->last() != 1)
+		throw moo_args_mismatched;
+	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
+		throw moo_method_object;
+	if (!(user = dynamic_cast<MooThing *>(args->get(1))))
+		throw MooException("IRC: arg 1: Invalid user, expected thing");
+	if (!(driver = dynamic_cast<MooTCP *>(user->resolve_property("conn"))))
+		throw MooException("IRC: Invalid user.conn, expected MooTCP driver");
+	if (!(obj = user->resolve_property("name")) || !(nick = obj->get_string()))
+		throw MooException("IRC: Invalid user.name, notify failed");
 
+	int type;
+	MooTask *task;
+	char buffer[LARGE_STRING_SIZE];
+/*
+
+	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
+		throw moo_method_object;
+	if (!(task = dynamic_cast<MooTask *>(m_this->resolve_property("task"))))
+		throw MooException("User not connected; No \"task\" defined.");
+	if (args->last() != 4)
+		throw moo_args_mismatched;
+	type = args->get_integer(1);
+	user = args->get_thing(2);
+	channel = args->get_thing(3);
+	if (!(obj = args->get(4)))
+		return(-1);
+	obj->to_string(buffer, LARGE_STRING_SIZE);
+	if (type < TNT_FIRST || type > TNT_LAST)
+		throw MooException("arg 1: Invalid notify() type");
+	// TODO permissions check!? I guess on task
+	task->notify(type, user, channel, buffer);
+*/
+
+
+/*
+	// TODO fix this later
 	if (thing)
 		thing_name = thing->name();
 	if (channel)
@@ -133,9 +107,9 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 		char buffer[LARGE_STRING_SIZE];
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (!channel_name)
-			return(IRCMsg::send(m_driver, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, m_nick->c_str(), buffer));
+			return(IRCMsg::send(driver, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, nick, buffer));
 		else
-			return(IRCMsg::send(m_driver, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name, buffer));
+			return(IRCMsg::send(driver, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name, buffer));
 	    }
 	    case TNT_SAY:
 	    case TNT_EMOTE: {
@@ -146,9 +120,9 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 			return(0);
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (type == TNT_SAY)
-			return(IRCMsg::send(m_driver, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
+			return(IRCMsg::send(driver, ":%s!~%s@%s PRIVMSG %s :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
 		else
-			return(IRCMsg::send(m_driver, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION %s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
+			return(IRCMsg::send(driver, ":%s!~%s@%s PRIVMSG %s :\x01\x41\x43TION %s\x01\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, channel_name, buffer));
 		break;
 	    }
 	    case TNT_JOIN:
@@ -160,12 +134,12 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 			return(0);
 		if (thing == m_user) {
 			if (type == TNT_JOIN)
-				return(this->send_join(channel_name));
+				return(irc_send_join(frame, driver, nick, channel_name));
 			else
-				return(this->send_part(channel_name));
+				return(irc_send_part(frame, driver, nick, channel_name));
 		}
 		else
-			return(IRCMsg::send(m_driver, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, channel_name));
+			return(IRCMsg::send(driver, ":%s!~%s@%s %s %s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, cmd, channel_name));
 	    case TNT_QUIT: {
 		char buffer[LARGE_STRING_SIZE];
 
@@ -173,68 +147,108 @@ int PseudoServ::notify(int type, MooThing *thing, MooThing *channel, const char 
 			return(0);
 		moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
 		if (thing != m_user)
-			return(IRCMsg::send(m_driver, ":%s!~%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
+			return(IRCMsg::send(driver, ":%s!~%s@%s QUIT :%s\r\n", thing_name ? thing_name : "Unknown", thing_name ? thing_name : "realm", server_name, buffer));
 		break;
 	    }
 	    default:
 		break;
 	}
+*/
 	return(0);
 }
 
-int PseudoServ::dispatch(IRCMsg *msg)
+int irc_pseudoserv_process(MooCodeFrame *frame, MooObjectArray *args)
 {
+	IRCMsg msg;
+	MooTCP *driver;
+	MooThing *m_this;
+
+	if (args->last() != 1)
+		throw moo_args_mismatched;
+	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
+		throw moo_method_object;
+	if (!(driver = dynamic_cast<MooTCP *>(args->get(1))))
+		throw MooException("Expected MooTCP driver");
+	//if (!(ready & IO_READY_READ))
+	//	return(-1);
+	if (msg.receive(dynamic_cast<MooTCP *>(driver)))
+		return(1);
+	irc_dispatch(frame, m_this, driver, &msg);
+	return(0);
+}
+
+int irc_dispatch(MooCodeFrame *frame, MooThing *m_this, MooTCP *driver, IRCMsg *msg)
+{
+	MooThing *user;
+	MooObject *obj;
+	const char *nick;
+	MooObjectHash *env;
+
 	if (msg->need_more_params())
-		return(IRCMsg::send(m_driver, ":%s %03d %s :Not enough parameters\r\n", server_name, IRC_ERR_NEEDMOREPARAMS, msg->m_cmdtext));
+		return(IRCMsg::send(driver, ":%s %03d %s :Not enough parameters\r\n", server_name, IRC_ERR_NEEDMOREPARAMS, msg->m_cmdtext));
 
 	/// Process messages that are common for pre and post registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PING:
 		if (msg->m_numparams != 1)
-			return(IRCMsg::send(m_driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[0]));
-		IRCMsg::send(m_driver, ":%s PONG %s :%s\r\n", server_name, server_name, msg->m_params[0]);
+			return(IRCMsg::send(driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[0]));
+		IRCMsg::send(driver, ":%s PONG %s :%s\r\n", server_name, server_name, msg->m_params[0]);
 		return(0);
 	    default:
 		break;
 	}
 
-	if (!this->welcomed()) {
+	env = frame->env();
+	user = dynamic_cast<MooThing *>(MooObject::resolve("user", env));
+	if (!user) {
 		switch (msg->cmd()) {
-		    case IRC_MSG_PASS:
-			m_pass = new std::string(msg->m_params[0]);
+		    case IRC_MSG_PASS: {
+			char buffer[STRING_SIZE];
+			user_encrypt_password(msg->m_params[0], buffer, STRING_SIZE);
+			buffer[STRING_SIZE - 1] = '\0';
+			env->set("password", new MooString("%s", buffer));
 			break;
+		    }
 		    case IRC_MSG_NICK: {
 			if (!user_valid_username(msg->m_params[0]))
-				return(IRCMsg::send(m_driver, ":%s %03d %s :Erroneus nickname\r\n", server_name, IRC_ERR_ERRONEUSNICKNAME, msg->m_params[0]));
+				return(IRCMsg::send(driver, ":%s %03d %s :Erroneus nickname\r\n", server_name, IRC_ERR_ERRONEUSNICKNAME, msg->m_params[0]));
 			if (user_logged_in(msg->m_params[0]))
-				return(IRCMsg::send(m_driver, ":%s %03d %s :Nickname is already in use\r\n", server_name, IRC_ERR_NICKNAMEINUSE, msg->m_params[0]));
-			if (m_nick)
-				delete m_nick;
-			m_nick = new std::string(msg->m_params[0]);
-			if (this->received_user())
-				this->login();
+				return(IRCMsg::send(driver, ":%s %03d %s :Nickname is already in use\r\n", server_name, IRC_ERR_NICKNAMEINUSE, msg->m_params[0]));
+			obj = new MooString("%s", msg->m_params[0]);
+			env->set("nick", obj);
+			if (env->get("realname"))
+				irc_login(frame, driver, env);
 			break;
 		    }
 		    case IRC_MSG_USER:
-			m_bits |= IRC_BF_RECEIVED_USER;
-			if (m_nick)
-				this->login();
+			env->set("realname", new MooString("%s", msg->m_params[3]));
+			if (env->get("nick"))
+				irc_login(frame, driver, env);
 			break;
+		    case IRC_MSG_PRIVMSG: {
+			// TODO this is where the restricted unauthenticated stuff gets done (you can only log in and register)
+			//	but I guess really we'll just forward all the messages to and from NickServ or else give the error
+			break;
+		    }
 		    default:
-			return(IRCMsg::send(m_driver, ":%s %03d :You have not registered\r\n", server_name, IRC_ERR_NOTREGISTERED));
+			return(IRCMsg::send(driver, ":%s %03d :You have not registered\r\n", server_name, IRC_ERR_NOTREGISTERED));
 		}
 		return(0);
 	}
+
+	// TODO should you change name to username??
+	obj = user->resolve_property("name");
+	nick = obj->get_string();
 
 	/// Process messages that are only acceptable after registration
 	switch (msg->cmd()) {
 	    case IRC_MSG_PRIVMSG: {
 		int res;
 
-		if (!m_user)
-			return(IRCMsg::send(m_driver, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, m_nick->c_str()));
+		if (!user)
+			return(IRCMsg::send(driver, ":%s NOTICE %s :You aren't logged in yet\r\n", server_name, nick));
 		else if (!msg->m_last)
-			return(IRCMsg::send(m_driver, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
+			return(IRCMsg::send(driver, ":%s %03d :No text to send\r\n", server_name, IRC_ERR_NOTEXTTOSEND));
 		else {
 			MooThing *channel;
 
@@ -246,24 +260,22 @@ int PseudoServ::dispatch(IRCMsg *msg)
 				//channel = MooUser::get(msg->m_params[0]);
 
 			if (!channel)
-				return(IRCMsg::send(m_driver, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
+				return(IRCMsg::send(driver, ":%s %03d %s :Cannot send to channel\r\n", server_name, IRC_ERR_CANNOTSENDTOCHAN, msg->m_params[0]));
 			if (msg->m_last[0] == '.') {
 				//res = channel->call_method(channel, "command", NULL, new MooString("%s", &msg->m_last[1]));
 				//if (res == MOO_ACTION_NOT_FOUND)
 				//	this->notify(TNT_STATUS, NULL, channel, "Pardon?");
-				MooObject *func;
 				MooTask *task;
 
-				task = new MooTask(m_user, channel);
-				if (!(func = channel->resolve_method("command")))
-					return(-1);
-				task->push_call(func, channel, new MooString("%s", &msg->m_last[1]));
+				/// The new frame will extend the current environment as it's base environment
+				task = new MooTask(frame->env());
+				task->push_method_call("command", channel, new MooString("%s", &msg->m_last[1]));
 				task->schedule(0);
 			}
 			else if (msg->m_last[0] == '\x01')
-				this->process_ctcp(msg, channel);
+				irc_process_ctcp(frame, driver, msg, user, channel);
 			else
-				channel->call_method(channel, "say", NULL, new MooString("%s", msg->m_last));
+				frame->push_method_call("say", channel, new MooString("%s", msg->m_last));
 		}
 		return(0);
 	    }
@@ -271,21 +283,21 @@ int PseudoServ::dispatch(IRCMsg *msg)
 		if (moo_is_channel_name(msg->m_params[0])) {
 			// TODO temporary, to satisfy irssi
 			if (msg->m_numparams > 1 && msg->m_params[1][0] == 'b')
-				return(IRCMsg::send(m_driver, ":%s %03d %s %s :End of channel ban list\r\n", server_name, IRC_RPL_ENDOFBANLIST, m_nick->c_str(), msg->m_params[0]));
+				return(IRCMsg::send(driver, ":%s %03d %s %s :End of channel ban list\r\n", server_name, IRC_RPL_ENDOFBANLIST, nick, msg->m_params[0]));
 			// TODO do channel mode command processing
 			// TODO the +r here is just to send something back and should be removed later when properly implemented
-			return(IRCMsg::send(m_driver, ":%s %03d %s %s +\r\n", server_name, IRC_RPL_CHANNELMODEIS, m_nick->c_str(), msg->m_params[0]));
+			return(IRCMsg::send(driver, ":%s %03d %s %s +\r\n", server_name, IRC_RPL_CHANNELMODEIS, nick, msg->m_params[0]));
 		}
 		else {
-			if (strcmp(m_nick->c_str(), msg->m_params[0]))
-				return(IRCMsg::send(m_driver, ":%s %03d :Cannot change mode for other users\r\n", server_name, IRC_ERR_USERSDONTMATCH));
+			if (strcmp(nick, msg->m_params[0]))
+				return(IRCMsg::send(driver, ":%s %03d :Cannot change mode for other users\r\n", server_name, IRC_ERR_USERSDONTMATCH));
 
 			// TODO check for unknown mode flag
-			//return(IRCMsg::send(m_driver, ":%s %03d :Unknown MODE flag\r\n", server_name, IRC_ERR_UMODEUNKNOWNFLAG));
+			//return(IRCMsg::send(driver, ":%s %03d :Unknown MODE flag\r\n", server_name, IRC_ERR_UMODEUNKNOWNFLAG));
 
 			/// User MODE command reply
 			// TODO the +i here is just to send something back and should be removed later when properly implemented
-			return(IRCMsg::send(m_driver, ":%s %03d %s +i\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
+			return(IRCMsg::send(driver, ":%s %03d %s +i\r\n", server_name, IRC_RPL_UMODEIS, msg->m_params[0]));
 		}
 		break;
 	    }
@@ -298,12 +310,12 @@ int PseudoServ::dispatch(IRCMsg *msg)
 			for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
 				if (msg->m_params[0][i] == ',') {
 					msg->m_params[0][i] = '\0';
-					this->handle_join(name);
+					irc_handle_join(frame, driver, name);
 					msg->m_params[0][i] = ',';
 					name = &msg->m_params[0][i + 1];
 				}
 			}
-			this->handle_join(name);
+			irc_handle_join(frame, driver, name);
 		}
 		break;
 	    }
@@ -313,68 +325,71 @@ int PseudoServ::dispatch(IRCMsg *msg)
 		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
 			if (msg->m_params[0][i] == ',') {
 				msg->m_params[0][i] = '\0';
-				this->handle_leave(name);
+				irc_handle_leave(frame, driver, user, name);
 				msg->m_params[0][i] = ',';
 				name = &msg->m_params[0][i + 1];
 			}
 		}
-		this->handle_leave(name);
+		irc_handle_leave(frame, driver, user, name);
 		break;
 	    }
 	    case IRC_MSG_NAMES: {
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
-			return(IRCMsg::send(m_driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
-		/// Cycle through the comma-seperated list of channels to leave
+			return(IRCMsg::send(driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+		/// Cycle through the comma-seperated list of channels to list the names of
 		char *name = &msg->m_params[0][0];
 		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
 			if (msg->m_params[0][i] == ',') {
 				msg->m_params[0][i] = '\0';
-				this->send_names(name);
+				irc_send_names(frame, driver, nick, name);
 				msg->m_params[0][i] = ',';
 				name = &msg->m_params[0][i + 1];
 			}
 		}
-		this->send_names(name);
+		irc_send_names(frame, driver, nick, name);
 		return(0);
 	    }
 	    case IRC_MSG_WHOIS: {
 		// TODO do rest of whois
-		return(IRCMsg::send(m_driver, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, m_nick->c_str()));
+		return(IRCMsg::send(driver, ":%s %03d %s :End of WHOIS list\r\n", server_name, IRC_RPL_ENDOFWHOIS, nick));
 	    }
 	    case IRC_MSG_QUIT: {
-		if (m_user)
-			m_user->quit();
-		IRCMsg::send(m_driver, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", m_nick->c_str(), m_driver->host());
-		delete this;
+		if (user) {
+			MooObject *channels;
+			if ((channels = MooObject::resolve("ChanServ", global_env)))
+				frame->push_method_call("quit", channels);
+		}
+		// TODO you can't do this now until after you process the quit (right??)
+		IRCMsg::send(driver, "ERROR :Closing Link: %s[%s] (Quit: )\r\n", nick, driver->host());
 		return(0);
 	    }
 	    case IRC_MSG_WHO: {
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
-			return(IRCMsg::send(m_driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
-		this->send_who(msg->m_params[0]);
+			return(IRCMsg::send(driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+		irc_send_who(frame, driver, nick, msg->m_params[0]);
 		return(0);
 	    }
 	    case IRC_MSG_LIST: {
 		if (msg->m_numparams > 1 && !strcmp(msg->m_params[1], server_name))
-			return(IRCMsg::send(m_driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
+			return(IRCMsg::send(driver, ":%s %03d %s :No such server\r\n", server_name, IRC_ERR_NOSUCHSERVER, msg->m_params[1]));
 		/// Cycle through the comma-seperated list of channels to leave
 		char *name = &msg->m_params[0][0];
 		for (int i = 0; msg->m_params[0][i] != '\0'; i++) {
 			if (msg->m_params[0][i] == ',') {
 				msg->m_params[0][i] = '\0';
-				this->send_list(name);
+				irc_send_list(frame, driver, nick, name);
 				msg->m_params[0][i] = ',';
 				name = &msg->m_params[0][i + 1];
 			}
 		}
-		this->send_list(name);
+		irc_send_list(frame, driver, nick, name);
 		return(0);
 	    }
 	    case IRC_MSG_PASS:
 	    case IRC_MSG_USER:
-		return(IRCMsg::send(m_driver, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
+		return(IRCMsg::send(driver, ":%s %03d :Unauthorized command (already registered)\r\n", server_name, IRC_ERR_ALREADYREGISTERED));
 	    default:
-		return(IRCMsg::send(m_driver, ":%s %03d %s :Unknown Command\r\n", server_name, IRC_ERR_UNKNOWNCOMMAND, msg->m_params[0]));
+		return(IRCMsg::send(driver, ":%s %03d %s :Unknown Command\r\n", server_name, IRC_ERR_UNKNOWNCOMMAND, msg->m_params[0]));
 	}
 
 	/*
@@ -421,111 +436,100 @@ int PseudoServ::dispatch(IRCMsg *msg)
 	return(0);
 }
 
-int PseudoServ::handle_join(const char *name)
+int irc_handle_join(MooCodeFrame *frame, MooTCP *driver, const char *name)
 {
 	// TODO check for invite only??
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Cannot join channel (+i)\r\n", server_name, IRC_ERR_INVITEONLYCHAN, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Cannot join channel (+i)\r\n", server_name, IRC_ERR_INVITEONLYCHAN, msg->m_params[0]));
 	// TODO check for channel limit? is there one?
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Cannot join channel (+l)\r\n", server_name, IRC_ERR_CHANNELISFULL, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Cannot join channel (+l)\r\n", server_name, IRC_ERR_CHANNELISFULL, msg->m_params[0]));
 	// TODO check for too many channels joined?
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :You have joined too many channels\r\n", server_name, IRC_ERR_TOOMANYCHANNELS, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :You have joined too many channels\r\n", server_name, IRC_ERR_TOOMANYCHANNELS, msg->m_params[0]));
 	// TODO check for banned??
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Cannot join channel (+b)\r\n", server_name, IRC_ERR_BANNEDFROMCHAN, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Cannot join channel (+b)\r\n", server_name, IRC_ERR_BANNEDFROMCHAN, msg->m_params[0]));
 
 	// TODO what are these messages for??
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Cannot join channel (+k)\r\n", server_name, IRC_ERR_BADCHANNELKEY, msg->m_params[0]));
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Bad channel mask\r\n", server_name, IRC_ERR_BADCHANMASK, msg->m_params[0]));
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
-	//	return(IRCMsg::send(m_driver, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Cannot join channel (+k)\r\n", server_name, IRC_ERR_BADCHANNELKEY, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Bad channel mask\r\n", server_name, IRC_ERR_BADCHANMASK, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :<ERRORCODE??> recipients. <ABORTMSG??>\r\n", server_name, IRC_ERR_TOOMANYTARGETS, msg->m_params[0]));
+	//	return(IRCMsg::send(driver, ":%s %03d %s :Nick/channel is temporarily unavailable\r\n", server_name, IRC_ERR_UNAVAILRESOURCE, msg->m_params[0]));
 
 	MooThing *channel = MooThing::get_channel(name);
 	if (!channel)
-		return(IRCMsg::send(m_driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
-	return(channel->call_method(channel, "join", NULL));
+		return(IRCMsg::send(driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	frame->push_method_call("join", channel);
+	return(0);
 }
 
-int PseudoServ::handle_leave(const char *name)
+int irc_handle_leave(MooCodeFrame *frame, MooTCP *driver, MooThing *user, const char *name)
 {
 	MooObjectArray *users;
 
 	MooThing *channel = MooThing::get_channel(name);
 	if (!channel)
-		return(IRCMsg::send(m_driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+		return(IRCMsg::send(driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	if ((users = dynamic_cast<MooObjectArray *>(channel->resolve_property("users")))) {
-		if (users->search(m_user) < 0)
-			return(IRCMsg::send(m_driver, ":%s %03d %s :You're not on that channel\r\n", server_name, IRC_ERR_NOTONCHANNEL, name));
+		if (users->search(user) < 0)
+			return(IRCMsg::send(driver, ":%s %03d %s :You're not on that channel\r\n", server_name, IRC_ERR_NOTONCHANNEL, name));
 	}
-	return(channel->call_method(channel, "leave", NULL));
-}
-
-int PseudoServ::login()
-{
-	char buffer[STRING_SIZE];
-
-	// TODO overwrite buffers used to store password as a security measure
-
-	if (m_pass) {
-		/// We received a password so attempt to log in as the user with the network password
-		strcpy(buffer, m_pass->c_str());
-		user_encrypt_password(m_nick->c_str(), buffer, STRING_SIZE);
-		m_user = user_login(m_nick->c_str(), buffer);
-		/// Free the password whether it was correct or not so it's not lying around
-		delete m_pass;
-		m_pass = NULL;
-		if (!m_user) {
-			IRCMsg::send(m_driver, "ERROR :Closing Link: Invalid password for %s\r\n", m_nick->c_str());
-			delete this;
-			return(0);
-		}
-	}
-	else {
-		/// We received no network password so sign in as a guest
-		try {
-			if (!(m_user = user_make_guest(m_nick->c_str())))
-				throw MooException("Unable to connect as guest");
-		}
-		catch (MooException e) {
-			IRCMsg::send(m_driver, "ERROR :Closing Link: (%s) %s\r\n", m_nick->c_str(), e.get());
-			delete this;
-			return(0);
-		}
-	}
-
-	if (m_user->call_method(NULL, "connect", NULL, this) < 0) {
-		IRCMsg::send(m_driver, "ERROR :Closing Link: Error when logging in to %s\r\n", m_nick->c_str());
-		delete this;
-		return(0);
-	}
-	this->owner(m_user->id());
-	this->send_welcome();
-	return(1);
-}
-
-int PseudoServ::send_welcome()
-{
-	IRCMsg::send(m_driver, ":%s %03d %s :Welcome to the Moo IRC Portal %s!~%s@%s\r\n", server_name, IRC_RPL_WELCOME, m_nick->c_str(), m_nick->c_str(), m_nick->c_str(), m_driver->host());
-	IRCMsg::send(m_driver, ":%s %03d %s :Your host is %s, running version SuperDuperMoo v%s\r\n", server_name, IRC_RPL_YOURHOST, m_nick->c_str(), server_name, server_version);
-	IRCMsg::send(m_driver, ":%s %03d %s :This server was created ???\r\n", server_name, IRC_RPL_CREATED, m_nick->c_str());
-	IRCMsg::send(m_driver, ":%s %03d %s :%s SuperDuperMoo v%s ? ?\r\n", server_name, IRC_RPL_MYINFO, m_nick->c_str(), server_name, server_version);
-	// TODO you can send the 005 ISUPPORT messages as well (which doesn't appear to be defined in the IRC standard)
-
-	this->send_motd();
-	m_bits |= IRC_BF_WELCOMED;
-	if (m_user) {
-		// TODO remove this eventually??  It should be able to work with it in though, so make sure there are no bugs currently
-		this->handle_join("#realm");
-		//IRCMsg::send(m_driver, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, m_nick->c_str(), m_nick->c_str());
-	}
+	frame->push_method_call("join", channel);
 	return(0);
 }
 
-int PseudoServ::send_motd()
+int irc_login(MooCodeFrame *frame, MooTCP *driver, MooObjectHash *env)
+{
+	MooObject *obj;
+	MooThing *user;
+	char buffer[STRING_SIZE];
+	const char *nick, *pass = NULL;
+
+	if (!(obj = env->get("nick")) || (nick = obj->get_string())) {
+		IRCMsg::send(driver, "ERROR :Closing Link: No nick given\r\n");
+		return(0);
+	}
+
+	if ((obj = env->get("pass")) && (pass = obj->get_string())) {
+		/// We received a password so attempt to log in as the user with the network password
+		user = user_login(nick, buffer);
+		if (!user) {
+			IRCMsg::send(driver, "ERROR :Closing Link: Invalid password for %s\r\n", nick);
+			return(0);
+		}
+		// TODO you need to get the server somehow
+		if (!user->resolve_property("driver", driver) || !user->resolve_property("server", &moo_nil)) {
+			IRCMsg::send(driver, "ERROR :Closing Link: Error when logging in to %s\r\n", nick);
+			return(0);
+		}
+		// TODO we need to move this somewhere else or... something (user_login?)
+		frame->owner(user->id());
+	}
+	irc_send_welcome(frame, driver, nick);
+	return(1);
+}
+
+int irc_send_welcome(MooCodeFrame *frame, MooTCP *driver, const char *nick)
+{
+	IRCMsg::send(driver, ":%s %03d %s :Welcome to the Moo IRC Portal %s!~%s@%s\r\n", server_name, IRC_RPL_WELCOME, nick, nick, nick, driver->host());
+	IRCMsg::send(driver, ":%s %03d %s :Your host is %s, running version SuperDuperMoo v%s\r\n", server_name, IRC_RPL_YOURHOST, nick, server_name, server_version);
+	IRCMsg::send(driver, ":%s %03d %s :This server was created ???\r\n", server_name, IRC_RPL_CREATED, nick);
+	IRCMsg::send(driver, ":%s %03d %s :%s SuperDuperMoo v%s ? ?\r\n", server_name, IRC_RPL_MYINFO, nick, server_name, server_version);
+	// TODO you can send the 005 ISUPPORT messages as well (which doesn't appear to be defined in the IRC standard)
+
+	irc_send_motd(frame, driver, nick);
+	//if (user) {
+		// TODO remove this eventually??  It should be able to work with it in though, so make sure there are no bugs currently
+	//	irc_handle_join(frame, driver, "#realm");
+		//IRCMsg::send(driver, ":TheRealm!realm@%s NOTICE %s :Welcome to The Realm of the Jabberwock, %s\r\n", server_name, nick, nick);
+	//}
+	return(0);
+}
+
+int irc_send_motd(MooCodeFrame *frame, MooTCP *driver, const char *nick)
 {
 	char ch;
 	int len, j = 0;
 	char buffer[LARGE_STRING_SIZE];
 
-	IRCMsg::send(m_driver, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, m_nick->c_str(), server_name);
+	IRCMsg::send(driver, ":%s %03d %s :- %s Message of the Day -\r\n", server_name, IRC_RPL_MOTDSTART, nick, server_name);
 	len = moo_data_read_file("etc/motd.txt", buffer, LARGE_STRING_SIZE);
 	for (int i = 0; i <= len; i++) {
 		if (buffer[i] == '\n' || buffer[i] == '\r' || buffer[i] == '\0') {
@@ -534,32 +538,33 @@ int PseudoServ::send_motd()
 				buffer[j + 80] = '\0';
 			else
 				buffer[i] = '\0';
-			IRCMsg::send(m_driver, ":%s %03d %s :- %s\r\n", server_name, IRC_RPL_MOTD, m_nick->c_str(), &buffer[j]);
+			IRCMsg::send(driver, ":%s %03d %s :- %s\r\n", server_name, IRC_RPL_MOTD, nick, &buffer[j]);
 			if (ch == '\r' && buffer[i + 1] == '\n')
 				i++;
 			j = i + 1;
 		}
 	}
-	IRCMsg::send(m_driver, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, m_nick->c_str());
+	IRCMsg::send(driver, ":%s %03d %s :End of /MOTD command.\r\n", server_name, IRC_RPL_ENDOFMOTD, nick);
 	return(0);
 }
 
-int PseudoServ::send_join(const char *name)
+int irc_send_join(MooCodeFrame *frame, MooTCP *driver, const char *nick, const char *name)
 {
-	IRCMsg::send(m_driver, ":%s!~%s@%s JOIN :%s\r\n", m_nick->c_str(), m_nick->c_str(), m_driver->host(), name);
+	IRCMsg::send(driver, ":%s!~%s@%s JOIN :%s\r\n", nick, nick, driver->host(), name);
 	// TODO send topic
-	this->send_names(name);
+	irc_send_names(frame, driver, nick, name);
 	return(0);
 }
 
-int PseudoServ::send_part(const char *name)
+int irc_send_part(MooCodeFrame *frame, MooTCP *driver, const char *nick, const char *name)
 {
-	IRCMsg::send(m_driver, ":%s!~%s@%s PART %s\r\n", m_nick->c_str(), m_nick->c_str(), m_driver->host(), name);
+	IRCMsg::send(driver, ":%s!~%s@%s PART %s\r\n", nick, nick, driver->host(), name);
 	return(0);
 }
 
-int PseudoServ::send_names(const char *name)
+int irc_send_names(MooCodeFrame *frame, MooTCP *driver, const char *nick, const char *name)
 {
+/*
 	MooString *names;
 	MooThing *channel;
 	MooObject *result = NULL;
@@ -569,18 +574,49 @@ int PseudoServ::send_names(const char *name)
 		return(-1);
 	channel = MooThing::get_channel(name);
 	if (!channel)
-		return(IRCMsg::send(m_driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+		return(IRCMsg::send(driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
 	channel->call_method(channel, "names", &result);
 	// TODO break into smaller chunks to guarentee the end message is less than 512 bytes
 	// TODO the '=' should be different depending on if it's a secret, private, or public channel
 	if (result && (names = dynamic_cast<MooString *>(result)))
-		IRCMsg::send(m_driver, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, m_nick->c_str(), name, names->get_string());
-	IRCMsg::send(m_driver, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, m_nick->c_str(), name);
+		IRCMsg::send(driver, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, nick, name, names->get_string());
+	IRCMsg::send(driver, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, nick, name);
 	MOO_DECREF(result);
+	return(0);
+*/
+
+	int j = 0;
+	MooObject *cur;
+	const char *thing_name;
+	MooThing *channel;
+	MooObjectArray *users;
+	char buffer[STRING_SIZE];
+
+	channel = MooThing::get_channel(name);
+	if (!channel)
+		return(IRCMsg::send(driver, ":%s %03d %s :No such channel\r\n", server_name, IRC_ERR_NOSUCHCHANNEL, name));
+	// TODO we need some way to check if the room we are currently in cannot list members (you don't want to list members if you
+	//	are in the cryolocker, for example)
+	if ((users = dynamic_cast<MooObjectArray *>(channel->resolve_property("users")))) {
+		for (int i = 0; i <= users->last(); i++) {
+			cur = users->get(i);
+			// TODO we should check that things are invisible, and also add @ for wizards or something
+			if ((cur = cur->resolve_property("name")) && (thing_name = cur->get_string())) {
+				strncpy(&buffer[i], thing_name, STRING_SIZE - j);
+				j += strlen(thing_name);
+				if (j >= STRING_SIZE)
+					break;
+				buffer[j++] = ' ';
+			}
+		}
+		buffer[j] = '\0';
+		IRCMsg::send(driver, ":%s %03d %s = %s :%s\r\n", server_name, IRC_RPL_NAMREPLY, nick, name, buffer);
+	}
+	IRCMsg::send(driver, ":%s %03d %s %s :End of NAMES list.\r\n", server_name, IRC_RPL_ENDOFNAMES, nick, name);
 	return(0);
 }
 
-int PseudoServ::send_who(const char *mask)
+int irc_send_who(MooCodeFrame *frame, MooTCP *driver, const char *nick, const char *mask)
 {
 	MooObject *cur;
 	const char *thing_name;
@@ -597,16 +633,16 @@ int PseudoServ::send_who(const char *mask)
 				cur = users->get(i);
 				// TODO we should check that things are invisible, and also add @ for wizards or something
 				if ((cur = cur->resolve_property("name")) && (thing_name = cur->get_string())) {
-					IRCMsg::send(m_driver, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, m_nick->c_str(), mask, thing_name, server_name, server_name, thing_name, thing_name);
+					IRCMsg::send(driver, ":%s %03d %s %s %s %s %s %s H :0 %s\r\n", server_name, IRC_RPL_WHOREPLY, nick, mask, thing_name, server_name, server_name, thing_name, thing_name);
 				}
 			}
 		}
 	}
-	IRCMsg::send(m_driver, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, m_nick->c_str(), mask);
+	IRCMsg::send(driver, ":%s %03d %s %s :End of WHO list.\r\n", server_name, IRC_RPL_ENDOFWHO, nick, mask);
 	return(0);
 }
 
-int PseudoServ::send_list(const char *name)
+int irc_send_list(MooCodeFrame *frame, MooTCP *driver, const char *nick, const char *name)
 {
 	const char *str;
 	MooObjectHash *list;
@@ -619,16 +655,16 @@ int PseudoServ::send_list(const char *name)
 			list->reset();
 			while ((cur = list->next())) {
 				if ((obj = cur->resolve_property("name")) && (str = obj->get_string()))
-					IRCMsg::send(m_driver, ":%s %03d %s %s 1 :\r\n", server_name, IRC_RPL_LIST, m_nick->c_str(), str);
+					IRCMsg::send(driver, ":%s %03d %s %s 1 :\r\n", server_name, IRC_RPL_LIST, nick, str);
 			}
 		}
 	}
 
-	IRCMsg::send(m_driver, ":%s %03d %s :End of LIST.\r\n", server_name, IRC_RPL_ENDOFLIST, m_nick->c_str());
+	IRCMsg::send(driver, ":%s %03d %s :End of LIST.\r\n", server_name, IRC_RPL_ENDOFLIST, nick);
 	return(0);
 }
 
-int PseudoServ::process_ctcp(IRCMsg *msg, MooThing *channel)
+int irc_process_ctcp(MooCodeFrame *frame, MooTCP *driver, IRCMsg *msg, MooThing *user, MooThing *channel)
 {
 	if (!strncmp(&msg->m_last[1], "ACTION", 6)) {
 		char buffer[STRING_SIZE];
@@ -636,9 +672,10 @@ int PseudoServ::process_ctcp(IRCMsg *msg, MooThing *channel)
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
 		if (channel)
-			return(channel->call_method(channel, "emote", NULL, new MooString("%s", buffer)));
+			frame->push_method_call("emote", channel, new MooString("%s", buffer));
 		else
-			return(m_user->call_method(NULL, "emote", NULL, new MooString("%s", buffer)));
+			frame->push_method_call("emote", user, new MooString("%s", buffer));
+		return(0);
 	}
 	// TODO process others?? return error??
 	return(0);
@@ -725,5 +762,38 @@ int irc_write_attrib(int type, char *buffer, int max)
 	}
 	return(j);
 }
+
+void moo_load_irc_methods(MooObjectHash *env)
+{
+	env->set("%irc-process", new MooFuncPtr(irc_pseudoserv_process));
+	env->set("%irc-notify", new MooFuncPtr(irc_pseudoserv_notify));
+}
+
+
+/*
+
+(define pseudoserv (root:clone (lambda (this)
+
+	; This is just an example...
+	(define this.server_driver (new-server 6667))
+	(this.server_driver:on_connection pseudoserv 'new_connection)
+
+	(define this:start (lambda (this port)
+
+	))
+
+	(define this:new_connection (lambda (this driver)
+		(loop
+			(driver:wait)
+			(this:process driver))
+	))
+
+	(define this:process %irc-process)
+	(define this:notify %irc-notify)
+
+)))
+
+
+*/
 
 

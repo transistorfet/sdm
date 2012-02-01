@@ -31,7 +31,7 @@ int init_hash(void)
 
 void release_hash(void)
 {
-	MOO_DECREF(hash_methods);
+	hash_methods = NULL;	/// Leave to the GC
 	moo_object_deregister_type(&moo_hash_obj_type);
 }
 
@@ -70,14 +70,14 @@ int MooObjectHash::read_entry(const char *type, MooDataFile *data)
 		data->read_attrib_string("key", key, STRING_SIZE);
 		owner = data->read_attrib_integer("owner");
 		mode = data->read_attrib_integer("mode");
-		if ((obj = MooObject::read_object(data, type_name))) {
+		if (!(obj = MooObject::read_object(data, type_name))) {
 			moo_status("HASH: Error loading entry, %s", key);
 			return(-1);
 		}
 		this->set(key, obj, owner, mode);
 	}
 	else
-		return(MooObject::read_entry(type, data));
+		return(MooMutable::read_entry(type, data));
 	return(MOO_HANDLED);
 }
 
@@ -189,11 +189,11 @@ MooObject *MooObjectHash::access_method(const char *name, MooObject *value)
 	return(hash_methods->get(name));
 }
 
-/************************
+/***********************
  * Hash Object Methods *
- ************************/
+ ***********************/
 
-static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_get(MooCodeFrame *frame, MooObjectArray *args)
 {
 	const char *name;
 	MooObjectHash *m_this;
@@ -208,7 +208,7 @@ static int hash_get(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_set(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	MooObject *obj;
@@ -226,7 +226,7 @@ static int hash_set(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *arg
 	return(0);
 }
 
-static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_remove(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int res;
 	const char *name;
@@ -242,7 +242,7 @@ static int hash_remove(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *
 	return(0);
 }
 
-static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_keys(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObjectHash *m_this;
 	MooObjectArray *array;
@@ -260,7 +260,7 @@ static int hash_keys(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *ar
 	return(0);
 }
 
-static int hash_to_array(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_to_array(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObjectHash *m_this;
 	MooObjectArray *array;
@@ -326,7 +326,7 @@ class HashEventForeach : public MooCodeEvent {
 	}
 };
 
-static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray *args)
+static int hash_foreach(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *func;
 	MooObjectHash *m_this;
@@ -337,7 +337,7 @@ static int hash_foreach(MooCodeFrame *frame, MooObjectHash *env, MooObjectArray 
 		throw moo_args_mismatched;
 	func = args->get(1);
 	frame->set_return(&moo_true);
-	frame->push_event(new HashEventForeach(0, NULL, m_this, env, func));
+	frame->push_event(new HashEventForeach(0, NULL, m_this, frame->env(), func));
 	return(0);
 }
 

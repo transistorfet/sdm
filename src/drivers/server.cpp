@@ -72,6 +72,22 @@ int MooServer::write_data(MooDataFile *data)
 	return(0);
 }
 
+int MooServer::handle(int ready)
+{
+	MooTask *task;
+
+	if (!(ready & IO_READY_READ))
+		return(-1);
+	task = new MooTask();
+	// TODO how will you start the new task? You will probably want to run a method on the server thing but should it be selectable?
+	// 	how will it be set? (since we write our data though, it only has to be set once, at creation)
+	task->push_code("(print \"What the fuck do I do\")");
+	task->schedule(0);
+	task = NULL;	/// The task will be destroyed when it finishes executing
+	return(0);
+}
+
+
 int MooServer::listen(int port)
 {
 	struct sockaddr_in saddr;

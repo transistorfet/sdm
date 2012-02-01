@@ -36,6 +36,7 @@ class MooCodeFrame : public MooObject {
 	int push_event(MooCodeEvent *event);
 	int push_block(MooObjectHash *env, MooCodeExpr *expr);
 	int push_call(MooObjectHash *env, MooObject *func, MooObjectArray *args);
+	int push_method_call(const char *name, MooObject *obj, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL);
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
 
@@ -51,13 +52,15 @@ class MooCodeFrame : public MooObject {
 	MooObject *get_return() { return(m_return); }		// TODO should this destroy a reference
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
-	void set_user_channel(MooObject *user, MooObject *channel);
+	MooObjectHash *extend_env();
 
 	void print_stacktrace();
 
     private:
 	friend class MooTask;
 	friend class FrameEventRelegate;
+	// TODO this is just here temporarily until we fix it
+	friend int irc_login(MooCodeFrame *frame, class MooTCP *driver, class MooObjectHash *env);
 	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
 
     public:
