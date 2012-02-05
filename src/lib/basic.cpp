@@ -749,15 +749,13 @@ static int basic_return(MooCodeFrame *frame, MooObjectArray *args)
 static int basic_sleep(MooCodeFrame *frame, MooObjectArray *args)
 {
 	double time;
-	MooTask *task;
 
 	if (args->last() != 0)
 		throw moo_args_mismatched;
 	time = args->get_float(0);
-	if (!(task = MooTask::current_task()))
-		throw MooException("No current task (???)");
-	task->schedule(time);
-	throw MooCodeFrameSuspend();
+	frame->schedule(time);
+	// TODO this should be redundant
+	//throw MooCodeFrameSuspend();
 }
 
 static int basic_time(MooCodeFrame *frame, MooObjectArray *args)

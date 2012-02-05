@@ -23,58 +23,26 @@
 
 typedef int moo_tid_t;
 
-class MooUser;
-class MooThing;
-class MooDriver;
-class MooCodeFrame;
-class MooObjectHash;
-class MooObjectArray;
-
-class MooTask : public MooObject {
-	moo_tid_t m_tid;
-	moo_tid_t m_parent_tid;
-	MooCodeFrame *m_frame;
-
+class MooTaskQueueEntry {
     public:
-	MooTask();
-	MooTask(MooObjectHash *env);
-	virtual ~MooTask();
-	void init(MooObjectHash *env);
-
-	static int run_idle();
-	void schedule(double time);
-
-	int initialize();
-	int idle();
-	int release();
-
-	int push_method_call(const char *name, MooObject *obj, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL);
-	int push_code(const char *code);
-
-	/**
-	 * Notify the task of an event from the user object.  If channel is NULL, then it's a message from
-	 * the realm, otherwise it is from a specific channel.  If thing is NULL, then it's from a status
-	 * message from the realm.  Type determines the type of message (eg. say, emote, join, part, quit,
-	 * etc).  The str may be used or not depending on type. */
-	virtual int notify(int type, MooThing *thing, MooThing *channel, const char *str) { return(-1); }
-
-	/// Accessors
-	int switch_handle(MooDriver *driver, int ready);
-	static MooTask *current_task();
-	static moo_id_t current_owner();
-	static moo_id_t current_user();
-
-    private:
-	friend class MooObject;
-	friend class FrameEventRelegate;
-	static moo_id_t current_owner(moo_id_t id);
-	static moo_id_t current_owner(MooTask *task, moo_id_t id);
-	static int switch_task(MooTask *task);
-	static int suid(MooObject *obj, MooCodeFrame *frame);
+	MooTaskQueueEntry(double time, MooCodeFrame *frame) { m_time = time; m_frame = frame; m_next = NULL; m_prev = NULL; }
+	double m_time;
+	MooCodeFrame *m_frame;
+	MooTaskQueueEntry *m_next;
+	MooTaskQueueEntry *m_prev;
 };
 
-int init_task(void);
-void release_task(void);
+class MooTaskQueue {
+	MooTaskQueueEntry *m_first;
+	MooTaskQueueEntry *m_last;
+
+    public:
+	MooTaskQueue();
+	~MooTaskQueue();
+
+	int schedule(MooCodeFrame *frame, double time);
+	MooCodeFrame *consume();
+};
 
 #endif
 

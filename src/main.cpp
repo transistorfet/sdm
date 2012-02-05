@@ -25,8 +25,8 @@
 
 static int exit_flag = 1;
 
+int parse_args(int argc, char **argv);
 int serverloop(void);
-
 static void handle_sigint(int);
 
 extern int moo_load_basic_funcs(MooObjectHash *env);
@@ -50,7 +50,7 @@ int init_moo(void)
 		init_array();
 		init_hash();
 
-		init_task();
+		init_frame();
 		init_driver();
 		init_tcp();
 
@@ -70,11 +70,12 @@ int init_moo(void)
 		// TODO #0:boot must create the listener task)
 		//load_global_config();
 
-		MooTask *task;
-		task = new MooTask();
-		task->push_code("(load \"code/core-seed.moo\")");
-		//task->push_code("(loop (debug \"Looping...\"))");
-		task->schedule(0);
+		MooCodeFrame *frame;
+		frame = new MooCodeFrame();
+		frame->owner(0);
+		frame->push_code("(load \"code/core-seed.moo\")");
+		//frame->push_code("(loop (debug \"Looping...\"))");
+		frame->schedule(0);
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());
@@ -98,7 +99,7 @@ void release_moo(void)
 
 	release_tcp();
 	release_driver();
-	release_task();
+	release_frame();
 
 	release_mutable();
 	release_object();
@@ -111,6 +112,9 @@ void release_moo(void)
  */
 int main(int argc, char **argv)
 {
+	if (parse_args(argc, argv))
+		return(-1);
+
 	if (init_moo()) {
 		printf("Failed to initialize moo\n");
 		release_moo();
@@ -127,7 +131,7 @@ int serverloop(void)
 {
 	while (exit_flag) {
 		MooDriver::wait(1);
-		MooTask::run_idle();
+		MooCodeFrame::run_all();
 	}
 	return(0);
 }
@@ -136,6 +140,52 @@ static void handle_sigint(int signum)
 {
 	printf("\nShutting down...\n");
 	exit_flag = 0;
+}
+
+
+/*
+ * Parse Command Line
+ *
+ * -r
+ * --readonly
+ *   The database is read only.  No modified data will be written to disc.
+ *
+ * -d <database>
+ * --db <database>
+ *   Specify the directory containing the object database.  Default: data/objs/ (???)
+ *
+ * -i
+ * --interactive
+ *   Interactive mode (commands can be entered like an interpreter)
+ *
+ * --bare
+ *   Start with no objects.
+ *
+ * --bootstrap
+ *   Bootstrap a basic database.
+ *
+ * -e <code>
+ * --run <code>
+ *   Run the moocode provided.  (Calling the save function from the code provided will write changes to disc).
+ *
+ * -l <file>
+ * --load <file>
+ *   Load and run the provided file.
+ */
+int parse_args(int argc, char **argv)
+{
+	int i;
+
+	for (i = 1; i < argc; i++) {
+		if (argv[i][0] == '-') {
+			// TODO implement them all
+		}
+		else {
+			/// We don't accept any non-flag arguments
+			return(-1);
+		}
+	}
+	return(0);
 }
 
 

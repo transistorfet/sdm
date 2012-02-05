@@ -18,6 +18,8 @@
 #include <sdm/objs/object.h>
 #include <sdm/drivers/driver.h>
 
+#include <sdm/code/code.h>
+
 #define DRIVER_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
 static MooArray<MooDriver *> *driver_list = NULL;
@@ -43,7 +45,7 @@ MooDriver::MooDriver()
 	m_efd = -1;
 
 	// TODO should this instead be set by the function that creates the driver?
-	m_owner = MooTask::current_owner();
+	m_owner = MooCodeFrame::current_owner();
 	driver_list->add(this);
 }
 

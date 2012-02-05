@@ -72,7 +72,7 @@ int irc_pseudoserv_notify(MooCodeFrame *frame, MooObjectArray *args)
 		throw MooException("IRC: Invalid user.name, notify failed");
 
 	int type;
-	MooTask *task;
+	//MooTask *task;
 	char buffer[LARGE_STRING_SIZE];
 /*
 
@@ -265,12 +265,13 @@ int irc_dispatch(MooCodeFrame *frame, MooThing *m_this, MooTCP *driver, IRCMsg *
 				//res = channel->call_method(channel, "command", NULL, new MooString("%s", &msg->m_last[1]));
 				//if (res == MOO_ACTION_NOT_FOUND)
 				//	this->notify(TNT_STATUS, NULL, channel, "Pardon?");
-				MooTask *task;
+				MooCodeFrame *frame;
 
 				/// The new frame will extend the current environment as it's base environment
-				task = new MooTask(frame->env());
-				task->push_method_call("command", channel, new MooString("%s", &msg->m_last[1]));
-				task->schedule(0);
+				frame = new MooCodeFrame(frame->env());
+				frame->push_method_call("command", channel, new MooString("%s", &msg->m_last[1]));
+				frame->schedule(0);
+				frame = NULL;
 			}
 			else if (msg->m_last[0] == '\x01')
 				irc_process_ctcp(frame, driver, msg, user, channel);

@@ -16,7 +16,7 @@
 
 extern class MooCodeFrame *g_current_frame;
 
-class MooCodeFrame : public MooObject {
+class MooCodeFrame {
 	moo_id_t m_owner;
 	MooArray<MooCodeEvent *> *m_stack;
 	MooObject *m_return;
@@ -28,9 +28,6 @@ class MooCodeFrame : public MooObject {
 	virtual ~MooCodeFrame();
 	int clear();
 
-	virtual int read_entry(const char *type, MooDataFile *data);
-	virtual int write_data(MooDataFile *data);
-
 	int eval(const char *code, MooObjectArray *args = NULL);
 
 	int push_event(MooCodeEvent *event);
@@ -40,7 +37,10 @@ class MooCodeFrame : public MooObject {
 	int push_code(const char *code);
 	int push_debug(const char *msg, ...);
 
-	int run(int limit = 0);
+	static int run_all();
+	int schedule(double time);
+	int run();
+	int do_run(int limit = 0);
 	int mark_return_point();
 	int goto_return_point(int level = 1);
 	int mark_exception(MooCodeExpr *handler);
@@ -56,23 +56,23 @@ class MooCodeFrame : public MooObject {
 
 	void print_stacktrace();
 
-    private:
-	friend class MooTask;
-	friend class FrameEventRelegate;
-	// TODO this is just here temporarily until we fix it
-	friend int irc_login(MooCodeFrame *frame, class MooTCP *driver, class MooObjectHash *env);
-	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
-
     public:
 	moo_id_t owner() { return(m_owner); }
 	static moo_id_t current_owner() { if (g_current_frame) return(g_current_frame->owner()); return(-1); } 
+	static MooCodeFrame *current_frame() { return(g_current_frame); } 
+
+    private:
+	friend class FrameEventRelegate;
+	// TODO this is just here temporarily until we fix it
+	friend int irc_login(MooCodeFrame *frame, class MooTCP *driver, class MooObjectHash *env);
+	friend int init_moo();
+	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
 };
 
 class MooCodeFrameSuspend { };
 
-extern MooObjectType moo_code_frame_obj_type;
-
-MooObject *load_moo_code_frame(MooDataFile *data);
+int init_frame(void);
+void release_frame(void);
 
 #endif
 

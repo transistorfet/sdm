@@ -19,7 +19,6 @@ MooObjectHash *global_env = NULL;
 int init_moo_code(void)
 {
 	moo_object_register_type(&moo_code_expr_obj_type);
-	moo_object_register_type(&moo_code_frame_obj_type);
 	moo_object_register_type(&moo_code_lambda_obj_type);
 	if (global_env)
 		return(1);

@@ -180,6 +180,10 @@
     TODO:
 	* change all dynamic casts to typeid compares + static cast
 	* go through all destructors and have them set all values to NULL instead of just freeing them, to help the garbage collector
+	* should you rename MooCodeFrame to MooTask?
+	* add command line parsing: can specify the database location, and/or a source file to execute instead of running the system
+	  as well as whether to load databaseless, or non-persistent, basically
+	* make a command line test suite (or use one already available)
 
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
 	  IS THIS NEEDED ANYMORE??

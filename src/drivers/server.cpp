@@ -74,16 +74,16 @@ int MooServer::write_data(MooDataFile *data)
 
 int MooServer::handle(int ready)
 {
-	MooTask *task;
+	MooCodeFrame *frame;
 
 	if (!(ready & IO_READY_READ))
 		return(-1);
-	task = new MooTask();
+	frame = new MooCodeFrame();
 	// TODO how will you start the new task? You will probably want to run a method on the server thing but should it be selectable?
 	// 	how will it be set? (since we write our data though, it only has to be set once, at creation)
-	task->push_code("(print \"What the fuck do I do\")");
-	task->schedule(0);
-	task = NULL;	/// The task will be destroyed when it finishes executing
+	frame->push_code("(print \"What the fuck do I do\")");
+	frame->schedule(0);
+	frame = NULL;	/// The task will be destroyed when it finishes executing
 	return(0);
 }
 

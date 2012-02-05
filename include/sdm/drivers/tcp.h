@@ -25,7 +25,7 @@ class MooTCP : public MooDriver {
 	int m_read_length;
 	char m_read_buffer[TCP_READ_BUFFER];
 	std::string *m_host;
-	MooTask *m_task;
+	MooCodeFrame *m_frame;
 
     public:
 	MooTCP();
@@ -49,7 +49,7 @@ class MooTCP : public MooDriver {
 	int receive(char *data, int len, char delim);
 	int send(const char *data, int len = -1);
 
-	int wait_for_data();
+	int wait_for_data(MooCodeFrame *frame);
 
     private:
 	//virtual MooObject *access_property(const char *name, MooObject *value = NULL);

@@ -89,12 +89,9 @@ const MooObjectType *MooObject::objtype()
 
 int MooObject::is_true()
 {
-	MooBoolean *b;
-
-	// TODO change this to a static call??
-	if (!(b = dynamic_cast<MooBoolean *>(this)))
-		return(1);
-	return(b->value() != B_FALSE);
+	if (this == &moo_false)
+		return(0);
+	return(1);
 }
 
 int MooObject::read_data(MooDataFile *data)

@@ -21,15 +21,21 @@ struct MooObjectType moo_boolean_obj_type = {
 
 MooObject *load_moo_boolean(MooDataFile *data)
 {
-	// TODO this needs to be changed
-	MooBoolean *obj = new MooBoolean(B_FALSE);
-	if (data)
-		obj->read_data(data);
-	return(obj);
+	char buffer[STRING_SIZE];
+
+	data->read_string_entry(buffer, STRING_SIZE);
+	if (buffer[0] == '#' && buffer[1] != '\0' && buffer[2] == '\0') {
+		if (buffer[1] == 't' || buffer[1] == 'T')
+			return(&moo_true);
+		else if (buffer[1] == 'f' || buffer[1] == 'f')
+			return(&moo_false);
+	}
+	return(NULL);
 }
 
 int MooBoolean::read_entry(const char *type, MooDataFile *data)
 {
+	// TODO is this now not needed?
 	if (!strcmp(type, "value")) {
 		char buffer[STRING_SIZE];
 

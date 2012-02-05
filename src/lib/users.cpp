@@ -12,6 +12,7 @@
 
 #include <sdm/code/code.h>
 #include <sdm/objs/thing.h>
+#include <sdm/drivers/driver.h>
 
 #include <sdm/lib/users.h>
 
@@ -50,7 +51,7 @@ int user_logged_in(const char *name)
 		moo_status("USER: No such user in NickServ, %s", name);
 		return(0);
 	}
-	if (dynamic_cast<MooTask *>(user->resolve_property(name)))
+	if (dynamic_cast<MooDriver *>(user->resolve_property("driver")))
 		return(1);
 	return(0);
 }
@@ -142,12 +143,13 @@ void user_encrypt_password(const char *salt, char *passwd, int max)
 static int user_notify(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int type;
-	MooTask *task;
+//	MooTask *task;
 	MooObject *obj;
 	MooThing *user, *channel;
 	MooThing *m_this;
 	char buffer[LARGE_STRING_SIZE];
 
+/*
 	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
 	if (!(task = dynamic_cast<MooTask *>(m_this->resolve_property("task"))))
@@ -164,6 +166,7 @@ static int user_notify(MooCodeFrame *frame, MooObjectArray *args)
 		throw MooException("arg 1: Invalid notify() type");
 	// TODO permissions check!? I guess on task
 	task->notify(type, user, channel, buffer);
+*/
 	return(0);
 }
 

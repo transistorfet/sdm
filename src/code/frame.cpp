@@ -16,7 +16,13 @@
 
 #include <sdm/code/code.h>
 
+//#define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
+
 MooCodeFrame *g_current_frame = NULL;
+
+/******************
+ * Special Events *
+ ******************/
 
 class FrameEventDebug : public MooCodeEvent {
 	std::string m_msg;
@@ -47,26 +53,33 @@ class FrameEventCatch : public MooCodeEvent {
 	int handle(MooCodeFrame *frame);
 };
 
-
-MooObjectType moo_code_frame_obj_type = {
-	"frame",
-	typeid(MooCodeFrame).name(),
-	(moo_type_load_t) load_moo_code_frame
-};
+/****************
+ * MooCodeFrame *
+ ****************/
 
 extern MooObjectHash *global_env;
 
-MooObject *load_moo_code_frame(MooDataFile *data)
+//static MooArray<MooCodeFrame *> *g_task_list = NULL;
+static MooTaskQueue *g_task_queue = NULL;
+
+int init_frame(void)
 {
-	MooCodeFrame *obj = new MooCodeFrame();
-	if (data)
-		obj->read_data(data);
-	return(obj);
+	if (g_task_queue)
+		return(1);
+//	g_task_list = new MooArray<MooCodeFrame *>(MOO_ARRAY_DEFAULT_SIZE, -1, TASK_LIST_BITS);
+	g_task_queue = new MooTaskQueue();
+	return(0);
+}
+
+void release_frame(void)
+{
+	delete g_task_queue;
+//	delete g_task_list;
 }
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 {
-	m_owner = MooTask::current_owner();
+	m_owner = g_current_frame ? g_current_frame->m_owner : -1;
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
 	m_return = NULL;
 	m_exception = NULL;
@@ -76,6 +89,8 @@ MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 
 MooCodeFrame::~MooCodeFrame()
 {
+	if (this == g_current_frame)
+		g_current_frame = NULL;
 	MOO_DECREF(m_stack);
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_return);
@@ -89,18 +104,6 @@ int MooCodeFrame::clear()
 
 	while ((event = m_stack->pop()))
 		delete event;
-	return(0);
-}
-
-int MooCodeFrame::read_entry(const char *type, MooDataFile *data)
-{
-	moo_status("DATA: Attempting to read unreadable type: MooCodeFrame (%x)", this);
-	return(0);
-}
-
-int MooCodeFrame::write_data(MooDataFile *data)
-{
-	moo_status("DATA: Attempting to write unwritable type: MooCodeFrame (%x)", this);
 	return(0);
 }
 
@@ -179,7 +182,61 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 	return(m_stack->push(new FrameEventDebug(buffer)));
 }
 
-int MooCodeFrame::run(int limit)
+int MooCodeFrame::run_all()
+{
+	int ret = 0;
+	MooCodeFrame *frame;
+
+	while ((frame = g_task_queue->consume())) {
+		if (frame->run())
+			ret = 1;
+	}
+	return(ret);
+}
+
+int MooCodeFrame::schedule(double time)
+{
+	// TODO remove the task before rescheduling it
+	g_task_queue->schedule(this, time);
+	if (g_current_frame == this)
+		throw MooCodeFrameSuspend();
+	return(0);
+}
+
+int MooCodeFrame::run()
+{
+	int cycles;
+	clock_t start;
+
+	start = clock();
+	try {
+		cycles = this->do_run();
+	}
+	catch (MooException e) {
+		// TODO temporary for debugging purposes??
+		moo_status("CODE: %s", e.get());
+		this->print_stacktrace();
+		cycles = -1;
+
+		//this->clear();
+
+		// TODO you need some way of reporting the error back to the user
+		// TODO the problem is you need to call basic_print, but it requires a frame and it calls a method, so you need to
+		//	either run the frame back to it's starting point (I suppose you could even push a breakpoint or something on
+		//	to the event stack rather than make custom provisions in frame->run().)  You need to detect double errors though
+		//	where an error occurs in the new code being called so you don't loop infinitely.  You could also somehow package
+		//	the event stack into an exception, clear everything, and then push the error reporting code.
+		/*
+		channel = dynamic_cast<MooThing *>(env->get("channel"));
+		if ((thing = MooThing::lookup(MooTask::current_user())))
+			thing->notify(TNT_STATUS, NULL, channel, e.get());
+		*/
+	}
+	//moo_status("Executed (%s ...) in %f seconds", name, ((float) clock() - start) / CLOCKS_PER_SEC);
+	return(cycles);
+}
+
+int MooCodeFrame::do_run(int limit)
 {
 	int cycles = 0;
 	MooObjectHash *base;
@@ -327,7 +384,7 @@ int MooCodeFrame::elevate(MooObject *obj)
 	/// If there is no difference in owner, then don't evelate in the first place.
 	//if (obj->owner() == this->owner())
 	//	return(0);
-	this->push_event(new FrameEventRelegate(m_owner));
+	//this->push_event(new FrameEventRelegate(m_owner));
 	// TODO FIX THIS!!!
 	// TODO this is the only time you need a different owner; in this case the owner of the function, which would otherwise be stored
 	//	in the hash entry where this object was originially found, but now we don't have it... We could possibly add a MooObject

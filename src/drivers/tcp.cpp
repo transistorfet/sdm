@@ -310,13 +310,13 @@ void MooTCP::clear_buffer()
 	m_read_length = 0;
 }
 
-int MooTCP::wait_for_data()
+int MooTCP::wait_for_data(MooCodeFrame *frame)
 {
-	if (m_task)
+	if (!frame)
+		throw MooException("TCP: No frame given, aborting wait.");
+	if (m_frame)
 		throw MooException("TCP: Another task is waiting, aborting.");
-	m_task = MooTask::current_task();
-	if (!m_task)
-		throw MooException("TCP: No task currently running, aborting wait.");
+	m_frame = frame;
 
 	/// If data is available, then return right away
 	if (this->check_ready(IO_READY_READ))
@@ -327,9 +327,9 @@ int MooTCP::wait_for_data()
 
 int MooTCP::handle(int ready)
 {
-	if (m_task) {
-		m_task->schedule(0);
-		m_task = NULL;
+	if (m_frame) {
+		m_frame->schedule(0);
+		m_frame = NULL;
 	}
 	return(0);
 }
@@ -347,7 +347,7 @@ static int tcp_wait(MooCodeFrame *frame, MooObjectArray *args)
 		throw moo_args_mismatched;
 	if (!(m_this = dynamic_cast<MooTCP *>(args->get(0))))
 		throw moo_method_object;
-	m_this->wait_for_data();
+	m_this->wait_for_data(frame);
 	return(0);
 }
 
