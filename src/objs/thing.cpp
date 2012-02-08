@@ -21,26 +21,14 @@
 #include <sdm/code/code.h>
 
 
+static MooObjectHash *thing_methods = new MooObjectHash();
+
+
 MooObjectType moo_thing_obj_type = {
 	"thing",
 	typeid(MooThing).name(),
 	(moo_type_load_t) load_moo_thing
 };
-
-static MooObjectHash *thing_methods = new MooObjectHash();
-void moo_load_thing_methods(MooObjectHash *env);
-
-int init_thing(void)
-{
-	moo_object_register_type(&moo_thing_obj_type);
-	moo_load_thing_methods(thing_methods);
-	return(0);
-}
-
-void release_thing(void)
-{
-	moo_object_deregister_type(&moo_thing_obj_type);
-}
 
 MooObject *load_moo_thing(MooDataFile *data)
 {
@@ -59,10 +47,15 @@ MooObject *load_moo_thing(MooDataFile *data)
 	return(obj);
 }
 
+/***********************
+ * MooThing Definition *
+ ***********************/
+
 MooThing::MooThing(moo_id_t id, moo_id_t parent, moo_id_t owner, moo_mode_t mode)
 {
 	// TODO temporary since we haven't properly dealt with refcounting/thingrefs
 	this->set_nofree();
+	this->assign_id(id);
 
 	// TODO you should set these to be unassignable or something
 	m_properties = new MooObjectHash();
@@ -329,42 +322,28 @@ int MooChannel::valid_channelname(const char *name)
 static int thing_clone(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooObject *func;
-	MooObject *id = NULL;
 	MooObjectArray *newargs;
 	MooThing *thing, *parent;
-	moo_id_t idnum = MOO_NEW_ID;
 
 	if (!(parent = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
-	if (args->last() == 1)
-		func = args->get(1);
-	else if (args->last() == 2) {
-		id = args->get(1);
-		func = args->get(2);
-	}
-	else
-		throw moo_args_mismatched;
-	if (id)
-		idnum = id->get_integer();
 
 	// TODO permissions check!!!
-	thing = parent->clone(idnum);
-	frame->push_event(new MooCodeEventEvalExpr(frame->env(), new MooCodeExpr(0, 0, MCT_OBJECT, thing, NULL)));
-	if (func) {
-		newargs = new MooObjectArray();
-		newargs->set(0, thing);
-		frame->push_call(frame->env(), func, newargs);
-	}
+	thing = parent->clone(MOO_NEW_ID);
 
 	/// Call the 'initialize' method of each parent object (Most distant parent will be called first)
 	while (parent) {
 		if ((func = parent->resolve_method("initialize"))) {
 			newargs = new MooObjectArray();
 			newargs->set(0, thing);
+			for (int i = 1; i <= args->last(); i++)
+				newargs->set(i, args->get(i));
 			frame->push_call(frame->env(), func, newargs);
 		}
 		parent = parent->parent();
 	}
+	newargs = NULL;
+	frame->set_return(thing);
 	return(0);
 }
 
@@ -577,6 +556,7 @@ void moo_load_thing_methods(MooObjectHash *env)
 {
 	// TODO this is wrong because it will *effectively* add these methods to all things without setting permissions for them
 	// 	which i *think* will make them all (specifically %save_all) executable by anyone
+	env->set("clone", new MooFuncPtr(thing_clone));
 	env->set("%clone", new MooFuncPtr(thing_clone));
 	env->set("%load", new MooFuncPtr(thing_load));
 	env->set("%save", new MooFuncPtr(thing_save));
@@ -588,4 +568,15 @@ void moo_load_thing_methods(MooObjectHash *env)
 	//env->set("%command", new MooFuncPtr(parse_command));
 }
 
+int init_thing(void)
+{
+	moo_object_register_type(&moo_thing_obj_type);
+	moo_load_thing_methods(thing_methods);
+	return(0);
+}
+
+void release_thing(void)
+{
+	moo_object_deregister_type(&moo_thing_obj_type);
+}
 

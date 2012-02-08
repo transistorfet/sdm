@@ -13,27 +13,15 @@
 
 #include <sdm/objs/hash.h>
 
+
+static MooObjectHash *hash_methods = new MooObjectHash();
+
+
 struct MooObjectType moo_hash_obj_type = {
 	"hash",
 	typeid(MooObjectHash).name(),
 	(moo_type_load_t) load_moo_hash
 };
-
-static MooObjectHash *hash_methods = new MooObjectHash();
-void moo_load_hash_methods(MooObjectHash *env);
-
-int init_hash(void)
-{
-	moo_object_register_type(&moo_hash_obj_type);
-	moo_load_hash_methods(hash_methods);
-	return(0);
-}
-
-void release_hash(void)
-{
-	hash_methods = NULL;	/// Leave to the GC
-	moo_object_deregister_type(&moo_hash_obj_type);
-}
 
 MooObject *load_moo_hash(MooDataFile *data)
 {
@@ -51,6 +39,10 @@ MooObject *load_moo_hash(MooDataFile *data)
 	}
 	return(obj);
 }
+
+/****************************
+ * MooObjectHash Definition *
+ ****************************/
 
 MooObjectHash::MooObjectHash(MooObjectHash *parent, int size, int bits) : MooHash<MooObject *>(size, bits, (void (*)(MooObject *)) MooGC::decref)
 {
@@ -351,4 +343,16 @@ void moo_load_hash_methods(MooObjectHash *env)
 	env->set("foreach", new MooFuncPtr(hash_foreach));
 }
 
+int init_hash(void)
+{
+	moo_object_register_type(&moo_hash_obj_type);
+	moo_load_hash_methods(hash_methods);
+	return(0);
+}
+
+void release_hash(void)
+{
+	hash_methods = NULL;	/// Leave to the GC
+	moo_object_deregister_type(&moo_hash_obj_type);
+}
 

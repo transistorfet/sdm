@@ -33,6 +33,10 @@ MooObject *load_moo_boolean(MooDataFile *data)
 	return(NULL);
 }
 
+/*************************
+ * MooBoolean Definition *
+ *************************/
+
 int MooBoolean::read_entry(const char *type, MooDataFile *data)
 {
 	// TODO is this now not needed?

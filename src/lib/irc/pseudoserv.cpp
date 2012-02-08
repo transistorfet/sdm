@@ -171,7 +171,7 @@ int irc_pseudoserv_process(MooCodeFrame *frame, MooObjectArray *args)
 		throw MooException("Expected MooTCP driver");
 	//if (!(ready & IO_READY_READ))
 	//	return(-1);
-	if (msg.receive(dynamic_cast<MooTCP *>(driver)))
+	if (msg.receive(driver))
 		return(1);
 	irc_dispatch(frame, m_this, driver, &msg);
 	return(0);

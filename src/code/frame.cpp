@@ -53,10 +53,6 @@ class FrameEventCatch : public MooCodeEvent {
 	int handle(MooCodeFrame *frame);
 };
 
-/****************
- * MooCodeFrame *
- ****************/
-
 extern MooObjectHash *global_env;
 
 //static MooArray<MooCodeFrame *> *g_task_list = NULL;
@@ -76,6 +72,11 @@ void release_frame(void)
 	delete g_task_queue;
 //	delete g_task_list;
 }
+
+
+/***************************
+ * MooCodeFrame Definition *
+ ***************************/
 
 MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 {

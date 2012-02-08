@@ -30,7 +30,6 @@ class MooCodeLambda : public MooObject {
 };
 
 extern MooObjectType moo_code_lambda_obj_type;
-
 MooObject *load_moo_code_lambda(MooDataFile *data);
 
 #endif

@@ -15,10 +15,17 @@
 
 class MooCodeFrame;
 
+typedef union {
+	int linecol;
+	struct {
+		short line;
+		short col;
+	};
+} linecol_t;
+
 class MooCodeExpr : public MooObject {
     protected:
-	int m_line;
-	int m_col;
+	linecol_t m_linecol;
 	int m_type;
 	MooObject *m_value;
 	MooCodeExpr *m_next;
@@ -36,8 +43,8 @@ class MooCodeExpr : public MooObject {
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectArray *args);
 
     public:
-	int line() { return(m_line); }
-	int col() { return(m_col); }
+	int line() { return(m_linecol.line); }
+	int col() { return(m_linecol.col); }
 	MooCodeExpr *next() { return(m_next); }
 	int type() { return(m_type); }
 	MooObject *value() { return(m_value); }

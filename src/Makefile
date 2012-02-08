@@ -21,8 +21,10 @@ OBJS =	colours.o	\
 	code/sync.o	\
 	code/task.o	\
 	drivers/driver.o	\
+	drivers/server.o	\
 	drivers/tcp.o	\
 	lib/basic.o	\
+	lib/telnet.o	\
 	lib/users.o	\
 	lib/irc/msg.o	\
 	lib/irc/pseudoserv.o	\
@@ -187,12 +189,32 @@ drivers/driver.o: drivers/driver.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/array.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
   ../include/sdm/objs/mutable.h ../include/sdm/drivers/driver.h \
-  ../include/sdm/code/task.h
+  ../include/sdm/code/task.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/funcptr.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
+
+drivers/server.o: drivers/server.cpp ../include/sdm/globals.h \
+  ../include/sdm/exception.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/data.h \
+  ../include/sdm/drivers/driver.h ../include/sdm/code/task.h \
+  ../include/sdm/drivers/tcp.h ../include/sdm/drivers/server.h
 
 drivers/tcp.o: drivers/tcp.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/drivers/tcp.h \
-  ../include/sdm/drivers/driver.h ../include/sdm/code/task.h
+  ../include/sdm/gc.h ../include/sdm/data.h \
+  ../include/sdm/drivers/driver.h ../include/sdm/code/task.h \
+  ../include/sdm/drivers/tcp.h ../include/sdm/code/code.h \
+  ../include/sdm/objs/hash.h ../include/sdm/objs/mutable.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/funcptr.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 lib/basic.o: lib/basic.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
@@ -206,6 +228,20 @@ lib/basic.o: lib/basic.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/code/task.h ../include/sdm/objs/thing.h
 
+lib/telnet.o: lib/telnet.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/funcptr.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h ../include/sdm/code/task.h \
+  ../include/sdm/objs/thing.h ../include/sdm/drivers/driver.h \
+  ../include/sdm/lib/users.h
+
 lib/users.o: lib/users.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \
   ../include/sdm/objs/object.h ../include/sdm/gc.h \
@@ -217,13 +253,14 @@ lib/users.o: lib/users.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/code/task.h ../include/sdm/objs/thing.h \
-  ../include/sdm/lib/users.h
+  ../include/sdm/drivers/driver.h ../include/sdm/lib/users.h
 
 lib/irc/msg.o: lib/irc/msg.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
   ../include/sdm/data.h ../include/sdm/objs/object.h ../include/sdm/gc.h \
-  ../include/sdm/objs/mutable.h ../include/sdm/lib/irc/commands.h \
-  ../include/sdm/lib/irc/msg.h
+  ../include/sdm/objs/mutable.h ../include/sdm/drivers/tcp.h \
+  ../include/sdm/drivers/driver.h ../include/sdm/code/task.h \
+  ../include/sdm/lib/irc/commands.h ../include/sdm/lib/irc/msg.h
 
 lib/irc/pseudoserv.o: lib/irc/pseudoserv.cpp ../include/sdm/colours.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \

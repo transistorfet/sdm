@@ -12,6 +12,7 @@
 #include <sdm/code/code.h>
 #include <sdm/drivers/driver.h>
 #include <sdm/drivers/tcp.h>
+#include <sdm/drivers/server.h>
 
 #include <sdm/objs/boolean.h>
 #include <sdm/objs/number.h>
@@ -24,6 +25,7 @@
 #include <sdm/lib/irc/pseudoserv.h>
 
 static int exit_flag = 1;
+static char loadfile[STRING_SIZE] = "";
 
 int parse_args(int argc, char **argv);
 int serverloop(void);
@@ -32,6 +34,7 @@ static void handle_sigint(int);
 extern int moo_load_basic_funcs(MooObjectHash *env);
 extern int moo_load_thing_methods(MooObjectHash *env);
 extern int moo_load_user_methods(MooObjectHash *env);
+extern int moo_load_telnet_methods(MooObjectHash *env);
 
 int init_moo(void)
 {
@@ -42,40 +45,31 @@ int init_moo(void)
 		init_object();
 		init_mutable();
 
+		/// Register Immutable Object Types
 		moo_object_register_type(&moo_nil_obj_type);
 		moo_object_register_type(&moo_boolean_obj_type);
 		moo_object_register_type(&moo_number_obj_type);
 		moo_object_register_type(&moo_string_obj_type);
 		moo_object_register_type(&moo_func_ptr_obj_type);
+
+		/// Initialize Mutable Object Types
 		init_array();
 		init_hash();
 
-		init_frame();
-		init_driver();
-		init_tcp();
-
 		init_moo_code();
+
+		init_driver();
+
+		init_tcp();
+		init_server();
+		init_thing();
 
 		moo_load_basic_funcs(global_env);
 		moo_load_thing_methods(global_env);
 		moo_load_user_methods(global_env);
+		moo_load_telnet_methods(global_env);
 
 		init_irc_pseudoserv();
-
-		init_thing();
-
-
-		// TODO create a new task and execute (#0:boot)
-		// TODO have #0:boot then call all this other shit.  It could be a compiled function and still call some other function
-		// TODO #0:boot must create the listener task)
-		//load_global_config();
-
-		MooCodeFrame *frame;
-		frame = new MooCodeFrame();
-		frame->owner(0);
-		frame->push_code("(load \"code/core-seed.moo\")");
-		//frame->push_code("(loop (debug \"Looping...\"))");
-		frame->schedule(0);
 	}
 	catch (MooException e) {
 		moo_status("%s", e.get());
@@ -91,15 +85,15 @@ void release_moo(void)
 	release_irc_pseudoserv();
 
 	release_thing();
+	release_server();
+	release_tcp();
+
+	release_driver();
 
 	release_moo_code();
 
 	release_array();
 	release_hash();
-
-	release_tcp();
-	release_driver();
-	release_frame();
 
 	release_mutable();
 	release_object();
@@ -120,6 +114,19 @@ int main(int argc, char **argv)
 		release_moo();
 		return(0);
 	}
+
+	// TODO create a new task and execute (#0:boot)
+	// TODO have #0:boot then call all this other shit.  It could be a compiled function and still call some other function
+	// TODO #0:boot must create the listener task)
+	//load_global_config();
+
+	MooCodeFrame *frame;
+	frame = new MooCodeFrame();
+	frame->owner(0);
+	if (loadfile[0] != '\0')
+		frame->push_code(loadfile);
+	//frame->push_code("(loop (debug \"Looping...\"))");
+	frame->schedule(0);
 
 	serverloop();
 
@@ -177,11 +184,15 @@ int parse_args(int argc, char **argv)
 	int i;
 
 	for (i = 1; i < argc; i++) {
-		if (argv[i][0] == '-') {
-			// TODO implement them all
+		if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "--load")) {
+			if (++i >= argc) {
+				printf("No file name given to --load\n");
+				return(-1);
+			}
+			snprintf(loadfile, STRING_SIZE, "(load \"%s\")", argv[i]);
 		}
 		else {
-			/// We don't accept any non-flag arguments
+			printf("Unrecognized argument: %s\n", argv[i]);
 			return(-1);
 		}
 	}

@@ -24,6 +24,10 @@ MooObject *load_moo_code_lambda(MooDataFile *data)
 	return(obj);
 }
 
+/****************************
+ * MooCodeLambda Definition *
+ ****************************/
+
 MooCodeLambda::MooCodeLambda(MooCodeExpr *params, MooCodeExpr *func)
 {
 	MOO_INCREF(m_params = params);

@@ -18,6 +18,8 @@
 class MooServer : public MooDriver {
     protected:
 	int m_port;
+	MooMutable *m_obj;
+	std::string *m_method;
 
     public:
 	MooServer();
@@ -28,13 +30,21 @@ class MooServer : public MooDriver {
 	virtual int handle(int ready);
 
 	int listen(int port);
-	MooTCP *MooServer::receive_connection();
+	MooTCP *receive_connection();
 	void disconnect();
+
+	int set_callback(MooMutable *obj, const char *method);
+
+    private:
+	//virtual MooObject *access_property(const char *name, MooObject *value = NULL);
+	virtual MooObject *access_method(const char *name, MooObject *value = NULL);
 };
 
 extern MooObjectType moo_server_obj_type;
-
 MooObject *load_moo_server(MooDataFile *data);
+
+int init_server(void);
+void release_server(void);
 
 #endif
 

@@ -65,7 +65,7 @@ class MooCodeFrame {
 	friend class FrameEventRelegate;
 	// TODO this is just here temporarily until we fix it
 	friend int irc_login(MooCodeFrame *frame, class MooTCP *driver, class MooObjectHash *env);
-	friend int init_moo();
+	friend int main(int argc, char **argv);
 	moo_id_t owner(moo_id_t owner) { return(m_owner = owner); }
 };
 

@@ -30,27 +30,15 @@
 #define TCP_CONNECT_ATTEMPTS		3
 #endif
 
+
+static MooObjectHash *tcp_methods = new MooObjectHash();
+
+
 MooObjectType moo_tcp_obj_type = {
 	"tcp",
 	typeid(MooTCP).name(),
 	(moo_type_load_t) load_moo_tcp
 };
-
-static MooObjectHash *tcp_methods = new MooObjectHash();
-
-int init_tcp(void)
-{
-	moo_object_register_type(&moo_tcp_obj_type);
-	moo_load_tcp_methods(tcp_methods);
-	return(0);
-}
-
-void release_tcp(void)
-{
-	tcp_methods = NULL;	/// Leave to the GC
-	moo_object_deregister_type(&moo_tcp_obj_type);
-}
-
 
 MooObject *load_moo_tcp(MooDataFile *data)
 {
@@ -60,6 +48,9 @@ MooObject *load_moo_tcp(MooDataFile *data)
 	return(obj);
 }
 
+/*********************
+ * MooTCP Definition *
+ *********************/
 
 MooTCP::MooTCP()
 {
@@ -367,11 +358,24 @@ static int tcp_print(MooCodeFrame *frame, MooObjectArray *args)
 	return(0);
 }
 
-
 void moo_load_tcp_methods(MooObjectHash *env)
 {
 	env->set("wait", new MooFuncPtr(tcp_wait));
 	env->set("print", new MooFuncPtr(tcp_print));
 }
+
+int init_tcp(void)
+{
+	moo_object_register_type(&moo_tcp_obj_type);
+	moo_load_tcp_methods(tcp_methods);
+	return(0);
+}
+
+void release_tcp(void)
+{
+	tcp_methods = NULL;	/// Leave to the GC
+	moo_object_deregister_type(&moo_tcp_obj_type);
+}
+
 
 

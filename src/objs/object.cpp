@@ -61,6 +61,10 @@ const MooObjectType *moo_object_find_type(const char *name)
 	return(name_type_list->get(name));
 }
 
+/************************
+ * MooObject Definition *
+ ************************/
+
 MooObject::MooObject()
 {
 	m_bitflags = 0;

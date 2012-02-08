@@ -14,27 +14,15 @@
 
 #include <sdm/objs/array.h>
 
+
+static MooObjectHash *array_methods = new MooObjectHash();
+
+
 struct MooObjectType moo_array_obj_type = {
 	"array",
 	typeid(MooObjectArray).name(),
 	(moo_type_load_t) load_moo_array
 };
-
-static MooObjectHash *array_methods = new MooObjectHash();
-void moo_load_array_methods(MooObjectHash *env);
-
-int init_array(void)
-{
-	moo_object_register_type(&moo_array_obj_type);
-	moo_load_array_methods(array_methods);
-	return(0);
-}
-
-void release_array(void)
-{
-	MOO_DECREF(array_methods);
-	moo_object_deregister_type(&moo_array_obj_type);
-}
 
 MooObject *load_moo_array(MooDataFile *data)
 {
@@ -52,6 +40,10 @@ MooObject *load_moo_array(MooDataFile *data)
 	}
 	return(obj);
 }
+
+/*****************************
+ * MooObjectArray Definition *
+ *****************************/
 
 MooObjectArray::MooObjectArray(int size, int max, int bits) : MooArray<MooObject *>(size, max, bits, (void (*)(MooObject *)) MooGC::decref)
 {
@@ -424,4 +416,18 @@ void moo_load_array_methods(MooObjectHash *env)
 
 	env->set("foreach", new MooFuncPtr(array_foreach));
 }
+
+int init_array(void)
+{
+	moo_object_register_type(&moo_array_obj_type);
+	moo_load_array_methods(array_methods);
+	return(0);
+}
+
+void release_array(void)
+{
+	array_methods = NULL;
+	moo_object_deregister_type(&moo_array_obj_type);
+}
+
 

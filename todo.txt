@@ -142,6 +142,7 @@
 	  just be a frame.  You just need to know the code to push onto the frame in order to handle the data request.  This could be
 	  set via an interface method which is passed a lambda pointer, or an object and method name pair or something.
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
+	  (then again, scheme has even more)
 
 	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
 	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
@@ -150,9 +151,6 @@
 	  because it allows a command to have the same name of a function but with different argument processing and stuff
 
 	* how can you delete MooThings from the system?
-
-	* should you make all boolean values refer to single constants rather than creating one every time? (like nil now).  We kinda
-	  need a better system for constants (in the C implementation)
 
 	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
 	  that function would then check for a '.something' and send it to channel:command itself
@@ -178,6 +176,12 @@
 	  level method, object, or task, and the output is returned to the calling function.
 
     TODO:
+	* modify clone so that it doesn't take the body like it does now
+	* modify the define and set! commands so that you have to use set! for changing methods and properties, since it makes more sense
+	  being a modification command and since the changes are always persistent.  Then 'define' would only set values in the global
+	  enviroment, which should become #0's properties (or something).  I guess set! would work even if the value is not already
+	  bound?  Or you could introduce a 3rd form name
+
 	* change all dynamic casts to typeid compares + static cast
 	* go through all destructors and have them set all values to NULL instead of just freeing them, to help the garbage collector
 	* should you rename MooCodeFrame to MooTask?
@@ -186,10 +190,10 @@
 	* make a command line test suite (or use one already available)
 
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
-	  IS THIS NEEDED ANYMORE??
 
 	* sort out the whole login/identify system so new people can connect and sign up
 
+	* you could use the line and column information in the expr when recreating the code for saving to files or editing purposes
 	* you could have a breakpoint events that causes execution to stop whenever you reach a certain in the execution process
 	* add debug field to event and fix debug message printing
 	* add commands to list properties and methods

@@ -140,10 +140,12 @@ int MooCodeParser::read_token()
 			m_type = TT_STRING;
 			while (m_input[m_pos] != '\0') {
 				ch = this->getchar();
- 				if (parser_is_whitespace(ch))
+ 				if (parser_is_whitespace(ch) || ch == ')')
 					break;
 				m_token[m_len++] = ch;
 			}
+			if (ch == ')')
+				this->ungetchar();
 			m_token[m_len] = '\0';
 			break;
 		}
@@ -167,7 +169,7 @@ int MooCodeParser::read_token()
 					break;
  				if (ch == '(')
 					throw MooException("(%d, %d): Unexpected open bracket.", m_line, m_col);
- 				else if (ch == ')') {
+				else if (ch == ')') {
 					this->ungetchar();
 					break;
 				}

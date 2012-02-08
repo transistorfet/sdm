@@ -25,6 +25,10 @@ MooObject *load_moo_string(MooDataFile *data)
 	return(obj);
 }
 
+/************************
+ * MooString Definition *
+ ************************/
+
 MooString::MooString(const char *fmt, ...)
 {
 	va_list va;

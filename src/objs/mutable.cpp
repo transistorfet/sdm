@@ -34,6 +34,10 @@ void release_mutable(void)
 		delete moo_id_table;
 }
 
+/*************************
+ * MooMutable Definition *
+ *************************/
+
 MooMutable::MooMutable()
 {
 	m_id = -1;

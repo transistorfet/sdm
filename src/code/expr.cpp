@@ -29,10 +29,14 @@ MooObject *load_moo_code_expr(MooDataFile *data)
 	return(obj);
 }
 
+/**************************
+ * MooCodeExpr Definition *
+ **************************/
+
 MooCodeExpr::MooCodeExpr(int line, int col, int type, MooObject *value, MooCodeExpr *next)
 {
-	m_line = line;
-	m_col = col;
+	m_linecol.line = line;
+	m_linecol.col = col;
 	m_type = type;
 	m_value = value;
 	m_next = next;
@@ -54,8 +58,7 @@ int MooCodeExpr::read_entry(const char *type, MooDataFile *data)
 			return(-1);
 		expr = MooCodeParser::parse_code(buffer);
 		// TODO this is a horrible hack...
-		m_line = expr->m_line;
-		m_col = expr->m_col;
+		m_linecol = expr->m_linecol;
 		m_value = expr->m_value;
 		m_type = expr->m_type;
 		m_next = expr->m_next;
@@ -89,7 +92,7 @@ const char *MooCodeExpr::get_identifier()
 	MooString *str;
 
 	if (m_type != MCT_IDENTIFIER || !(str = dynamic_cast<MooString *>(m_value)))
-		throw MooException("(%d, %d) Expected identifier", m_line, m_col);
+		throw MooException("(%d, %d) Expected identifier", m_linecol.line, m_linecol.col);
 	return(str->get_string());
 }
 
@@ -98,7 +101,7 @@ MooCodeExpr *MooCodeExpr::get_call()
 	MooCodeExpr *expr = NULL;
 
 	if (m_type != MCT_CALL || (m_value && !(expr = dynamic_cast<MooCodeExpr *>(m_value))))
-		throw MooException("(%d, %d) Expected expression", m_line, m_col);
+		throw MooException("(%d, %d) Expected expression", m_linecol.line, m_linecol.col);
 	return(expr);
 }
 

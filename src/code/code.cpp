@@ -26,11 +26,13 @@ int init_moo_code(void)
 	global_env->set("*global*", global_env);
 	global_env->set("nil", &moo_nil);
 	init_code_event();
+	init_frame();
 	return(0);
 }
 
 void release_moo_code(void)
 {
+	release_frame();
 	release_code_event();
 	if (!global_env)
 		return;

@@ -20,6 +20,7 @@
 #endif
 
 class MooTCP : public MooDriver {
+	friend class MooServer;
     protected:
 	int m_read_pos;
 	int m_read_length;
@@ -63,12 +64,10 @@ class MooTCP : public MooDriver {
 };
 
 extern MooObjectType moo_tcp_obj_type;
-
 MooObject *load_moo_tcp(MooDataFile *data);
 
 int init_tcp(void);
 void release_tcp(void);
-void moo_load_tcp_methods(MooObjectHash *env);
 
 #endif
 

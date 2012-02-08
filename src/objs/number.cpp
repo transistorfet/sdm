@@ -24,6 +24,10 @@ MooObject *load_moo_number(MooDataFile *data)
 	return(obj);
 }
 
+/************************
+ * MooNumber Definition *
+ ************************/
+
 MooNumber::MooNumber(const char *str)
 {
 	char *endptr;
