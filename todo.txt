@@ -45,23 +45,9 @@
 	* how will any code (assuming we use pthreads) be able to get the current task (the only thing needed usually is the owner of
 	  the task, and the user)?  We can't use global variables like we are.  I guess this depends on the whole threading mechanism
 	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
-	  was interactive.  It could possibly be implemented, such that .say gets redirected to a thing (perhaps by placing the user in
-	  the thing itself, like a room. thing->do_action("say")).  We could alternatively have the registration "thing" call notify
-	  with a special message telling it to prompt the user for input and returning it.  The task responding to the notify (or
-	  possibly the user's notify function which mearly calls task's notify. NO IT SHOULD BE POSSIBLY FOR TASKS TO DO INTERFACE
-	  SPECIFIC PROMPTS) can then redirect any input it receives to the registration thing
 
-	* how will 'notify' relate to tasks and all that?  Will it be a message system for passing messages to a task?
-	* we could have a message queue for each task such that certain functions (handling notify() calls or handling interface-ready
-	  or timer expire events or something) can be performed later.  It could be a fairly generic mechanism
-	* notify can either be like an interrupt, where in a code task, the notify execution code would be pushed directly onto the
-	  task's frame, so that it's executed immediately, no matter what is currently executing (or alternatively, somewhere in the
-	  frame that we know is safe).
 	* commands could run for a time without having to create their own tasks.  For example, fighting could be implemented directly
 	  in the command itself, so the fight command would just run and use 'sleep' or something to pause between rounds.
-	* we could turn socket-data-ready callbacks into notify() calls and use the same mechanism for handling them
-	* notify could be a function or method defined in an environment, which all tasks would have (MooTask), and then in pseudoserv's
-	  case, it would be a MooFunc type definition to a builtin function.  We could eliminate the indirection (user:notify)
 
 	* you could have a queue type which is stored as just a normal property in the user object, instead of storing the task??
 	* you could have a queue of messages for each task (notify events, handling, etc) and still have a single task run function in
@@ -85,36 +71,8 @@
 	  assign it to the user once we connect).  This would again, however, not work for MooCodeTask, because it is not already
 	  waiting on a queue.  Then again, MooCodeTasks cannot currently use interfaces anyways, and should not be able to do so easily
 
-	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
-	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
-	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
-	  things and have them remain in the task's scope at all times (thread-global definitions).
-
-	* you could add a virtual handle function to driver so that drivers can custom handle the connection rather than calling a
-	  method or creating a new task for all drivers.
-	* you could have server create a new task and pass it the new connection, and then the task can call a blocking read function
-	  on the driver which suspends the task, and stores the task pointer in the tcp driver (which also acts as a lock of sorts on
-	  who can read from the connection) and when data is ready, the task is unsuspended and a check to make sure the task was really
-	  waiting for data, then it schedules itself for execution and acknowledges the condition.  The continuation would cause the
-	  actual read operation to take place and the value would be returned.  It doesn't matter that the task would be lost in a
-	  crash since the connection should go down as well.
-
-      Dealing with References when Saving:
-	* wait wait, this will actually work because you don't have to assign an ID unless you save that object.  When you write
-	  everything to disk, if you come across a value with a -1 ID, then you assign it an ID and save it (or optionally traverse
-	  everything, assign the IDs, and then save everything, or else you might have already saved that type and then it wont be saved,
-	  or else you are able to individually save objects, and you do that when you assign a new ID (??)
-	* actually not all objects have to be persistent.  They could be individually selected, such that if the aren't persistent, they
-	  are never assigned IDs and always written as nil to disk (like perhaps some interfaces)
-	* all of this would actually make it easier to have a distributed system or something, because every value of uniqueness would
-	  have a global ID of some kind allowing objects to be distributed and cached or accessed remotely.
-	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
-	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
-	  namespaces would be merged.  The : syntax would just be a syntactic thing for calls (a shorthand).  Lambda environments would
-	  be non-persistent, or at least never ID assigned, and as long as you don't save the frame, you are fine.  But come to think of
-	  it, you could always save a frame to suspend a task to disk!
-	* you could store all values in a global array of some kind and use that for garbage collecting, and IDs, and saving, and so on
-	  You need to change the data storage system anyways
+	* how will 'notify' relate to tasks and all that?  It should just be a function on the user which uses the server and/or
+	  driver properties (set by the connection automatically), to send a formatted message back on that connection.
 
       Permissions:
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
@@ -135,22 +93,31 @@
 	  not (eqv? ...) to true
 
       Miscellaneous:
+	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
+	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
+	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
+	  things and have them remain in the task's scope at all times (thread-global definitions).
 	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
 	  parent).  If you assign anything to the root environment, it will be saved as part of the root thing (#0).  You can also
 	  access the root (global) env at any time by directly accessing #0.
-	* when data is available on an interface, you don't need to know the specific task to call ever, since all tasks would essentially
-	  just be a frame.  You just need to know the code to push onto the frame in order to handle the data request.  This could be
-	  set via an interface method which is passed a lambda pointer, or an object and method name pair or something.
-	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
-	  (then again, scheme has even more)
-
-	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
-	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
-	  data, or something.
 	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
 	  because it allows a command to have the same name of a function but with different argument processing and stuff
 
-	* how can you delete MooThings from the system?
+	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
+	  (then again, scheme has even more)
+	* you can modify the parser to either use {} and [] as equivallent to () (assuming they match up properly) or else to make
+	  {...} equivallent to (begin ...) or something make coding easier and cleaner while providing added protection against mistakes
+	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
+	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
+	  data, or something.
+
+	* should you rename MooCodeFrame to MooTask?
+	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
+	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
+	  namespaces would be merged.  The : syntax would just be a syntactic thing for calls (a shorthand).  Lambda environments would
+	  be non-persistent, or at least never ID assigned, and as long as you don't save the frame, you are fine.  But come to think of
+	  it, you could always save a frame to suspend a task to disk!
+	* how can you delete persistent objects from the system?
 
 	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
 	  that function would then check for a '.something' and send it to channel:command itself
@@ -176,30 +143,28 @@
 	  level method, object, or task, and the output is returned to the calling function.
 
     TODO:
-	* modify clone so that it doesn't take the body like it does now
 	* modify the define and set! commands so that you have to use set! for changing methods and properties, since it makes more sense
 	  being a modification command and since the changes are always persistent.  Then 'define' would only set values in the global
 	  enviroment, which should become #0's properties (or something).  I guess set! would work even if the value is not already
 	  bound?  Or you could introduce a 3rd form name
-
 	* change all dynamic casts to typeid compares + static cast
-	* go through all destructors and have them set all values to NULL instead of just freeing them, to help the garbage collector
-	* should you rename MooCodeFrame to MooTask?
-	* add command line parsing: can specify the database location, and/or a source file to execute instead of running the system
-	  as well as whether to load databaseless, or non-persistent, basically
-	* make a command line test suite (or use one already available)
-
 	* add a (sudo <object> <code>) function which elevates to the given object before executing the code (without requiring SUID)
-
-	* sort out the whole login/identify system so new people can connect and sign up
 
 	* you could use the line and column information in the expr when recreating the code for saving to files or editing purposes
 	* you could have a breakpoint events that causes execution to stop whenever you reach a certain in the execution process
 	* add debug field to event and fix debug message printing
 	* add commands to list properties and methods
 
-	* add arguments to be passed to 'initialize' during cloning
+	* fix the pseudoserv
+	* sort out the whole login/identify system so new people can connect and sign up
+
 	* add a (check ...) function to do a permissions check and throw an error, so more complex checks can take place
+	* test (clone ...) argument passing
+	* break the moo code into files that are loaded by another file (irc, telnet, game, etc)
+	* go through all destructors and have them set all values to NULL instead of just freeing them, to help the garbage collector
+	* add command line parsing: can specify the database location, and/or a source file to execute instead of running the system
+	  as well as whether to load databaseless, or non-persistent, basically
+	* make a command line test suite (or use one already available)
 
 	* you could add code that creates initial objects so that you can bootstrap the system with just the source code (??)
 	* add infinite loop protection

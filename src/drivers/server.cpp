@@ -121,7 +121,6 @@ int MooServer::handle(int ready)
 		return(-1);
 	}
 
-	moo_status("SERVER: DEBUG: Calling method %s", m_method->c_str());
 	frame = new MooCodeFrame();
 	frame->push_method_call(m_method->c_str(), m_obj, driver);
 	frame->schedule(0);
@@ -143,6 +142,7 @@ int MooServer::listen(int port)
 	    && (::bind(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
 	    && (::listen(m_rfd, TCP_LISTEN_QUEUE) >= 0)) {
 		moo_status("TCP: Listening on port %d", port);
+		m_port = port;
 		return(0);
 	}
 	return(-1);
@@ -168,6 +168,7 @@ MooTCP *MooServer::receive_connection()
 	if ((driver->m_rfd = ::accept(m_rfd, (struct sockaddr *) &saddr, (socklen_t *) &size)) > 0) {
 		driver->m_host = new std::string(inet_ntoa(saddr.sin_addr));
 		moo_status("TCP: Accepted connection from %s", driver->m_host->c_str());
+		driver->set_connected(1);
 		return(driver);
 	}
 	delete driver;

@@ -128,7 +128,7 @@ int MooThing::write_object(MooDataFile *data)
 	if (m_owner >= 0)
 		data->write_integer_entry("owner", m_owner);
 	if (m_mode != MOO_DEFAULT_MODE)
-		data->write_integer_entry("mode", m_mode);
+		data->write_octal_entry("mode", m_mode);
 
 	/// Write the properties to the file
 	if (m_properties->entries()) {
@@ -378,7 +378,7 @@ static int thing_save(MooCodeFrame *frame, MooObjectArray *args)
 static int thing_save_all(MooCodeFrame *frame, MooObjectArray *args)
 {
 	// TODO permissions check
-	MooThing::save_all();
+	MooMutable::save_all();
 	return(0);
 }
 

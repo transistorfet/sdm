@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing>
  <id>0</id>
- <bits>0x81</bits>
  <owner>0</owner>
- <mode>075</mode>
+ <mode>61</mode>
  <properties>
+  <id>-1</id>
   <entry key="name" type="string" owner="0" mode="055">
    <value>root</value>
   </entry>
  </properties>
- <methods>
- </methods>
 </thing>

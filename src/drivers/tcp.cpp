@@ -103,8 +103,10 @@ int MooTCP::connect(const char *addr, int port)
 		for (j = 0;host->h_addr_list[j];j++) {
 			saddr.sin_addr = *((struct in_addr *) host->h_addr_list[j]);
 			for (i = 0;i < TCP_CONNECT_ATTEMPTS;i++) {
-				if (::connect(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0)
+				if (::connect(m_rfd, (struct sockaddr *) &saddr, sizeof(struct sockaddr_in)) >= 0) {
+					this->set_connected(1);
 					return(0);
+				}
 			}
 		}
 	}
@@ -113,6 +115,7 @@ int MooTCP::connect(const char *addr, int port)
 
 void MooTCP::disconnect()
 {
+	this->set_connected(0);
 	if (m_rfd <= 0)
 		return;
 	::shutdown(m_rfd, 2);
@@ -180,8 +183,10 @@ int MooTCP::receive(char *data, int len)
 		if (::select(m_rfd + 1, &rd, NULL, NULL, &timeout)
 		    && ((j = ::recv(m_rfd, &data[i], len - i, 0)) > 0))
 			i += j;
-		if (j <= 0)
+		if (j <= 0) {
+			this->set_connected(0);
 			throw moo_closed;
+		}
 	}
 	if (m_read_pos < m_read_length)
 		this->set_ready();
@@ -192,8 +197,10 @@ int MooTCP::receive(char *data, int len, char delim)
 {
 	int i, j = 0;
 
-	if (this->recv_to_buffer() < 0)
+	if (this->recv_to_buffer() < 0) {
+		this->set_connected(0);
 		throw moo_closed;
+	}
 	for (i = m_read_pos; i < m_read_length; i++) {
 		if (m_read_buffer[i] == delim) {
 			data[j] = '\0';
@@ -358,10 +365,23 @@ static int tcp_print(MooCodeFrame *frame, MooObjectArray *args)
 	return(0);
 }
 
+static int tcp_connected_q(MooCodeFrame *frame, MooObjectArray *args)
+{
+	MooTCP *m_this;
+
+	if (args->last() != 0)
+		throw moo_args_mismatched;
+	if (!(m_this = dynamic_cast<MooTCP *>(args->get(0))))
+		throw moo_method_object;
+	frame->set_return( m_this->connected() ? &moo_true : &moo_false );
+	return(0);
+}
+
 void moo_load_tcp_methods(MooObjectHash *env)
 {
 	env->set("wait", new MooFuncPtr(tcp_wait));
 	env->set("print", new MooFuncPtr(tcp_print));
+	env->set("connected?", new MooFuncPtr(tcp_connected_q));
 }
 
 int init_tcp(void)

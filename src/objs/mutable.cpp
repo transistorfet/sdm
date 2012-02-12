@@ -199,7 +199,8 @@ int MooMutable::read_entry(const char *type, MooDataFile *data)
 
 int MooMutable::write_data(MooDataFile *data)
 {
-	data->write_integer(m_id);
+	if (m_id >= 0)
+		data->write_integer(m_id);
 	if (m_bitflags & MOO_BF_WIZARD)
 		data->write_hex_entry("bits", MOO_BF_WIZARD);
 	return(0);
