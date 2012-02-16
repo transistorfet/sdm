@@ -19,6 +19,7 @@ extern class MooCodeFrame *g_current_frame;
 class MooCodeFrame {
 	moo_id_t m_owner;
 	MooArray<MooCodeEvent *> *m_stack;
+	MooCodeEvent *m_curevent;
 	MooObject *m_return;
 	MooException *m_exception;
 	MooObjectHash *m_env;
@@ -32,6 +33,7 @@ class MooCodeFrame {
 
 	int push_event(MooCodeEvent *event);
 	int push_block(MooObjectHash *env, MooCodeExpr *expr);
+	int push_call(MooObjectHash *env, MooObjectArray *args);
 	int push_call(MooObjectHash *env, MooObject *func, MooObjectArray *args);
 	int push_method_call(const char *name, MooObject *obj, MooObject *arg1 = NULL, MooObject *arg2 = NULL, MooObject *arg3 = NULL);
 	int push_code(const char *code);

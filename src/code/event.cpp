@@ -20,23 +20,20 @@ typedef int (*MooFormT)(MooCodeFrame *frame, MooCodeExpr *expr);
 
 MooHash<MooFormT *> *form_env = NULL;
 
-MooCodeEvent::MooCodeEvent(MooObjectHash *env, MooObjectArray *args, MooCodeExpr *expr, MooObject *debug)
+MooCodeEvent::MooCodeEvent(MooCodeExpr *debug, MooObjectHash *env, MooObjectArray *args, MooCodeExpr *expr)
 {
+	MOO_INCREF(m_debug = debug);
 	MOO_INCREF(m_env = env);
 	MOO_INCREF(m_args = args);
 	MOO_INCREF(m_expr = expr);
-	if (debug)
-		MOO_INCREF(m_debug = debug);
-	else
-		MOO_INCREF(m_debug = expr);
 }
 
 MooCodeEvent::~MooCodeEvent()
 {
+	MOO_DECREF(m_debug);
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_args);
 	MOO_DECREF(m_expr);
-	MOO_DECREF(m_debug);
 }
 
 int MooCodeEvent::linecol(int &line, int &col)
@@ -58,12 +55,11 @@ int MooCodeEvent::linecol(int &line, int &col)
 void MooCodeEvent::print_debug()
 {
 	int line, col;
-	MooCodeExpr *expr;
 	char buffer[STRING_SIZE];
 
 	this->linecol(line, col);
-	if (m_debug && (expr = dynamic_cast<MooCodeExpr *>(m_debug))) {
-		if (MooCodeParser::generate(expr, buffer, DEBUG_LIMIT, &moo_style_one_line) >= DEBUG_LIMIT)
+	if (m_debug) {
+		if (MooCodeParser::generate(m_debug, buffer, DEBUG_LIMIT, &moo_style_one_line) >= DEBUG_LIMIT)
 			strcpy(&buffer[DEBUG_LIMIT], "...");
 		moo_status("DEBUG: (%d, %d) %s: %s", line, col, typeid(*this).name(), buffer);
 	}
@@ -119,8 +115,8 @@ int MooCodeEventEvalExpr::do_event(MooCodeFrame *frame)
 				args->push(parent);
 			expr = expr->next();
 		}
-		frame->push_event(new MooCodeEventCallFunc(m_env, args, m_expr));
-		frame->push_event(new MooCodeEventEvalArgs(m_env, args, expr));
+		frame->push_event(new MooCodeEventCallFunc(m_expr, m_env, args));
+		frame->push_event(new MooCodeEventEvalArgs(m_expr, m_env, args, expr));
 		MOO_DECREF(args);
 		break;
 	    }
@@ -144,7 +140,7 @@ int MooCodeEventEvalBlock::do_event(MooCodeFrame *frame)
 	remain = m_expr->next();
 
 	if (remain)
-		frame->push_event(new MooCodeEventEvalBlock(m_env, remain));
+		frame->push_event(new MooCodeEventEvalBlock(m_debug, m_env, remain));
 	frame->push_event(new MooCodeEventEvalExpr(m_env, m_expr));
 	return(0);
 }
@@ -184,8 +180,8 @@ int MooCodeEventEvalArgs::do_event(MooCodeFrame *frame)
 	remain = m_expr->next();
 
 	if (remain)
-		frame->push_event(new MooCodeEventEvalArgs(m_env, m_args, remain));
-	frame->push_event(new MooCodeEventAppendReturn(m_env, m_args));
+		frame->push_event(new MooCodeEventEvalArgs(m_debug, m_env, m_args, remain));
+	frame->push_event(new MooCodeEventAppendReturn(m_debug, m_env, m_args));
 	frame->push_event(new MooCodeEventEvalExpr(m_env, m_expr));
 	return(0);
 }
@@ -204,6 +200,18 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 	return(m_args->push(MOO_INCREF(frame->get_return())));
 }
 
+/*********************
+ * MooCodeEventCatch *
+ *********************/
+
+int MooCodeEventCatch::handle(MooCodeFrame *frame, MooException *e)
+{
+	m_env->set("%error", new MooString("%s", e->get()));
+	if (m_expr)
+		frame->push_event(new MooCodeEventEvalBlock(m_expr, m_env, m_expr));
+	return(0);
+}
+
 
 /************************
  * Moo Code Event Forms *
@@ -215,7 +223,7 @@ int MooCodeEventAppendReturn::do_event(MooCodeFrame *frame)
 
 class FormDefineEvent : public MooCodeEvent {
     public:
-	FormDefineEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormDefineEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(expr, env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		MooObject *obj;
 
@@ -253,7 +261,7 @@ static int form_undefine(MooCodeFrame *frame, MooCodeExpr *expr)
 
 class FormSetEvent : public MooCodeEvent {
     public:
-	FormSetEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormSetEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(expr, env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		const char *id;
 		MooObject *obj;
@@ -282,7 +290,7 @@ static int form_set(MooCodeFrame *frame, MooCodeExpr *expr)
 
 class FormIfEvent : public MooCodeEvent {
     public:
-	FormIfEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormIfEvent(MooCodeExpr *debug, MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(debug, env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		MooObject *obj;
 
@@ -298,7 +306,7 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 {
 	if (!MooCodeExpr::check_args(expr, 2, 3))
 		throw moo_args_mismatched;
-	frame->push_event(new FormIfEvent(frame->env(), expr->next()));
+	frame->push_event(new FormIfEvent(expr, frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
 }
@@ -309,10 +317,10 @@ static int form_if(MooCodeFrame *frame, MooCodeExpr *expr)
 
 class FormLoopEvent : public MooCodeEvent {
     public:
-	FormLoopEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormLoopEvent(MooCodeExpr *debug, MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(debug, env, NULL, expr) { };
 
 	int do_event(MooCodeFrame *frame) {
-		frame->push_event(new FormLoopEvent(frame->env(), m_expr));
+		frame->push_event(new FormLoopEvent(m_debug, frame->env(), m_expr));
 		frame->push_block(frame->env(), m_expr);
 		return(0);
 	}
@@ -323,7 +331,7 @@ static int form_loop(MooCodeFrame *frame, MooCodeExpr *expr)
 	if (!expr)
 		throw moo_args_mismatched;
 	frame->mark_return_point();
-	frame->push_event(new FormLoopEvent(frame->env(), expr));
+	frame->push_event(new FormLoopEvent(expr, frame->env(), expr));
 	return(0);
 }
 
@@ -335,7 +343,7 @@ static int form_loop(MooCodeFrame *frame, MooCodeExpr *expr)
 class FormCondEvent : public MooCodeEvent {
 	MooCodeExpr *m_next;
     public:
-	FormCondEvent(MooObjectHash *env, MooCodeExpr *expr, MooCodeExpr *next) : MooCodeEvent(env, NULL, expr) {
+	FormCondEvent(MooCodeExpr *debug, MooObjectHash *env, MooCodeExpr *expr, MooCodeExpr *next) : MooCodeEvent(debug, env, NULL, expr) {
 		m_next = next;
 	}
 
@@ -348,7 +356,7 @@ class FormCondEvent : public MooCodeEvent {
 			MooCodeExpr *cond;
 
 			cond = m_next->get_call();
-			frame->push_event(new FormCondEvent(frame->env(), cond->next(), m_next->next()));
+			frame->push_event(new FormCondEvent(m_debug, frame->env(), cond->next(), m_next->next()));
 			frame->push_event(new MooCodeEventEvalExpr(frame->env(), cond));
 		}
 		return(0);
@@ -360,7 +368,7 @@ static int form_cond(MooCodeFrame *frame, MooCodeExpr *expr)
 	if (!expr)
 		throw moo_args_mismatched;
 	frame->set_return(&moo_false);
-	frame->push_event(new FormCondEvent(frame->env(), NULL, expr));
+	frame->push_event(new FormCondEvent(expr, frame->env(), NULL, expr));
 	return(0);
 }
 
@@ -370,7 +378,7 @@ static int form_cond(MooCodeFrame *frame, MooCodeExpr *expr)
 
 class FormAndEvent : public MooCodeEvent {
     public:
-	FormAndEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormAndEvent(MooCodeExpr *debug, MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(debug, env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		MooObject *obj;
 
@@ -379,7 +387,7 @@ class FormAndEvent : public MooCodeEvent {
 		else if (!m_expr)
 			frame->set_return(obj);
 		else {
-			frame->push_event(new FormAndEvent(frame->env(), m_expr->next()));
+			frame->push_event(new FormAndEvent(m_debug, frame->env(), m_expr->next()));
 			frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
 		}
 		return(0);
@@ -392,7 +400,7 @@ static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
 		frame->set_return(&moo_true);
 		return(0);
 	}
-	frame->push_event(new FormAndEvent(frame->env(), expr->next()));
+	frame->push_event(new FormAndEvent(expr, frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
 }
@@ -403,7 +411,7 @@ static int form_and(MooCodeFrame *frame, MooCodeExpr *expr)
 
 class FormOrEvent : public MooCodeEvent {
     public:
-	FormOrEvent(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
+	FormOrEvent(MooCodeExpr *debug, MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(debug, env, NULL, expr) { };
 	int do_event(MooCodeFrame *frame) {
 		MooObject *obj;
 
@@ -412,7 +420,7 @@ class FormOrEvent : public MooCodeEvent {
 		else if (!m_expr)
 			frame->set_return(obj);
 		else {
-			frame->push_event(new FormOrEvent(frame->env(), m_expr->next()));
+			frame->push_event(new FormOrEvent(m_debug, frame->env(), m_expr->next()));
 			frame->push_event(new MooCodeEventEvalExpr(frame->env(), m_expr));
 		}
 		return(0);
@@ -426,7 +434,7 @@ static int form_or(MooCodeFrame *frame, MooCodeExpr *expr)
 		return(0);
 	}
 
-	frame->push_event(new FormOrEvent(frame->env(), expr->next()));
+	frame->push_event(new FormOrEvent(expr, frame->env(), expr->next()));
 	frame->push_event(new MooCodeEventEvalExpr(frame->env(), expr));
 	return(0);
 }
@@ -491,8 +499,8 @@ static int form_super(MooCodeFrame *frame, MooCodeExpr *expr)
  	args = new MooObjectArray();
 	args->set(0, MOO_INCREF(obj));
 	args->set(1, o_this);
-	frame->push_event(new MooCodeEventCallFunc(env, args, expr));
-	frame->push_event(new MooCodeEventEvalArgs(env, args, expr->next()));
+	frame->push_event(new MooCodeEventCallFunc(expr, env, args));
+	frame->push_event(new MooCodeEventEvalArgs(expr, env, args, expr->next()));
 	MOO_DECREF(args);
 	return(0);
 }

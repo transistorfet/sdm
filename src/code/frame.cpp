@@ -18,43 +18,9 @@
 
 //#define TASK_LIST_BITS		MOO_ABF_DELETEALL | MOO_ABF_RESIZE
 
-MooCodeFrame *g_current_frame = NULL;
-
-/******************
- * Special Events *
- ******************/
-
-class FrameEventDebug : public MooCodeEvent {
-	std::string m_msg;
-    public:
-	FrameEventDebug(const char *msg) : MooCodeEvent(NULL, NULL, NULL) {
-		m_msg = std::string(msg);
-	}
-
-	int do_event(MooCodeFrame *frame) { return(0); }
-
-	void print_debug() {
-		moo_status("DEBUG: %s", m_msg.c_str());
-	}
-};
-
-class FrameEventReturnPoint : public MooCodeEvent {
-    public:
-	FrameEventReturnPoint() : MooCodeEvent(NULL, NULL, NULL) { };
-	int do_event(MooCodeFrame *frame) { return(0); }
-};
-
-class FrameEventCatch : public MooCodeEvent {
-    public:
-	FrameEventCatch(MooObjectHash *env, MooCodeExpr *expr) : MooCodeEvent(env, NULL, expr) { };
-
-	/// If we evaluate this during the normal run loop then an exception hasn't occurred and we therefore do nothing
-	int do_event(MooCodeFrame *frame) { return(0); }
-	int handle(MooCodeFrame *frame);
-};
-
 extern MooObjectHash *global_env;
 
+MooCodeFrame *g_current_frame = NULL;
 //static MooArray<MooCodeFrame *> *g_task_list = NULL;
 static MooTaskQueue *g_task_queue = NULL;
 
@@ -82,6 +48,7 @@ MooCodeFrame::MooCodeFrame(MooObjectHash *env)
 {
 	m_owner = g_current_frame ? g_current_frame->m_owner : -1;
 	m_stack = new MooArray<MooCodeEvent *>(5, -1, MOO_ABF_DELETE | MOO_ABF_DELETEALL | MOO_ABF_RESIZE | MOO_ABF_REPLACE);
+	m_curevent = NULL;
 	m_return = NULL;
 	m_exception = NULL;
 	m_env = NULL;
@@ -95,6 +62,8 @@ MooCodeFrame::~MooCodeFrame()
 	MOO_DECREF(m_stack);
 	MOO_DECREF(m_env);
 	MOO_DECREF(m_return);
+	if (m_curevent)
+		delete m_curevent;
 	if (m_exception)
 		delete m_exception;
 }
@@ -130,13 +99,18 @@ int MooCodeFrame::push_event(MooCodeEvent *event)
 
 int MooCodeFrame::push_block(MooObjectHash *env, MooCodeExpr *expr)
 {
-	return(m_stack->push(new MooCodeEventEvalBlock(env, expr)));
+	return(m_stack->push(new MooCodeEventEvalBlock(expr, env, expr)));
+}
+
+int MooCodeFrame::push_call(MooObjectHash *env, MooObjectArray *args)
+{
+	return(m_stack->push(new MooCodeEventCallFunc(NULL, env, args)));
 }
 
 int MooCodeFrame::push_call(MooObjectHash *env, MooObject *func, MooObjectArray *args)
 {
 	args->unshift(func);
-	return(m_stack->push(new MooCodeEventCallFunc(env, args, func)));
+	return(m_stack->push(new MooCodeEventCallFunc(NULL, env, args)));
 }
 
 int MooCodeFrame::push_method_call(const char *name, MooObject *obj, MooObject *arg1, MooObject *arg2, MooObject *arg3)
@@ -147,17 +121,18 @@ int MooCodeFrame::push_method_call(const char *name, MooObject *obj, MooObject *
 	if (!(func = obj->resolve_method(name)))
 		return(-1);
 	args = new MooObjectArray();
-	args->set(0, obj);
+	args->set(0, func);
+	args->set(1, obj);
 	if (arg1) {
-		args->set(1, arg1);
+		args->set(2, arg1);
 		if (arg2) {
-			args->set(2, arg2);
+			args->set(3, arg2);
 			if (arg3)
-				args->set(3, arg3);
+				args->set(4, arg3);
 		}
 	}
 
-	return(this->push_call(this->env(), func, args));
+	return(this->push_call(this->env(), args));
 }
 
 int MooCodeFrame::push_code(const char *code)
@@ -180,7 +155,7 @@ int MooCodeFrame::push_debug(const char *msg, ...)
 
 	va_start(va, msg);
 	vsnprintf(buffer, STRING_SIZE, msg, va);
-	return(m_stack->push(new FrameEventDebug(buffer)));
+	return(m_stack->push(new MooCodeEventDebug(buffer)));
 }
 
 int MooCodeFrame::run_all()
@@ -215,7 +190,7 @@ int MooCodeFrame::run()
 	}
 	catch (MooException e) {
 		// TODO temporary for debugging purposes??
-		moo_status("CODE: %s", e.get());
+		moo_status("EXEC: %s", e.get());
 		this->print_stacktrace();
 		cycles = -1;
 
@@ -241,7 +216,6 @@ int MooCodeFrame::do_run(int limit)
 {
 	int cycles = 0;
 	MooObjectHash *base;
-	MooCodeEvent *event;
 
 	if (!limit)
 		limit = MOO_FRAME_CYCLE_LIMIT;
@@ -249,59 +223,73 @@ int MooCodeFrame::do_run(int limit)
 	if (g_current_frame)
 		throw MooException("Nested run() detected");
 	g_current_frame = this;
+
+	if (m_exception) {
+		delete m_exception;
+		m_exception = NULL;
+	}
+
+	if (m_curevent) {
+		delete m_curevent;
+		m_curevent = NULL;
+	}
+
 	base = m_env;
 	// TODO add an event counter in the frame and also take a max events param or something, such that
 	//	a frame gets a limited time slice...
 	while (cycles <= limit && m_stack->last() >= 0) {
-		if (!(event = m_stack->pop()))
-			continue;
-
 		if (m_exception) {
 			delete m_exception;
 			m_exception = NULL;
 		}
 
+		if (!(m_curevent = m_stack->pop()))
+			continue;
+
 		try {
-			this->env(event->env());
+			this->env(m_curevent->env());
 			// TODO temporary for debugging
 			//event->print_debug();
-			event->do_event(this);
+			m_curevent->do_event(this);
 		}
 		catch (MooException e) {
 			int line, col;
 
 			if (e.is_fatal())
 				throw e;
-			event->linecol(line, col);
+			m_curevent->linecol(line, col);
 			m_exception = new MooException(e.type(), "(%d, %d): %s", line, col, e.get());
 		}
 		catch (MooCodeFrameSuspend s) {
-			delete event;
+			delete m_curevent;
+			m_curevent = NULL;
 			break;
 		}
 
 		if (m_exception) {
-			m_stack->push(event);
-			if (!this->handle_exception()) {
-				this->env(base);
-				g_current_frame = NULL;
-				throw *m_exception;
-			}
+			if (!this->handle_exception())
+				break;
+			delete m_exception;
+			m_exception = NULL;
 		}
-		else
-			delete event;
+
+		delete m_curevent;
+		m_curevent = NULL;
 		cycles++;
 	}
+
 	this->env(base);
 	g_current_frame = NULL;
+	if (m_exception)
+		throw *m_exception;
 	return(cycles);
 }
 
 int MooCodeFrame::mark_return_point()
 {
-	if (dynamic_cast<FrameEventReturnPoint *>(m_stack->get_last()))
+	if (dynamic_cast<MooCodeEventReturnPoint *>(m_stack->get_last()))
 		return(0);
-	return(m_stack->push(new FrameEventReturnPoint()));
+	return(m_stack->push(new MooCodeEventReturnPoint()));
 }
 
 int MooCodeFrame::goto_return_point(int level)
@@ -313,7 +301,7 @@ int MooCodeFrame::goto_return_point(int level)
 		event = m_stack->pop();
 		if (!event)
 			return(0);
-		if (dynamic_cast<FrameEventReturnPoint *>(event)) {
+		if (dynamic_cast<MooCodeEventReturnPoint *>(event)) {
 			level--;
 			if (level <= 0)
 				ret = 1;
@@ -325,16 +313,17 @@ int MooCodeFrame::goto_return_point(int level)
 
 int MooCodeFrame::mark_exception(MooCodeExpr *handler)
 {
-	return(m_stack->push(new FrameEventCatch(m_env, handler)));
+	// TODO add debug field somehow
+	return(m_stack->push(new MooCodeEventCatch(NULL, m_env, handler)));
 }
 
 int MooCodeFrame::handle_exception()
 {
 	MooCodeEvent *event;
-	FrameEventCatch *handler;
+	MooCodeEventCatch *handler;
 
 	for (int i = m_stack->last(); i >= 0; i--) {
-		if ((handler = dynamic_cast<FrameEventCatch *>(m_stack->get(i)))) {
+		if ((handler = dynamic_cast<MooCodeEventCatch *>(m_stack->get(i)))) {
 			/// Rewind the stack
 			for (int j = m_stack->last(); j > i; j--) {
 				if ((event = m_stack->pop()))
@@ -342,22 +331,11 @@ int MooCodeFrame::handle_exception()
 			}
 			m_stack->pop();		/// Pop the handler off the stack but don't delete it yet
 			this->set_return(NULL);
-			handler->handle(this);
+			handler->handle(this, m_exception);
 			delete handler;
 			return(1);
 		}
 	}
-	return(0);
-}
-
-/*******************
- * FrameEventCatch *
- *******************/
-
-int FrameEventCatch::handle(MooCodeFrame *frame)
-{
-	if (m_expr)
-		frame->push_event(new MooCodeEventEvalBlock(m_env, m_expr));
 	return(0);
 }
 

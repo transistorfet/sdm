@@ -277,7 +277,7 @@ class HashEventForeach : public MooCodeEvent {
 	MooObject *m_func;
 	
     public:
-	HashEventForeach(int index, MooHashEntry<MooObject *> *next, MooObjectHash *obj, MooObjectHash *env, MooObject *func) : MooCodeEvent(env, NULL, NULL) {
+	HashEventForeach(int index, MooHashEntry<MooObject *> *next, MooObjectHash *obj, MooObjectHash *env, MooObject *func) : MooCodeEvent(NULL, env, NULL, NULL) {
 		m_index = index;
 		m_next = next;
 		// TODO incref??
@@ -313,7 +313,7 @@ class HashEventForeach : public MooCodeEvent {
 		args = new MooObjectArray();
 		args->set(0, MOO_INCREF(m_func));
 		args->set(1, MOO_INCREF(entry->m_data));
-		frame->push_event(new MooCodeEventCallFunc(m_env, args));
+		frame->push_call(m_env, args);
 		return(0);
 	}
 };

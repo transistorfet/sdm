@@ -61,7 +61,7 @@ int irc_pseudoserv_notify(MooCodeFrame *frame, MooObjectArray *args)
 	MooThing *m_this, *user, *channel;
 
 	if (args->last() != 1)
-		throw moo_args_mismatched;
+		throw MooException("Expected 2 arguments; given %d", args->last() + 1);
 	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
 		throw moo_method_object;
 	if (!(user = dynamic_cast<MooThing *>(args->get(1))))
