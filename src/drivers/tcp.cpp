@@ -352,16 +352,16 @@ static int tcp_wait(MooCodeFrame *frame, MooObjectArray *args)
 static int tcp_print(MooCodeFrame *frame, MooObjectArray *args)
 {
 	MooTCP *m_this;
-	char buffer[LARGE_STRING_SIZE];
+	const char *str;
 
-	if (args->last() < 1)
+	if (args->last() != 1)
 		throw moo_args_mismatched;
 	if (!(m_this = dynamic_cast<MooTCP *>(args->get(0))))
 		throw moo_method_object;
-	// TODO wtf? also, should we have a printf format instead?
-	MooObject::format(buffer, LARGE_STRING_SIZE, frame->env(), args->get_string(1));
+	if (!(str = args->get_string(1)))
+		throw MooException("arg1: Expected string type.");
 	//moo_status("TCP: SEND DEBUG: %s", buffer);
-	m_this->send(buffer);
+	m_this->send(str);
 	return(0);
 }
 

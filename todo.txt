@@ -145,9 +145,10 @@
     TODO:
 	* modify all exception throwing to provide more debugging info
 	* aad a field to frame for storing the currently executing event, just so it can be refered to easily
-	* improve try/catch to either allow multiple catch blocks or make the exception info accessable somehow
 	* modify the telnet code to properly catch and report exceptions via debug and also to the user
-	* make it possible to use (print...) in telnet code
+	* make it possible to use (print...) in telnet code by using some kind of task-global %out variable or something that is an
+	  object, and the %out:print method will be called
+	* change the exception message variable name??  %error isn't good
 
 	* modify the define and set! commands so that you have to use set! for changing methods and properties, since it makes more sense
 	  being a modification command and since the changes are always persistent.  Then 'define' would only set values in the global

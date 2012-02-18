@@ -15,7 +15,13 @@
 
 (define shell:new-connection (lambda (this driver)
 	; TODO this is where you'd do stuff when first connected
+	(define *out* this)
+	(define conn driver)
 	(this:handle-connection driver)
+))
+
+(define shell:print (lambda (this str)
+	(conn:print str)
 ))
 
 (define shell:handle-connection (lambda (this driver)
@@ -30,7 +36,7 @@
 				(begin
 					(debug "Disconnecting")
 					(return)))
-			(debug "ERROR: " %error)
+			(debug %error)
 			(sleep 1)
 		))
 	)

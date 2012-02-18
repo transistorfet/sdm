@@ -23,9 +23,7 @@ static int basic_print(MooCodeFrame *frame, MooObjectArray *args)
 {
 	int j = 0;
 	MooObjectHash *env;
-	MooObject *obj, *func;
-	MooObjectArray *newargs;
-	MooThing *user, *channel;
+	MooObject *obj, *out;
 	char buffer[LARGE_STRING_SIZE];
 
 	if (args->last() == -1)
@@ -36,15 +34,9 @@ static int basic_print(MooCodeFrame *frame, MooObjectArray *args)
 		j += obj->to_string(&buffer[j], LARGE_STRING_SIZE - j);
 	}
 	env = frame->env();
-	if (!(user = dynamic_cast<MooThing *>(env->get("user"))))
-		throw moo_type_error;
-
-	if (!(func = user->resolve_method("tell")))
-		throw MooException("User object does not have a \'tell\' method");
-	newargs = new MooObjectArray();
-	args->set(0, user);
-	args->set(1, new MooString("%s", buffer));
-	frame->push_call(env, func, args);
+	if (!(out = dynamic_cast<MooThing *>(env->get("*out*"))))
+		throw MooException("No output object specified in *out*");
+	frame->push_method_call("print", out, new MooString("%s", buffer));
 	return(0);
 }
 

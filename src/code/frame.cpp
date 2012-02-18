@@ -278,6 +278,11 @@ int MooCodeFrame::do_run(int limit)
 		cycles++;
 	}
 
+	if (m_curevent) {
+		delete m_curevent;
+		m_curevent = NULL;
+	}
+
 	this->env(base);
 	g_current_frame = NULL;
 	if (m_exception)
