@@ -21,16 +21,19 @@ MooThing *user_make_guest(const char *name)
 {
 	MooThing *user, *parent;
 
+/*
 	if (user_exists(name))
 		throw MooException("User already exists.  Cannot make guest.");
-	if (!(parent = dynamic_cast<MooThing *>(MooObject::resolve("user", NULL))))
+	if (!(parent = dynamic_cast<MooThing *>(frame->resolve("user"))))
 		throw moo_thing_not_found;
 	user = new MooThing(MOO_NEW_ID, parent->id());
 	user->resolve_property("name", new MooString(name));
 	//user->owner(user->id());
 	user->resolve_property("description", new MooString("You see a new person who looks rather out-of-place."));
-	//user->move(dynamic_cast<MooThing *>(MooObject::resolve("start-room", NULL)));
+	//user->move(dynamic_cast<MooThing *>(frame->resolve("start-room")));
 	return(user);
+*/
+	return(NULL);
 }
 
 int user_logged_in(const char *name)
@@ -39,7 +42,7 @@ int user_logged_in(const char *name)
 	MooObject *users;
 	MooObjectHash *list;
 
-	if (!(users = MooObject::resolve("NickServ", global_env))) {
+	if (!(users = global_env->get("NickServ"))) {
 		moo_status("USER: NickServ object not found");
 		return(0);
 	}

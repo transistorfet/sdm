@@ -71,9 +71,6 @@
 	  assign it to the user once we connect).  This would again, however, not work for MooCodeTask, because it is not already
 	  waiting on a queue.  Then again, MooCodeTasks cannot currently use interfaces anyways, and should not be able to do so easily
 
-	* how will 'notify' relate to tasks and all that?  It should just be a function on the user which uses the server and/or
-	  driver properties (set by the connection automatically), to send a formatted message back on that connection.
-
       Permissions:
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
 	  being accessed on the direct thing. (call it 'local'??)
@@ -93,8 +90,6 @@
 	  not (eqv? ...) to true
 
       Miscellaneous:
-	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
-	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
 	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
 	  things and have them remain in the task's scope at all times (thread-global definitions).
 	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
@@ -103,6 +98,20 @@
 	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
 	  because it allows a command to have the same name of a function but with different argument processing and stuff
 
+	* you really should integrate hash and thing and make methods and properties have the same namespace.  access_method can remain
+	  and be custom for each object, and then have what you have for thing but with the hash's builtins as well
+	* you should modify the name lookup to generate the hash only once and use it in the multiple places needed when looking up
+	  names in environments
+
+	* if you make a seperate method type, you would use something like defmethod or something, so that you can get the method object
+	  and set it in the value somehow.  You could then also switch to defun and take on a more lispy feel, since you are already
+	  more lisp than scheme anyways, with dynamic scope and seperate properties methods instead of first class functions in scheme (but lambda could
+	  still be available).  The only way to create a method would be to assign it to an object, which is a good
+	  restriction, and since the method value itself has a reference to the parent object, it can be passed directly as a single
+	  value, (however, if a new method is assigned, any references will be invalid because they will still point to the old method.
+	  you need a reference of some kind, preferably transparent).
+	* yes, you'd only have to change a few names and the behaviour of the define/set forms and to add the defun, defm forms, but you
+	  have to change all that anyways.
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 	  (then again, scheme has even more)
 	* you can modify the parser to either use {} and [] as equivallent to () (assuming they match up properly) or else to make
@@ -111,6 +120,8 @@
 	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
 	  data, or something.
 
+	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
+	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
 	* should you rename MooCodeFrame to MooTask?
 	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
 	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
@@ -143,12 +154,16 @@
 	  level method, object, or task, and the output is returned to the calling function.
 
     TODO:
+	* move MooObject::resolve to MooCodeFrame.  The resolve_* functions can remain for now.  You can then use the frame itself and
+	  all its info (maybe/maybe not the ability to use events) to look up the value.  You can then also have a root environment for
+	  each frame which is the task's global env (with an uplink to the *primatives* env which can maybe remain global_env).  You
+	  should also integrate the root object as a global space somehow... I guess the root env would uplink to the root object which
+	  would uplink to prims?  Or we could all just do it in resolve since it's the same amount of executed code either way.
+
 	* modify all exception throwing to provide more debugging info
-	* aad a field to frame for storing the currently executing event, just so it can be refered to easily
 	* modify the telnet code to properly catch and report exceptions via debug and also to the user
 	* make it possible to use (print...) in telnet code by using some kind of task-global %out variable or something that is an
 	  object, and the %out:print method will be called
-	* change the exception message variable name??  %error isn't good
 
 	* modify the define and set! commands so that you have to use set! for changing methods and properties, since it makes more sense
 	  being a modification command and since the changes are always persistent.  Then 'define' would only set values in the global

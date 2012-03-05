@@ -38,6 +38,9 @@ class MooObject : public MooGC {
     protected:
 	int m_bitflags;
 
+	int is_deleting() { return((m_bitflags & MOO_BF_DELETING) ? 1 : 0); }
+	void set_delete() { m_bitflags |= MOO_BF_DELETING; }
+
     public:
 	MooObject();
 	virtual ~MooObject() { }
@@ -69,13 +72,8 @@ class MooObject : public MooGC {
 	virtual const char *get_string() { throw MooException("Unable to convert to string"); }
 	virtual MooThing *get_thing() { throw MooException("Unable to convert to thing"); }
 
-	static MooObject *resolve(const char *name, MooObjectHash *env, MooObject *value = NULL, MooObject **parent = NULL);
 	MooObject *resolve_property(const char *name, MooObject *value = NULL);
 	MooObject *resolve_method(const char *name, MooObject *value = NULL);
-
-	static int format(char *buffer, int max, MooObjectHash *env, const char *fmt);
-	static int expand_reference(char *buffer, int max, MooObjectHash *env, const char *str, int *used);
-	static int escape_char(const char *str, char *buffer);
 
     private:
 	/// Object Member Access Functions
@@ -84,10 +82,6 @@ class MooObject : public MooGC {
 
 	friend class MooCodeEventCallFunc;
 	virtual int do_evaluate(MooCodeFrame *frame, MooObjectArray *args) { throw moo_evaluate_error; }
-
-    protected:
-	int is_deleting() { return((m_bitflags & MOO_BF_DELETING) ? 1 : 0); }
-	void set_delete() { m_bitflags |= MOO_BF_DELETING; }
 };
 
 int init_object(void);

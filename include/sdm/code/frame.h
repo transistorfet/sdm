@@ -55,6 +55,7 @@ class MooCodeFrame {
 	MooObjectHash *env() { return(m_env); }
 	void env(MooObjectHash *env);
 	MooObjectHash *extend_env();
+	MooObject *resolve(const char *name, MooObject *value = NULL, MooObject **parent = NULL);
 
 	void print_stacktrace();
 

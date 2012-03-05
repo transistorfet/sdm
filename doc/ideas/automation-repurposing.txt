@@ -1,0 +1,23 @@
+
+2012/01/15:
+
+* it might be possible to repurpose this system as the core of a home automation network (i've been thinking about this for a while)
+* The main advantages are that you can change and test things easily on the fly and have those changes saved to disc, and possibly
+  revision controlled as well.  Larger changes would be harder to do but still possible.
+* the IRC interface might still be useful but most things would be done through a basic command prompt (telnet?) type system, or by
+  some other means
+
+* there would need to be some adjustment to the task and output distribution system.  Instead of having a user in the way we do now,
+  the 'user' would be any object that represents the initiator of the action (i guess it would always be the owner of the currently
+  executing task).
+
+* I envision each device in the network being represented by an object.  The RGB controlled would be represented by an object, and there
+  would be a task that communicates with the device itself.  If you want to control the device, you call a method on the object, which
+  would send a message to the device and get confirmation if needed and all that.  It could possibly even cause the calling task to
+  block until confirmation is received (subject to a timeout).  When IR data comes in from the controlled, it can use information in
+  the object itself to direct the data as needed, calling an appropriate method on another object that registered itself for that data,
+  for example.
+
+* you could 'go/teleport' to that object to work on it locally (it will be checked for matching methods when you execute a command)
+
+

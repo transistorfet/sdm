@@ -32,6 +32,7 @@ int serverloop(void);
 static void handle_sigint(int);
 
 extern int moo_load_basic_funcs(MooObjectHash *env);
+extern int moo_load_string_funcs(MooObjectHash *env);
 extern int moo_load_thing_methods(MooObjectHash *env);
 extern int moo_load_user_methods(MooObjectHash *env);
 extern int moo_load_telnet_methods(MooObjectHash *env);
@@ -65,6 +66,7 @@ int init_moo(void)
 		init_thing();
 
 		moo_load_basic_funcs(global_env);
+		moo_load_string_funcs(global_env);
 		moo_load_thing_methods(global_env);
 		moo_load_user_methods(global_env);
 		moo_load_telnet_methods(global_env);

@@ -36,7 +36,7 @@
 				(begin
 					(debug "Disconnecting")
 					(return)))
-			(debug %error)
+			(debug *error*)
 			(sleep 1)
 		))
 	)

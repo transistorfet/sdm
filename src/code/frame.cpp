@@ -398,6 +398,55 @@ MooObjectHash *MooCodeFrame::extend_env()
 	return(m_env);
 }
 
+MooObject *MooCodeFrame::resolve(const char *name, MooObject *value, MooObject **parent)
+{
+	MooObject *obj;
+	char *method, *remain;
+	char buffer[STRING_SIZE];
+
+	strncpy(buffer, name, STRING_SIZE);
+	buffer[STRING_SIZE - 1] = '\0';
+
+	if ((method = strchr(buffer, ':'))) {
+		*method = '\0';
+		method++;
+	}
+
+	if ((remain = strchr(buffer, '.'))) {
+		*remain = '\0';
+		remain++;
+	}
+
+	if (!method && !remain && value) {
+		// TODO check perms
+		if (!m_env) {
+			if (global_env->set(buffer, MOO_INCREF(value)))
+				return(NULL);
+		}
+		else if (m_env->set(buffer, MOO_INCREF(value)))
+			return(NULL);
+		return(value);
+	}
+	else {
+		// TODO should we modify this so that we never do a global_env lookup and instead rely on the env being linked to global_env
+		if (!(obj = MooMutable::reference(buffer))
+		    && !(obj = m_env->get(buffer))
+		    && !(obj = global_env->get(buffer)))
+			return(NULL);
+	}
+	if (remain && !(obj = obj->resolve_property(remain, method ? NULL : value)))
+		return(NULL);
+
+	if (method) {
+		if (parent)
+			*parent = obj;
+		if (!(obj = obj->resolve_method(method, value)))
+			return(NULL);
+	}
+	return(obj);
+}
+
+
 void MooCodeFrame::print_stacktrace()
 {
 	MooCodeEvent *event;

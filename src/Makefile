@@ -24,6 +24,7 @@ OBJS =	colours.o	\
 	drivers/server.o	\
 	drivers/tcp.o	\
 	lib/basic.o	\
+	lib/strings.o	\
 	lib/telnet.o	\
 	lib/users.o	\
 	lib/irc/msg.o	\
@@ -84,9 +85,9 @@ main.o: main.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/event.h ../include/sdm/code/parser.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/code/task.h ../include/sdm/drivers/driver.h \
-  ../include/sdm/drivers/tcp.h ../include/sdm/objs/thing.h \
-  ../include/sdm/lib/irc/pseudoserv.h ../include/sdm/lib/irc/msg.h \
-  ../include/sdm/lib/irc/commands.h
+  ../include/sdm/drivers/tcp.h ../include/sdm/drivers/server.h \
+  ../include/sdm/objs/thing.h ../include/sdm/lib/irc/pseudoserv.h \
+  ../include/sdm/lib/irc/msg.h ../include/sdm/lib/irc/commands.h
 
 code/code.o: code/code.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/hash.h \
@@ -199,9 +200,16 @@ drivers/driver.o: drivers/driver.cpp ../include/sdm/globals.h \
 
 drivers/server.o: drivers/server.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
-  ../include/sdm/gc.h ../include/sdm/data.h \
+  ../include/sdm/gc.h ../include/sdm/data.h ../include/sdm/objs/mutable.h \
   ../include/sdm/drivers/driver.h ../include/sdm/code/task.h \
-  ../include/sdm/drivers/tcp.h ../include/sdm/drivers/server.h
+  ../include/sdm/drivers/tcp.h ../include/sdm/drivers/server.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/array.h ../include/sdm/objs/nil.h \
+  ../include/sdm/objs/boolean.h ../include/sdm/objs/number.h \
+  ../include/sdm/objs/string.h ../include/sdm/objs/funcptr.h \
+  ../include/sdm/code/expr.h ../include/sdm/code/sync.h \
+  ../include/sdm/code/event.h ../include/sdm/code/parser.h \
+  ../include/sdm/code/frame.h ../include/sdm/code/lambda.h
 
 drivers/tcp.o: drivers/tcp.cpp ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/objs/object.h \
@@ -228,6 +236,18 @@ lib/basic.o: lib/basic.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/code/frame.h ../include/sdm/code/lambda.h \
   ../include/sdm/code/task.h ../include/sdm/objs/thing.h
 
+lib/strings.o: lib/strings.cpp ../include/sdm/data.h \
+  ../include/sdm/globals.h ../include/sdm/exception.h \
+  ../include/sdm/code/code.h ../include/sdm/objs/object.h \
+  ../include/sdm/gc.h ../include/sdm/objs/hash.h \
+  ../include/sdm/objs/mutable.h ../include/sdm/objs/array.h \
+  ../include/sdm/objs/nil.h ../include/sdm/objs/boolean.h \
+  ../include/sdm/objs/number.h ../include/sdm/objs/string.h \
+  ../include/sdm/objs/funcptr.h ../include/sdm/code/expr.h \
+  ../include/sdm/code/sync.h ../include/sdm/code/event.h \
+  ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
+  ../include/sdm/code/lambda.h ../include/sdm/code/task.h
+
 lib/telnet.o: lib/telnet.cpp ../include/sdm/data.h \
   ../include/sdm/globals.h ../include/sdm/exception.h \
   ../include/sdm/code/code.h ../include/sdm/objs/object.h \
@@ -240,7 +260,7 @@ lib/telnet.o: lib/telnet.cpp ../include/sdm/data.h \
   ../include/sdm/code/parser.h ../include/sdm/code/frame.h \
   ../include/sdm/code/lambda.h ../include/sdm/code/task.h \
   ../include/sdm/objs/thing.h ../include/sdm/drivers/driver.h \
-  ../include/sdm/lib/users.h
+  ../include/sdm/drivers/tcp.h ../include/sdm/lib/users.h
 
 lib/users.o: lib/users.cpp ../include/sdm/data.h ../include/sdm/globals.h \
   ../include/sdm/exception.h ../include/sdm/code/code.h \

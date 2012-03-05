@@ -284,7 +284,7 @@ MooThing *MooThing::get_channel(const char *name)
 	MooObject *channels;
 	MooObjectHash *list;
 
-	if (!(channels = MooObject::resolve("ChanServ", global_env))) {
+	if (!(channels = global_env->get("ChanServ"))) {
 		moo_status("CHANNEL: ChanServ object not found");
 		return(NULL);
 	}

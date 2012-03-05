@@ -157,6 +157,39 @@ int irc_pseudoserv_notify(MooCodeFrame *frame, MooObjectArray *args)
 	return(0);
 }
 
+
+int irc_pseudoserv_send_status(MooCodeFrame *frame, MooObjectArray *args)
+{
+	MooTCP *driver;
+	MooObject *obj;
+	char buffer[LARGE_STRING_SIZE];
+	const char *nick, *channel_name, *str;
+	MooThing *m_this, *user, *channel;
+
+	if (args->last() != 3)
+		throw MooException("IRC: Expected 4 arguments; given %d", args->last() + 1);
+	if (!(m_this = dynamic_cast<MooThing *>(args->get(0))))
+		throw moo_method_object;
+	if (!(user = dynamic_cast<MooThing *>(args->get(1))))
+		throw MooException("IRC: arg 1: Invalid user, expected thing type");
+	if (!(channel = dynamic_cast<MooThing *>(args->get(2))))
+		throw MooException("IRC: arg 2: Invalid channel, expected thing type");
+	if (!(str = args->get_string(3)))
+		throw MooException("IRC: arg 3: Expected string type");
+	if (!(driver = dynamic_cast<MooTCP *>(user->resolve_property("conn"))))
+		throw MooException("IRC: Invalid user.conn, expected MooTCP driver");
+	if (!(obj = user->resolve_property("name")) || !(nick = obj->get_string()))
+		throw MooException("IRC: Invalid user.name");
+	if (!(obj = channel->resolve_property("name")) || !(channel_name = obj->get_string()))
+		throw MooException("IRC: Invalid channel.name");
+
+	moo_colour_format(&irc_write_attrib, buffer, LARGE_STRING_SIZE, str);
+	if (!channel_name)
+		return(IRCMsg::send(driver, ":TheRealm!realm@%s NOTICE %s :*** %s\r\n", server_name, nick, buffer));
+	else
+		return(IRCMsg::send(driver, ":TheRealm!realm@%s PRIVMSG %s :*** %s\r\n", server_name, channel_name, buffer));
+}
+
 int irc_pseudoserv_process(MooCodeFrame *frame, MooObjectArray *args)
 {
 	IRCMsg msg;
@@ -199,7 +232,7 @@ int irc_dispatch(MooCodeFrame *frame, MooThing *m_this, MooTCP *driver, IRCMsg *
 	}
 
 	env = frame->env();
-	user = dynamic_cast<MooThing *>(MooObject::resolve("user", env));
+	user = dynamic_cast<MooThing *>(frame->resolve("user"));
 	if (!user) {
 		switch (msg->cmd()) {
 		    case IRC_MSG_PASS: {
@@ -357,7 +390,7 @@ int irc_dispatch(MooCodeFrame *frame, MooThing *m_this, MooTCP *driver, IRCMsg *
 	    case IRC_MSG_QUIT: {
 		if (user) {
 			MooObject *channels;
-			if ((channels = MooObject::resolve("ChanServ", global_env)))
+			if ((channels = frame->resolve("ChanServ")))
 				frame->push_method_call("quit", channels);
 		}
 		// TODO you can't do this now until after you process the quit (right??)
@@ -651,7 +684,7 @@ int irc_send_list(MooCodeFrame *frame, MooTCP *driver, const char *nick, const c
 
 	// TODO accessing the db directly isn't really correct here, we should either call a method, evaluate direct code (but which
 	//	would allow easy use of a method on chanserv), or something to put the actual db access into a method on ChanServ
-	if ((channels = MooObject::resolve("ChanServ", global_env))) {
+	if ((channels = frame->resolve("ChanServ"))) {
 		if ((list = dynamic_cast<MooObjectHash *>(channels->resolve_property("db")))) {
 			list->reset();
 			while ((cur = list->next())) {
@@ -766,6 +799,8 @@ int irc_write_attrib(int type, char *buffer, int max)
 
 void moo_load_irc_methods(MooObjectHash *env)
 {
+	env->set("%irc-send-status", new MooFuncPtr(irc_pseudoserv_send_status));
+
 	env->set("%irc-process", new MooFuncPtr(irc_pseudoserv_process));
 	env->set("%irc-notify", new MooFuncPtr(irc_pseudoserv_notify));
 }
@@ -773,27 +808,33 @@ void moo_load_irc_methods(MooObjectHash *env)
 
 /*
 
-(define pseudoserv (root:clone (lambda (this)
+(define irc (root:clone))
 
-	; This is just an example...
-	(define this.server_driver (new-server 6667))
-	(this.server_driver:on_connection pseudoserv 'new_connection)
+(define irc:start (lambda (this port)
 
-	(define this:start (lambda (this port)
+))
 
-	))
+(define irc:new-connection (lambda (this driver)
+	(define *out* this)
+	(define conn driver)
+	(this:handle-connection driver)
+))
 
-	(define this:new_connection (lambda (this driver)
-		(loop
-			(driver:wait)
-			(this:process driver))
-	))
+(define irc:handle-connection (lambda (this driver)
+	(loop
+		(driver:wait)
+		(this:process driver))
+))
 
-	(define this:process %irc-process)
-	(define this:notify %irc-notify)
+(define irc:print (lambda (this text)
+	(%irc-send-status this user channel text)
+))
 
-)))
+(define irc:process %irc-process)
+(define irc:notify %irc-notify)
 
+(define irc.server (make-server 6667))
+(irc.server:set_callback pseudoserv 'new-connection)
 
 */
 
