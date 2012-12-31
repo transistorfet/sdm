@@ -1,0 +1,35 @@
+
+
+LIST OF STANDARD PROPERTIES:
+
+All objects:
+	name		A simple proper name which only contains the characters [A-Za-z0-9_]
+	title		A brief descriptive name for the object, used for descriptions
+	description	A long description of the object which is printed when the object is examined
+
+
+
+Things We Need:
+- owner
+- permissions (how will they be organized)
+
+- silence (perhaps only for forced silence?)
+- deaf (perhaps a secondary for mobiles)
+- teleport allowed (immortal bit overrides)
+- ignore list
+- invisibility bit
+
+- physical world bit (physical rules apply like hunger and death)
+- immortal bit (for a user, cannot be fought) (should this instead by "decended from wizard/immortal object?")
+- fighting not allowed bit (for rooms to disable fighting)
+- player killing not allowed (for rooms, also perhaps for users, so some users can be immune (somehow))
+- allow guest bit (for rooms, if you are a guest, you can't enter rooms that require a full character)
+
+
+
+
+
+
+OBJECTS:
+* 'wizard'	Bit, Is a wizard
+

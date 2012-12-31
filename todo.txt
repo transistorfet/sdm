@@ -30,7 +30,7 @@
 	  forcejoin'd by TheRealm.)  (Note: the number used in numeric channels cannot be the room unless you are force join/part'd)
 	* you could somehow have a web browser based system and use CSS for text formatting or something, so you can do advanced stuff
 
-      MultiTasking:
+      MultiThreading:
 	* you could have a locking mechanism in the frame itself similar to the task suid mechanism, where an unlock event is placed
 	  on the stack.  Then, when a frame is going to be suspended, it can check for a lock and continue execution until the unlock
 	  is reached.  It can also monitor for overrun and terminate the task or something.
@@ -44,32 +44,8 @@
 
 	* how will any code (assuming we use pthreads) be able to get the current task (the only thing needed usually is the owner of
 	  the task, and the user)?  We can't use global variables like we are.  I guess this depends on the whole threading mechanism
-	* how will you be able to do register/create_character when you need to ask a bunch of questions.  It would be nice if it
-
 	* commands could run for a time without having to create their own tasks.  For example, fighting could be implemented directly
 	  in the command itself, so the fight command would just run and use 'sleep' or something to pause between rounds.
-
-	* you could have a queue type which is stored as just a normal property in the user object, instead of storing the task??
-	* you could have a queue of messages for each task (notify events, handling, etc) and still have a single task run function in
-	  each task, and have the run function call a function to process and dispatch notify messages automatically (for convenience).
-	  For pseudoserv and stuff, it's ok because they don't use their current idle() functions so that would become a run() function
-	  and would have a loop that blocks trying to read the queue, thus waiting until a message arrives.  Everything else in the
-	  server could be handled in this way (besides pinging clients and detecting timeouts, which could be incorporated into the
-	  read_and_dispatch() function).  For MooCodeTasks, you would have to incorporate the dispatch function inte the frame->run()
-	  system by periodically checking if a message is available (non-blocking).  The big problem here is if you use sleep() or
-	  somehow want a delay (without creating a new task to delay execution).  If you use the real sleep(), the thread will block,
-	  so you'd need 2 threads per task to run; one for the run() function and one for dispatching.  Another way is to somehow use
-	  another thread to time or something, or somehow get a special message sent when the time expires, and then the thread can
-	  block by waiting to read and dispatch a message, and when it recieves the timeout message, it unsuspends the run.  Another
-	  option is to not have a message queue per task, and instead, special tasks will be able to receive a message, like pseudoserv
-	  and everything else would be handled via thing methods (tell and functions like that would all just be methods and only the
-	  user object would have a tell function which calls task:notify or something like that, or else which pushes the message onto
-	  a queue, which pseudoserv can (with thread-safety built in to queue) consume messages from that queue and process them as it
-	  currently does.  We would still need a way to handle network events, but perhaps that could be integrated using a similar
-	  mechanism (register a queue object with interfaces, and have interfaces' select() function to write a message to that queue,
-	  and for pseudoserv, you'd give it the same queue as the user's queue (we'd create the queue first when the task starts and
-	  assign it to the user once we connect).  This would again, however, not work for MooCodeTask, because it is not already
-	  waiting on a queue.  Then again, MooCodeTasks cannot currently use interfaces anyways, and should not be able to do so easily
 
       Permissions:
 	* we could have a public/private flag for each property (permissions) such that some properties are only accessable when they are
@@ -79,8 +55,32 @@
 	  could also just use init().
 	* (define &rwxp name value) - you could do this or something like it in order to set permissions during the define.  Also
 	  (chmod &rwxp name/value) to keep it consistent, but it'd need to be a form.
-	* you could possible pass the frame to resolve(), which can then use it to get the current owner for permissions checking, so
-	  that you no longer need the global variables in frame and task.
+
+      Command Parsing:
+	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
+	  because it allows a command to have the same name of a function but with different argument processing and stuff
+	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
+	  that function would then check for a '.something' and send it to channel:command itself
+	* you could have a command prefix like '.' such that it doesn't get parsed out of the name but only commands with that prefix
+	  are interpreted as commands, therefore all user-accessible commands must have a special name and don't get confused with
+	  none-command methods.  It would have to be something else because '.' is used as an accessor in code (would be impossible to
+	  have channel:.say for example, but could have channel:@say)
+	* this could be entirely object dependant.  In nickserv, the 'say' method will be called when a pm is sent to nickserv.  That
+	  method then executes it as a command.
+
+      Major General Issues:
+	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
+	  things and have them remain in the task's scope at all times (thread-global definitions).
+	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
+	  parent).  If you assign anything to the root environment, it will be saved as part of the root thing (#0).  You can also
+	  access the root (global) env at any time by directly accessing #0.
+	* is there a way to fork a task or create a new task generically from moocode?
+	* if you were to enter text sequentially on multiple lines ending in a period kinda-deal, how would the actual input work?? How
+	  would it be implemented.  How would input be redirected to that command versus being interpreted as a new command?  Would it
+	  involve a task running in the background and intercepting the data somehow? or would a directional pointer of some kind be
+	  stored in the user object??  Would this require any method that wants to have this entry method to have high level permissions?
+	  or perhaps even could you make this a generic format thing of some kind such that the actual control is handled by a higher
+	  level method, object, or task, and the output is returned to the calling function.
 	* you still need to get the owner when you evaluate a method, so that you can elevate the privs.  You can't elevate the frame
 	  when you access the method, because you can't know that it will execute it (it only read it), and you can't set a member of the
 	  object to be the owner through a MooObject virtual function, because anything stored in the object itself will make it
@@ -88,18 +88,13 @@
 	  return that object when you read it (like MooMethod was like) which stores the owner and elevates the perms transparently when
 	  you try to evaluate it, but it would be added memory and complexity, and when you set a method and then get a method, it will
 	  not (eqv? ...) to true
-
-      Miscellaneous:
-	* there must be a consistent global environment for every task such that when the task is executed, it's possible to (define ...)
-	  things and have them remain in the task's scope at all times (thread-global definitions).
-	* you could make the root thing's properties hash be the root environment (but I guess with the 'primatives' environment as its
-	  parent).  If you assign anything to the root environment, it will be saved as part of the root thing (#0).  You can also
-	  access the root (global) env at any time by directly accessing #0.
-	* you need to fix arguments and command and method processing and stuff.  I like the idea of a seperate namespace for commands
-	  because it allows a command to have the same name of a function but with different argument processing and stuff
-
 	* you really should integrate hash and thing and make methods and properties have the same namespace.  access_method can remain
 	  and be custom for each object, and then have what you have for thing but with the hash's builtins as well
+	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
+	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
+	  namespaces would be merged.  The : syntax would just be a syntactic thing for calls (a shorthand).  Lambda environments would
+	  be non-persistent, or at least never ID assigned, and as long as you don't save the frame, you are fine.  But come to think of
+	  it, you could always save a frame to suspend a task to disk!
 	* you should modify the name lookup to generate the hash only once and use it in the multiple places needed when looking up
 	  names in environments
 
@@ -110,48 +105,26 @@
 	  restriction, and since the method value itself has a reference to the parent object, it can be passed directly as a single
 	  value, (however, if a new method is assigned, any references will be invalid because they will still point to the old method.
 	  you need a reference of some kind, preferably transparent).
-	* yes, you'd only have to change a few names and the behaviour of the define/set forms and to add the defun, defm forms, but you
-	  have to change all that anyways.
+
+	* how can you delete persistent objects from the system?
+
+      Minor Issues:
+	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
+	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
+	  data, or something.
 	* We could have a new undef type to be used when a value is not defined, although this might be confusing having 2 'blank' values
 	  (then again, scheme has even more)
 	* you can modify the parser to either use {} and [] as equivallent to () (assuming they match up properly) or else to make
 	  {...} equivallent to (begin ...) or something make coding easier and cleaner while providing added protection against mistakes
-	* can you somehow change events to be static so that you don't have a new/delete for every step of the execution process?  So
-	  the frame would have a stack of actual events rather than pointers to them, and you could possibly have a pointer to extended
-	  data, or something.
-
-	* a (lambda ...) would be the best way to define a task's body, because we use it for everything else (so no special case) but
-	  because evaluation of a lambda creates a new env, things defined in the lambda will not be perminent to the task
 	* should you rename MooCodeFrame to MooTask?
-	* you could possibly get rid of thing and make all things hash tables and hash tables things, since they would both be persistent,
-	  ID assigned objects.  The root environment for the language would be the root object, and the properties and methods
-	  namespaces would be merged.  The : syntax would just be a syntactic thing for calls (a shorthand).  Lambda environments would
-	  be non-persistent, or at least never ID assigned, and as long as you don't save the frame, you are fine.  But come to think of
-	  it, you could always save a frame to suspend a task to disk!
-	* how can you delete persistent objects from the system?
 
-	* should you remove the period commands and just have the system parse it all out?  All text would be sent to channel:say and
-	  that function would then check for a '.something' and send it to channel:command itself
-	* you could have a command prefix like '.' such that it doesn't get parsed out of the name but only commands with that prefix
-	  are interpreted as commands, therefore all user-accessible commands must have a special name and don't get confused with
-	  none-command methods.  It would have to be something else because '.' is used as an accessor in code (would be impossible to
-	  have channel:.say for example, but could have channel:@say)
-	* this could be entirely object dependant.  In nickserv, the 'say' method will be called when a pm is sent to nickserv.  That
-	  method then executes it as a command.
-
+	* if you have an editor channel or something, how would it work?
 	* could you maybe have an aspect oriented debugging system??  That would make it easier to debug the running system without
 	  a fully interactive text editor or something. (add-pc[??] 'debug "*null?*" (lambda () (print name)))) this would
 	  print the value of name at the point after the null? statement.  You'd need a better way to specify joinpoints but it might
 	  work.  The 'debug would be a label so you can group pointcuts together and remove them simultaneously (or activate/deactivate)
 	  How would they be stored and implemented and so on??
 
-	* if you have an editor channel or something, how would it work?
-	* if you were to enter text sequentially on multiple lines ending in a period kinda-deal, how would the actual input work?? How
-	  would it be implemented.  How would input be redirected to that command versus being interpreted as a new command?  Would it
-	  involve a task running in the background and intercepting the data somehow? or would a directional pointer of some kind be
-	  stored in the user object??  Would this require any method that wants to have this entry method to have high level permissions?
-	  or perhaps even could you make this a generic format thing of some kind such that the actual control is handled by a higher
-	  level method, object, or task, and the output is returned to the calling function.
 
     TODO:
 	* move MooObject::resolve to MooCodeFrame.  The resolve_* functions can remain for now.  You can then use the frame itself and

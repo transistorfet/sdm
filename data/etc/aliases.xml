@@ -1,0 +1,11 @@
+<!-- This is just a test file for an object ID to name/variable mapping format. This
+  list could actually be in config or in a seperate directory or something.  When the
+  system starts, this file would be read in and variables added to the global_env which
+  map to the object IDs in this file.  Everything (including internal stuff) could look
+  up these variables for things like which object should user objects inherit from. -->
+<aliases>
+ <alias>
+  <name>@user</name>
+  <id>6</id>
+ </alias>
+</aliases>

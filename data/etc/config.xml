@@ -1,0 +1,7 @@
+<config>
+ <listener>
+  <port>6667</port>
+  <type>tcp</type>
+  <task>irc-pseudoserv</task>
+ </listener>
+</config>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<passwd>
+ <!--
+ <user name="chanser">
+  <thing>103</thing>
+  <password>chFE2uKPNjxl.</password>
+ </user>
+ -->
+ <user name="trans">
+  <thing>101</thing>
+  <password>trmnnMRMYbWZw</password>
+ </user>
+ <user name="trans2">
+  <thing>112</thing>
+  <password>trmnnMRMYbWZw</password>
+ </user>
+ <user name="trans3">
+  <thing>118</thing>
+  <password>trmnnMRMYbWZw</password>
+ </user>
+ <user name="transistor">
+  <thing>100</thing>
+  <password>trmnnMRMYbWZw</password>
+ </user>
+</passwd>

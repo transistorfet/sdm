@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing>
+ <id>101</id>
+ <parent>9</parent>
+ <owner>101</owner>
+ <mode>075</mode>
+ <properties>
+  <entry key="task" type="nil" owner="101" mode="077"/>
+  <entry key="location" type="thing" owner="101">4</entry>
+  <entry key="title" type="string" owner="101">
+   <value>trans</value>
+  </entry>
+  <entry key="contents" type="array" owner="101">
+  </entry>
+  <entry key="name" type="string" owner="101">
+   <value>trans</value>
+  </entry>
+  <entry key="description" type="string" owner="101">
+   <value>You see a strange man here, twitching slightly.</value>
+  </entry>
+  <entry key="last_location" type="thing" owner="0">50</entry>
+ </properties>
+</thing>

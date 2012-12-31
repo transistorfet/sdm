@@ -1,0 +1,5 @@
+Welcome to The Realm of the Jabberwock
+
+To register a character: /msg NickServ register <email>
+
+If this is your first time here, try joining #realm.
